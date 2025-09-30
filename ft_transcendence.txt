@@ -1,0 +1,17 @@
+#backend: PHP #frontend: typescript
+
+#Constrains 7 modules
+#Major Module: 1 point
+#Minor Module: 0.5 point
+
+#Major Module:
+	#Major module: Use a framework to build the backend
+	#Major module: Store the score of a tournament in the Blockchain
+	#Major module: Standard user management, authentication and users across tour-naments.
+	#Major module: Live Chat.
+	#Major module: Implement Two-Factor Authentication (2FA) and JWT.
+	#Major module: Remote players
+
+#Minor Module:
+	#Minor module: Use a framework or toolkit to build the front-end
+	#Minor module: Use a database for the backend -and more.
