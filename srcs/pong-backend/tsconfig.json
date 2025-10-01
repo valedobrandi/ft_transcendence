@@ -1,44 +1,15 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
-  "compilerOptions": {
-    // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "target": "esnext",
-    "types": [],
-    // For nodejs:
-    // "lib": ["esnext"],
-    // "types": ["node"],
-    // and npm install -D @types/node
-
-    // Other Outputs
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Style Options
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
-    "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true,
-  }
+  "compilerOptions": 
+  {
+    "target": "ES2022",             //type de traduction en JS -> ici version 2022
+    "module": "NodeNext",           //Node.js moderne (ESM).--> (import/export)
+    "moduleResolution": "NodeNext", //TypeScript résout les imports comme Node ESM i: import....".js"
+    "strict": true,                 //definir des types obligatoirement
+    "esModuleInterop": true,        //permet d importer des librairies ex : fastify
+    "outDir": "dist",               // tous les JS générés iront dans dist/
+    "rootDir": "src",               // code source a compiler est dans src afin qu'il soit traduit en JS et mis dans le dossier 'dist'
+    "skipLibCheck": true            //ne vérifie pas les fichiers de types (.d.ts)-compilation : plus rapide
+                                        //et moins d’erreurs “bruit” venant de dépendances externes que je ne contrôles pas.
+  },
+  "include": ["src"]
 }
