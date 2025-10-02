@@ -1,0 +1,17 @@
+services:
+  pong-game:
+    build:
+      context: ./pong-game
+      dockerfile: Dockerfile
+    image: pong-game
+    ports: 
+      - "5173:5173"
+    volumes:
+      - ./pong-game:/app
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host
+
+volumes:
+  node_modules:
