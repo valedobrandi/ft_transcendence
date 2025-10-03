@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "email": "jose.59@hotmail.com",
+    "username": "joe",
+    "password": "$2b$10$KFELVI0PRBKeW3.Ara/yCOkkc6KTPKdZNYKW71cSUGn7T0QuYBChe"
+  },
+  {
+    "id": 2,
+    "email": "jose9@hotmail.com",
+    "username": "joela",
+    "password": "$2b$10$dk64JRUMudV761N0r/UdSelSsnJ.hpoLWikQtzTq18s9EVmyQ9GmS"
+  },
+  {
+    "id": 3,
+    "email": "bob@hotmail.com",
+    "username": "Bob",
+    "password": "$2b$10$1LcMzQcNjNH0GxNIe.MCr.7Z9p4YQq8XwoZSyUdrRI0ZZ2SRfiWyC"
+  }
+]
