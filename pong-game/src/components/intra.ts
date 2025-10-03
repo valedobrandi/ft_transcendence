@@ -14,17 +14,17 @@ export function intra(): HTMLElement {
     const messagesDiv = document.createElement("div");
     messagesDiv.id = "messages";
     messagesDiv.className = "border borderh-full w-3/4 min-w-xs";
-    
+
     const usersDiv = document.createElement("div");
     usersDiv.id = "users";
     usersDiv.className = "border border flex-grow min-w-3xs";
-    
+
     const inputDiv = document.createElement("div");
     inputDiv.className = "border border w-full min-h-20 flex";
 
     const contentDiv = document.createElement("div");
-    contentDiv.className = "flex flex-grow";    
-    
+    contentDiv.className = "flex flex-grow";
+
     mainDiv.appendChild(chatDiv);
     contentDiv.appendChild(messagesDiv);
     contentDiv.appendChild(usersDiv);
@@ -33,7 +33,7 @@ export function intra(): HTMLElement {
     usersDiv.appendChild(usersListUI!);
 
     chatDiv.appendChild(contentDiv)
-    chatDiv.appendChild(inputDiv); 
+    chatDiv.appendChild(inputDiv);
 
     const settingsUI = settings();
     mainDiv.appendChild(settingsUI!);
