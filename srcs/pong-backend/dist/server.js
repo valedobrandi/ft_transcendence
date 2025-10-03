@@ -1,15 +1,7 @@
-import Fastify from 'fastify'; //'fastify' est le nom du paquet
-import { players } from './data/userstat.js';
-// active les logs
+import Fastify from 'fastify';
+import authRoutes from './routes/auth.js';
 const fastify = Fastify({ logger: true });
-// route GET (request = requête client, reply = réponse)
-fastify.get('/', () => {
-    return { hello: 'world' };
-});
-fastify.get('/player', () => {
-    return players;
-});
-/** Run the server! */
+fastify.register(authRoutes);
 const start = async () => {
     try {
         await fastify.listen({ port: 3000 });
