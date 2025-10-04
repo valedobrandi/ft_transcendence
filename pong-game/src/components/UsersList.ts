@@ -1,6 +1,6 @@
 import { users } from "../../mock/users";
 
-export function usersList(): HTMLDivElement {
+export function UsersList(): HTMLDivElement {
     const usersDiv = document.createElement("div");
     usersDiv.id = "users-list-container";
     usersDiv.className = "";

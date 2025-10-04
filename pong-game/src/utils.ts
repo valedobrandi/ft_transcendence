@@ -1,4 +1,4 @@
-import { IntraView, LoginView, MatchView, RegisterView, SingInView, twoFactorAuthenticationView } from "./views";
+import { intraView, loginView, matchView, registerView, singInView, twoFactorAuthenticationView } from "./views";
 
 export function navigateTo(path: string, viewFn: (root: HTMLElement) => void) {
     history.pushState({}, "", path);
@@ -7,16 +7,16 @@ export function navigateTo(path: string, viewFn: (root: HTMLElement) => void) {
 }
 
 const routes: Record<string, (root: HTMLElement) => void> = {
-    "/match": MatchView,
-    "/intra": IntraView,
-	"/login": LoginView,
-	"/sing-in": SingInView,
-	"/register": RegisterView,
-	"/twoFactorAuthentication": twoFactorAuthenticationView
+    "/match": matchView,
+    "/intra": intraView,
+	"/login": loginView,
+	"/sing-in": singInView,
+	"/register": registerView,
+	"/auth": twoFactorAuthenticationView
 };
 
 export function renderRoute(path: string) {
     const root = document.getElementById("root")!;
-    const view = routes[path] || LoginView;
+    const view = routes[path] || loginView;
     view(root);
 }

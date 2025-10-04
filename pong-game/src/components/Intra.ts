@@ -1,7 +1,7 @@
-import { settings } from "./settings";
-import { usersList } from "./usersList";
+import { Settings } from "./Settings";
+import { UsersList } from "./UsersList";
 
-export function intra(): HTMLElement {
+export function Intra(): HTMLElement {
 
     const mainDiv = document.createElement("div");
     mainDiv.id = "main-chat-container";
@@ -29,13 +29,13 @@ export function intra(): HTMLElement {
     contentDiv.appendChild(messagesDiv);
     contentDiv.appendChild(usersDiv);
 
-    const usersListUI = usersList();
+    const usersListUI = UsersList();
     usersDiv.appendChild(usersListUI!);
 
     chatDiv.appendChild(contentDiv)
     chatDiv.appendChild(inputDiv);
 
-    const settingsUI = settings();
+    const settingsUI = Settings();
     mainDiv.appendChild(settingsUI!);
 
     const input = document.createElement("input");

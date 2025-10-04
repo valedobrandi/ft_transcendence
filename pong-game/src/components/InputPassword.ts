@@ -1,6 +1,6 @@
 export function InputPassword():HTMLElement {
 	const fieldset = document.createElement("fieldset");
-	fieldset.className = "border p-4 rounded w-1/3";
+	fieldset.className = "border p-4 rounded max-w-xs w-full";
 
 	const legend = document.createElement("legend");
 	legend.className = "text-sm font-semibold text-gray-700";

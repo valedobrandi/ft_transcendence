@@ -1,39 +1,38 @@
-import { intra } from "./components/intra";
+import { Intra } from "./components/Intra";
 import { Login } from "./components/Login";
-import { menu } from "./components/menu";
-import { pong } from "./components/pong";
-import { Register } from "./components/Register";
-import { settings } from "./components/settings";
-import { SingIn } from "./components/SingIn";
-import { TwoFactorAuthentication } from "./components/TwoFactorAuthentication";
+import { Menu } from "./components/Menu";
+import { Pong } from "./components/Pong";
+import { Register } from "./components/FormRegister";
+import { FormSingIn } from "./components/FormSingIn";
+import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 
-export function IntraView(root: HTMLElement) {
+export function intraView(root: HTMLElement) {
     root.innerHTML = "";
-    const intraUI = intra();
-    const menuUI = menu();
+    const intraUI = Intra();
+    const menuUI = Menu();
     root.appendChild(menuUI);
     root.appendChild(intraUI);
 }
 
-export function MatchView(root: HTMLElement) {
+export function matchView(root: HTMLElement) {
     root.innerHTML = "";
-    const pongUI = pong();
+    const pongUI = Pong();
     root.appendChild(pongUI);
 }
 
-export function LoginView(root: HTMLElement) {
+export function loginView(root: HTMLElement) {
     root.innerHTML = "";
 	const loginUI = Login();
 	root.appendChild(loginUI);
 }
 
-export function SingInView(root: HTMLElement) {
+export function singInView(root: HTMLElement) {
     root.innerHTML = "";
-	const SingUI = SingIn();
+	const SingUI = FormSingIn();
 	root.appendChild(SingUI);
 }
 
-export function RegisterView(root: HTMLElement) {
+export function registerView(root: HTMLElement) {
     root.innerHTML = "";
 	const registerUI = Register();
 	root.appendChild(registerUI);
@@ -41,6 +40,6 @@ export function RegisterView(root: HTMLElement) {
 
 export function twoFactorAuthenticationView(root: HTMLElement) {
     root.innerHTML = "";
-	const authenticationUI = TwoFactorAuthentication();
+	const authenticationUI = FormTwoFactorAuthentication();
 	root.appendChild(authenticationUI);
 }

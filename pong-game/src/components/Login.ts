@@ -1,5 +1,5 @@
 import { navigateTo } from "../utils";
-import { RegisterView, SingInView } from "../views";
+import { registerView, singInView } from "../views";
 import { Button } from "./Button";
 
 export function Login(): HTMLElement {
@@ -10,8 +10,8 @@ export function Login(): HTMLElement {
     mainDiv.id = "login-container";
     mainDiv.className = "flex gap-2";
 
-	const singInBtn = Button("Sign in", "", () => navigateTo("/sing-in", SingInView));
-	const registerBtn = Button("Register", "", () => navigateTo("/register", RegisterView));
+	const singInBtn = Button("Sign in", "w-24", () => navigateTo("/sing-in", singInView));
+	const registerBtn = Button("Register", "w-24", () => navigateTo("/register", registerView));
 
 	mainDiv.appendChild(registerBtn);
 	mainDiv.appendChild(singInBtn);

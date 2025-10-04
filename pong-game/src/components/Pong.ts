@@ -5,14 +5,14 @@ import type { DrawTextType } from "../interface/drawText";
 import type { NetType } from "../interface/net";
 import type { PlayerType } from "../interface/player";
 
-export function pong(): HTMLElement {
+export function Pong(): HTMLElement {
     
     const canvasElement = document.createElement("canvas");
     const ctx = canvasElement.getContext("2d");
     canvasElement.id = "pong";
     canvasElement.width = 1200;
     canvasElement.height = 600;
-    canvasElement.className = "my-auto border border-4 border-blue-500";
+    canvasElement.className = "my-auto border border-4 border-blue-500 mx-16";
 
     const userX: PlayerType = {
         x : 10,
