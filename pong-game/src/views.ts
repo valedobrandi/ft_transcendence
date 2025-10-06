@@ -1,10 +1,11 @@
 import { Intra } from "./components/Intra";
 import { Login } from "./components/Login";
 import { Menu } from "./components/Menu";
-import { Pong } from "./components/Pong";
+import { RenderGame } from "./components/Pong";
 import { Register } from "./components/FormRegister";
 import { FormSingIn } from "./components/FormSingIn";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
+import { websocketConnect } from "./websocket/connect";
 
 export function intraView(root: HTMLElement) {
     root.innerHTML = "";
@@ -12,11 +13,12 @@ export function intraView(root: HTMLElement) {
     const menuUI = Menu();
     root.appendChild(menuUI);
     root.appendChild(intraUI);
+    websocketConnect();
 }
 
 export function matchView(root: HTMLElement) {
     root.innerHTML = "";
-    const pongUI = Pong();
+    const pongUI = RenderGame();
     root.appendChild(pongUI);
 }
 

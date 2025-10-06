@@ -12,6 +12,60 @@ services:
     environment:
       - NODE_ENV=development
     command: npm run dev -- --host
+    networks:
+      - transcedence-network
+
+  userX:
+    build:
+      context: ./pong-game
+      dockerfile: Dockerfile
+    image: pong-game
+    ports:
+      - "5174:5173"
+    volumes:
+      - ./pong-game:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host
+    networks:
+      - transcedence-network
+
+  userY:
+    build:
+      context: ./pong-game
+      dockerfile: Dockerfile
+    image: pong-game
+    ports:
+      - "5175:5173"
+    volumes:
+      - ./pong-game:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host
+    networks:
+      - transcedence-network
+
+  fastify-app:
+    build:
+      context: ./fastify-app
+      dockerfile: Dockerfile
+    image: fastify-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./fastify-app:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    networks:
+      - transcedence-network
 
 volumes:
   node_modules:
+
+networks:
+  transcedence-network:
+    driver: bridge
