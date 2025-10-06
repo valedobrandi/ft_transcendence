@@ -1,7 +1,7 @@
 import { Intra } from "./components/Intra";
 import { Login } from "./components/Login";
 import { Menu } from "./components/Menu";
-import { RenderGame } from "./components/Pong";
+import { RenderGame } from "./components/RenderGame";
 import { Register } from "./components/FormRegister";
 import { FormSingIn } from "./components/FormSingIn";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
