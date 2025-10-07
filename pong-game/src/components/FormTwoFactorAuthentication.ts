@@ -9,7 +9,7 @@ export function FormTwoFactorAuthentication(): HTMLElement {
     const headerBar = HeaderBar("Two-Factor Authentication");
 
     const formElement = document.createElement("form");
-    formElement.className = `flex flex-col justify-center items-center 
+    formElement.className = `flex flex-col justify-center items-center
         flex-grow gap-4 maw-w-sm mx-auto`;
 
     formElement.onsubmit = (e) => {
@@ -19,8 +19,12 @@ export function FormTwoFactorAuthentication(): HTMLElement {
 
     const inputAuthUI = InputNumber();
     formElement.appendChild(inputAuthUI);
+
     const sendBtn = Button("Send", "w-full", () => {});
     formElement.appendChild(sendBtn);
+	sendBtn.onclick = () => {
+		fetch("localhost/auth") 
+	}
 
 
     viewDiv.appendChild(headerBar);

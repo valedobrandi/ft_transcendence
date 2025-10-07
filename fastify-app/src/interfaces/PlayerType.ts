@@ -6,4 +6,5 @@ export interface PlayerType {
     status: "CONNECT_ROOM" | "MATCH_ROOM" | "GAME_ROOM";
     socket: WebSocket;
     matchId: string;
+	side: string;
 }

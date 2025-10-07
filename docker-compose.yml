@@ -3,7 +3,6 @@ services:
     build:
       context: ./pong-game
       dockerfile: Dockerfile
-    image: pong-game
     ports:
       - "5173:5173"
     volumes:
@@ -15,11 +14,10 @@ services:
     networks:
       - transcedence-network
 
-  userX:
+  userx:
     build:
       context: ./pong-game
       dockerfile: Dockerfile
-    image: pong-game
     ports:
       - "5174:5173"
     volumes:
@@ -31,11 +29,10 @@ services:
     networks:
       - transcedence-network
 
-  userY:
+  usery:
     build:
       context: ./pong-game
       dockerfile: Dockerfile
-    image: pong-game
     ports:
       - "5175:5173"
     volumes:
@@ -51,7 +48,6 @@ services:
     build:
       context: ./fastify-app
       dockerfile: Dockerfile
-    image: fastify-app
     ports:
       - "3000:3000"
     volumes:

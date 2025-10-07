@@ -1,12 +1,27 @@
+import { socket } from "../app";
+import { userX, userY } from "../gameState";
 import type { drawCircleType } from "../interface/drawCircle";
 import type { DrawRectType } from "../interface/drawRect";
 import type { DrawTextType } from "../interface/drawText";
-import type { GameStateType } from "../interface/GameStateType";
 import type { NetType } from "../interface/net";
 
+type PlayerType = {
+  x: number;
+  y: number;
+  score: number;
+};
 
-export function RenderGame(state : GameStateType): HTMLElement {
-    
+type BallType = {
+  x: number;
+  y: number;
+  radius: number;
+  speed: number;
+  velocityX: number;
+  velocityY: number;
+};
+
+export function RenderGame(): HTMLElement {
+
     const canvasElement = document.createElement("canvas");
     const ctx = canvasElement.getContext("2d");
     canvasElement.id = "pong";
@@ -60,53 +75,36 @@ export function RenderGame(state : GameStateType): HTMLElement {
 
     drawText({text:0, x:300, y:200, color:"white"});
 
-    function render({scores, player, ball}: GameStateType) {
-        const playerX = player.X;
-        const playerY = player.Y;
+    function render(ball: BallType, userX: PlayerType, userY: PlayerType) {
         drawRect({x:0, y:0, w:canvasElement.width, h:canvasElement.height, color:"black"});
 
         drawNet(net);
 
-        drawText({text:scores.pX, x:canvasElement.width/4, y:canvasElement.height/5, color:"white"});
-        drawText({text:scores.pY, x:3*canvasElement.width/4, y:canvasElement.height/5, color:"white"});
+        drawText({text:userX.score, x:canvasElement.width/4, y:canvasElement.height/5, color:"white"});
+        drawText({text:userY.score, x:3*canvasElement.width/4, y:canvasElement.height/5, color:"white"});
 
-        drawRect({x:playerX.x, y:playerX.y, w:10, h:100, color:"white" });
-        drawRect({x:playerY.x, y:playerY.y, w:10, h:100, color:"white" });
+        drawRect({x:userX.x, y:userX.y, w:10, h:100, color:"white" });
+        drawRect({x:userY.x, y:userY.y, w:10, h:100, color:"white" });
 
         drawCircle({x:ball.x, y:ball.y, r:ball.radius, color:"white" });
     }
 
-    let upMove = false;
-    let downMove = false;
+		socket.onmessage = (event) => {
+		const { type, payload } = JSON.parse(event.data);
+		if (type === "state") {
+			const { ball, players } = payload;
 
-    document.addEventListener("keydown", function(event) {
-        switch(event.key) {
-            case "ArrowUp":
-                upMove = true;
-                break;
-            case "ArrowDown":
-                downMove = true;
-                break;
-        }
-    });
+			Object.assign(userX, players.userX);
+			Object.assign(userY, players.userY);
 
-    document.addEventListener("keyup", function(event) {
-        switch(event.key) {
-            case "ArrowUp":
-                upMove = false;
-                break;
-            case "ArrowDown":
-                downMove = false;
-                break;
-        }
-    });
+			Object.assign(ball, payload.ball);
 
+			render(ball, userX, userY);
+		}
+	};
 
-    function game() {
-        render(state);
-    }
-
-    const framePerSecond = 60;
-    setInterval(game, 1000/framePerSecond);
     return canvasElement;
 }
+
+
+

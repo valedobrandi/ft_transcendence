@@ -1,8 +1,8 @@
-import { GameStateType } from "./interfaces/GameStateType";
+/* import { GameStateType } from "./interfaces/GameStateType";
 
 function collision(state: GameStateType) {
     const { ball } = state;
-    const {x, y, height, width} = state.player; 
+    const {x, y, height, width} = state.player;
     const ballTop =  ball.y - ball.radius;
     const ballBottom = ball.y + ball.radius;
     const ballLeft = ball.x - ball.radius;
@@ -13,7 +13,7 @@ function collision(state: GameStateType) {
     const playerLeft = x;
     const playerRight = x + width;
 
-    return ballRight > playerLeft && ballBottom > playerTop && 
+    return ballRight > playerLeft && ballBottom > playerTop &&
         ballLeft < playerRight && ballTop < playerBottom;
 }
 
@@ -63,4 +63,4 @@ export function pongGameUpdate(state: GameStateType ) {
         scores.pY++;
         resetBall(state);
     }
-}
+} */

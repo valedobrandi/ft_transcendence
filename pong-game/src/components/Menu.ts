@@ -3,13 +3,13 @@ import { serverState } from "../state";
 // import { matchView } from "../views";
 import { Button } from "./Button";
 import { id, socket } from "../app";
-
+const text = "name";
 export function Menu() {
     const divElement = document.createElement("div");
     divElement.id = "menu-bar";
     divElement.className = "flex justify-start items-end gap-2 p-1";
 
-    const matchBtn = Button("MATCH", "h-10 w-18 rounded", () => {
+    const matchBtn = Button(text, "h-10 w-18 rounded", () => {
             socket.send(JSON.stringify({ type: 'MATCH', id: id }));
         });
     matchBtn.id = "match-btn";
@@ -24,6 +24,6 @@ export function Menu() {
     divElement.appendChild(matchBtn);
     divElement.appendChild(tourBtn);
     divElement.appendChild(elementP);
-    
+
     return divElement;
 }
