@@ -93,12 +93,9 @@ export function RenderGame(): HTMLElement {
 		const { type, payload } = JSON.parse(event.data);
 		if (type === "state") {
 			const { ball, players } = payload;
-
 			Object.assign(userX, players.userX);
 			Object.assign(userY, players.userY);
-
 			Object.assign(ball, payload.ball);
-
 			render(ball, userX, userY);
 		}
 	};

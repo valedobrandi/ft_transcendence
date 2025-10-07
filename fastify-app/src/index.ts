@@ -31,8 +31,8 @@ const canvasWidth = 1200;
 const canvasHeight = 600;
 
 const gameState = {
-  userX: { y: canvasHeight / 2 - 50, score: 0 } as Player,
-  userY: { y: canvasHeight / 2 - 50, score: 0 } as Player,
+  userX: {x: 10, y: canvasHeight / 2 - 50, score: 0 } as Player,
+  userY: {x: canvasWidth - 20, y: canvasHeight / 2 - 50, score: 0 } as Player,
   ball: {
     x: canvasWidth / 2,
     y: canvasHeight / 2,
@@ -186,7 +186,7 @@ setInterval(() => {
         gameRoom.set(matchId, [playerX.id, playerY.id]);
 
 		playerX.side = 'left';
-		playerY.side = 'rigth';
+		playerY.side = "right";
 
         playerX.socket.send(JSON.stringify({
 			status: 200,
