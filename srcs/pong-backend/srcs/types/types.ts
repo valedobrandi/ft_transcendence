@@ -4,6 +4,7 @@ export type User =
   email: string;
   username: string;
   password: string;
+  created_at: string;
 };
 
 export type RegisterBody =
