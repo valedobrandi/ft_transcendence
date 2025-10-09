@@ -1,8 +1,6 @@
 import Fastify from 'fastify';
 import fastifyWebSocket from '@fastify/websocket';
 import { PlayerType } from './interfaces/PlayerType';
-import { GameSessionType } from './interfaces/GameSessionType';
-import { GameStateType } from './interfaces/GameStateType';
 
 const connectedRoom = new Map<string, PlayerType>();
 const matchRoom: PlayerType[] = [];
@@ -47,7 +45,7 @@ fastify.register(async (fastify) => {
     fastify.get('/ws', { websocket: true }, (connection, req) => {
         connection.on('message', message => {
             const data = JSON.parse(message.toString());
-            if (data.type === 'CONNECT' && data.id) {
+            if (data.type === 'CONNECT') {
                 const player: PlayerType = {
                     id: data.id,
                     name: 'player_' + data.id,

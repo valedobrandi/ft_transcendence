@@ -1,12 +1,12 @@
 services:
-  pong-game:
+  pong-frontend:
     build:
-      context: ./pong-game
+      context: ./pong-frontend
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
     volumes:
-      - ./pong-game:/app
+      - ./pong-frontend:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -16,12 +16,12 @@ services:
 
   userx:
     build:
-      context: ./pong-game
+      context: ./pong-frontend
       dockerfile: Dockerfile
     ports:
       - "5174:5173"
     volumes:
-      - ./pong-game:/app
+      - ./pong-frontend:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -31,12 +31,12 @@ services:
 
   usery:
     build:
-      context: ./pong-game
+      context: ./pong-frontend
       dockerfile: Dockerfile
     ports:
       - "5175:5173"
     volumes:
-      - ./pong-game:/app
+      - ./pong-frontend:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -44,14 +44,14 @@ services:
     networks:
       - transcedence-network
 
-  fastify-app:
+  pong-backend:
     build:
-      context: ./fastify-app
+      context: ./pong-backend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
     volumes:
-      - ./fastify-app:/app
+      - ./pong-backend:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
