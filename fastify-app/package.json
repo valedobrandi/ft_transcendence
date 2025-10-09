@@ -1,0 +1,18 @@
+{
+    "name": "fastify-ts-app",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
+    },
+    "dependencies": {
+        "@fastify/websocket": "^11.2.0",
+        "fastify": "^5.6.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "@types/ws": "^8.18.1",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.0.0"
+    }
+}
