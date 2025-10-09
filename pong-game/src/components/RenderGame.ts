@@ -29,10 +29,11 @@ export function RenderGame(): HTMLElement {
     canvasElement.height = 600;
     canvasElement.className = "my-auto border border-4 border-blue-500 mx-16";
 
+    const netWidth = Math.max(2, Math.min(canvasElement.width * 0.002, 6));
     const net: NetType = {
-        x : canvasElement.width/2 -1,
+        x : canvasElement.width/2 - netWidth/2,
         y : 0,
-        width : 2,
+        width : netWidth,
         height : 10,
         color : "white"
     }
@@ -76,17 +77,19 @@ export function RenderGame(): HTMLElement {
     drawText({text:0, x:300, y:200, color:"white"});
 
     function render(ball: BallType, userX: PlayerType, userY: PlayerType) {
-        drawRect({x:0, y:0, w:canvasElement.width, h:canvasElement.height, color:"black"});
+        const scaleX = canvasElement.width;
+        const scaleY = canvasElement.height;
+        drawRect({x:0, y:0, w:scaleX, h:scaleY, color:"black"});
 
         drawNet(net);
 
-        drawText({text:userX.score, x:canvasElement.width/4, y:canvasElement.height/5, color:"white"});
-        drawText({text:userY.score, x:3*canvasElement.width/4, y:canvasElement.height/5, color:"white"});
+        drawText({text:userX.score, x:scaleX/4, y:scaleY/5, color:"white"});
+        drawText({text:userY.score, x:3*scaleX/4, y:scaleY/5, color:"white"});
 
-        drawRect({x:userX.x, y:userX.y, w:10, h:100, color:"white" });
-        drawRect({x:userY.x, y:userY.y, w:10, h:100, color:"white" });
-
-        drawCircle({x:ball.x, y:ball.y, r:ball.radius, color:"white" });
+        drawRect({x:userX.x*scaleX, y:userX.y*scaleY, w:10, h:100, color:"white" });
+        drawRect({x:userY.x*scaleX-10, y:userY.y*scaleY, w:10, h:100, color:"white" });
+        const ballRadius = Math.min(ball.radius * ((scaleX + scaleY) / 2), 8);
+        drawCircle({x:ball.x*scaleX, y:ball.y*scaleY, r:ballRadius, color:"white" });
     }
 
 		socket.onmessage = (event) => {

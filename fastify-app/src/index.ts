@@ -13,6 +13,8 @@ const fastify = Fastify({ logger: true });
 
 fastify.register(fastifyWebSocket);
 
+const INITIAL_BALL_SPEED = 0.005;
+
 type Player = {
   y: number;
   score: number;
@@ -27,23 +29,19 @@ type Ball = {
   velocityY: number;
 };
 
-const canvasWidth = 1200;
-const canvasHeight = 600;
-
 const gameState = {
-  userX: {x: 10, y: canvasHeight / 2 - 50, score: 0 } as Player,
-  userY: {x: canvasWidth - 20, y: canvasHeight / 2 - 50, score: 0 } as Player,
+  userX: {x: 0.01, y: 0.5, score: 0 } as Player,
+  userY: {x: 0.99, y: 0.5, score: 0 } as Player,
   ball: {
-    x: canvasWidth / 2,
-    y: canvasHeight / 2,
-    radius: 10,
-    speed: 5,
-    velocityX: 5,
-    velocityY: 5,
+    x: 0.5,
+    y: 0.5,
+    radius: 0.02,
+    speed: 0.01,
+    velocityX: 0.01,
+    velocityY: 0.01,
   } as Ball,
 };
 
-let userYInput = { up: false, down: false };
 
 fastify.register(async (fastify) => {
     fastify.get('/ws', { websocket: true }, (connection, req) => {
@@ -95,24 +93,18 @@ fastify.register(async (fastify) => {
 });
 
 function resetBall() {
-  gameState.ball.x = canvasWidth / 2;
-  gameState.ball.y = canvasHeight / 2;
-  gameState.ball.speed = 5;
-  gameState.ball.velocityX = -gameState.ball.velocityX;
-}
-
-function collision(ball: Ball, playerY: number): boolean {
-  const ballTop = ball.y - ball.radius;
-  const ballBottom = ball.y + ball.radius;
-  const playerTop = playerY;
-  const playerBottom = playerY + 100;
-
-  return ballBottom > playerTop && ballTop < playerBottom;
+  gameState.ball.x = 0.5;
+  gameState.ball.y = 0.5;
+  gameState.ball.speed = INITIAL_BALL_SPEED;
+  gameState.ball.velocityX = -INITIAL_BALL_SPEED;
+  gameState.ball.velocityY = INITIAL_BALL_SPEED;
 }
 
 function updateGame() {
   const ball = gameState.ball;
-  const paddleSpeed = 7;
+
+  const paddleHeight = 0.166;
+  const paddleSpeed = 0.012;
 
   ball.x += ball.velocityX;
   ball.y += ball.velocityY;
@@ -121,48 +113,46 @@ function updateGame() {
   const player = connectedRoom.get(id);
   if (!player || player.status !== 'GAME_ROOM') continue;
 
-  const paddleSpeed = 7;
   const side = player.side;
 
   if (side === 'left') {
     if (input.up && gameState.userX.y > 0) gameState.userX.y -= paddleSpeed;
-    if (input.down && gameState.userX.y < canvasHeight - 100) gameState.userX.y += paddleSpeed;
+    if (input.down && gameState.userX.y < 1-paddleHeight) gameState.userX.y += paddleSpeed;
   } else if (side === 'right') {
     if (input.up && gameState.userY.y > 0) gameState.userY.y -= paddleSpeed;
-    if (input.down && gameState.userY.y < canvasHeight - 100) gameState.userY.y += paddleSpeed;
+    if (input.down && gameState.userY.y < 1-paddleHeight) gameState.userY.y += paddleSpeed;
   }
 }
 
-
   // Wall collision
-  if (ball.y + ball.radius > canvasHeight || ball.y - ball.radius < 0) {
+  if (ball.y + ball.radius > 1 || ball.y - ball.radius < 0) {
     ball.velocityY = -ball.velocityY;
   }
 
   // Paddle collision
-  const player = ball.x < canvasWidth / 2 ? gameState.userX : gameState.userY;
-  const playerX = ball.x < canvasWidth / 2 ? 10 : canvasWidth - 20;
+  const player = ball.x < 0.5 ? gameState.userX : gameState.userY;
+  const playerX = ball.x < 0.5 ? 0.01 : 0.99;
 
   if (
-    ball.x + ball.radius > playerX &&
-    collision(ball, player.y)
+    Math.abs(ball.x - playerX) < ball.radius &&
+    ball.y > player.y && ball.y < player.y + paddleHeight
   ) {
-    const collidePoint = ball.y - (player.y + 50);
-    const normalized = collidePoint / 50;
+    const collidePoint = ball.y - (player.y+paddleHeight/2);
+    const normalized = collidePoint/(paddleHeight/2);
     const angle = normalized * Math.PI / 4;
-    const direction = ball.x < canvasWidth / 2 ? 1 : -1;
+    const direction = ball.x < 0.5 ? 1 : -1;
 
     ball.velocityX = direction * ball.speed * Math.cos(angle);
     ball.velocityY = ball.speed * Math.sin(angle);
 
-    if (ball.speed < 10) ball.speed += 0.5;
+    ball.speed += 0.0005;
   }
 
   // Score
   if (ball.x - ball.radius < 0) {
     gameState.userY.score++;
     resetBall();
-  } else if (ball.x + ball.radius > canvasWidth) {
+  } else if (ball.x + ball.radius > 1) {
     gameState.userX.score++;
     resetBall();
   }
