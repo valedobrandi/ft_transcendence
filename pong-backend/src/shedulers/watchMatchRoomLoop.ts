@@ -1,40 +1,48 @@
+import { GameRoom } from "../classes/GameRoom.js";
 import { gameRoom, matchRoom } from "../state/rooms.js";
 
 export function watchMatchRoomLoop() {
+    if (matchRoom.length < 2) return;
+    console.log('Match room watcher started');
     setInterval(() => {
 
-        if (matchRoom.length >= 2) {
-            const playerX = matchRoom.shift()!;
-            const playerY = matchRoom.shift()!;
+        const playerX = matchRoom.shift()!;
+        const playerY = matchRoom.shift()!;
 
-            const matchId = Date.now().toString();
+        const matchId = Date.now().toString();
 
-            playerX.status = 'GAME_ROOM';
-            playerY.status = 'GAME_ROOM';
+        playerX.status = 'GAME_ROOM';
+        playerY.status = 'GAME_ROOM';
 
-            playerX.matchId = matchId;
-            playerY.matchId = matchId;
+        playerX.side = 'LEFT';
+        playerY.side = 'RIGHT';
 
-            gameRoom.set(matchId, [playerX.id, playerY.id]);
+        playerX.matchId = matchId;
+        playerY.matchId = matchId;
 
-            playerX.side = 'left';
-            playerY.side = "right";
+        const match = new GameRoom(matchId);
 
-            playerX.socket.send(JSON.stringify({
-                status: 200,
-                message: 'GAME_ROOM',
-                side: 'left',
-                id: playerX.id
-            }));
+        match.addPlayer(playerX);
+        match.addPlayer(playerY);
 
-            playerY.socket.send(JSON.stringify({
-                status: 200,
-                message: 'GAME_ROOM',
-                side: 'right',
-                id: playerY.id
-            }));
+        gameRoom.set(matchId, match);
 
-            console.log(`Match started: ${matchId} between ${playerX.id} and ${playerY.id}`);
-        }
+
+        playerX.socket.send(JSON.stringify({
+            status: 200,
+            message: 'GAME_ROOM',
+            side: 'LEFT',
+            id: playerX.id
+        }));
+
+        playerY.socket.send(JSON.stringify({
+            status: 200,
+            message: 'GAME_ROOM',
+            side: 'RIGHT',
+            id: playerY.id
+        }));
+
+        console.log(`Match started: ${matchId} between ${playerX.id} and ${playerY.id}`);
+
     }, 2000);
 }

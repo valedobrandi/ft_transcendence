@@ -1,11 +1,12 @@
-import { playerInputs } from "../../state/playerInput.js";
-import { connectedRoom } from "../../state/rooms.js";
+import { connectedRoom, gameRoom } from "../../state/rooms.js";
 import { MovePaddleType } from "../types.js";
 
 export function MOVE_PADDLE(data: MovePaddleType) {
-    const player = connectedRoom.get(data.id);
+    const { id, payload } = data;
+    const player = connectedRoom.get(id);
+    if (!player || !player.matchId) return;
+    const room = gameRoom.get(player.matchId);
+    if (!room) return;
     const input = data.payload;
-    if (player) {
-        playerInputs.set(player.id, input);
-    }
+    room.updatePlayerInput(id, payload);
 }

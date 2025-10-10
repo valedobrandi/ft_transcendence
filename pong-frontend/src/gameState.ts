@@ -1,6 +1,6 @@
 const userX = {x: 0, y: 0, score: 0};
 const userY = {x: 0, y: 0, score: 0};
-const playerSide: { side: "left" | "right" } = {side: "left" };
+const playerSide: { side: "LEFT" | "RIGHT" } = {side: "LEFT" };
 const ball = {
     x: 0,
     y: 0,

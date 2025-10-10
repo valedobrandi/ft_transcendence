@@ -9,7 +9,8 @@ export interface PlayerType {
 	side: string;
 }
 
-export interface UserType {
+export interface PlayerStatType {
+    x: number;
     y: number;
     score: number;
 };

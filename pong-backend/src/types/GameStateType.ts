@@ -1,3 +1,6 @@
+import { BallType } from "./BallType.js";
+import { PlayerStatType } from "./PlayerType.js";
+
 interface playerStateType {
     x: number;
     y: number;
@@ -12,4 +15,10 @@ export interface GameStateType {
     scores: { pX: number; pY: number };
     width: number;
     heigth: number;
+}
+
+export interface userGameStateType {
+    userX: PlayerStatType;
+    userY: PlayerStatType;
+    ball: BallType;
 }

@@ -113,10 +113,10 @@ function updateGame() {
 
   const side = player.side;
 
-  if (side === 'left') {
+  if (side === 'LEFT') {
     if (input.up && gameState.userX.y > 0) gameState.userX.y -= paddleSpeed;
     if (input.down && gameState.userX.y < 1-paddleHeight) gameState.userX.y += paddleSpeed;
-  } else if (side === 'right') {
+  } else if (side === 'RIGHT') {
     if (input.up && gameState.userY.y > 0) gameState.userY.y -= paddleSpeed;
     if (input.down && gameState.userY.y < 1-paddleHeight) gameState.userY.y += paddleSpeed;
   }
@@ -173,20 +173,20 @@ setInterval(() => {
 
         gameRoom.set(matchId, [playerX.id, playerY.id]);
 
-		playerX.side = 'left';
-		playerY.side = "right";
+		playerX.side = 'LEFT';
+		playerY.side = "RIGHT";
 
         playerX.socket.send(JSON.stringify({
 			status: 200,
 			message: 'GAME_ROOM',
-			side: 'left',
+			side: 'LEFT',
 			id: playerX.id
 		}));
 
 		playerY.socket.send(JSON.stringify({
 			status: 200,
 			message: 'GAME_ROOM',
-			side: 'right',
+			side: 'RIGHT',
 			id: playerY.id
 		}));
 
