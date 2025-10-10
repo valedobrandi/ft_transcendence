@@ -3,6 +3,7 @@ import { MessageType } from '../types.js';
 import { CONNECT, } from './CONNECT.js';
 import { MATCH } from './MATCH.js';
 import { MOVE_PADDLE } from './MOVE_PADDLE.js';
+import { PLAY } from './PLAY.js';
 
 export function handleMessage(conn: WebSocket, msg: MessageType) {
     console.log('Received message:', msg);
@@ -16,5 +17,8 @@ export function handleMessage(conn: WebSocket, msg: MessageType) {
         case 'MOVE_PADDLE':
             MOVE_PADDLE(msg);
             break;
+		case 'PLAY':
+			PLAY(msg, conn);
+			break;
     }
 }

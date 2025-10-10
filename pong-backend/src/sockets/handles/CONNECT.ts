@@ -5,7 +5,6 @@ import { ConnectType } from "../types.js";
 
 
 export function CONNECT(data: ConnectType, connection:WebSocket) {
-    console.log(`CONNECT function called with data:`, data.id);
     const player: PlayerType = {
         id: data.id,
         name: 'player_' + data.id,

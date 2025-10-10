@@ -5,7 +5,7 @@ const ball = {
     x: 0,
     y: 0,
     radius: 10,
-    speed: 5,
+    speed: 0.005,
     velocityX: 5,
     velocityY: 5,
   }
