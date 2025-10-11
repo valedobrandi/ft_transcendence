@@ -1,15 +1,7 @@
-interface playerStateType {
-    x: number;
-    y: number;
-    canvasWidth: number;
-    canvasHeight: number;
-}
+import type { BallType } from "./ball";
+import type { PlayerType } from "./player";
 
 export interface GameStateType {
-    player: { X: playerStateType; Y: playerStateType; };
-    ball: { x: number; y: number; velocityX: number; velocityY: number, radius: number, speed: number };
-    paddles: { [key: number]: { y: number } };
-    scores: { pX: number; pY: number };
-    width: number;
-    heigth: number;
+    ball: BallType; 
+    players: { userX: PlayerType; userY: PlayerType };
 }

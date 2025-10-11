@@ -18,30 +18,34 @@ export function intraView(root: HTMLElement) {
 
 export function matchView(root: HTMLElement) {
     root.innerHTML = "";
+    
+    const container = document.createElement("div");
+    container.className = "flex justify-center items-center h-full w-full overflow-hidden"
     const pongUI = RenderGame();
-    root.appendChild(pongUI);
+    container.appendChild(pongUI);
+    root.appendChild(container);
 }
 
 export function loginView(root: HTMLElement) {
     root.innerHTML = "";
-	const loginUI = Login();
-	root.appendChild(loginUI);
+    const loginUI = Login();
+    root.appendChild(loginUI);
 }
 
 export function singInView(root: HTMLElement) {
     root.innerHTML = "";
-	const SingUI = FormSingIn();
-	root.appendChild(SingUI);
+    const SingUI = FormSingIn();
+    root.appendChild(SingUI);
 }
 
 export function registerView(root: HTMLElement) {
     root.innerHTML = "";
-	const registerUI = Register();
-	root.appendChild(registerUI);
+    const registerUI = Register();
+    root.appendChild(registerUI);
 }
 
 export function twoFactorAuthenticationView(root: HTMLElement) {
     root.innerHTML = "";
-	const authenticationUI = FormTwoFactorAuthentication();
-	root.appendChild(authenticationUI);
+    const authenticationUI = FormTwoFactorAuthentication();
+    root.appendChild(authenticationUI);
 }
