@@ -11,9 +11,20 @@ export function Intra(): HTMLElement {
     chatDiv.id = "chat-container";
     chatDiv.className = "w-full flex flex-col flex-grow";
 
-    const messagesDiv = document.createElement("div");
-    messagesDiv.id = "messages";
-    messagesDiv.className = "border borderh-full w-3/4 min-w-xs";
+    const chatWidget = document.createElement("div");
+    chatWidget.id = "chatWidget";
+    chatWidget.className = "border w-full h-full flex flex-col";
+
+    const chatTabs = document.createElement("div");
+    chatTabs.id = "chat-tabs";
+    chatTabs.className = "flex border-b bg-gray-100";
+
+    const messages = document.createElement("div");
+    messages.id = "messages";
+    messages.className = "flex-1 overflow-y-auto p-2";
+
+    chatWidget.appendChild(chatTabs);
+    chatWidget.appendChild(messages);
 
     const usersDiv = document.createElement("div");
     usersDiv.id = "users";
@@ -26,7 +37,7 @@ export function Intra(): HTMLElement {
     contentDiv.className = "flex flex-grow";
 
     mainDiv.appendChild(chatDiv);
-    contentDiv.appendChild(messagesDiv);
+    contentDiv.appendChild(chatWidget);
     contentDiv.appendChild(usersDiv);
 
     const usersListUI = UsersList();

@@ -14,7 +14,7 @@ export function RenderGame(): HTMLElement {
     let currentState: GameStateType | null = null;
     let previousState: GameStateType | null = null;
     let lastUpdateTime = performance.now();
-    const SERVER_TICK_RATE = 60; // adjust to match your server updates (e.g., 20 or 30Hz)
+    const SERVER_TICK_RATE = 60; 
     const INTERPOLATION_DELAY = 1000 / SERVER_TICK_RATE;
 
     const canvasElement = document.createElement("canvas");
@@ -22,7 +22,7 @@ export function RenderGame(): HTMLElement {
     canvasElement.id = "pong";
     canvasElement.width = 1200;
     canvasElement.height = 600;
-    canvasElement.className = "border-4 border-blue-500 my-4";
+    canvasElement.className = "border-4 border-blue-500 bg-black my-4";
     const paddleHeight = 0.166;
 
     setActiveCanvas(canvasElement);
@@ -85,7 +85,7 @@ export function RenderGame(): HTMLElement {
         }
         ctx.fillStyle = color;
         ctx.font = "45px Verdana";
-        ctx.fillText(text.toString(), x, y);
+        ctx.fillText(text.toString() || '0', x, y);
     }
 
     drawText({ text: 0, x: 300, y: 200, color: "white" });
@@ -107,7 +107,6 @@ export function RenderGame(): HTMLElement {
         drawCircle({ x: ball.x * scaleX, y: ball.y * scaleY, r: ballRadius, color: "white" });
     }
 
-
     socket.onmessage = (event) => {
         const { type, payload } = JSON.parse(event.data);
         if (type === "state") {
@@ -126,10 +125,8 @@ export function RenderGame(): HTMLElement {
             const now = performance.now();
             const delta = now - lastUpdateTime;
 
-            // Clamp t between 0 and 1
             const t = Math.min(delta / INTERPOLATION_DELAY, 1);
 
-            // Interpolate ball position
             const interpBall = {
                 x: interpolate(previousState.ball.x, currentState.ball.x, t),
                 y: interpolate(previousState.ball.y, currentState.ball.y, t),
@@ -140,7 +137,6 @@ export function RenderGame(): HTMLElement {
                 color: currentState.ball.color,
             };
 
-            // Interpolate players (optional — smoother paddles)
             const interpUserX = {
                 ...currentState.players.userX,
                 y: interpolate(previousState.players.userX.y, currentState.players.userX.y, t),
@@ -158,8 +154,27 @@ export function RenderGame(): HTMLElement {
         requestAnimationFrame(renderLoop);
     }
 
+    function botPlayer() {
+        if (!currentState) return;
+        const ballY = currentState.ball.y;
+        // Get the player paddle position
+        const paddleY = currentState.players.userY.y;
+
+        const tolerance = 0.03;
+        const input = { up: false, down: false };
+        if (paddleY + paddleHeight / 2 < ballY - tolerance) {
+            input.down = true;
+        } else if (paddleY + paddleHeight / 2 > ballY + tolerance) {
+            input.up = true;
+        }
+        socket.send(JSON.stringify({ type: "input", payload: input }));
+        setTimeout(botPlayer, 1000 / SERVER_TICK_RATE);
+        
+    }
+
     requestAnimationFrame(renderLoop);
     requestAnimationFrame(resizeCanvas);
+    setTimeout(botPlayer, 1000);
     return canvasElement;
 }
 

@@ -1,4 +1,4 @@
-import { serverState } from "../state";
+import { serverState } from "../states/serverState";
 // import { navigateTo } from "../utils";
 // import { matchView } from "../views";
 import { Button } from "./Button";
@@ -14,7 +14,10 @@ export function Menu() {
         });
     matchBtn.id = "match-btn";
 
-    const tourBtn = Button("TOURNAMENT", "h-10 w-24 rounded", () => {});
+    const tourBtn = Button("TOURNAMENT", "h-10 w-24 rounded", () => {
+        socket.send(JSON.stringify({ type: 'TOURNAMENT', id: id }));
+    });
+    tourBtn.id = "tournament-btn";
 
     const elementP = document.createElement("p");
     elementP.id = "server-state";

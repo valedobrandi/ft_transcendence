@@ -6,6 +6,7 @@ import { Register } from "./components/FormRegister";
 import { FormSingIn } from "./components/FormSingIn";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { websocketConnect } from "./websocket/connect";
+import { messagerState, renderMessages } from "./states/messagerState";
 
 export function intraView(root: HTMLElement) {
     root.innerHTML = "";
@@ -14,11 +15,30 @@ export function intraView(root: HTMLElement) {
     root.appendChild(menuUI);
     root.appendChild(intraUI);
     websocketConnect();
+    const tabBar = document.getElementById('chat-tabs');
+    if (!tabBar) return;
+
+    tabBar.innerHTML = '';
+
+    let intraTab: HTMLButtonElement | null = null;
+    for (const chatId of messagerState.messages.keys()) {
+        const tab = document.createElement('button');
+        tab.textContent = `#${chatId}`;
+        tab.className = 'px-4 text-sm border-r border-gray-300 bg-white cursor-pointer hover:bg-blue-100';
+        tab.onclick = () => {
+            renderMessages(chatId);
+        };
+        if (chatId === "INTRA") {
+            intraTab = tab;
+        }
+        tabBar.appendChild(tab);
+    }
+    if (intraTab) intraTab.click();
 }
 
 export function matchView(root: HTMLElement) {
     root.innerHTML = "";
-    
+
     const container = document.createElement("div");
     container.className = "flex justify-center items-center h-full w-full overflow-hidden"
     const pongUI = RenderGame();

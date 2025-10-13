@@ -1,4 +1,4 @@
-import { connectedRoom } from "../../state/rooms.js";
+import { connectedRoom } from "../../state/connectedRoom.js";
 import { PlayerType } from "../../types/PlayerType.js";
 import type { WebSocket } from 'ws';
 import { ConnectType } from "../types.js";
@@ -11,6 +11,7 @@ export function CONNECT(data: ConnectType, connection:WebSocket) {
         socket: connection,
         status: 'CONNECT_ROOM',
         matchId: "",
+        tournamentId: "",
         side: ""
     };
 

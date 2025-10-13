@@ -1,4 +1,4 @@
-import { connectedRoom } from "../../state/rooms.js";
+import { connectedRoom } from "../../state/connectedRoom.js";
 import type { WebSocket } from 'ws';
 import { MatchType } from "../types.js";
 import { joinMatchRoom } from "../../state/matchRoom.js";

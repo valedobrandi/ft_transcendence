@@ -1,4 +1,4 @@
-import { connectedRoom } from "../../state/rooms.js";
+import { connectedRoom } from "../../state/connectedRoom.js";
 import type { WebSocket } from 'ws';
 import { PlayType } from "../types.js";
 import { gameRoom } from "../../state/gameRoom.js";
@@ -11,6 +11,6 @@ export function PLAY(data: PlayType, connection: WebSocket) {
 	if (room === undefined) return;
 	room.setPlayerReady(player.id);
 
-	console.log("PLAYER_READY");
+	console.log(`Player ${player.id} is ready in match ${player.matchId}`);
 	connection.send(JSON.stringify({ status: 200, message: 'GAME_START' }));
 }

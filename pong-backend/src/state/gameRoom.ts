@@ -1,8 +1,27 @@
-import { GameRoom } from "../classes/GameRoom.js";
+import { PingPong } from "../classes/PingPong.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";
-import { getNextPlayers } from "./matchRoom.js";
+import { PlayerType } from "../types/PlayerType.js";
 
-export const gameRoom = new Map<string, GameRoom>();
+const matchRoom: PlayerType[] = [];
+
+export const gameRoom = new Map<string, PingPong>();
+
+export function joinMatchRoom(player: PlayerType) {
+	matchRoom.push(player);
+	player.status = 'MATCH_ROOM';
+
+	player.socket.send(JSON.stringify({ status: 200, message: 'MATCHED_ROOM' }))
+
+	if (matchRoom.length >= 2) {
+		matchQueueEvent.emit('ready');
+	}
+}
+
+export function getNextPlayers(): [PlayerType, PlayerType] | null {
+	if (matchRoom.length < 2) return null;
+	return [matchRoom.shift()!, matchRoom.shift()!];
+}
+
 
 matchQueueEvent.on('ready', () => {
 
@@ -10,27 +29,9 @@ matchQueueEvent.on('ready', () => {
 	if (players == undefined) return;
 
 	const [playerX, playerY] = players;
-	const matchId = Date.now().toString();
+	const matchId = crypto.randomUUID();
 
-	const room = new GameRoom(matchId);
-	room.addPlayer(playerX);
-	room.addPlayer(playerY);
-	gameRoom.set(matchId, room);
-
-	[playerX, playerY].forEach((player, index) => {
-		console.log(`Sending GAME_ROOM to ${player.id}, socket readyState: ${player.socket.readyState}`);
-		player.status = 'GAME_ROOM';
-		player.side = index === 0 ? 'LEFT' : 'RIGHT';
-		player.matchId = matchId;
-
-		player.socket.send(JSON.stringify({
-			status: 200,
-			message: 'GAME_ROOM',
-			side: player.side,
-			id: player.id
-		}));
-	});
-
-	console.log(`Match created: ${matchId} between ${playerX.id} and ${playerY.id}`);
+	const newMatch = new PingPong(matchId);
+	newMatch.createMatch(playerX, playerY);
 
 })

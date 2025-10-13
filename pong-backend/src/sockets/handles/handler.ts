@@ -4,9 +4,12 @@ import { CONNECT, } from './CONNECT.js';
 import { MATCH } from './MATCH.js';
 import { MOVE_PADDLE } from './MOVE_PADDLE.js';
 import { PLAY } from './PLAY.js';
+import { TOURNAMENT } from './TOURNAMENT.js';
 
 export function handleMessage(conn: WebSocket, msg: MessageType) {
-    console.log('Received message:', msg);
+    if (msg.type !== 'input') {
+        console.log('Received message:', msg);
+    }
     switch (msg.type) {
         case 'CONNECT':
             CONNECT(msg, conn);
@@ -20,5 +23,8 @@ export function handleMessage(conn: WebSocket, msg: MessageType) {
 		case 'PLAY':
 			PLAY(msg, conn);
 			break;
+        case 'TOURNAMENT':
+            TOURNAMENT(msg, conn);
+            break;
     }
 }

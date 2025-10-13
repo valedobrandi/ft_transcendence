@@ -1,5 +1,5 @@
 import { gameRoom } from "../../state/gameRoom.js";
-import { connectedRoom } from "../../state/rooms.js";
+import { connectedRoom } from "../../state/connectedRoom.js";
 import { MovePaddleType } from "../types.js";
 
 export function MOVE_PADDLE(data: MovePaddleType) {
