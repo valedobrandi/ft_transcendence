@@ -5,9 +5,10 @@ import { joinTournamentRoom } from "../../state/tournamentRoom.js";
 
 export function TOURNAMENT(data: Tournamentype, connection: WebSocket) {
 	const player = connectedRoom.get(data.id);
+
 	if (player == undefined || player.status != 'CONNECT_ROOM') return;
 
-	console.log(`Tournament: ${data.id}`);
+	console.log(`Tournament Player: ${data.id}`);
 
 	joinTournamentRoom(player);
 }

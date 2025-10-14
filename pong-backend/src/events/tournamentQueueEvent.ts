@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
 
-export const torunamentEvent = new EventEmitter();
+export const tournamentEvent = new EventEmitter();
 
-torunamentEvent.setMaxListeners(100);
+tournamentEvent.setMaxListeners(100);

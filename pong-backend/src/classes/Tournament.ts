@@ -1,94 +1,95 @@
 import { gameEvents } from "../events/gameEvents.js";
 import { tournamentRoom } from "../state/tournamentRoom.js";
+import { EndMatchEventType } from "../types/EndMatchEventType.js";
 import { PlayerType } from "../types/PlayerType.js";
 import { PingPong } from "./PingPong.js";
 
 class Tournament {
-    tournamentId: string;
-    players: Map<string, PlayerType>
-    currentBracket: PlayerType[] = [];
-    nextBracket: PlayerType[] = [];
+	tournamentId: string;
+	currentBracket: Map<string, PlayerType>
+	nextBracket: PlayerType[] = [];
+	private rounds = 0;
+	cleanup: () => void = () => { };
+
+	constructor(tournamentId: string) {
+		this.tournamentId = tournamentId;
+		this.currentBracket = new Map<string, PlayerType>();
+
+		const matchEndedListener = ({ winner, loser, tournamentId }: EndMatchEventType) => {
+			if (tournamentId != this.tournamentId) return;
+			this.reportMatchResult(winner, loser);
+		}
+
+		gameEvents.on('matchEnded', matchEndedListener);
+		this.cleanup = () => gameEvents.off('matchEnded', matchEndedListener);
+	}
 
 
-    constructor(tournamentId: string) {
-        this.tournamentId = tournamentId;
-        this.players = new Map<string, PlayerType>();
+	add(player: PlayerType) {
+		this.currentBracket.set(player.id, player);
+		if (this.currentBracket.size == 8) {
+			this.startRound();
+		}
+	}
 
-        const listener = () => {
-            gameEvents.on('matchEnded', listener);
-            this.cleanup = () => gameEvents.off('matchEnded', listener);
-        }
+	startRound() {
+		if (this.currentBracket.size % 2 !== 0) return;
 
-        gameEvents.on('matchEnded', ({ winner, tournamentId }) => {
-            if (tournamentId != this.tournamentId) return;
-            console.log('Match ended in tournament:', this.tournamentId, 'Winner:', winner.id);
-            this.report(winner);
-        })
-    }
+		this.rounds = Math.floor(this.currentBracket.size / 2);
 
-    cleanup: () => void = () => { }
+		const players = Array.from(this.currentBracket.values());
+		for (let i = 0; i < players.length; i += 2) {
+			const playerX = players[i];
+			const playerY = players[i + 1];
 
-    add(player: PlayerType) {
-        this.players.set(player.id, player);
-        if (this.players.size == 8) {
-            console.log('Tournament started with 8 players');
-            this.currentBracket = Array.from(this.players.values());
-            this.startRound();
-        }
-    }
+			if (!playerX || !playerY) continue;
 
-    startRound() {
-        for (let i = 0; i < this.currentBracket.length; i += 2) {
-            const playerX = this.currentBracket[i];
-            const playerY = this.currentBracket[i + 1];
-            const matchId = crypto.randomUUID();
+			const matchId = crypto.randomUUID();
+			const newMatch = new PingPong(matchId);
+			newMatch.setTournamentId(this.tournamentId);
 
-            const newMatch = new PingPong(matchId);
-            newMatch.createMatch(playerX, playerY);
-        }
-    }
+			newMatch.createMatch(playerX, playerY);
+		}
+	}
 
-    report(winner: PlayerType) {
-        this.nextBracket.push(winner);
+	reportMatchResult(winner: PlayerType, loser: PlayerType) {
 
-        for (const [id, player] of this.players.entries()) {
-            if (player !== winner && this.currentBracket.includes(player)) {
-                player.status = 'CONNECT_ROOM';
-                this.remove(player);
-            }
-        }
+		winner.status = 'TOURNAMENT_ROOM';
 
-        if (this.nextBracket.length === this.currentBracket.length / 2) {
-            this.advanceBracket();
-        }
-    }
+		this.nextBracket.push(winner);
+		this.currentBracket.delete(loser.id);
+		loser.tournamentId = undefined;
+		if (this.nextBracket.length === this.rounds) {
+			this.advanceBracket();
+		}
+	}
 
-    advanceBracket() {
-        this.currentBracket = [...this.nextBracket];
-        this.nextBracket = [];
-        if (this.currentBracket.length > 1) {
-            this.startRound();
-        } else {
-            this.endTornament(this.currentBracket[0]);
-        }
-    }
+	advanceBracket() {
+		if (this.nextBracket.length === 0) return;
+		 this.currentBracket.clear();
 
-    endTornament(player: PlayerType) {
-        player.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT_WINNER' }));
+		for (const player of this.nextBracket) {
+			this.currentBracket.set(player.id, player);
+		}
 
-        player.status = 'CONNECT_ROOM';
-        tournamentRoom.delete(this.tournamentId);
+		this.nextBracket = [];
 
-        for (const player of this.players.values()) {
-            this.remove(player);
-        }
+		if (this.currentBracket.size > 1) {
+			this.startRound();
+		} else {
+			const winner = Array.from(this.currentBracket.values())[0];
+			this.endTornament(winner);
+		}
+	}
 
-        this.cleanup();
-    }
+	endTornament(player: PlayerType) {
+		player.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT_WINNER' }));
 
-    remove(player: PlayerType) {
-        player.tournamentId = '';
-    }
+		player.status = 'CONNECT_ROOM';
+		tournamentRoom.delete(this.tournamentId);
+
+		this.cleanup();
+	}
 }
 
 export { Tournament };

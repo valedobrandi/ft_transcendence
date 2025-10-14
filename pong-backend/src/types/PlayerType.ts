@@ -6,7 +6,7 @@ export interface PlayerType {
     status: "CONNECT_ROOM" | "MATCH_ROOM" | "GAME_ROOM" | "TOURNAMENT_ROOM" | "GAME_START";
     socket: WebSocket;
     matchId: string;
-    tournamentId: string;
+    tournamentId: string | undefined;
 	side: string;
 }
 

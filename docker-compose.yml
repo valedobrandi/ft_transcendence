@@ -13,7 +13,7 @@ services:
     command: npm run dev -- --host
     networks:
       - transcedence-network
-      
+
   pong-backend:
     build:
       context: ./pong-backend
