@@ -14,36 +14,6 @@ services:
     networks:
       - transcedence-network
 
-  userx:
-    build:
-      context: ./pong-frontend
-      dockerfile: Dockerfile
-    ports:
-      - "5174:5173"
-    volumes:
-      - ./pong-frontend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-    command: npm run dev -- --host
-    networks:
-      - transcedence-network
-
-  usery:
-    build:
-      context: ./pong-frontend
-      dockerfile: Dockerfile
-    ports:
-      - "5175:5173"
-    volumes:
-      - ./pong-frontend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-    command: npm run dev -- --host
-    networks:
-      - transcedence-network
-
   pong-backend:
     build:
       context: ./pong-backend

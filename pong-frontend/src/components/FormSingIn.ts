@@ -21,7 +21,7 @@ export function FormSingIn(): HTMLElement {
 	const inputNameUI = InputName();
 
     const sendBtn = Button("sing-in", "w-full", () => {});
-    
+
 	viewDiv.appendChild(headerBar);
     viewDiv.appendChild(formElement);
 	formElement.appendChild(inputNameUI);

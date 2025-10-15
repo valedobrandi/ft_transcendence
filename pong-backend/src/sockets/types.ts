@@ -14,7 +14,27 @@ export type MovePaddleType = {
     payload: { up: boolean; down: boolean };
 };
 
+export type PlayType = {
+    type: 'PLAY';
+    id: string;
+};
+
+export type Tournamentype = {
+    type: 'TOURNAMENT';
+    id: string;
+};
+
+export type InputType = { 
+    type: 'input';
+    id: string;
+    payload: { up: boolean; down: boolean };
+}
+
+
 export type MessageType =
     | ConnectType
     | MatchType
-    | MovePaddleType;
+    | MovePaddleType
+	| PlayType
+    | Tournamentype
+    | InputType;

@@ -10,8 +10,8 @@ export function Login(): HTMLElement {
     mainDiv.id = "login-container";
     mainDiv.className = "flex gap-2";
 
-	const singInBtn = Button("Sign in", "w-24", () => navigateTo("/sing-in", singInView));
-	const registerBtn = Button("Register", "w-24", () => navigateTo("/register", registerView));
+	const singInBtn = Button("Sign in", "h-14 w-24", () => navigateTo("/sing-in", singInView));
+	const registerBtn = Button("Register", "h-14 w-24", () => navigateTo("/register", registerView));
 
 	mainDiv.appendChild(registerBtn);
 	mainDiv.appendChild(singInBtn);

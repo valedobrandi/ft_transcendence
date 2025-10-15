@@ -1,0 +1,110 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - button "PLAY" [active] [ref=e4]
+    - button "TOURNAMENT" [disabled] [ref=e5]
+    - paragraph [ref=e6]: GAME_ROOM
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - button "#INTRA" [ref=e12] [cursor=pointer]
+        - generic [ref=e13]:
+          - generic [ref=e14]: "Welcome: eece8088-ab7e-4056-8763-2aba678126f8"
+          - generic [ref=e15]: You have joined the tournament queue.
+      - generic [ref=e17]:
+        - paragraph [ref=e18]:
+          - text: "#PlayerOne"
+          - combobox [ref=e19]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e20]:
+          - text: "#GamerGal"
+          - combobox [ref=e21]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e22]:
+          - text: "#NoobMaster"
+          - combobox [ref=e23]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e24]:
+          - text: "#ProPlayer"
+          - combobox [ref=e25]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e26]:
+          - text: "#CasualGamer"
+          - combobox [ref=e27]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e28]:
+          - text: "#Speedy"
+          - combobox [ref=e29]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e30]:
+          - text: "#Ace"
+          - combobox [ref=e31]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e32]:
+          - text: "#Champion"
+          - combobox [ref=e33]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e34]:
+          - text: "#Rookie"
+          - combobox [ref=e35]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+        - paragraph [ref=e36]:
+          - text: "#Veteran"
+          - combobox [ref=e37]:
+            - option "Action" [disabled] [selected]
+            - option "Send Message"
+            - option "View Profile"
+            - option "Add Friend"
+            - option "Block User"
+            - option "Invite to Game"
+    - generic [ref=e38]:
+      - textbox "Type a message..." [ref=e39]
+      - button "Send" [ref=e40]
+```
