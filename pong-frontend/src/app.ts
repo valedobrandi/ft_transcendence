@@ -1,3 +1,4 @@
+import { addGlobalEventListeners } from "./events/addEventListeners";
 import { setupPaddleListeners } from "./events/paddleListeners";
 import { addMessage } from "./states/messagerState";
 import { renderRoute } from "./utils";
@@ -21,9 +22,6 @@ function init() {
     renderRoute(window.location.pathname);
 }
 
-window.addEventListener("popstate", () => {
-    renderRoute(window.location.pathname);
-});
-
 init();
 setWebSocketMessage();
+addGlobalEventListeners();

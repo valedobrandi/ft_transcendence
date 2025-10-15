@@ -1,7 +1,3 @@
-import { navigateTo } from "../utils";
-import { matchView } from "../views";
-import { websocketStartMatch } from "../websocket/websocketStartMatch";
-
 export const serverState = new Proxy({ state: "" }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
@@ -12,26 +8,17 @@ export const serverState = new Proxy({ state: "" }, {
             serverStateElement.textContent = value as string;
         }
         if (!matchBtn || !tourBtn) return true;
-        switch (value) {
-            case "MATCHED_ROOM":
-                matchBtn.textContent = "SEARCH";
-                matchBtn.className = `h-10 w-18 font-bold text-xs text-white
-                        rounded bg-blue-500 load-btn`;
-                break;
-            case "GAME_ROOM":
-                matchBtn.textContent = "PLAY";
-                matchBtn.className = `h-10 w-18 font-bold text-xs text-white
-                        rounded bg-green-500`;
-                matchBtn.onclick = () => {
-                    navigateTo("/match", matchView);
-                    websocketStartMatch();
-                };
-                break;
-            case "TOURNAMENT_ROOM":
-                tourBtn.setAttribute("disabled", "true");
-                tourBtn.className = `h-10 w-24 rounded bg-black text-white text-xs
-		                uppercase font-bold disabled:cursor-not-allowed disabled:opacity-50`;
-                break;
+        if (value === "MATCH_ROOM" || value === "TOURNAMENT_ROOM") {
+            matchBtn.setAttribute("disabled", "true");
+            tourBtn.setAttribute("disabled", "true");
+
+            const isDisabled = (type: string) => type === value;
+            matchBtn.className = `h-10 w-18 rounded bg-black text-white text-xs
+                uppercase font-bold disabled:cursor-not-allowed disabled:opacity-50 
+                ${isDisabled("MATCH_ROOM") ? "disabled:bg-green-500" : ""}`;
+            tourBtn.className = `h-10 w-24 rounded bg-black text-white text-xs
+                uppercase font-bold disabled:cursor-not-allowed disabled:opacity-50 
+                ${isDisabled("TOURNAMENT_ROOM") ? "disabled:bg-green-500" : ""}`;
         }
 
         return true;

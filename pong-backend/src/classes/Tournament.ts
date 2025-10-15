@@ -27,7 +27,7 @@ class Tournament {
 
 	add(player: PlayerType) {
 		this.currentBracket.set(player.id, player);
-		if (this.currentBracket.size == 8) {
+		if (this.currentBracket.size == 4) {
 			this.startRound();
 		}
 	}

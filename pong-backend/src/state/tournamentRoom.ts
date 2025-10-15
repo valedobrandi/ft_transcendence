@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { Tournament } from "../classes/Tournament.js";
 import { tournamentEvent } from "../events/tournamentQueueEvent.js";
 import { PlayerType } from "../types/PlayerType.js";
@@ -13,8 +12,8 @@ export function joinTournamentRoom(player: PlayerType) {
 
 	player.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT_ROOM' }))
 
-	if (queueRoom.length == 8) {
-        console.log('Tournament ready with 8 players');
+	if (queueRoom.length == 4) {
+        console.log('Tournament ready is starting;');
         tournamentEvent.emit('ready');
 	}
 }
