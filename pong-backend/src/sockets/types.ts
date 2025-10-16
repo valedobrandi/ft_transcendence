@@ -24,10 +24,17 @@ export type Tournamentype = {
     id: string;
 };
 
-export type InputType = { 
+export type InputType = {
     type: 'input';
     id: string;
     payload: { up: boolean; down: boolean };
+}
+
+export type ChatType = {
+    type: 'CHAT';
+    from: string;
+    to: string;
+    message: string;
 }
 
 
@@ -35,6 +42,7 @@ export type MessageType =
     | ConnectType
     | MatchType
     | MovePaddleType
-	| PlayType
+    | PlayType
     | Tournamentype
-    | InputType;
+    | InputType
+    | ChatType;

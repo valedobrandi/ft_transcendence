@@ -64,7 +64,7 @@ class PingPong {
             if (!player) continue;
 
 
-            const side = player.side;
+            const side = player.matchSide;
 
             if (side === 'LEFT') {
                 if (input.up && this.gameState.userX.y > 0) this.gameState.userX.y -= paddleSpeed;
@@ -123,8 +123,8 @@ class PingPong {
         this.matchState = 'ENDED';
 
         const getMatchWinner = this.gameState.userX.score === 5 ? 'LEFT' : 'RIGHT';
-        this.winner = Array.from(this.players.values()).find(player => player.side === getMatchWinner);
-        this.loser = Array.from(this.players.values()).find(player => player.side !== getMatchWinner);
+        this.winner = Array.from(this.players.values()).find(player => player.matchSide === getMatchWinner);
+        this.loser = Array.from(this.players.values()).find(player => player.matchSide !== getMatchWinner);
 
         if (this.interval) {
             clearInterval(this.interval);
@@ -233,13 +233,13 @@ class PingPong {
             case "match created":
                 getArrayPlayers.forEach((player, index) => {
                     player.status = 'GAME_ROOM';
-                    player.side = index === 0 ? 'LEFT' : 'RIGHT';
+                    player.matchSide = index === 0 ? 'LEFT' : 'RIGHT';
                     player.matchId = this.machId;
 
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_ROOM',
-                        side: player.side,
+                        side: player.matchSide,
                         id: player.id
                     }));
                 });

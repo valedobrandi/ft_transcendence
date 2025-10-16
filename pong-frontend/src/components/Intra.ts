@@ -1,3 +1,4 @@
+import { ChatHeader } from "./ChatHeader";
 import { Settings } from "./Settings";
 import { UsersList } from "./UsersList";
 
@@ -17,13 +18,16 @@ export function Intra(): HTMLElement {
 
     const chatTabs = document.createElement("div");
     chatTabs.id = "chat-tabs";
-    chatTabs.className = "flex border-b bg-gray-100";
+    chatTabs.className = "flex border-b bg-gray-100 h-10";
+
+    const chatMenu = ChatHeader();
 
     const messages = document.createElement("div");
     messages.id = "messages";
     messages.className = "flex-1 overflow-y-auto p-2";
 
     chatWidget.appendChild(chatTabs);
+    chatWidget.appendChild(chatMenu);
     chatWidget.appendChild(messages);
 
     const usersDiv = document.createElement("div");

@@ -1,8 +1,8 @@
-import { addGlobalEventListeners } from "./events/addEventListeners";
+import { globalEventListeners } from "./events/globalEventListeners";
 import { setupPaddleListeners } from "./events/paddleListeners";
 import { addMessage } from "./states/messagerState";
 import { renderRoute } from "./utils";
-import { setWebSocketMessage } from "./websocket/setWebSocketMessage";
+import { websocketReceiver } from "./websocket/websocketReceiver";
 
 export const id = crypto.randomUUID();
 
@@ -23,5 +23,5 @@ function init() {
 }
 
 init();
-setWebSocketMessage();
-addGlobalEventListeners();
+websocketReceiver();
+globalEventListeners();

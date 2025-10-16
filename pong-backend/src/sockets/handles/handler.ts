@@ -5,6 +5,7 @@ import { MATCH } from './MATCH.js';
 import { MOVE_PADDLE } from './MOVE_PADDLE.js';
 import { PLAY } from './PLAY.js';
 import { TOURNAMENT } from './TOURNAMENT.js';
+import { CHAT } from './CHAT.js';
 
 export function handleMessage(conn: WebSocket, msg: MessageType) {
     if (msg.type !== 'input') {
@@ -25,6 +26,9 @@ export function handleMessage(conn: WebSocket, msg: MessageType) {
 			break;
         case 'TOURNAMENT':
             TOURNAMENT(msg, conn);
+            break;
+        case 'CHAT':
+            CHAT(msg);
             break;
     }
 }

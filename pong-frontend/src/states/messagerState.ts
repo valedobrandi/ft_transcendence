@@ -12,7 +12,7 @@ export function addMessage(chatId: string, message: string) {
 export function renderMessages(chatId: string) {
     const messageBox = document.getElementById('messages');
     if (!messageBox) return;
-    
+
     const messages = messagerState.messages.get(chatId) || [];
 
     // Create a new paragraph element for each message
@@ -27,7 +27,7 @@ export function renderMessages(chatId: string) {
         messageBox.appendChild(p);
         p.prepend(span);
     })
-   
+
 }
 
 export function playLinkHandler(event: Event) {
@@ -39,12 +39,41 @@ export function playLinkHandler(event: Event) {
     }
 }
 
-export const messagerState = new Proxy({
+const messagerListeners: (() => void)[] = [];
+
+export function onMessagerChange(fn: () => void) {
+    messagerListeners.push(fn);
+}
+
+interface MessagerStateType {
+    messages: Map<string, string[]>;
+    connected: { id: string; name: string }[];
+    state: string;
+    selectChat: string;
+}
+
+export function changeChatHeader(header: string) {
+    const chatHeader = document.getElementById('chat-tabs');
+    if (!chatHeader) return;
+
+    const tab = document.createElement('h1');
+    tab.innerHTML = '';
+    tab.textContent = `#${header}`;
+    tab.className = 'm-auto font-bold';
+    renderMessages(messagerState.selectChat);
+    chatHeader.innerHTML = '';
+    chatHeader.appendChild(tab);
+}
+
+export const messagerState: MessagerStateType = new Proxy({
     messages: new Map<string, string[]>([['INTRA', []]]),
+    connected: [],
+    selectChat: "INTRA",
     state: ""
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
+        
         if (prop === 'state') {
             switch (value) {
                 case "TOURNAMENT_ROOM":
@@ -61,7 +90,17 @@ export const messagerState = new Proxy({
                 case "GAME_OVER":
                     addMessage("INTRA", `the match is over.`);
                     break;
+                case "CHAT_MESSAGE":
+                    messagerListeners.forEach(fn => fn());
             }
+        }
+
+        if (prop === 'connected') {
+            messagerListeners.forEach(fn => fn());
+        }
+
+        if (prop === 'selectChat') {
+            changeChatHeader(messagerState.selectChat);
         }
 
         return true;
