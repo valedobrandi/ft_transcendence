@@ -1,10 +1,11 @@
+import { id } from "../app";
 import { navigateTo } from "../utils";
 import { matchView } from "../views";
 import { websocketStartMatch } from "../websocket/websocketStartMatch";
 
-export function addMessage(chatId: string, message: string) {
+export function addMessage(chatId: string, chat: string, sender = id) {
     const messages = messagerState.messages.get(chatId) || [];
-    messages.push(message);
+    messages.push({chat, sender});
     messagerState.messages.set(chatId, messages);
     renderMessages(chatId);
 }
@@ -20,10 +21,10 @@ export function renderMessages(chatId: string) {
     messages.forEach(msg => {
         const span = document.createElement('span');
         span.className = "font-bold lowercase";
-        span.textContent = `#${chatId}: `;
+        span.textContent = msg.sender === id ? `#You: ` : `#${chatId}: `;
         const p = document.createElement('p');
         p.className = "m-2 text-xs";
-        p.innerHTML = `${msg}`;
+        p.innerHTML = `${msg.chat}`;
         messageBox.appendChild(p);
         p.prepend(span);
     })
@@ -46,7 +47,7 @@ export function onMessagerChange(fn: () => void) {
 }
 
 interface MessagerStateType {
-    messages: Map<string, string[]>;
+    messages: Map<string, MessageType[]>;
     connected: { id: string; name: string }[];
     state: string;
     selectChat: string;
@@ -65,15 +66,19 @@ export function changeChatHeader(header: string) {
     chatHeader.appendChild(tab);
 }
 
+export interface MessageType  {
+	chat:string;
+	sender: string;
+}
 export const messagerState: MessagerStateType = new Proxy({
-    messages: new Map<string, string[]>([['INTRA', []]]),
+    messages: new Map<string, MessageType[]>([['INTRA', []]]),
     connected: [],
     selectChat: "INTRA",
     state: ""
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
-        
+
         if (prop === 'state') {
             switch (value) {
                 case "TOURNAMENT_ROOM":

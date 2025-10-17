@@ -10,31 +10,15 @@ class ChatManager {
         return [userA, userB].sort().join('-');
     }
 
-    sendMessage(toUserId: string, message: string) {
-        const chatId = this.getConversationId(this.userId, toUserId);
-        let chatKey = conversationStore.get(chatId);
+    sendMessage(receiver: string, message: string, sender: string) {
+        const send = connectedRoom.get(this.userId);
 
-        if (chatKey === undefined) {
-            chatKey = new ChatStore(this.userId, toUserId);
-            conversationStore.set(chatId, chatKey);
-
-        }
-
-        chatKey.addMessage(this.userId, toUserId, message);
-
-        const senderRoom = connectedRoom.get(this.userId);
-        if (senderRoom) {
-            senderRoom.chat.receiveMessage(this.userId, message);
-        }
-
-        const sendTo = connectedRoom.get(toUserId);
-
-        if (sendTo) {
-            sendTo.chat.receiveMessage(this.userId, message)
-            sendTo.socket.send(JSON.stringify({
+        if (send) {
+            send.socket.send(JSON.stringify({
                 message: 'CHAT_MESSAGE',
-                from: this.userId,
-                chat: message
+                receiver: receiver,
+                chat: message,
+				sender
             }));
         };
 

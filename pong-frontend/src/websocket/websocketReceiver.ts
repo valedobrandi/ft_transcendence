@@ -1,6 +1,6 @@
 import { socket } from "../app";
 import { playerSideState } from "../context";
-import { messagerState } from "../states/messagerState";
+import { messagerState, type MessageType } from "../states/messagerState";
 import { serverState } from "../states/serverState";
 
 export function websocketReceiver() {
@@ -31,12 +31,15 @@ export function websocketReceiver() {
                 messagerState.connected = data.users;
                 break;
             case 'CHAT_MESSAGE':
-                const { from, chat } = data;
+                const { receiver, chat, sender } = data;
                 messagerState.state = data.message;
-                if (messagerState.messages.has(from) === false) {
-                    messagerState.messages.set(from, []);
+                if (messagerState.messages.has(receiver) === false) {
+                    messagerState.messages.set(receiver, []);
                 }
-                messagerState.messages.get(from)!.push(chat);
+				const response: MessageType = {
+					chat, sender
+				}
+                messagerState.messages.get(receiver)!.push(response);
                 messagerState.messages = new Map(messagerState.messages);
                 break;
         }

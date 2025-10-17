@@ -3,12 +3,15 @@ import { connectedRoom } from "../../state/connectedRoom.js";
 
 export function CHAT(data: ChatType) {
 
-    const from = connectedRoom.get(data.from);
-    const to = connectedRoom.get(data.to);
+    const to = connectedRoom.get(data.receiver);
+
+    const from = connectedRoom.get(data.sender);
 
     if (!from || !to) return
 
-    from.chat.sendMessage(data.from, data.message);
-    from.chat.sendMessage(data.to, data.message);
-    
+    to.chat.sendMessage(data.sender, data.message, data.sender);
+
+    from.chat.sendMessage(data.receiver, data.message, data.sender);
+
+
 }
