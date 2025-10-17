@@ -12,7 +12,7 @@ class ChatManager {
 
     sendMessage(toUserId: string, message: string) {
         const chatId = this.getConversationId(this.userId, toUserId);
-        let chatKey = conversationStore.get(toUserId);
+        let chatKey = conversationStore.get(chatId);
 
         if (chatKey === undefined) {
             chatKey = new ChatStore(this.userId, toUserId);
@@ -22,28 +22,34 @@ class ChatManager {
 
         chatKey.addMessage(this.userId, toUserId, message);
 
+        const senderRoom = connectedRoom.get(this.userId);
+        if (senderRoom) {
+            senderRoom.chat.receiveMessage(this.userId, message);
+        }
+
         const sendTo = connectedRoom.get(toUserId);
 
-        if (sendTo === undefined) return;
-
-        sendTo.chat.receiveMessage(this.userId, message);
-
-        sendTo.socket.send(JSON.stringify({
-            message: 'CHAT_MESSAGE',
-            from: this.userId,
-            chat: message
-        }));
+        if (sendTo) {
+            sendTo.chat.receiveMessage(this.userId, message)
+            sendTo.socket.send(JSON.stringify({
+                message: 'CHAT_MESSAGE',
+                from: this.userId,
+                chat: message
+            }));
+        };
 
     }
 
     receiveMessage(fromUserId: string, message: string) {
-        let chatKey = conversationStore.get(fromUserId);
+        const chatId = this.getConversationId(this.userId, fromUserId);
+
+        let chatKey = conversationStore.get(chatId);
+
         if (chatKey === undefined) {
             chatKey = new ChatStore(this.userId, fromUserId);
             const chatId = this.getConversationId(this.userId, fromUserId);
             conversationStore.set(chatId, chatKey);
         }
-
         chatKey.addMessage(fromUserId, this.userId, message);
     }
 }

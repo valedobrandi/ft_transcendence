@@ -8,6 +8,7 @@ export function CHAT(data: ChatType) {
 
     if (!from || !to) return
 
+    from.chat.sendMessage(data.from, data.message);
     from.chat.sendMessage(data.to, data.message);
     
 }

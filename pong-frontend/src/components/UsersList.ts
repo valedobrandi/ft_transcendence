@@ -1,5 +1,5 @@
 import { messagerState, onMessagerChange } from "../states/messagerState";
-
+import { id as userId }  from "../app";
 
 export function UsersList(): HTMLDivElement {
     const usersDiv = document.createElement("div");
@@ -8,6 +8,8 @@ export function UsersList(): HTMLDivElement {
     function render() {
         usersDiv.innerHTML = "";
         messagerState.connected.forEach(({ name, id }) => {
+
+            if (userId === id) return;
 
              const btn = document.createElement("button");
             // Show the first 10 characters of the name
