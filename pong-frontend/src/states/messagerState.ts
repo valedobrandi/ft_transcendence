@@ -101,8 +101,12 @@ export const messagerState: MessagerStateType = new Proxy({
 
         if (prop === 'selectChat') {
             changeChatHeader(messagerState.selectChat);
-        }
+            const isIntra = messagerState.selectChat === 'INTRA';
+            const chatMenu = document.getElementById("chat-menu");
+            if (chatMenu) chatMenu.className = "flex border-b bg-gray-100 h-10";
+            if (isIntra && chatMenu) chatMenu.className += " hidden";
 
+        }
         return true;
     }
 });

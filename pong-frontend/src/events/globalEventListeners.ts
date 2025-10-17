@@ -25,11 +25,7 @@ export function globalEventListeners() {
             const action = target.value;
             const parent = target.closest("p");
             if (!parent) return;
-            const toSend = parent.id;
             switch (action) {
-                case "send-message":
-                    websocketChatSend("", toSend);
-                    break;
                 case "view-profile":
                     break;
                 case "add-friend":

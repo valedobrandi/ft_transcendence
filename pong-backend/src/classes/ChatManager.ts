@@ -25,6 +25,7 @@ class ChatManager {
         const sendTo = connectedRoom.get(toUserId);
 
         if (sendTo === undefined) return;
+
         sendTo.chat.receiveMessage(this.userId, message);
 
         sendTo.socket.send(JSON.stringify({
@@ -42,6 +43,7 @@ class ChatManager {
             const chatId = this.getConversationId(this.userId, fromUserId);
             conversationStore.set(chatId, chatKey);
         }
+
         chatKey.addMessage(fromUserId, this.userId, message);
     }
 }

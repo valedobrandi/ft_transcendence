@@ -1,4 +1,5 @@
 import { ChatHeader } from "./ChatHeader";
+import { ChatSendInput } from "./ChatSendInput";
 import { Settings } from "./Settings";
 import { UsersList } from "./UsersList";
 
@@ -18,7 +19,7 @@ export function Intra(): HTMLElement {
 
     const chatTabs = document.createElement("div");
     chatTabs.id = "chat-tabs";
-    chatTabs.className = "flex border-b bg-gray-100 h-10";
+    chatTabs.className = "flex border-b bg-gray-100 h-10 min-w-lg";
 
     const chatMenu = ChatHeader();
 
@@ -34,9 +35,6 @@ export function Intra(): HTMLElement {
     usersDiv.id = "users";
     usersDiv.className = "border border flex-grow min-w-3xs";
 
-    const inputDiv = document.createElement("div");
-    inputDiv.className = "border border w-full min-h-20 flex";
-
     const contentDiv = document.createElement("div");
     contentDiv.className = "flex flex-grow";
 
@@ -48,23 +46,12 @@ export function Intra(): HTMLElement {
     usersDiv.appendChild(usersListUI!);
 
     chatDiv.appendChild(contentDiv)
+
+    const inputDiv = ChatSendInput();
     chatDiv.appendChild(inputDiv);
 
     const settingsUI = Settings();
     mainDiv.appendChild(settingsUI!);
-
-    const input = document.createElement("input");
-    input.id = "chat-input";
-    input.type = "text";
-    input.placeholder = "Type a message...";
-    input.className = "px-2 py-1 border rounded w-full h-full";
-
-    const sendBtn = document.createElement("button");
-    sendBtn.textContent = "Send";
-    sendBtn.className = "px-4 py-1 bg-blue-500 text-white font-bold rounded hover:bg-blue-600";
-
-    inputDiv.appendChild(input);
-    inputDiv.appendChild(sendBtn);
 
     return mainDiv;
 }
