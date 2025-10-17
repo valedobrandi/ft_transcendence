@@ -1,6 +1,6 @@
 import { socket } from "../app";
 import { playerSideState } from "../context";
-import { messagerState, type MessageType } from "../states/messagerState";
+import { messagerState, renderMessages, type MessageType } from "../states/messagerState";
 import { serverState } from "../states/serverState";
 
 export function websocketReceiver() {
@@ -36,11 +36,13 @@ export function websocketReceiver() {
                 if (messagerState.messages.has(receiver) === false) {
                     messagerState.messages.set(receiver, []);
                 }
-				const response: MessageType = {
-					chat, sender
-				}
+				const response: MessageType = { chat, sender };
                 messagerState.messages.get(receiver)!.push(response);
                 messagerState.messages = new Map(messagerState.messages);
+
+				if (receiver === messagerState.selectChat) {
+					renderMessages(receiver);
+				}
                 break;
         }
     });

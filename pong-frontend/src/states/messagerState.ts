@@ -96,7 +96,7 @@ export const messagerState: MessagerStateType = new Proxy({
                     addMessage("INTRA", `the match is over.`);
                     break;
                 case "CHAT_MESSAGE":
-                    messagerListeners.forEach(fn => fn());
+
             }
         }
 
