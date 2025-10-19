@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import ChatManager from "../classes/ChatManager.js";
 
 export interface PlayerType {
     id: string;
@@ -7,7 +8,8 @@ export interface PlayerType {
     socket: WebSocket;
     matchId: string;
     tournamentId: string | undefined;
-	side: string;
+	matchSide: string;
+    chat: ChatManager;
 }
 
 export interface PlayerStatType {
