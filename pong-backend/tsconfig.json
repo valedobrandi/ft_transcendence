@@ -1,21 +1,15 @@
+/* Based on https://github.com/tsconfig/bases/blob/501da2bcd640cf95c95805783e1012b992338f28/bases/node22.json */
 {
-  "compilerOptions": 
-  {
-    "target": "ES2022",             //type de traduction en JS -> ici version 2022
-    "module": "NodeNext",           //Node.js moderne (ESM).--> (import/export)
-    "moduleResolution": "NodeNext", //TypeScript résout les imports comme Node ESM i: import....".js"
-    "strict": true,                 //definir des types obligatoirement
-    "esModuleInterop": true,        //permet d importer des librairies ex : fastify
-    "allowSyntheticDefaultImports": true, //permet d'importer des modules sans export par défaut
-    "resolveJsonModule": true,      //permet d'importer des fichiers .json
-    "outDir": "dist",               // tous les JS générés iront dans dist/
-    "rootDir": "src",               // code source a compiler est dans src afin qu'il soit traduit en JS et mis dans le dossier 'dist'
-    "skipLibCheck": true            //ne vérifie pas les fichiers de types (.d.ts)-compilation : plus rapide
-                                        //et moins d’erreurs “bruit” venant de dépendances externes que je ne contrôles pas.
-  },
-  "ts-node": {
-    "esm": true
-  },
-  "include": ["src", "src/db.ts"],
-  "exclude": ["dist"] 
+	"compilerOptions": {
+		"lib": [
+			"es2023"
+		],
+		"module": "node16",
+		"target": "es2022",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"moduleResolution": "node16",
+		"outDir": "dist",
+	}
 }

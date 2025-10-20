@@ -25,6 +25,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - ADRESS=192.0.7
     command: npm run dev
     networks:
       - transcedence-network

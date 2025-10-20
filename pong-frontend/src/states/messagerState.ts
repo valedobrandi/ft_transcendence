@@ -70,6 +70,7 @@ export interface MessageType  {
 	chat:string;
 	sender: string;
 }
+
 export const messagerState: MessagerStateType = new Proxy({
     messages: new Map<string, MessageType[]>([['INTRA', []]]),
     connected: [],
