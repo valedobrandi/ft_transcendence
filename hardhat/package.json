@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "npx hardhat run scripts/Score.ts --network localhost"
+    "deploy": "npx hardhat run scripts/Score.ts --network localhost",
+    "console": "npx hardhat console --network localhost"
   },
   "keywords": [],
   "author": "",
