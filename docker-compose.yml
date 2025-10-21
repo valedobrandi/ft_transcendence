@@ -41,7 +41,7 @@ services:
     volumes:
       - ./hardhat:/app
       - /app/node_modules
-    command: ./hardhat-entrypoint.sh
+    command: npx hardhat node
     networks:
       - transcedence-network
 
