@@ -7,3 +7,7 @@ export interface BallType {
     velocityY: number;
     color: string;
 }
+
+export let name = "Hello";
+
+export const object = {name: "hello"};

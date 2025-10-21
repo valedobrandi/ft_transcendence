@@ -25,7 +25,23 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - ADRESS=192.0.7
+      - RPC_URL=http://blockchain:8545
     command: npm run dev
+    networks:
+      - transcedence-network
+
+  blockchain:
+    build:
+      context: ./hardhat
+      dockerfile: Dockerfile
+    container_name: hardhat-node
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./hardhat:/app
+      - /app/node_modules
+    command: npx hardhat node
     networks:
       - transcedence-network
 
