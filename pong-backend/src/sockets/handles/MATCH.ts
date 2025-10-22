@@ -10,5 +10,5 @@ export function MATCH(data: MatchType, connection: WebSocket) {
 
 	console.log(`Player matching: ${data.id}`);
 
-	joinMatchRoom(player);
+	joinMatchRoom(player.id);
 }

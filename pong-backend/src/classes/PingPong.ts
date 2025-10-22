@@ -1,27 +1,31 @@
+import { connect } from "http2";
 import { gameEvents } from "../events/gameEvents.js";
 import { gameRoom } from "../state/gameRoom.js";
 import { userGameStateType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
+import { connectedRoom } from "../state/connectedRoom.js";
 
 class PingPong {
     machId: string;
     tournamentId: string | undefined;
-    players: Map<string, PlayerType>;
+    playersIds: Set<string>;
     inputs: Map<string, { up: boolean; down: boolean }>;
     readyPlayer: Set<string> = new Set();
     interval: NodeJS.Timeout | null;
     initialBallSpeed: number = 0.003;
     gameState: userGameStateType;
-    winner: PlayerType | undefined = undefined;
-    loser: PlayerType | undefined = undefined;
+    winner: string | undefined = undefined;
+    loser: string | undefined = undefined;
+    side: {RIGHT: string, LEFT: string};
     matchState: 'PAUSE' | 'PLAYING' | 'ENDED' = 'PAUSE';
 
     constructor(id: string) {
         this.machId = id;
         this.tournamentId = undefined;
-        this.players = new Map<string, PlayerType>();
+        this.playersIds = new Set<string>();
         this.inputs = new Map<string, { up: boolean; down: boolean }>();
         this.interval = null;
+        this.side = {RIGHT: "", LEFT: ""};
         this.gameState = {
             userX: { x: 0.01, y: 0.5, score: 0 },
             userY: { x: 0.99, y: 0.5, score: 0 },
@@ -36,11 +40,15 @@ class PingPong {
         };
     }
 
+    getPlayer(id: string): PlayerType | undefined {
+        return connectedRoom.get(id) || undefined;
+    }
+
     resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
         this.gameState.ball.x = 0.5;
         this.gameState.ball.y = 0.5;
         this.gameState.ball.speed = this.initialBallSpeed;
-        const direction = side === 'LEFT' ? 1 : -1;
+        const direction = side === 'LEFT' ? -1 : 1;
         this.gameState.ball.velocityX = this.initialBallSpeed * direction;
         this.gameState.ball.velocityY = 0;
     }
@@ -60,16 +68,12 @@ class PingPong {
         ball.y += ball.velocityY;
 
         for (const [id, input] of this.inputs.entries()) {
-            const player = this.players.get(id);
+            const player = this.getPlayer(id);
             if (!player) continue;
-
-
-            const side = player.matchSide;
-
-            if (side === 'LEFT') {
+            if (id === this.side.LEFT) {
                 if (input.up && this.gameState.userX.y > 0) this.gameState.userX.y -= paddleSpeed;
                 if (input.down && this.gameState.userX.y < 1 - paddleHeight) this.gameState.userX.y += paddleSpeed;
-            } else if (side === 'RIGHT') {
+            } else if (id === this.side.RIGHT) {
                 if (input.up && this.gameState.userY.y > 0) this.gameState.userY.y -= paddleSpeed;
                 if (input.down && this.gameState.userY.y < 1 - paddleHeight) this.gameState.userY.y += paddleSpeed;
             }
@@ -123,8 +127,14 @@ class PingPong {
         this.matchState = 'ENDED';
 
         const getMatchWinner = this.gameState.userX.score === 5 ? 'LEFT' : 'RIGHT';
-        this.winner = Array.from(this.players.values()).find(player => player.matchSide === getMatchWinner);
-        this.loser = Array.from(this.players.values()).find(player => player.matchSide !== getMatchWinner);
+
+        if (getMatchWinner === 'LEFT') {
+            this.winner = this.side.LEFT;
+            this.loser = this.side.RIGHT;
+        } else {
+            this.winner = this.side.RIGHT;
+            this.loser = this.side.LEFT;
+        }
 
         if (this.interval) {
             clearInterval(this.interval);
@@ -135,20 +145,28 @@ class PingPong {
 
         if (this.tournamentId) {
             if (this.winner) {
-                this.winner.status = 'TOURNAMENT_ROOM';
-                gameEvents.emit('matchEnded', {
-                    matchId: this.machId,
-                    winner: this.winner,
-                    loser: this.loser,
-                    tournamentId: this.winner ? this.winner.tournamentId : undefined
-                })
+                const playerWinner = this.getPlayer(this.winner);
+                if (playerWinner) {
+                    playerWinner.status = 'TOURNAMENT_ROOM';
+                    gameEvents.emit('matchEnded', {
+                        matchId: this.machId,
+                        winner: this.winner,
+                        loser: this.loser,
+                        tournamentId: this.winner ? playerWinner.tournamentId : undefined
+                    })
+                }
             }
             if (this.loser) {
-                this.loser.status = 'CONNECT_ROOM';
-                this.loser.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                const playerLoser = this.getPlayer(this.loser);
+                if (playerLoser) {
+                    playerLoser.status = 'CONNECT_ROOM';
+                    playerLoser.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                }
             }
         } else {
-            this.players.forEach((player) => {
+            this.playersIds.forEach((id) => {
+                const player = this.getPlayer(id);
+                if (!player) return;
                 player.status = 'CONNECT_ROOM';
                 player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
             });
@@ -163,31 +181,18 @@ class PingPong {
     }
 
     updatePlayerInput(playerId: string, input: { up: boolean; down: boolean }) {
-        if (this.players.has(playerId)) {
+        if (this.playersIds.has(playerId)) {
             this.inputs.set(playerId, input);
         }
     }
 
-    add(player: PlayerType) {
-        this.players.set(player.id, player);
-        this.inputs.set(player.id, { up: false, down: false });
+    add(id: string) {
+        this.playersIds.add(id);
+        this.inputs.set(id, { up: false, down: false });
     }
 
     setPlayerReady(playerId: string) {
-        this.readyPlayer.add(playerId);
-        this.send();
-        if (this.readyPlayer.size === 2) {
-            this.messages("countdown");
-        }
-    }
-
-
-    removePlayer(playerId: string) {
-        this.players.delete(playerId);
-        this.inputs.delete(playerId);
-        if (this.players.size === 0 && this.interval) {
-            clearInterval(this.interval);
-        }
+        
     }
 
     send() {
@@ -203,7 +208,9 @@ class PingPong {
         };
 
         const message = JSON.stringify(payload);
-        for (const player of this.players.values()) {
+        for (const id of this.playersIds.values()) {
+            const player = this.getPlayer(id);
+            if (!player) continue;
             if (player.socket.readyState === 1) {
                 player.socket.send(message);
             }
@@ -215,37 +222,52 @@ class PingPong {
         this.tournamentId = tournamentId;
     }
 
-    createMatch(playerX: PlayerType, playerY: PlayerType) {
+    createMatch(playerXId: string, playerYId: string) {
 
-        this.players.set(playerX.id, playerX);
-        this.players.set(playerY.id, playerY);
+        this.playersIds.add(playerXId);
+        this.playersIds.add(playerYId);
 
         gameRoom.set(this.machId, this);
 
+        this.playersIds.forEach((id: string) => {
+            const isConnect = this.getPlayer(id);
+            if (isConnect) {
+                isConnect.status = 'GAME_ROOM';
+            }
+        });
+
+        this.side.LEFT = playerXId;
+        this.side.RIGHT = playerYId;
+
         this.messages("match created");
 
-        console.log(`Match created: ${this.machId} between ${playerX.id} and ${playerY.id}`);
+        this.send();
+
+        this.messages("countdown");
+
+        console.log(`Match created: ${this.machId} between ${playerXId} and ${playerYId}`);
     }
 
     messages(type: string) {
-        const getArrayPlayers = Array.from(this.players.values());
-        switch (type) {
-            case "match created":
-                getArrayPlayers.forEach((player, index) => {
+        const getArrayPlayers = Array.from(this.playersIds.values());
+        getArrayPlayers.forEach((id, index) => {
+            const player = this.getPlayer(id);
+            if (!player) return;
+            switch (type) {
+                case "match created":
                     player.status = 'GAME_ROOM';
-                    player.matchSide = index === 0 ? 'LEFT' : 'RIGHT';
+                    const side = id === this.side.LEFT ? 'LEFT' : 'RIGHT';
                     player.matchId = this.machId;
 
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_ROOM',
-                        side: player.matchSide,
+                        side: side,
                         id: player.id
                     }));
-                });
-                break;
-            case "game over":
-                getArrayPlayers.forEach((player) => {
+
+                    break;
+                case "game over":
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_OVER',
@@ -255,26 +277,25 @@ class PingPong {
                             userY: this.gameState.userY.score,
                         }
                     }));
-                });
-                break;
-            case "countdown":
-                const conter = { time: 4 };
-                const interval = setInterval(() => {
-                    getArrayPlayers.forEach((player) => {
+                    break;
+                case "countdown":
+                    const conter = { time: 4 };
+                    const interval = setInterval(() => {
                         player.socket.send(JSON.stringify({
                             status: 200,
                             message: 'COUNTDOWN',
                             seconds: conter.time
                         }));
-                    });
-                    if (conter.time == 0) {
-                        this.interval = setInterval(() => this.update(), 1000 / 60);
-                        clearInterval(interval)
-                    }
-                    conter.time--;
-                }, 1000)
-                break;
-        }
+                        if (conter.time == 0) {
+                            this.interval = setInterval(() => this.update(), 1000 / 60);
+                            clearInterval(interval)
+                        }
+                        conter.time--;
+                    }, 1000)
+                    break;
+            }
+
+        });
     }
 }
 

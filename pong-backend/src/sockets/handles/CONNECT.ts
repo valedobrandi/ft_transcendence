@@ -13,7 +13,6 @@ export function CONNECT(data: ConnectType, connection:WebSocket) {
         status: 'CONNECT_ROOM',
         matchId: "",
         tournamentId: "",
-        matchSide: "",
         chat: new ChatManager(data.id),
     };
 

@@ -6,7 +6,7 @@ test.describe.parallel('Simulate 8 players joining tournament', () => {
       const context = await browser.newContext();
       const page = await context.newPage();
 
-      await page.goto('http://localhost:5173/intra');
+      await page.goto(`http://pong-frontend:5173/intra`);
       await page.click('id=tournament-btn');
       await page.waitForSelector('text=PLAY', { timeout: 5000 });
       await page.click('id=match-btn');

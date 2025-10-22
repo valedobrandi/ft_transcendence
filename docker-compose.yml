@@ -21,7 +21,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./pong-backend:/app
+      - ./playwright:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -42,6 +42,22 @@ services:
       - ./hardhat:/app
       - /app/node_modules
     command: npx hardhat node
+    networks:
+      - transcedence-network
+
+  playwright:
+    build:
+      context: ./playwright
+      dockerfile: Dockerfile
+    depends_on:
+      - pong-frontend
+      - pong-backend
+    volumes:
+      - ./playwright:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - FRONTEND_URL=http://pong-frontend:5173
     networks:
       - transcedence-network
 
