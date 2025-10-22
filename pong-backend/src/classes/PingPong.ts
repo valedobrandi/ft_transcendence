@@ -250,15 +250,17 @@ class PingPong {
 
     messages(type: string) {
         const getArrayPlayers = Array.from(this.playersIds.values());
-        getArrayPlayers.forEach((id, index) => {
+        getArrayPlayers.forEach((id) => {
             const player = this.getPlayer(id);
             if (!player) return;
             switch (type) {
                 case "match created":
+                    
                     player.status = 'GAME_ROOM';
                     const side = id === this.side.LEFT ? 'LEFT' : 'RIGHT';
                     player.matchId = this.machId;
-
+                    
+                    console.log(`Sending GAME_ROOM to ${player.id} as ${side}`);
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_ROOM',

@@ -21,10 +21,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./playwright:/app
+      - ./pong-backend:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
       - ADRESS=192.0.7
       - RPC_URL=http://blockchain:8545
     command: npm run dev

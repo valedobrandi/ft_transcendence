@@ -89,9 +89,9 @@ export const messagerState: MessagerStateType = new Proxy({
                     addMessage("INTRA", `you have joined the match queue.`);
                     break;
                 case "GAME_ROOM":
-                    addMessage("INTRA", `the match is ready...
-                            <a href="#" class="play-link text-blue-500 underline">Play</a>`);
-                    document.addEventListener('click', playLinkHandler);
+                    addMessage("INTRA", `The match will start in 15 seconds.`);
+                    window.location.href = '/match'
+                    //document.addEventListener('click', playLinkHandler);
                     break;
                 case "GAME_OVER":
                     addMessage("INTRA", `the match is over.`);
