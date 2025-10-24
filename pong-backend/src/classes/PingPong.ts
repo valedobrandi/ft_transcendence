@@ -4,305 +4,324 @@ import { userGameStateType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
 import { connectedRoom } from "../state/connectedRoom.js";
 
+const WIN_SCORE = 2
+
 class PingPong {
-	machId: string;
-	tournamentId: string | undefined;
-	playersIds: Set<string>;
-	inputs: Map<string, { up: boolean; down: boolean }>;
-	readyPlayer: Set<string> = new Set();
-	interval: NodeJS.Timeout | null;
-	initialBallSpeed: number = 0.002;
-	gameState: userGameStateType;
-	winner: string | undefined = undefined;
-	loser: string | undefined = undefined;
-	side: { RIGHT: string, LEFT: string };
-	matchState: 'COUNTDOWN' | 'PLAYING' | 'ENDED' = 'COUNTDOWN';
+    machId: string;
+    tournamentId: string | undefined;
+    playersIds: Set<string>;
+    inputs: Map<string, { up: boolean; down: boolean }>;
+    readyPlayer: Set<string> = new Set();
+    updateInterval: NodeJS.Timeout | null;
+    initialBallSpeed: number = 0.003;
+    gameState: userGameStateType;
+    winnerId: string | undefined = undefined;
+    loserId: string | undefined = undefined;
+    side: { RIGHT: string, LEFT: string };
+    matchState: 'COUNTDOWN' | 'PLAYING' | 'ENDED' = 'COUNTDOWN';
 
-	constructor(id: string) {
-		this.machId = id;
-		this.tournamentId = undefined;
-		this.playersIds = new Set<string>();
-		this.inputs = new Map<string, { up: boolean; down: boolean }>();
-		this.interval = null;
-		this.side = { RIGHT: "", LEFT: "" };
-		this.gameState = {
-			userX: { x: 0.01, y: 0.5, score: 0 },
-			userY: { x: 0.99, y: 0.5, score: 0 },
-			ball: {
-				x: 0.5,
-				y: 0.5,
-				radius: 0.02,
-				speed: this.initialBallSpeed,
-				velocityX: this.initialBallSpeed * 1,
-				velocityY: 0,
-			},
-		};
-	}
+    constructor(id: string) {
+        this.machId = id;
+        this.tournamentId = undefined;
+        this.playersIds = new Set<string>();
+        this.inputs = new Map<string, { up: boolean; down: boolean }>();
+        this.updateInterval = null;
+        this.side = { RIGHT: "", LEFT: "" };
+        this.gameState = {
+            userX: { x: 0.01, y: 0.5, score: 0 },
+            userY: { x: 0.99, y: 0.5, score: 0 },
+            ball: {
+                x: 0.5,
+                y: 0.5,
+                radius: 0.02,
+                speed: this.initialBallSpeed,
+                velocityX: this.initialBallSpeed * 1,
+                velocityY: 0,
+            },
+        };
+    }
 
-	getPlayer(id: string): PlayerType | undefined {
-		return connectedRoom.get(id) || undefined;
-	}
+    getPlayer(id: string): PlayerType | undefined {
+        return connectedRoom.get(id) || undefined;
+    }
 
-	resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
-		this.gameState.ball.x = 0.5;
-		this.gameState.ball.y = 0.5;
-		this.gameState.ball.speed = this.initialBallSpeed;
-		const direction = side === 'LEFT' ? -1 : 1;
-		this.gameState.ball.velocityX = this.initialBallSpeed * direction;
-		this.gameState.ball.velocityY = 0;
-	}
+    resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
+        this.gameState.ball.x = 0.5;
+        this.gameState.ball.y = 0.5;
+        this.gameState.ball.speed = this.initialBallSpeed;
+        const direction = side === 'LEFT' ? -1 : 1;
+        this.gameState.ball.velocityX = this.initialBallSpeed * direction;
+        this.gameState.ball.velocityY = 0;
+    }
 
-	updateGame() {
-		if (this.matchState === 'COUNTDOWN') {
-			this.matchState = 'PLAYING'
-			this.resetBall('LEFT');
-		}
-		const ball = this.gameState.ball;
+    updateGame() {
+        if (this.matchState === 'COUNTDOWN') {
+            this.matchState = 'PLAYING'
+            this.resetBall('LEFT');
+        }
+        const ball = this.gameState.ball;
 
-		const paddleHeight = 0.150;
-		const paddleSpeed = 0.010;
+        const paddleHeight = 0.150;
+        const paddleSpeed = 0.010;
 
-		ball.x += ball.velocityX;
-		ball.y += ball.velocityY;
+        ball.x += ball.velocityX;
+        ball.y += ball.velocityY;
 
-		for (const [id, input] of this.inputs.entries()) {
-			const player = this.getPlayer(id);
-			if (!player) continue;
-			if (id === this.side.LEFT) {
-				if (input.up && this.gameState.userX.y > 0 + (paddleHeight / 2)) this.gameState.userX.y -= paddleSpeed;
-				if (input.down && this.gameState.userX.y < 1 - (paddleHeight / 2)) this.gameState.userX.y += paddleSpeed;
-			} else if (id === this.side.RIGHT) {
-				if (input.up && this.gameState.userY.y > 0 + (paddleHeight / 2)) this.gameState.userY.y -= paddleSpeed;
-				if (input.down && this.gameState.userY.y < 1 - (paddleHeight / 2)) this.gameState.userY.y += paddleSpeed;
-			}
-		}
+        for (const [id, input] of this.inputs.entries()) {
+            const player = this.getPlayer(id);
+            if (!player) continue;
+            if (id === this.side.LEFT) {
+                if (input.up && this.gameState.userX.y > 0 + (paddleHeight / 2)) this.gameState.userX.y -= paddleSpeed;
+                if (input.down && this.gameState.userX.y < 1 - (paddleHeight / 2)) this.gameState.userX.y += paddleSpeed;
+            } else if (id === this.side.RIGHT) {
+                if (input.up && this.gameState.userY.y > 0 + (paddleHeight / 2)) this.gameState.userY.y -= paddleSpeed;
+                if (input.down && this.gameState.userY.y < 1 - (paddleHeight / 2)) this.gameState.userY.y += paddleSpeed;
+            }
+        }
 
-		// Wall collision
-		if (ball.y + ball.radius > 1 || ball.y - ball.radius < 0) {
-			ball.velocityY = -ball.velocityY;
-		}
+        // Wall collision
+        if (ball.y + ball.radius > 1 || ball.y - ball.radius < 0) {
+            ball.velocityY = -ball.velocityY;
+        }
 
-		// Paddle collision
-		const player = ball.x < 0.5 ? this.gameState.userX : this.gameState.userY;
-		const playerX = ball.x < 0.5 ? 0.01 : 0.99;
+        // Paddle collision
+        const player = ball.x < 0.5 ? this.gameState.userX : this.gameState.userY;
+        const playerX = ball.x < 0.5 ? 0.01 : 0.99;
 
-		const ballTop = ball.y - ball.radius;
-		const ballBottom = ball.y + ball.radius;
-		const paddleTop = player.y - (paddleHeight/2);
-		const paddleBottom = player.y + (paddleHeight/2);
+        const ballTop = ball.y - ball.radius;
+        const ballBottom = ball.y + ball.radius;
+        const paddleTop = player.y - (paddleHeight / 2);
+        const paddleBottom = player.y + (paddleHeight / 2);
 
-		if (
-			Math.abs(ball.x - playerX) < ball.radius &&
-			ballBottom >= paddleTop &&
-			ballTop <= paddleBottom
-		) {
-			const paddleCenter = player.y + paddleHeight / 2;
+        if (
+            Math.abs(ball.x - playerX) < ball.radius &&
+            ballBottom >= paddleTop &&
+            ballTop <= paddleBottom
+        ) {
+            const paddleCenter = player.y + paddleHeight / 2;
 
-			const collidePoint = ball.y - paddleCenter;
-			const normalized = collidePoint / (paddleHeight / 2);
+            const collidePoint = ball.y - paddleCenter;
+            const normalized = collidePoint / (paddleHeight / 2);
 
-			const clamped = Math.max(-1, Math.min(1, normalized));
-			const angle = Math.pow(clamped, 3) * Math.PI / 4;
-			const direction = ball.x < 0.5 ? 1 : -1;
+            const clamped = Math.max(-1, Math.min(1, normalized));
+            const angle = Math.pow(clamped, 3) * Math.PI / 4;
+            const direction = ball.x < 0.5 ? 1 : -1;
 
-			ball.velocityX = direction * ball.speed * Math.cos(angle);
-			ball.velocityY = ball.speed * Math.sin(angle);
+            ball.velocityX = direction * ball.speed * Math.cos(angle);
+            ball.velocityY = ball.speed * Math.sin(angle);
 
-			if (ball.speed < 0.005) {
-				ball.speed += 0.0005;
-			}
-		}
+            if (ball.speed < 0.008) {
+                ball.speed += 0.001;
+            }
+        }
 
-		// Score
-		if (ball.x - ball.radius < 0) {
-			this.resetBall('RIGHT');
-			this.gameState.userY.score++;
-		} else if (ball.x + ball.radius > 1) {
-			this.resetBall('LEFT');
-			this.gameState.userX.score++;
-		}
+        // Score
+        if (ball.x - ball.radius < 0) {
+            this.resetBall('RIGHT');
+            this.gameState.userY.score++;
+        } else if (ball.x + ball.radius > 1) {
+            this.resetBall('LEFT');
+            this.gameState.userX.score++;
+        }
+    }
 
-		// End match
-		if (this.gameState.userX.score === 2 || this.gameState.userY.score === 2) {
-			this.endMatch();
-		}
-	}
+    endMatch() {
+        if (this.gameState.userX.score === WIN_SCORE || this.gameState.userY.score === WIN_SCORE) {
+            if (this.matchState === 'ENDED') return;
+            this.matchState = 'ENDED';
+
+            const getWinner = this.gameState.userX.score === WIN_SCORE;;
+
+            this.winnerId = getWinner ? this.side.LEFT : this.side.RIGHT;
+            this.loserId = getWinner ? this.side.RIGHT : this.side.LEFT;
+
+            console.log(`Winner: ${this.winnerId}`);
+
+            this.messages("GAME_OVER");
+
+            if (this.tournamentId) {
+                if (this.winnerId) {
+                    const playerWinner = this.getPlayer(this.winnerId);
+                    if (playerWinner) {
+                        playerWinner.status = 'TOURNAMENT_ROOM';
+                        gameEvents.emit('tournament_match_end', {
+                            matchId: this.machId,
+                            winnerId: this.winnerId,
+                            loserId: this.loserId,
+                            tournamentId: this.tournamentId
+                        })
+                    }
+                }
+                if (this.loserId) {
+                    const playerLoser = this.getPlayer(this.loserId);
+                    if (playerLoser) {
+                        playerLoser.status = 'CONNECT_ROOM';
+                        playerLoser.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                    }
+                }
+            } else {
+                this.playersIds.forEach((id) => {
+                    const player = this.getPlayer(id);
+                    if (!player) return;
+                    player.status = 'CONNECT_ROOM';
+                    player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                });
+            }
+
+            gameRoom.delete(this.machId);
+        }
+    }
+
+    updatePlayerInput(playerId: string, input: { up: boolean; down: boolean }) {
+        if (this.playersIds.has(playerId)) {
+            this.inputs.set(playerId, input);
+        }
+    }
+
+    add(id: string) {
+        this.playersIds.add(id);
+        this.inputs.set(id, { up: false, down: false });
+    }
+
+    send() {
+        const payload = {
+            message: 'STATE',
+            payload: {
+                ball: this.gameState.ball,
+                players: {
+                    userX: this.gameState.userX,
+                    userY: this.gameState.userY,
+                },
+            },
+        };
+
+        const message = JSON.stringify(payload);
+        for (const id of this.playersIds.values()) {
+            const player = this.getPlayer(id);
+            if (!player) continue;
+            if (player.socket.readyState === 1) {
+                player.socket.send(message);
+            }
+        }
+
+    }
+
+    setTournamentId(tournamentId: string) {
+        this.tournamentId = tournamentId;
+    }
+
+    createMatch(playerXId: string, playerYId: string) {
+
+        this.playersIds.add(playerXId);
+        this.playersIds.add(playerYId);
+
+        gameRoom.set(this.machId, this);
+
+        this.playersIds.forEach((id: string) => {
+            const isConnect = this.getPlayer(id);
+            if (isConnect) {
+                isConnect.status = 'GAME_ROOM';
+            }
+        });
+
+        this.side.LEFT = playerXId;
+        this.side.RIGHT = playerYId;
+
+        this.messages("MATCH_CREATED");
+        this.send();
+        this.messages("COUNTDOWN");
+
+        console.log(`match_created: ${this.machId} between ${playerXId} and ${playerYId}`);
+    }
+
+    update() {
+        this.updateGame();
+        this.endMatch();
+        this.send();
+    }
+
+    startGame() {
+        const FRAME_DURATION = 1000 / 60;
+        let lastTime = process.hrtime.bigint();
+    
+        const run = () => {
+            if (this.matchState === "ENDED") return;
+    
+            const now = process.hrtime.bigint();
+            const delta = Number(now - lastTime) / 1e6; 
+    
+            if (delta >= FRAME_DURATION) {
+                lastTime = now;
+                this.update(); 
+            }
+    
+            setImmediate(run);
+        };
+        run();
+    }
 
 
+    messages(type: string) {
+        const getArrayPlayers = Array.from(this.playersIds.values());
+        switch (type) {
+            case "MATCH_CREATED":
+                getArrayPlayers.forEach((id) => {
+                    const player = this.getPlayer(id);
+                    if (!player) return;
+                    player.status = 'GAME_ROOM';
+                    const side = id === this.side.LEFT ? 'LEFT' : 'RIGHT';
+                    player.matchId = this.machId;
 
-	endMatch() {
-
-		if (this.matchState === 'ENDED') return;
-		this.matchState = 'ENDED';
-
-		const getMatchWinner = this.gameState.userX.score === 5 ? 'LEFT' : 'RIGHT';
-
-		if (getMatchWinner === 'LEFT') {
-			this.winner = this.side.LEFT;
-			this.loser = this.side.RIGHT;
-		} else {
-			this.winner = this.side.RIGHT;
-			this.loser = this.side.LEFT;
-		}
-
-		if (this.interval) {
-			clearInterval(this.interval);
-			this.interval = null;
-		}
-
-		this.messages("GAME_OVER");
-
-		if (this.tournamentId) {
-			if (this.winner) {
-				const playerWinner = this.getPlayer(this.winner);
-				if (playerWinner) {
-					playerWinner.status = 'TOURNAMENT_ROOM';
-					gameEvents.emit('matchEnded', {
-						matchId: this.machId,
-						winner: this.winner,
-						loser: this.loser,
-						tournamentId: this.winner ? playerWinner.tournamentId : undefined
-					})
-				}
-			}
-			if (this.loser) {
-				const playerLoser = this.getPlayer(this.loser);
-				if (playerLoser) {
-					playerLoser.status = 'CONNECT_ROOM';
-					playerLoser.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
-				}
-			}
-		} else {
-			this.playersIds.forEach((id) => {
-				const player = this.getPlayer(id);
-				if (!player) return;
-				player.status = 'CONNECT_ROOM';
-				player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
-			});
-		}
-
-		gameRoom.delete(this.machId);
-	}
-
-	update() {
-		if (this.matchState === "ENDED") return;
-		this.updateGame();
-		this.send();
-	}
-
-	updatePlayerInput(playerId: string, input: { up: boolean; down: boolean }) {
-		if (this.playersIds.has(playerId)) {
-			this.inputs.set(playerId, input);
-		}
-	}
-
-	add(id: string) {
-		this.playersIds.add(id);
-		this.inputs.set(id, { up: false, down: false });
-	}
-
-	send() {
-		const payload = {
-			message: 'STATE',
-			payload: {
-				ball: this.gameState.ball,
-				players: {
-					userX: this.gameState.userX,
-					userY: this.gameState.userY,
-				},
-			},
-		};
-
-		const message = JSON.stringify(payload);
-		for (const id of this.playersIds.values()) {
-			const player = this.getPlayer(id);
-			if (!player) continue;
-			if (player.socket.readyState === 1) {
-				player.socket.send(message);
-			}
-		}
-
-	}
-
-	setTournamentId(tournamentId: string) {
-		this.tournamentId = tournamentId;
-	}
-
-	createMatch(playerXId: string, playerYId: string) {
-
-		this.playersIds.add(playerXId);
-		this.playersIds.add(playerYId);
-
-		gameRoom.set(this.machId, this);
-
-		this.playersIds.forEach((id: string) => {
-			const isConnect = this.getPlayer(id);
-			if (isConnect) {
-				isConnect.status = 'GAME_ROOM';
-			}
-		});
-
-		this.side.LEFT = playerXId;
-		this.side.RIGHT = playerYId;
-
-		this.messages("match_created");
-		this.messages("countdown");
-
-		console.log(`match_created: ${this.machId} between ${playerXId} and ${playerYId}`);
-	}
-
-	messages(type: string) {
-		const getArrayPlayers = Array.from(this.playersIds.values());
-		getArrayPlayers.forEach((id) => {
-			const player = this.getPlayer(id);
-			if (!player) return;
-			switch (type) {
-				case "match_created":
-
-					player.status = 'GAME_ROOM';
-					const side = id === this.side.LEFT ? 'LEFT' : 'RIGHT';
-					player.matchId = this.machId;
-
-					console.log(`Sending GAME_ROOM to ${player.id} as ${side}`);
-					player.socket.send(JSON.stringify({
-						status: 200,
-						message: 'GAME_ROOM',
-						side: side,
-						id: player.id
-					}));
-
-					break;
-				case "GAME_OVER":
-					player.socket.send(JSON.stringify({
-						status: 200,
-						message: 'GAME_OVER',
-						payload: { winner: this.winner },
-						finalScore: {
-							userX: this.gameState.userX.score,
-							userY: this.gameState.userY.score,
-						}
-					}));
-					break;
-				case "countdown":
-					const conter = { time: 10 };
-					const interval = setInterval(() => {
+                    console.log(`Sending GAME_ROOM to ${player.id} as ${side}`);
+                    player.socket.send(JSON.stringify({
+                        status: 200,
+                        message: 'GAME_ROOM',
+                        payload: { message: `${getArrayPlayers[0]} vs ${getArrayPlayers[1]}` },
+                        side: side,
+                        id: player.id
+                    }));
+                });
+                break;
+            case "GAME_OVER":
+                getArrayPlayers.forEach((id) => {
+                    const player = this.getPlayer(id);
+                    if (!player) return;
+                    player.socket.send(JSON.stringify({
+                        status: 200,
+                        message: 'GAME_OVER',
+                        payload: { winner: this.winnerId, message: this.winnerId === player.id ? 'YOU WIN!' : 'YOU LOSE!', },
+                        finalScore: {
+                            userX: this.gameState.userX.score,
+                            userY: this.gameState.userY.score,
+                        }
+                    }));
+                });
+                break;
+            case "COUNTDOWN":
+                const conter = { time: 10 };
+                const countdownInterval = setInterval(() => {
+                    this.playersIds.forEach((id) => {
+                        const player = this.getPlayer(id);
+                        if (!player) return;
                         this.send();
-						player.socket.send(JSON.stringify({
-							status: 200,
-							message: 'COUNTDOWN',
-							payload: { seconds: conter.time }
-						}));
-						if (conter.time == 0) {
-							this.interval = setInterval(() => this.update(), 1000 / 60);
-							clearInterval(interval)
-						}
-						conter.time--;
-					}, 1000)
-					break;
-			}
+                        player.socket.send(JSON.stringify({
+                            status: 200,
+                            message: 'COUNTDOWN',
+                            payload: { seconds: conter.time }
+                        }));
+                    });
+            
+                    if (conter.time <= 0) {
+                        clearInterval(countdownInterval);
+                        this.startGame();
+                    }
+            
+                    conter.time--;
+                }, 1000);
+                break;
+        }
+    }
 
-		});
-	}
 }
 
 export { PingPong };

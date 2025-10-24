@@ -1,6 +1,4 @@
-import ChatStore from "./ChatStore.js";
 import { connectedRoom } from "../state/connectedRoom.js";
-import { conversationStore } from "../state/conversationStore.js";
 
 class ChatManager {
 

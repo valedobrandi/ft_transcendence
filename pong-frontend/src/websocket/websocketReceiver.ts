@@ -1,6 +1,6 @@
 import { socket } from "../app";
 import { playerSideState } from "../context";
-import { messagerState, renderMessages, type MessageType } from "../states/messagerState";
+import { addMessage, messagerState, renderMessages, type MessageType } from "../states/messagerState";
 import { serverState } from "../states/serverState";
 
 export function websocketReceiver() {
@@ -18,8 +18,10 @@ export function websocketReceiver() {
                 messagerState.state = data.message;
                 break;
             case 'GAME_ROOM': {
-				playerSideState.side = data.side;
+				addMessage('INTRA', data.payload.message);
+                playerSideState.side = data.side;
                 messagerState.state = data.message;
+                
 			}
                 break;
             case 'TOURNAMENT_ROOM':
@@ -27,6 +29,7 @@ export function websocketReceiver() {
                 messagerState.state = data.message;
                 break;
             case 'GAME_OVER':
+                addMessage('INTRA', data.payload.message);
                 messagerState.state = data.message;
                 break;
             case 'CONNECTED_USERS':
@@ -34,7 +37,8 @@ export function websocketReceiver() {
                 break;
             case 'CHAT_MESSAGE':
                 const { receiver, chat, sender } = data;
-                messagerState.state = data.message;
+                addMessage(receiver, chat, sender);
+                /* messagerState.state = data.message;
                 if (messagerState.messages.has(receiver) === false) {
                     messagerState.messages.set(receiver, []);
                 }
@@ -44,7 +48,7 @@ export function websocketReceiver() {
 
 				if (receiver === messagerState.selectChat) {
 					renderMessages(receiver);
-				}
+				} */
                 break;
         }
     });

@@ -1,13 +1,15 @@
 import { id } from "../app";
-import { navigateTo, renderRoute, setTime } from "../utils";
+import { navigateTo, setTime } from "../utils";
 import { intraView, matchView } from "../views";
-import { websocketStartMatch } from "../websocket/websocketStartMatch";
 
 export function addMessage(chatId: string, chat: string, sender = id) {
-    const messages = messagerState.messages.get(chatId) || [];
-    messages.push({ chat, sender });
-    messagerState.messages.set(chatId, messages);
-    renderMessages(chatId);
+    if (!messagerState.messages.has(chatId)) {
+        messagerState.messages.set(chatId, []);
+    }
+    messagerState.messages.get(chatId)!.push({ chat, sender });
+    if (chatId === messagerState.selectChat) {
+        renderMessages(chatId);
+    }
 }
 
 export function renderMessages(chatId: string) {
@@ -21,16 +23,14 @@ export function renderMessages(chatId: string) {
     messages.forEach(msg => {
         const span = document.createElement('span');
         span.className = "font-bold lowercase";
-        span.textContent = msg.sender === id ? `#You: ` : `#${chatId}: `;
+        span.textContent = msg.sender === id ? `` : `#${chatId}: `;
         const p = document.createElement('p');
         p.className = "m-2 text-xs";
         p.innerHTML = `${msg.chat}`;
         messageBox.appendChild(p);
         p.prepend(span);
     })
-
 }
-
 
 const messagerListeners: (() => void)[] = [];
 
@@ -68,7 +68,7 @@ export const messagerState: MessagerStateType = new Proxy({
     messages: new Map<string, MessageType[]>([['INTRA', []]]),
     connected: [],
     selectChat: "INTRA",
-    state: ""
+    state: "",
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
@@ -82,20 +82,15 @@ export const messagerState: MessagerStateType = new Proxy({
                     addMessage("INTRA", `you have joined the match queue.`);
                     break;
                 case "GAME_ROOM":
-                    addMessage("INTRA", `the match will start.`);
-                    //navigateTo("/match", matchView);
-                    setTimeout(() => {
+                    setTime(5000, () => {
                         navigateTo("/match", matchView);
-                    }, 5000);
+                    });
                     break;
                 case "GAME_OVER":
-                    addMessage("INTRA", `the match is over.`);
                     setTime(5000, () => {
                         navigateTo("/intra", intraView);
                     });
                     break;
-                case "CHAT_MESSAGE":
-
             }
         }
 
@@ -111,6 +106,7 @@ export const messagerState: MessagerStateType = new Proxy({
             if (isIntra && chatMenu) chatMenu.className += " hidden";
 
         }
+
         return true;
     }
 });
