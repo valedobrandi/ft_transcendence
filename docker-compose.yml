@@ -22,7 +22,6 @@ services:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
-      - /app/node_modules
     environment:
       - ADRESS=192.0.7
       - RPC_URL=http://blockchain:8545
@@ -48,9 +47,6 @@ services:
     build:
       context: ./playwright
       dockerfile: Dockerfile
-    depends_on:
-      - pong-frontend
-      - pong-backend
     volumes:
       - ./playwright:/app
       - /app/node_modules

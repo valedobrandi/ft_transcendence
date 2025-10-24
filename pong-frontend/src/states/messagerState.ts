@@ -1,5 +1,5 @@
 import { id } from "../app";
-import { navigateTo } from "../utils";
+import { navigateTo, renderRoute } from "../utils";
 import { matchView } from "../views";
 import { websocketStartMatch } from "../websocket/websocketStartMatch";
 
@@ -31,14 +31,6 @@ export function renderMessages(chatId: string) {
 
 }
 
-export function playLinkHandler(event: Event) {
-    const target = event.target as HTMLElement;
-    if (target.classList.contains('play-link')) {
-        event.preventDefault();
-        navigateTo("/match", matchView);
-        websocketStartMatch();
-    }
-}
 
 const messagerListeners: (() => void)[] = [];
 
@@ -89,8 +81,8 @@ export const messagerState: MessagerStateType = new Proxy({
                     addMessage("INTRA", `you have joined the match queue.`);
                     break;
                 case "GAME_ROOM":
-                    addMessage("INTRA", `The match will start in 15 seconds.`);
-                    window.location.href = '/match'
+                    addMessage("INTRA", `the match will start.`);
+                    navigateTo("/match", matchView);
                     //document.addEventListener('click', playLinkHandler);
                     break;
                 case "GAME_OVER":

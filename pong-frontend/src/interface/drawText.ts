@@ -1,6 +1,7 @@
 export interface DrawTextType {
-    text: number;
+    text: number | string;
     x: number;
     y: number;
     color: string;
+	font:  string;
 }

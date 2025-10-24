@@ -9,7 +9,6 @@ export function PLAY(data: PlayType, connection: WebSocket) {
 
 	const room = gameRoom.get(player.matchId);
 	if (room === undefined) return;
-	room.setPlayerReady(player.id);
 
 	console.log(`Player ${player.id} is ready in match ${player.matchId}`);
 	connection.send(JSON.stringify({ status: 200, message: 'GAME_START' }));

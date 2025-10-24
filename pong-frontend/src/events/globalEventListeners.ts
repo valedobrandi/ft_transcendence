@@ -1,9 +1,7 @@
-import { messagerState, playLinkHandler } from "../states/messagerState";
+import { messagerState } from "../states/messagerState";
 import { renderRoute } from "../utils";
-import { websocketChatSend } from "../websocket/websocketChatSend";
 
 export function globalEventListeners() {
-    document.addEventListener('click', playLinkHandler);
 
     window.addEventListener("popstate", () => {
         renderRoute(window.location.pathname);

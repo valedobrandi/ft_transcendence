@@ -37,8 +37,8 @@ export function getNextPlayers(): [string, string] | undefined {
             continue;
         }
         if (playerX === undefined) playerX = id;
-        if (playerY === undefined) playerY = id;
-        
+        else if (playerY === undefined) playerY = id;
+
     }
 
     if (playerX && playerY) {

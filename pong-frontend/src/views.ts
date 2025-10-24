@@ -7,49 +7,61 @@ import { FormSingIn } from "./components/FormSingIn";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { websocketConnect } from "./websocket/websocketConnect";
 import { changeChatHeader, messagerState } from "./states/messagerState";
+import { renderRoute } from "./utils";
 
 export function intraView(root: HTMLElement) {
-    root.innerHTML = "";
-    const intraUI = Intra();
-    const menuUI = Menu();
-    root.appendChild(menuUI);
-    root.appendChild(intraUI);
-    websocketConnect();
-    changeChatHeader(messagerState.selectChat);
-    // In not one is clicked, default to intra
-    
+	root.innerHTML = "";
+	const intraUI = Intra();
+	const menuUI = Menu();
+	root.appendChild(menuUI);
+	root.appendChild(intraUI);
+	websocketConnect();
+	changeChatHeader(messagerState.selectChat);
+	// In not one is clicked, default to intra
+
 }
 
 export function matchView(root: HTMLElement) {
-    root.innerHTML = "";
+	root.innerHTML = "";
 
-    const container = document.createElement("div");
-    container.className = "flex justify-center items-center h-full w-full overflow-hidden"
-    const pongUI = RenderGame();
-    container.appendChild(pongUI);
-    root.appendChild(container);
+	const container = document.createElement("div");
+	container.className = "flex justify-center items-center h-full w-full overflow-hidden"
+	const pongUI = RenderGame();
+	const quitBtn = document.createElement("button");
+	quitBtn.textContent = " ⇦ Back";
+	quitBtn.id = "quit-btn";
+	quitBtn.className = `absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-8
+		text-white font-bold text-6xl lg"text-8xl
+		rounded z-10`;
+	quitBtn.style.display = "none";
+	quitBtn.onclick = () => {
+		renderRoute("/intra")
+	}
+	container.appendChild(quitBtn);
+	container.appendChild(pongUI);
+	root.appendChild(container);
 }
 
 export function loginView(root: HTMLElement) {
-    root.innerHTML = "";
-    const loginUI = Login();
-    root.appendChild(loginUI);
+	root.innerHTML = "";
+	const loginUI = Login();
+	root.appendChild(loginUI);
 }
 
 export function singInView(root: HTMLElement) {
-    root.innerHTML = "";
-    const SingUI = FormSingIn();
-    root.appendChild(SingUI);
+	root.innerHTML = "";
+	const SingUI = FormSingIn();
+	root.appendChild(SingUI);
 }
 
 export function registerView(root: HTMLElement) {
-    root.innerHTML = "";
-    const registerUI = Register();
-    root.appendChild(registerUI);
+	root.innerHTML = "";
+	const registerUI = Register();
+	root.appendChild(registerUI);
 }
 
 export function twoFactorAuthenticationView(root: HTMLElement) {
-    root.innerHTML = "";
-    const authenticationUI = FormTwoFactorAuthentication();
-    root.appendChild(authenticationUI);
+	root.innerHTML = "";
+	const authenticationUI = FormTwoFactorAuthentication();
+	root.appendChild(authenticationUI);
 }
