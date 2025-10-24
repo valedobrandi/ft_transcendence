@@ -246,7 +246,6 @@ class PingPong {
 		this.side.RIGHT = playerYId;
 
 		this.messages("match_created");
-		this.send();
 		this.messages("countdown");
 
 		console.log(`match_created: ${this.machId} between ${playerXId} and ${playerYId}`);
@@ -285,8 +284,9 @@ class PingPong {
 					}));
 					break;
 				case "countdown":
-					const conter = { time: 2 };
+					const conter = { time: 10 };
 					const interval = setInterval(() => {
+                        this.send();
 						player.socket.send(JSON.stringify({
 							status: 200,
 							message: 'COUNTDOWN',

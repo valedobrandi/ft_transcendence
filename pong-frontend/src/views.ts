@@ -7,7 +7,6 @@ import { FormSingIn } from "./components/FormSingIn";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { websocketConnect } from "./websocket/websocketConnect";
 import { changeChatHeader, messagerState } from "./states/messagerState";
-import { renderRoute } from "./utils";
 
 export function intraView(root: HTMLElement) {
 	root.innerHTML = "";
@@ -27,17 +26,6 @@ export function matchView(root: HTMLElement) {
 	const container = document.createElement("div");
 	container.className = "flex justify-center items-center h-full w-full overflow-hidden"
 	const pongUI = RenderGame();
-	const quitBtn = document.createElement("button");
-	quitBtn.textContent = " ⇦ Back";
-	quitBtn.id = "quit-btn";
-	quitBtn.className = `absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-8
-		text-white font-bold text-6xl lg"text-8xl
-		rounded z-10`;
-	quitBtn.style.display = "none";
-	quitBtn.onclick = () => {
-		renderRoute("/intra")
-	}
-	container.appendChild(quitBtn);
 	container.appendChild(pongUI);
 	root.appendChild(container);
 }

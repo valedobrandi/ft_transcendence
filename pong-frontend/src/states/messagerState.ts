@@ -1,11 +1,11 @@
 import { id } from "../app";
-import { navigateTo, renderRoute } from "../utils";
-import { matchView } from "../views";
+import { navigateTo, renderRoute, setTime } from "../utils";
+import { intraView, matchView } from "../views";
 import { websocketStartMatch } from "../websocket/websocketStartMatch";
 
 export function addMessage(chatId: string, chat: string, sender = id) {
     const messages = messagerState.messages.get(chatId) || [];
-    messages.push({chat, sender});
+    messages.push({ chat, sender });
     messagerState.messages.set(chatId, messages);
     renderMessages(chatId);
 }
@@ -58,10 +58,11 @@ export function changeChatHeader(header: string) {
     chatHeader.appendChild(tab);
 }
 
-export interface MessageType  {
-	chat:string;
-	sender: string;
+export interface MessageType {
+    chat: string;
+    sender: string;
 }
+
 
 export const messagerState: MessagerStateType = new Proxy({
     messages: new Map<string, MessageType[]>([['INTRA', []]]),
@@ -82,11 +83,16 @@ export const messagerState: MessagerStateType = new Proxy({
                     break;
                 case "GAME_ROOM":
                     addMessage("INTRA", `the match will start.`);
-                    navigateTo("/match", matchView);
-                    //document.addEventListener('click', playLinkHandler);
+                    //navigateTo("/match", matchView);
+                    setTimeout(() => {
+                        navigateTo("/match", matchView);
+                    }, 5000);
                     break;
                 case "GAME_OVER":
                     addMessage("INTRA", `the match is over.`);
+                    setTime(5000, () => {
+                        navigateTo("/intra", intraView);
+                    });
                     break;
                 case "CHAT_MESSAGE":
 

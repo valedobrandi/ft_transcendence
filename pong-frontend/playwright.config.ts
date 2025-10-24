@@ -5,4 +5,5 @@ export default {
         headless: true
 	},
     testDir: './playwright/tests',
+    outputDir: './playwright/test-results',
 };

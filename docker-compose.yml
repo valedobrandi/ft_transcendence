@@ -3,6 +3,7 @@ services:
     build:
       context: ./pong-frontend
       dockerfile: Dockerfile
+    container_name: pong-frontend
     ports:
       - "5173:5173"
     volumes:
@@ -18,10 +19,13 @@ services:
     build:
       context: ./pong-backend
       dockerfile: Dockerfile
+    container_name: pong-backend
     ports:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
+      - /app/node_modules
+      - pong-backend-data:/app/data
     environment:
       - ADRESS=192.0.7
       - RPC_URL=http://blockchain:8545
@@ -43,21 +47,8 @@ services:
     networks:
       - transcedence-network
 
-  playwright:
-    build:
-      context: ./playwright
-      dockerfile: Dockerfile
-    volumes:
-      - ./playwright:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - FRONTEND_URL=http://pong-frontend:5173
-    networks:
-      - transcedence-network
-
 volumes:
-  node_modules:
+  pong-backend-data:
 
 networks:
   transcedence-network:

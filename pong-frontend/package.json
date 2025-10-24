@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "npx playwright test"
+    "test": "docker run --rm pong-frontend npm run test"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",

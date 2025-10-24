@@ -1,12 +1,14 @@
-FROM node:20-alpine
+FROM node:20-bullseye
 
 WORKDIR /app
 
 COPY package*.json ./
 
+RUN npm install --include=dev
+
 COPY . .
 
-RUN npm install
+RUN mkdir -p /app/data
 
 EXPOSE 3000
 
