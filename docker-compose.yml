@@ -10,6 +10,7 @@ services:
       - ./pong-frontend:/app
       - /app/node_modules
     environment:
+      - VITE_BACKEND_HOST=localhost:3000
       - NODE_ENV=development
     command: npm run dev -- --host
     networks:
@@ -25,7 +26,6 @@ services:
     volumes:
       - ./pong-backend:/app
       - /app/node_modules
-      - pong-backend-data:/app/data
     environment:
       - ADRESS=192.0.7
       - RPC_URL=http://blockchain:8545

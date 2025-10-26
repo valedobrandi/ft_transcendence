@@ -25,6 +25,7 @@ export function renderMessages(chatId: string) {
         span.className = "font-bold lowercase";
         span.textContent = msg.sender === id ? `` : `#${chatId}: `;
         const p = document.createElement('p');
+        p.id = 'id-message';
         p.className = "m-2 text-xs";
         p.innerHTML = `${msg.chat}`;
         messageBox.appendChild(p);

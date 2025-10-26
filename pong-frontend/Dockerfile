@@ -1,18 +1,11 @@
-FROM node:22.12.0 As playwright
-
+FROM node:22.12.0 
 WORKDIR /app
-
-RUN npx playwright install-deps && npx playwright install --with-deps
-
-FROM playwright As builder
 
 WORKDIR /app
 
 COPY package*.json ./
 
 RUN npm install --include=dev
-
-FROM builder As dev
 
 COPY . .
 

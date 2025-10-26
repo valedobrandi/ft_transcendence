@@ -1,10 +1,10 @@
-import { socket } from "../app";
 import { playerSideState } from "../context";
-import { addMessage, messagerState, renderMessages, type MessageType } from "../states/messagerState";
+import { addMessage, messagerState } from "../states/messagerState";
 import { serverState } from "../states/serverState";
+import { getSocket } from "../websocket";
 
 export function websocketReceiver() {
-    socket.addEventListener('message', (event) => {
+    getSocket().addEventListener('message', (event) => {
         const data = JSON.parse(event.data);
 		if (data.message != 'STATE') {
 			console.log('Message from server ', data);

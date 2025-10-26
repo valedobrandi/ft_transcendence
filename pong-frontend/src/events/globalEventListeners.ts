@@ -1,7 +1,18 @@
+import { id } from "../app";
 import { messagerState } from "../states/messagerState";
 import { renderRoute } from "../utils";
+import { getSocket } from "../websocket";
+import { setupPaddleListeners } from "./paddleListeners";
 
 export function globalEventListeners() {
+
+    setupPaddleListeners((up, down) => {
+        getSocket().send(JSON.stringify({
+            type: "MOVE_PADDLE",
+            id: id,
+            payload: {up, down}
+        }))
+    });
 
     window.addEventListener("popstate", () => {
         renderRoute(window.location.pathname);

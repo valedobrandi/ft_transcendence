@@ -1,4 +1,4 @@
-import { id, socket } from "../app";
+import { id } from "../app";
 import { setActiveCanvas } from "../events/resizeManager";
 import type { BallType } from "../interface/ball";
 import type { drawCircleType } from "../interface/drawCircle";
@@ -7,6 +7,7 @@ import type { DrawTextType } from "../interface/drawText";
 import type { GameStateType } from "../interface/GameStateType";
 import type { NetType } from "../interface/net";
 import type { PlayerType } from "../interface/player";
+import { getSocket } from "../websocket";
 
 
 export function RenderGame(): HTMLElement {
@@ -112,7 +113,7 @@ export function RenderGame(): HTMLElement {
         drawEndGame(scaleX, scaleY);
     }
 
-    socket.onmessage = (event) => {
+    getSocket().onmessage = (event) => {
         const { message, payload } = JSON.parse(event.data);
         if (message === "STATE") {
             previousState = currentState ? structuredClone(currentState) : payload;
