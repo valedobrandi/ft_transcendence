@@ -1,27 +1,17 @@
 import { globalEventListeners } from "./events/globalEventListeners";
-import { setupPaddleListeners } from "./events/paddleListeners";
 import { addMessage } from "./states/messagerState";
 import { renderRoute } from "./utils";
+import { initSocket } from "./websocket";
 import { websocketReceiver } from "./websocket/websocketReceiver";
 
 export const id = crypto.randomUUID();
 
-export const socket = new WebSocket(`ws://localhost:3000/ws?id=${id}`);
+export const VITE_BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST;
 
-addMessage("INTRA", `Welcome: ${id}`);
-
-setupPaddleListeners((up, down) => {
-	socket.send(JSON.stringify({
-		type: "MOVE_PADDLE",
-		id,
-		payload: {up, down}
-	}));
-});
-
-function init() {
+export function init() {
+    initSocket(VITE_BACKEND_HOST, id);
     renderRoute(window.location.pathname);
+    websocketReceiver();
+    globalEventListeners();
+    addMessage("INTRA", `Welcome: ${id}`);
 }
-
-init();
-websocketReceiver();
-globalEventListeners();

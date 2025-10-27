@@ -6,14 +6,19 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "npx vitest --run --reporter verbose"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.14",
+    "@testing-library/dom": "^10.4.1",
     "autoprefixer": "^10.4.21",
+    "jest-websocket-mock": "^2.5.0",
+    "jsdom": "^22.1.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14",
     "typescript": "~5.8.3",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vitest": "^4.0.3"
   }
 }

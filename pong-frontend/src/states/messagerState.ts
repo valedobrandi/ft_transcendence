@@ -1,13 +1,15 @@
 import { id } from "../app";
-import { navigateTo } from "../utils";
-import { matchView } from "../views";
-import { websocketStartMatch } from "../websocket/websocketStartMatch";
+import { navigateTo, setTime } from "../utils";
+import { intraView, matchView } from "../views";
 
 export function addMessage(chatId: string, chat: string, sender = id) {
-    const messages = messagerState.messages.get(chatId) || [];
-    messages.push({chat, sender});
-    messagerState.messages.set(chatId, messages);
-    renderMessages(chatId);
+    if (!messagerState.messages.has(chatId)) {
+        messagerState.messages.set(chatId, []);
+    }
+    messagerState.messages.get(chatId)!.push({ chat, sender });
+    if (chatId === messagerState.selectChat) {
+        renderMessages(chatId);
+    }
 }
 
 export function renderMessages(chatId: string) {
@@ -21,23 +23,14 @@ export function renderMessages(chatId: string) {
     messages.forEach(msg => {
         const span = document.createElement('span');
         span.className = "font-bold lowercase";
-        span.textContent = msg.sender === id ? `#You: ` : `#${chatId}: `;
+        span.textContent = msg.sender === id ? `` : `#${chatId}: `;
         const p = document.createElement('p');
+        p.id = 'id-message';
         p.className = "m-2 text-xs";
         p.innerHTML = `${msg.chat}`;
         messageBox.appendChild(p);
         p.prepend(span);
     })
-
-}
-
-export function playLinkHandler(event: Event) {
-    const target = event.target as HTMLElement;
-    if (target.classList.contains('play-link')) {
-        event.preventDefault();
-        navigateTo("/match", matchView);
-        websocketStartMatch();
-    }
 }
 
 const messagerListeners: (() => void)[] = [];
@@ -66,16 +59,17 @@ export function changeChatHeader(header: string) {
     chatHeader.appendChild(tab);
 }
 
-export interface MessageType  {
-	chat:string;
-	sender: string;
+export interface MessageType {
+    chat: string;
+    sender: string;
 }
+
 
 export const messagerState: MessagerStateType = new Proxy({
     messages: new Map<string, MessageType[]>([['INTRA', []]]),
     connected: [],
     selectChat: "INTRA",
-    state: ""
+    state: "",
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
@@ -89,15 +83,15 @@ export const messagerState: MessagerStateType = new Proxy({
                     addMessage("INTRA", `you have joined the match queue.`);
                     break;
                 case "GAME_ROOM":
-                    addMessage("INTRA", `the match is ready...
-                            <a href="#" class="play-link text-blue-500 underline">Play</a>`);
-                    document.addEventListener('click', playLinkHandler);
+                    setTime(5000, () => {
+                        navigateTo("/match", matchView);
+                    });
                     break;
                 case "GAME_OVER":
-                    addMessage("INTRA", `the match is over.`);
+                    setTime(5000, () => {
+                        navigateTo("/intra", intraView);
+                    });
                     break;
-                case "CHAT_MESSAGE":
-
             }
         }
 
@@ -113,6 +107,7 @@ export const messagerState: MessagerStateType = new Proxy({
             if (isIntra && chatMenu) chatMenu.className += " hidden";
 
         }
+
         return true;
     }
 });

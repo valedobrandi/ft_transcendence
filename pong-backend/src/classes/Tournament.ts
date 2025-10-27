@@ -3,93 +3,107 @@ import { tournamentRoom } from "../state/tournamentRoom.js";
 import { EndMatchEventType } from "../types/EndMatchEventType.js";
 import { PlayerType } from "../types/PlayerType.js";
 import { PingPong } from "./PingPong.js";
+import { connectedRoom } from "../state/connectedRoom.js";
 
 class Tournament {
-	tournamentId: string;
-	currentBracket: Map<string, PlayerType>
-	nextBracket: PlayerType[] = [];
-	private rounds = 0;
-	cleanup: () => void = () => { };
+    tournamentId: string;
+    currentBracket: Set<string>;
+    currentRoundWinners: Set<string>;
+    nextBracket: Set<string> = new Set<string>();
+    private rounds = 0;
+    cleanup: () => void = () => { };
 
-	constructor(tournamentId: string) {
-		this.tournamentId = tournamentId;
-		this.currentBracket = new Map<string, PlayerType>();
+    constructor(tournamentId: string) {
+        this.tournamentId = tournamentId;
+        this.currentBracket = new Set<string>();
+        this.currentRoundWinners = new Set<string>();
 
-		const matchEndedListener = ({ winner, loser, tournamentId }: EndMatchEventType) => {
-			if (tournamentId != this.tournamentId) return;
-			this.reportMatchResult(winner, loser);
-		}
+        const matchEndedListener = ({ winnerId, loserId, tournamentId }: EndMatchEventType) => {
+            if (tournamentId != this.tournamentId) return;
+            this.reportMatchResult(winnerId, loserId);
+        }
 
-		gameEvents.on('matchEnded', matchEndedListener);
-		this.cleanup = () => gameEvents.off('matchEnded', matchEndedListener);
-	}
+        gameEvents.on('tournament_match_end', matchEndedListener);
+        this.cleanup = () => gameEvents.off('tournament_match_end', matchEndedListener);
+    }
 
 
-	add(player: PlayerType) {
-		this.currentBracket.set(player.id, player);
-		if (this.currentBracket.size == 4) {
-			this.startRound();
-		}
-	}
+    add(id: string) {
+        this.currentBracket.add(id);
+        if (this.currentBracket.size == 4) {
+            this.startRound();
+        }
+    }
 
-	startRound() {
-		if (this.currentBracket.size % 2 !== 0) return;
+    async startRound() {
+        if (this.currentBracket.size % 2 !== 0) return;
 
-		this.rounds = Math.floor(this.currentBracket.size / 2);
+        this.rounds = Math.floor(this.currentBracket.size / 2);
+        this.currentRoundWinners = new Set<string>();
 
-		const players = Array.from(this.currentBracket.values());
-		for (let i = 0; i < players.length; i += 2) {
-			const playerX = players[i];
-			const playerY = players[i + 1];
+        const players = Array.from(this.currentBracket.values());
+        for (let i = 0; i < players.length; i += 2) {
+            const playerX = players[i];
+            const playerY = players[i + 1];
 
-			if (!playerX || !playerY) continue;
+            if (!playerX || !playerY) continue;
 
-			const matchId = crypto.randomUUID();
-			const newMatch = new PingPong(matchId);
-			newMatch.setTournamentId(this.tournamentId);
+            const matchId = crypto.randomUUID();
+            const newMatch = new PingPong(matchId);
 
-			newMatch.createMatch(playerX, playerY);
-		}
-	}
+            newMatch.setTournamentId(this.tournamentId);
 
-	reportMatchResult(winner: PlayerType, loser: PlayerType) {
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            newMatch.createMatch(playerX, playerY);
+        }
+    }
 
-		winner.status = 'TOURNAMENT_ROOM';
+    async reportMatchResult(winnerId: string, loserId: string) {
+        this.currentRoundWinners.add(winnerId);
+        this.currentBracket.delete(loserId);
 
-		this.nextBracket.push(winner);
-		this.currentBracket.delete(loser.id);
-		loser.tournamentId = undefined;
-		if (this.nextBracket.length === this.rounds) {
-			this.advanceBracket();
-		}
-	}
+        const loserPlayer = connectedRoom.get(loserId);
+        if (loserPlayer) {
+            loserPlayer.chat.sendMessage('INTRA', `you have been eliminated from the tournament.`, loserPlayer.id);
+        };
+        if (this.currentRoundWinners.size === this.rounds) {
+            this.nextBracket = new Set(this.currentRoundWinners);
+            if (this.rounds > 1) {
+                for (const winnerId of this.nextBracket) {
+                    const player = connectedRoom.get(winnerId);
+                    if (player) {
+                        player.chat.sendMessage("INTRA", "You have advanced to the next phase!", player.id);
+                    }
+                }
+            }
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            await this.advanceBracket();
+        }
+    }
 
-	advanceBracket() {
-		if (this.nextBracket.length === 0) return;
-		 this.currentBracket.clear();
+    async advanceBracket() {
+        if (this.nextBracket.size === 0) return;
+        this.currentBracket = new Set<string>(this.nextBracket);
+        this.nextBracket.clear();
 
-		for (const player of this.nextBracket) {
-			this.currentBracket.set(player.id, player);
-		}
+        if (this.currentBracket.size > 1) {
+            await this.startRound();
+        } else {
+            const winnerId = Array.from(this.currentBracket)[0];
+            await this.endTornament(winnerId);
+        }
+    }
 
-		this.nextBracket = [];
-
-		if (this.currentBracket.size > 1) {
-			this.startRound();
-		} else {
-			const winner = Array.from(this.currentBracket.values())[0];
-			this.endTornament(winner);
-		}
-	}
-
-	endTornament(player: PlayerType) {
-		player.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT_WINNER' }));
-
-		player.status = 'CONNECT_ROOM';
-		tournamentRoom.delete(this.tournamentId);
-
-		this.cleanup();
-	}
+    async endTornament(id: string) {
+        const player = connectedRoom.get(id);
+        if (player) {
+            player.chat.sendMessage('INTRA', "Congratulations! You are the champion of the tournament!", player.id);
+            player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+            player.status = 'CONNECT_ROOM';
+        };
+        tournamentRoom.delete(this.tournamentId);
+        this.cleanup();
+    }
 }
 
 export { Tournament };

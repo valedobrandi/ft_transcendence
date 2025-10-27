@@ -1,8 +1,9 @@
-import { socket, id } from "../app";
+import { id } from "../app";
+import { getSocket } from "../websocket";
 
 export function websocketConnect() {
-    socket.onopen = () => {
-        socket.send(JSON.stringify({
+    getSocket().onopen = () => {
+        getSocket().send(JSON.stringify({
             type: "CONNECT", 
             id 
         }));

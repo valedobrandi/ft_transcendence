@@ -1,9 +1,13 @@
 import { serverState } from "../states/serverState";
 
 import { Button } from "./Button";
-import { id, socket } from "../app";
+import { id } from "../app";
+import { getSocket } from "../websocket";
 
 export function Menu() {
+
+    const socket = getSocket();
+    if (socket === null) return;
 
     const shouldDisable = serverState.state === "MATCH_ROOM" || serverState.state === "TOURNAMENT_ROOM";
     const isMatch = serverState.state === "MATCH_ROOM";

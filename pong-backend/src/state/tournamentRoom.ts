@@ -1,26 +1,48 @@
 import { Tournament } from "../classes/Tournament.js";
 import { tournamentEvent } from "../events/tournamentQueueEvent.js";
 import { PlayerType } from "../types/PlayerType.js";
+import { connectedRoom } from "./connectedRoom.js";
 
-const queueRoom: PlayerType[] = [];
+export const tournamentQueue: Set<string> = new Set();
+
 export const tournamentRoom = new Map<string, Tournament>();
 
-export function joinTournamentRoom(player: PlayerType) {
-	queueRoom.push(player);
-	
+export function joinTournamentRoom(id: string) {
+	tournamentQueue.add(id);
+    const player = connectedRoom.get(id);
+    if (player == undefined) return;
 	player.status = 'TOURNAMENT_ROOM';
 
 	player.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT_ROOM' }))
 
-	if (queueRoom.length == 4) {
+	if (tournamentQueue.size >= 4) {
         console.log('Tournament ready is starting;');
         tournamentEvent.emit('ready');
 	}
 }
 
-export function getTournamentPlayers(): PlayerType[] | null {
-	if (queueRoom.length === 0) return null;
-    return queueRoom.splice(0, 8);
+export function getTournamentPlayers(): string[] | undefined {
+	if (tournamentQueue.size === 0) return undefined;
+    const iterator = tournamentQueue.values();
+    const tournament: string[] = [];
+    while (tournament.length < 4) {
+        const next = iterator.next();
+        if (next.done) break;
+
+        const id = next.value;
+        if (!connectedRoom.has(id)) {
+            tournamentQueue.delete(id);
+            continue;
+        }
+        tournament.push(id);
+    }
+    if (tournament.length === 4) {
+        for (const id of tournament) {
+            tournamentQueue.delete(id);
+        }
+        return tournament;
+    }
+    return undefined;
 }
 
 tournamentEvent.on('ready', () => {
@@ -28,12 +50,13 @@ tournamentEvent.on('ready', () => {
     if (tournamentPlayers ==  undefined) return;
 
     const tournamentId = crypto.randomUUID();
-
     const newTournament = new Tournament(tournamentId);
 
-    for (const player of tournamentPlayers) {
+    for (const id of tournamentPlayers) {
+        const player = connectedRoom.get(id);
+        if (player == undefined) continue;
         player.tournamentId = tournamentId;
-        newTournament.add(player);
+        newTournament.add(id);
     }
 
     tournamentRoom.set(tournamentId, newTournament);

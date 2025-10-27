@@ -1,9 +1,18 @@
-import { messagerState, playLinkHandler } from "../states/messagerState";
+import { id } from "../app";
+import { messagerState } from "../states/messagerState";
 import { renderRoute } from "../utils";
-import { websocketChatSend } from "../websocket/websocketChatSend";
+import { getSocket } from "../websocket";
+import { setupPaddleListeners } from "./paddleListeners";
 
 export function globalEventListeners() {
-    document.addEventListener('click', playLinkHandler);
+
+    setupPaddleListeners((up, down) => {
+        getSocket().send(JSON.stringify({
+            type: "MOVE_PADDLE",
+            id: id,
+            payload: {up, down}
+        }))
+    });
 
     window.addEventListener("popstate", () => {
         renderRoute(window.location.pathname);

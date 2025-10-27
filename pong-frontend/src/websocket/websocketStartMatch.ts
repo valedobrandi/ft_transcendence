@@ -1,7 +1,8 @@
-import { socket, id } from "../app";
+import { id } from "../app";
+import { getSocket } from "../websocket";
 
 export function websocketStartMatch() {
-	socket.send(JSON.stringify({
+	getSocket().send(JSON.stringify({
 		type: "PLAY",
 		id
 	}));

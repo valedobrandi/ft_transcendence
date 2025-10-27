@@ -3,12 +3,14 @@ services:
     build:
       context: ./pong-frontend
       dockerfile: Dockerfile
+    container_name: pong-frontend
     ports:
       - "5173:5173"
     volumes:
       - ./pong-frontend:/app
       - /app/node_modules
     environment:
+      - VITE_BACKEND_HOST=localhost:3000
       - NODE_ENV=development
     command: npm run dev -- --host
     networks:
@@ -18,13 +20,13 @@ services:
     build:
       context: ./pong-backend
       dockerfile: Dockerfile
+    container_name: pong-backend
     ports:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
       - ADRESS=192.0.7
       - RPC_URL=http://blockchain:8545
     command: npm run dev
@@ -46,7 +48,7 @@ services:
       - transcedence-network
 
 volumes:
-  node_modules:
+  pong-backend-data:
 
 networks:
   transcedence-network:

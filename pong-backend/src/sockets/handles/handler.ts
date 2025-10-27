@@ -8,7 +8,7 @@ import { TOURNAMENT } from './TOURNAMENT.js';
 import { CHAT } from './CHAT.js';
 
 export function handleMessage(conn: WebSocket, msg: MessageType) {
-    if (msg.type !== 'input') {
+    if (msg.type !== 'MOVE_PADDLE' && msg.type !== 'input') {
         console.log('Received message:', msg);
     }
     switch (msg.type) {

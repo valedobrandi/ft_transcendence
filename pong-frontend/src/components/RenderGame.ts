@@ -1,4 +1,4 @@
-import { socket } from "../app";
+import { id } from "../app";
 import { setActiveCanvas } from "../events/resizeManager";
 import type { BallType } from "../interface/ball";
 import type { drawCircleType } from "../interface/drawCircle";
@@ -7,14 +7,21 @@ import type { DrawTextType } from "../interface/drawText";
 import type { GameStateType } from "../interface/GameStateType";
 import type { NetType } from "../interface/net";
 import type { PlayerType } from "../interface/player";
+import { getSocket } from "../websocket";
 
 
 export function RenderGame(): HTMLElement {
 
+    const socket = getSocket();
+
+
+    let countdown: number | null = null;
+    let gameResult: "WIN" | "LOSE" | null = null;
+
     let currentState: GameStateType | null = null;
     let previousState: GameStateType | null = null;
     let lastUpdateTime = performance.now();
-    const SERVER_TICK_RATE = 60; 
+    const SERVER_TICK_RATE = 60;
     const INTERPOLATION_DELAY = 1000 / SERVER_TICK_RATE;
 
     const canvasElement = document.createElement("canvas");
@@ -23,7 +30,7 @@ export function RenderGame(): HTMLElement {
     canvasElement.width = 1200;
     canvasElement.height = 600;
     canvasElement.className = "border-4 border-blue-500 bg-black my-4";
-    const paddleHeight = 0.166;
+    const paddleHeight = 0.150;
 
     setActiveCanvas(canvasElement);
 
@@ -79,16 +86,16 @@ export function RenderGame(): HTMLElement {
     }
 
 
-    function drawText({ text, x, y, color }: DrawTextType) {
+    function drawText({ text, x, y, color, font }: DrawTextType) {
         if (!ctx) {
             return console.error('Error: drawText.');
         }
         ctx.fillStyle = color;
-        ctx.font = "45px Verdana";
+        ctx.font = font;
         ctx.fillText(text.toString() || '0', x, y);
     }
 
-    drawText({ text: 0, x: 300, y: 200, color: "white" });
+    drawText({ text: 0, x: 300, y: 200, color: "white", font: "45px Verdana" });
 
     function render(ball: BallType, userX: PlayerType, userY: PlayerType) {
         const scaleX = canvasElement.width;
@@ -97,24 +104,73 @@ export function RenderGame(): HTMLElement {
 
         drawNet(net);
 
-        drawText({ text: userX.score, x: scaleX / 4, y: scaleY / 5, color: "white" });
-        drawText({ text: userY.score, x: 3 * scaleX / 4, y: scaleY / 5, color: "white" });
+        drawText({ text: userX.score, x: scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
+        drawText({ text: userY.score, x: 3 * scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
 
-        drawRect({ x: userX.x * scaleX, y: userX.y * scaleY - paddleHeight / 2, w: 10, h: 100, color: "white" });
-        drawRect({ x: userY.x * scaleX - 10, y: userY.y * scaleY - paddleHeight / 2, w: 10, h: 100, color: "white" });
+        drawRect({ x: userX.x * scaleX, y: (userX.y * scaleY) - (paddleHeight * scaleY / 2), w: 10, h: 100, color: "white" });
+        drawRect({ x: userY.x * scaleX - 10, y: (userY.y * scaleY) - (paddleHeight * scaleY / 2), w: 10, h: 100, color: "white" });
 
         const ballRadius = Math.min(ball.radius * ((scaleX + scaleY) / 2), 8);
         drawCircle({ x: ball.x * scaleX, y: ball.y * scaleY, r: ballRadius, color: "white" });
+        drawCountdown(scaleX, scaleY);
+        drawEndGame(scaleX, scaleY);
     }
 
-    socket.onmessage = (event) => {
-        const { type, payload } = JSON.parse(event.data);
-        if (type === "state") {
-            previousState = currentState ? structuredClone(currentState) : payload;
-            currentState = payload;
-            lastUpdateTime = performance.now();
+    if (socket) {
+        socket.onmessage = (event) => {
+            const { message, payload } = JSON.parse(event.data);
+            if (message === "STATE") {
+                previousState = currentState ? structuredClone(currentState) : payload;
+                currentState = payload;
+                lastUpdateTime = performance.now();
+            } else if (message === "COUNTDOWN") {
+                countdown = payload.seconds;
+            } else if (message === "GAME_OVER") {
+                const winnerId = payload.winner;
+                gameResult = id === winnerId ? "WIN" : "LOSE";
+            }
+        };
+    }
+
+    function drawEndGame(scaleX: number, scaleY: number) {
+        if (gameResult) {
+            drawText({
+                text: gameResult === "WIN" ? "YOU WIN!" : "YOU LOSE!",
+                x: (0.5 * scaleX) / 2,
+                y: 0.5 * scaleY + 30,
+                color: gameResult === "WIN" ? "green" : "red",
+                font: "120px Verdana"
+            });
+            return;
         }
-    };
+    }
+
+    function drawCountdown(scaleX: number, scaleY: number) {
+        if (!ctx) return;
+        const readyText = "READY";
+        const textWidth = ctx.measureText(readyText).width;
+        if (countdown !== null) {
+            if (countdown < 2) {
+                drawText({
+                    text: "GO!",
+                    x: 0.5 * scaleX - 90,
+                    y: 0.5 * scaleY + 30,
+                    color: "white",
+                    font: "120px Verdana"
+                });
+            } else {
+                drawText({
+                    text: "READY",
+                    x: (0.5 * scaleX - (textWidth)),
+                    y: 0.5 * scaleY + 30,
+                    color: "white",
+                    font: "120px Verdana"
+                });
+            }
+            if (countdown === 0) countdown = null;
+            return;
+        }
+    }
 
     function interpolate(a: number, b: number, t: number): number {
         return a + (b - a) * t;
@@ -154,27 +210,8 @@ export function RenderGame(): HTMLElement {
         requestAnimationFrame(renderLoop);
     }
 
-    function botPlayer() {
-        if (!currentState) return;
-        const ballY = currentState.ball.y;
-        // Get the player paddle position
-        const paddleY = currentState.players.userY.y;
-
-        const tolerance = 0.03;
-        const input = { up: false, down: false };
-        if (paddleY + paddleHeight / 2 < ballY - tolerance) {
-            input.down = true;
-        } else if (paddleY + paddleHeight / 2 > ballY + tolerance) {
-            input.up = true;
-        }
-        socket.send(JSON.stringify({ type: "input", payload: input }));
-        setTimeout(botPlayer, 1000 / SERVER_TICK_RATE);
-        
-    }
-
     requestAnimationFrame(renderLoop);
     requestAnimationFrame(resizeCanvas);
-    setTimeout(botPlayer, 1000);
     return canvasElement;
 }
 
