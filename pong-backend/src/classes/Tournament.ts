@@ -10,6 +10,7 @@ class Tournament {
     currentBracket: Set<string>;
     currentRoundWinners: Set<string>;
     nextBracket: Set<string> = new Set<string>();
+    private matchs = 0;
     private rounds = 0;
     cleanup: () => void = () => { };
 
@@ -18,9 +19,9 @@ class Tournament {
         this.currentBracket = new Set<string>();
         this.currentRoundWinners = new Set<string>();
 
-        const matchEndedListener = ({ winnerId, loserId, tournamentId }: EndMatchEventType) => {
-            if (tournamentId != this.tournamentId) return;
-            this.reportMatchResult(winnerId, loserId);
+        const matchEndedListener = (report: EndMatchEventType) => {
+            if (report.tournamentId != this.tournamentId) return;
+            this.reportMatchResult(report);
         }
 
         gameEvents.on('tournament_match_end', matchEndedListener);
@@ -41,6 +42,8 @@ class Tournament {
         this.rounds = Math.floor(this.currentBracket.size / 2);
         this.currentRoundWinners = new Set<string>();
 
+        this.matchs = 0;
+
         const players = Array.from(this.currentBracket.values());
         for (let i = 0; i < players.length; i += 2) {
             const playerX = players[i];
@@ -58,16 +61,27 @@ class Tournament {
         }
     }
 
-    async reportMatchResult(winnerId: string, loserId: string) {
-        this.currentRoundWinners.add(winnerId);
-        this.currentBracket.delete(loserId);
+    async reportMatchResult(report: EndMatchEventType) {
+        const { winnerId, loserId, drawMatch } = report;
 
-        const loserPlayer = connectedRoom.get(loserId);
-        if (loserPlayer) {
-            loserPlayer.chat.sendMessage('INTRA', `you have been eliminated from the tournament.`, loserPlayer.id);
-        };
-        if (this.currentRoundWinners.size === this.rounds) {
+        this.matchs++;
+
+        // Take the two player out of the current bracket
+        if (drawMatch) {
+            this.currentBracket.delete(winnerId);
+            this.currentBracket.delete(loserId);
+        } else {
+            this.currentRoundWinners.add(winnerId);
+            this.currentBracket.delete(loserId);
+
+            const loserPlayer = connectedRoom.get(loserId);
+            if (loserPlayer) {
+                loserPlayer.chat.sendMessage('INTRA', `you have been eliminated from the tournament.`, loserPlayer.id);
+            };
+        }
+        if (this.matchs === this.rounds) {
             this.nextBracket = new Set(this.currentRoundWinners);
+            
             if (this.rounds > 1) {
                 for (const winnerId of this.nextBracket) {
                     const player = connectedRoom.get(winnerId);
@@ -90,11 +104,12 @@ class Tournament {
             await this.startRound();
         } else {
             const winnerId = Array.from(this.currentBracket)[0];
-            await this.endTornament(winnerId);
+            console.log(`Tournament ${this.tournamentId} winner is ${winnerId}`);
+            await this.endTournament(winnerId);
         }
     }
 
-    async endTornament(id: string) {
+    async endTournament(id: string) {
         const player = connectedRoom.get(id);
         if (player) {
             player.chat.sendMessage('INTRA', "Congratulations! You are the champion of the tournament!", player.id);
