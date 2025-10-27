@@ -8,6 +8,7 @@ import db from '../db.js';
 
 export default async function authRoutes(fastify: FastifyInstance)
 {
+  //register user
   fastify.post('/register', async (request: FastifyRequest<{ Body: RegisterBody }>, reply) => {
     const { email, username, password } = request.body;
 
@@ -32,6 +33,10 @@ export default async function authRoutes(fastify: FastifyInstance)
     return reply.status(201).send({message: 'User created successfully'});
   });
 
+
+
+
+  //login user
   fastify.post('/login', async (request: FastifyRequest<{ Body: RegisterBody}>, reply) => {
     const { email, username, password } = request.body;
 
@@ -47,7 +52,8 @@ export default async function authRoutes(fastify: FastifyInstance)
     return reply.status(201).send({message: 'user connected'});
   });
 
-  fastify.post('/user/:id', async(request: FastifyRequest<{ Params : {id : number }, Body : RegisterBody }>, reply) =>
+  //update user
+  fastify.put('/user/:id', async(request: FastifyRequest<{ Params : {id : number }, Body : RegisterBody }>, reply) =>
   {
     const { email, username, password} = request.body;
     const { id } = request.params;
@@ -86,5 +92,38 @@ export default async function authRoutes(fastify: FastifyInstance)
       const err = error as Error;
       return reply.status(404).send({error: err.message });
     }
+  });
+
+  //disconnect user
+  fastify.put('/logout', (request: FastifyRequest<{Body: RegisterBody}>, reply) =>
+  {
+    const { id } = request.body;
+
+    if(!id)
+      return reply.status(404).send({error: "id not found"});
+
+    db.prepare('UPDATE users SET status = ? WHERE id = ?').run(playerStatus.DISCONNECT, id);
+    return reply.status(200).send({message: "User disconnected"});
+  });
+
+  //get info user + all match playing
+  fastify.get('/user/:id', (request: FastifyRequest<{Params: {id: string}}>, reply) =>
+  {
+    const { id } = request.params;
+    const UserId = Number(id);
+
+     if(!id)
+      return reply.status(404).send({error: "ID not found"});
+
+    const searchUser = db.prepare('SELECT * from users WHERE id = ?')
+    const displayUser = searchUser.get(UserId);
+
+    if (!displayUser)
+      return reply.status(404).send({error : "user not found"});
+
+    const getStatMatchUser = db.prepare('SELECT * from matches WHERE player1_id = ? OR player2_id = ? ORDER BY created_at DESC');
+    const displayMatchUser = getStatMatchUser.all(UserId, UserId);
+
+    return reply.status(200).send({user: displayUser, matches: displayMatchUser});
   });
 }

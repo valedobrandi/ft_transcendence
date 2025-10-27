@@ -16,8 +16,7 @@ export default function matchRoute(fastify: FastifyInstance)
             return reply.status(404).send({error: "player1 not found"});
         if (!existPlayer2)
             return reply.status(404).send({error: "player2 not found"});
-
-        
+ 
         const createMatch = db.prepare(`INSERT INTO matches (player1_id, player2_id, match_status) VALUES (?, ?, ?)`);
        
         const result = createMatch.run(player1_id, player2_id, matchStatus.WAITING);
