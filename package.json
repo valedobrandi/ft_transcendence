@@ -2,5 +2,9 @@
     "dependencies": {
         "better-sqlite3": "^12.4.1",
         "sqlite3": "^5.1.7"
+    },
+    "scripts": {
+        "test:frontend": "cd pong-frontend && npm run test",
+        "test": "npm run test:frontend"
     }
 }

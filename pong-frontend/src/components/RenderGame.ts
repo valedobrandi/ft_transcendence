@@ -12,6 +12,9 @@ import { getSocket } from "../websocket";
 
 export function RenderGame(): HTMLElement {
 
+    const socket = getSocket();
+
+
     let countdown: number | null = null;
     let gameResult: "WIN" | "LOSE" | null = null;
 
@@ -113,22 +116,21 @@ export function RenderGame(): HTMLElement {
         drawEndGame(scaleX, scaleY);
     }
 
-    getSocket().onmessage = (event) => {
-        const { message, payload } = JSON.parse(event.data);
-        if (message === "STATE") {
-            previousState = currentState ? structuredClone(currentState) : payload;
-            currentState = payload;
-            lastUpdateTime = performance.now();
-        } else if (message === "COUNTDOWN") {
-            countdown = payload.seconds;
-        } else if (message === "GAME_OVER") {
-            const winnerId = payload.winner;
-            gameResult = id === winnerId ? "WIN" : "LOSE";
-            const quitBtn = document.getElementById("quit-btn");
-            if (quitBtn === null) return;
-            quitBtn.style.display = "block";
-        }
-    };
+    if (socket) {
+        socket.onmessage = (event) => {
+            const { message, payload } = JSON.parse(event.data);
+            if (message === "STATE") {
+                previousState = currentState ? structuredClone(currentState) : payload;
+                currentState = payload;
+                lastUpdateTime = performance.now();
+            } else if (message === "COUNTDOWN") {
+                countdown = payload.seconds;
+            } else if (message === "GAME_OVER") {
+                const winnerId = payload.winner;
+                gameResult = id === winnerId ? "WIN" : "LOSE";
+            }
+        };
+    }
 
     function drawEndGame(scaleX: number, scaleY: number) {
         if (gameResult) {
