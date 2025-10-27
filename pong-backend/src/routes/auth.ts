@@ -95,14 +95,15 @@ export default async function authRoutes(fastify: FastifyInstance)
   });
 
   //disconnect user
-  fastify.put('/logout', (request: FastifyRequest<{Body: RegisterBody}>, reply) =>
+  fastify.put('/logout/:id', (request: FastifyRequest<{Params: {id: string }}>, reply) =>
   {
-    const { id } = request.body;
+    const { id } = request.params;
+    const idUser = Number(id);
 
-    if(!id)
+    if(!idUser)
       return reply.status(404).send({error: "id not found"});
 
-    db.prepare('UPDATE users SET status = ? WHERE id = ?').run(playerStatus.DISCONNECT, id);
+    db.prepare('UPDATE users SET status = ? WHERE id = ?').run(playerStatus.DISCONNECT, idUser);
     return reply.status(200).send({message: "User disconnected"});
   });
 
