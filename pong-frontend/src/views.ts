@@ -7,6 +7,7 @@ import { FormSingIn } from "./components/FormSingIn";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { websocketConnect } from "./websocket/websocketConnect";
 import { changeChatHeader, messagerState } from "./states/messagerState";
+import { FormGuest } from "./components/FormGuest";
 
 export function intraView(root: HTMLElement) {
 	root.innerHTML = "";
@@ -34,6 +35,12 @@ export function loginView(root: HTMLElement) {
 	root.innerHTML = "";
 	const loginUI = Login();
 	root.appendChild(loginUI);
+}
+
+export function guestView(root: HTMLElement) {
+    root.innerHTML = "";
+    const guestUI = FormGuest();
+    root.appendChild(guestUI);
 }
 
 export function singInView(root: HTMLElement) {

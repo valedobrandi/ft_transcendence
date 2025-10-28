@@ -4,10 +4,9 @@ import { Button } from "./Button";
 import { id } from "../app";
 import { getSocket } from "../websocket";
 
-export function Menu() {
+export function Menu():HTMLDivElement {
 
     const socket = getSocket();
-    if (socket === null) return;
 
     const shouldDisable = serverState.state === "MATCH_ROOM" || serverState.state === "TOURNAMENT_ROOM";
     const isMatch = serverState.state === "MATCH_ROOM";
@@ -19,11 +18,13 @@ export function Menu() {
     divElement.className = "flex justify-start items-end gap-2 p-1";
     
     const matchBtn = Button('MATCH', "h-10 w-18 rounded", () => {
+        if (!socket) return;
         socket.send(JSON.stringify({ type: 'MATCH', id: id }));
     });
     matchBtn.id = "match-btn";
     
     const tourBtn = Button("TOURNAMENT", "h-10 w-24 rounded", () => {
+        if (!socket) return;
         socket.send(JSON.stringify({ type: 'TOURNAMENT', id: id }));
     });
     tourBtn.id = "tournament-btn";

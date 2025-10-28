@@ -1,26 +1,22 @@
-import { broadcastConnectedRoom, connectedRoom } from "../../state/connectedRoom.js";
-import { PlayerType } from "../../types/PlayerType.js";
+import { connectedRoomInstance } from "../../state/connectedRoom.js";
 import type { WebSocket } from 'ws';
 import { ConnectType } from "../types.js";
-import ChatManager from "../../classes/ChatManager.js";
+import { authenticationRoomInstance } from "../../state/authenticationRoom.js";
+import { log } from "console";
 
 
-export function CONNECT(data: ConnectType, connection:WebSocket) {
-    const player: PlayerType = {
-        id: data.id,
-        name: 'player_' + data.id,
-        socket: connection,
-        status: 'CONNECT_ROOM',
-        matchId: "",
-        tournamentId: "",
-        chat: new ChatManager(data.id),
-    };
+export function CONNECT(data: ConnectType, connection: WebSocket) {
+    const authenticationRoom = authenticationRoomInstance;
 
-    if (connectedRoom.has(player.id) == false) {
-        connectedRoom.set(player.id, player);
-        broadcastConnectedRoom();
+    const isValid = authenticationRoom.verify(data.username.toString(), data.code);
+    if (!isValid) {
+        connection.send(JSON.stringify({ status: 401, message: 'INVALID_CODE' }));
+        return;
     }
-    
+
+    authenticationRoom.delete(data.username.toString());
+    connectedRoomInstance.add(data.username, connection);
     connection.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
-    console.log(`Player connected: ${player.id}`);
+    
+    console.log(`Player connected: ${data.username}`);
 }

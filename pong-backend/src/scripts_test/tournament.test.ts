@@ -1,12 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { PingPong } from '../classes/PingPong.js';
-import { connectedRoom } from '../state/connectedRoom.js';
 import ChatManager from '../classes/ChatManager.js';
-import { gameRoom } from '../state/gameRoom.js';
-import { PlayType } from '../sockets/types.js';
 import { Tournament } from '../classes/Tournament.js';
-import { joinTournamentRoom, tournamentQueue, tournamentRoom } from '../state/tournamentRoom.js';
+import { joinTournamentRoom, tournamentRoom } from '../state/tournamentRoom.js';
 import { gameEvents } from '../events/gameEvents.js';
+import { connectedRoomInstance } from '../state/connectedRoom.js';
 
 // Mock WebSocket
 class MockSocket {
@@ -61,51 +58,18 @@ describe('Tournament Game', () => {
 
     beforeEach(() => {
         // Reset rooms and mocks
-        connectedRoom.clear();
+        connectedRoomInstance.clear();
         socket1 = new MockSocket();
         socket2 = new MockSocket();
         socket3 = new MockSocket();
         socket4 = new MockSocket();
 
-        connectedRoom.set('player1', {
-            id: 'player1',
-            socket: socket1,
-            status: 'CONNECT_ROOM',
-            matchId: '',
-            name: 'Player 1',
-            tournamentId: undefined,
-            chat: new ChatManager("player1")
-        });
+        connectedRoomInstance.add('player1', socket1 as any);   
+        connectedRoomInstance.add('player2', socket2 as any);
+        connectedRoomInstance.add('player3', socket3 as any);
+        connectedRoomInstance.add('player4', socket4 as any);
 
-        connectedRoom.set('player2', {
-            id: 'player2',
-            socket: socket2,
-            status: 'CONNECT_ROOM',
-            matchId: '',
-            name: 'Player 2',
-            tournamentId: undefined,
-            chat: new ChatManager("player2")
-        });
-
-        connectedRoom.set('player3', {
-            id: 'player3',
-            socket: socket3,
-            status: 'CONNECT_ROOM',
-            matchId: '',
-            name: 'Player 3',
-            tournamentId: undefined,
-            chat: new ChatManager("player3")
-        });
-
-        connectedRoom.set('player4', {
-            id: 'player4',
-            socket: socket4,
-            status: 'CONNECT_ROOM',
-            matchId: '',
-            name: 'Player 4',
-            tournamentId: undefined,
-            chat: new ChatManager("player4")
-        });
+        
     });
 
     it('should start the tournament', async () => {
@@ -115,10 +79,10 @@ describe('Tournament Game', () => {
         joinTournamentRoom('player4');
 
         // Check that players are in TOURNAMENT_ROOM
-        expect(connectedRoom.get('player1')?.status).toBe('TOURNAMENT_ROOM');
-        expect(connectedRoom.get('player2')?.status).toBe('TOURNAMENT_ROOM');
-        expect(connectedRoom.get('player3')?.status).toBe('TOURNAMENT_ROOM');
-        expect(connectedRoom.get('player4')?.status).toBe('TOURNAMENT_ROOM');
+        expect(connectedRoomInstance.getById('player1')?.status).toBe('TOURNAMENT_ROOM');
+        expect(connectedRoomInstance.getById('player2')?.status).toBe('TOURNAMENT_ROOM');
+        expect(connectedRoomInstance.getById('player3')?.status).toBe('TOURNAMENT_ROOM');
+        expect(connectedRoomInstance.getById('player4')?.status).toBe('TOURNAMENT_ROOM');
 
         // Check that a tournament has been created
         expect(tournamentRoom.size).toBe(1);
@@ -127,10 +91,10 @@ describe('Tournament Game', () => {
         
         // Check that players have a tournamentId
         
-        expect(connectedRoom.get('player1')?.tournamentId).toBe(tournamentId);
-        expect(connectedRoom.get('player2')?.tournamentId).toBe(tournamentId);
-        expect(connectedRoom.get('player3')?.tournamentId).toBe(tournamentId);
-        expect(connectedRoom.get('player4')?.tournamentId).toBe(tournamentId);
+        expect(connectedRoomInstance.getById('player1')?.tournamentId).toBe(tournamentId);
+        expect(connectedRoomInstance.getById('player2')?.tournamentId).toBe(tournamentId);
+        expect(connectedRoomInstance.getById('player3')?.tournamentId).toBe(tournamentId);
+        expect(connectedRoomInstance.getById('player4')?.tournamentId).toBe(tournamentId);
         
         // Simulate tournament progression and check for winner
         gameEvents.emit('tournament_match_end', {
@@ -174,21 +138,14 @@ describe('Tournament Game', () => {
 
 describe('Tournament Game - Disconnects', () => {
     beforeEach(() => {
-        connectedRoom.clear();
+        connectedRoomInstance.clear();
         tournamentRoom.clear();
 
         // Mock players
         const players = ['player1', 'player2', 'player3', 'player4'];
         for (const id of players) {
-            connectedRoom.set(id, {
-                id,
-                socket: { send: vi.fn() },
-                status: 'CONNECT_ROOM',
-                matchId: '',
-                name: id,
-                tournamentId: undefined,
-                chat: new ChatManager(id)
-            });
+            const socket = new MockSocket();
+            connectedRoomInstance.add(id, socket as any);
         }
     });
 

@@ -1,9 +1,8 @@
 import { gameEvents } from "../events/gameEvents.js";
+import { connectedRoomInstance } from "../state/connectedRoom.js";
 import { tournamentRoom } from "../state/tournamentRoom.js";
 import { EndMatchEventType } from "../types/EndMatchEventType.js";
-import { PlayerType } from "../types/PlayerType.js";
 import { PingPong } from "./PingPong.js";
-import { connectedRoom } from "../state/connectedRoom.js";
 
 class Tournament {
     tournamentId: string;
@@ -74,7 +73,7 @@ class Tournament {
             this.currentRoundWinners.add(winnerId);
             this.currentBracket.delete(loserId);
 
-            const loserPlayer = connectedRoom.get(loserId);
+            const loserPlayer = connectedRoomInstance.getById(loserId);
             if (loserPlayer) {
                 loserPlayer.chat.sendMessage('INTRA', `you have been eliminated from the tournament.`, loserPlayer.id);
             };
@@ -84,7 +83,7 @@ class Tournament {
             
             if (this.rounds > 1) {
                 for (const winnerId of this.nextBracket) {
-                    const player = connectedRoom.get(winnerId);
+                    const player = connectedRoomInstance.getById(winnerId);
                     if (player) {
                         player.chat.sendMessage("INTRA", "You have advanced to the next phase!", player.id);
                     }
@@ -110,7 +109,7 @@ class Tournament {
     }
 
     async endTournament(id: string) {
-        const player = connectedRoom.get(id);
+        const player = connectedRoomInstance.getById(id);;
         if (player) {
             player.chat.sendMessage('INTRA', "Congratulations! You are the champion of the tournament!", player.id);
             player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));

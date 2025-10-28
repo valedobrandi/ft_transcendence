@@ -1,17 +1,22 @@
 // websocket.test.ts
-import { beforeAll, afterAll, describe, it, expect } from 'vitest'
+import { beforeAll, afterAll, describe, it, expect, vi } from 'vitest'
 import WebSocket from 'ws'
-
 import { fastify } from '../server.js';
-import { connectedRoom } from '../state/connectedRoom.js';
-import { ConnectType } from '../sockets/types.js';
+import { connectedRoomInstance } from '../state/connectedRoom.js';
+import { authenticationRoomInstance } from '../state/authenticationRoom.js';
+import { waitForMessage } from './utils.js';
 
 
-let port: number;
+let port: number | null = null;
 
 beforeAll(async () => {
-    const server = await fastify.listen({ port: 0 });
-    port = fastify.server.address().port;
+    vi.spyOn(authenticationRoomInstance, 'verify').mockReturnValue(true);
+
+    connectedRoomInstance.clear();
+    await fastify.listen({ port: 0 });
+    const adress = fastify.server.address();
+
+    if (adress) port = typeof adress === 'string' ? null : adress.port;
 });
 
 afterAll(async () => {
@@ -24,19 +29,18 @@ describe('WebSocket connect/disconnect logic', () => {
 
         await new Promise(resolve => ws.once('open', resolve));
         // CONNECT_ROOM should add the client to connectedRoom
-        const action = JSON.stringify({ type: 'CONNECT', id: 'test-client-1' })
+        const action = JSON.stringify({ type: 'CONNECT', id: 'test-client-1', code: 'valid-code' });
 
         ws.send(action);
-
-        await new Promise(res => setTimeout(res, 50));
-
-        expect(connectedRoom.size).toBe(1);
+        
+        await waitForMessage(ws, "message", "CONNECT_ROOM");
+        expect(connectedRoomInstance.size()).toBe(1);
 
         ws.close();
 
         await new Promise<void>((resolve) => ws.once('close', resolve));
 
-        expect(connectedRoom.size).toBe(0);
+        expect(connectedRoomInstance.size()).toBe(0);
 
     });
 

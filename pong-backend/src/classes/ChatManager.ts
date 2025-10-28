@@ -1,4 +1,4 @@
-import { connectedRoom } from "../state/connectedRoom.js";
+import { connectedRoomInstance } from "../state/connectedRoom.js";
 
 class ChatManager {
 
@@ -9,7 +9,7 @@ class ChatManager {
     }
  */
     sendMessage(receiver: string, message: string, sender: string) {
-        const send = connectedRoom.get(this.userId);
+        const send = connectedRoomInstance.getById(this.userId);
 
         if (send) {
             send.socket.send(JSON.stringify({

@@ -7,14 +7,16 @@
     "prestart": "npm run build",
     "start": "node dist/start.js",
     "dev": "nodemon",
-    "test": "docker exec -it pong-backend npx vitest run"
+    "test": "docker exec -it pong-backend npx vitest run",
+    "seed": "node --loader ts-node/esm ./database/seeds/usersTable.ts"
   },
   "dependencies": {
     "@fastify/websocket": "^11.2.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.4.1",
     "fastify": "^5.6.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "resend": "^6.3.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

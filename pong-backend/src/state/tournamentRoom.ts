@@ -1,7 +1,6 @@
 import { Tournament } from "../classes/Tournament.js";
 import { tournamentEvent } from "../events/tournamentQueueEvent.js";
-import { PlayerType } from "../types/PlayerType.js";
-import { connectedRoom } from "./connectedRoom.js";
+import { connectedRoomInstance } from "./connectedRoom.js";
 
 export const tournamentQueue: Set<string> = new Set();
 
@@ -9,7 +8,7 @@ export const tournamentRoom = new Map<string, Tournament>();
 
 export function joinTournamentRoom(id: string) {
 	tournamentQueue.add(id);
-    const player = connectedRoom.get(id);
+    const player = connectedRoomInstance.getById(id);
     if (player == undefined) return;
 	player.status = 'TOURNAMENT_ROOM';
 
@@ -30,7 +29,7 @@ export function getTournamentPlayers(): string[] | undefined {
         if (next.done) break;
 
         const id = next.value;
-        if (!connectedRoom.has(id)) {
+        if (!connectedRoomInstance.has(id)) {
             tournamentQueue.delete(id);
             continue;
         }
@@ -53,7 +52,7 @@ tournamentEvent.on('ready', () => {
     const newTournament = new Tournament(tournamentId);
 
     for (const id of tournamentPlayers) {
-        const player = connectedRoom.get(id);
+        const player = connectedRoomInstance.getById(id);
         if (player == undefined) continue;
         player.tournamentId = tournamentId;
         newTournament.add(id);

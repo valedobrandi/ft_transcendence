@@ -1,7 +1,6 @@
 import { PingPong } from "../classes/PingPong.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";
-import { PlayerType } from "../types/PlayerType.js";
-import { connectedRoom } from "./connectedRoom.js";
+import { connectedRoomInstance } from "./connectedRoom.js";
 
 export const matchQueue: Set<string> = new Set();
 
@@ -9,7 +8,7 @@ export const gameRoom = new Map<string, PingPong>();
 
 export function joinMatchRoom(id: string) {
 	matchQueue.add(id);
-    const player = connectedRoom.get(id);
+    const player = connectedRoomInstance.getById(id);
     if (player == undefined) return;
 	player.status = 'MATCH_QUEUE';
 	player.socket.send(JSON.stringify({ status: 200, message: 'MATCH_ROOM' }))
@@ -32,7 +31,7 @@ export function getNextPlayers(): [string, string] | undefined {
         if (next.done) break;
 
         const id = next.value;
-        if (!connectedRoom.has(id)) {
+        if (!connectedRoomInstance.has(id)) {
             matchQueue.delete(id);
             continue;
         }
