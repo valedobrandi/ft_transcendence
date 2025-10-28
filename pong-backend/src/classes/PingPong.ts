@@ -9,7 +9,7 @@ const WIN_SCORE = 2
 class PingPong {
     machId: string;
     tournamentId: string | undefined;
-    playersIds = new Set<{ id: string, disconnect: boolean }>();
+    playersIds = new Map<string, { disconnect: boolean }>();
     inputs: Map<string, { up: boolean; down: boolean }>;
     initialBallSpeed: number = 0.003;
     gameState: userGameStateType;
@@ -166,12 +166,12 @@ class PingPong {
                 timeout: this.drawMatch
             })
         } else {
-            this.playersIds.forEach(({ id, disconnect }) => {
+            for (const [id, { disconnect }] of this.playersIds) {
                 const player = this.getPlayer(id);
                 if (!player) return;
                 player.status = 'CONNECT_ROOM';
                 player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
-            });
+            };
         }
 
         gameRoom.delete(this.machId);
@@ -184,7 +184,7 @@ class PingPong {
     }
 
     add(id: string) {
-        this.playersIds.add({ id, disconnect: false });
+        this.playersIds.set(id, { disconnect: false });
         this.inputs.set(id, { up: false, down: false });
     }
 
@@ -201,7 +201,7 @@ class PingPong {
         };
 
         const message = JSON.stringify(payload);
-        for (const { id, disconnect } of this.playersIds.values()) {
+        for (const [id, { disconnect }] of this.playersIds) {
             const player = this.getPlayer(id);
             if (!player) continue;
             if (player.socket.readyState === 1) {
@@ -222,12 +222,12 @@ class PingPong {
 
         gameRoom.set(this.machId, this);
 
-        this.playersIds.forEach(({ id, disconnect }) => {
+        for (const [id, { disconnect }] of this.playersIds) {
             const isConnect = this.getPlayer(id);
             if (isConnect) {
                 isConnect.status = 'GAME_ROOM';
             }
-        });
+        };
 
         this.side.LEFT = playerXId;
         this.side.RIGHT = playerYId;
@@ -241,15 +241,14 @@ class PingPong {
 
     disconnect(playerId: string) {
         if (this.matchState === 'ENDED') return;
-        this.playersIds.forEach(({ id, disconnect }) => {
-            if (id === playerId) {
-                disconnect = true;
-            }
-        });
+        const player = this.playersIds.get(playerId);
+        if (player) player.disconnect = true;
     }
 
     handleMatch() {
-        const isDisconnected = Array.from(this.playersIds.values()).every(({ id, disconnect }) => disconnect === false);
+        const isDisconnected = [...this.playersIds.values()]
+            .every(({ disconnect }) => disconnect)
+
         if (isDisconnected ||
             this.gameState.userX.score === WIN_SCORE ||
             this.gameState.userY.score === WIN_SCORE) {
@@ -286,10 +285,11 @@ class PingPong {
 
 
     messages(type: string) {
-        const getArrayPlayers = Array.from(this.playersIds.values()).map(({ id, disconnect }) => id);
+        const playerX = Array.from(this.playersIds.keys())[0];
+        const playerY = Array.from(this.playersIds.keys())[0];
         switch (type) {
             case "MATCH_CREATED":
-                getArrayPlayers.forEach((id) => {
+                for (const [id, { disconnect }] of this.playersIds) {
                     const player = this.getPlayer(id);
                     if (!player) return;
                     player.status = 'GAME_ROOM';
@@ -300,15 +300,15 @@ class PingPong {
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_ROOM',
-                        payload: { message: `${getArrayPlayers[0]} vs ${getArrayPlayers[1]}` },
+                        payload: { message: `${playerX} vs ${playerY}` },
                         side: side,
                         id: player.id
                     }));
-                });
+                };
                 break;
             case "GAME_OVER":
 
-                getArrayPlayers.forEach((id) => {
+                for (const [id, { disconnect }] of this.playersIds) {
                     const player = this.getPlayer(id);
                     if (!player) return;
                     player.socket.send(JSON.stringify({
@@ -325,12 +325,12 @@ class PingPong {
                             userY: this.gameState.userY.score,
                         }
                     }));
-                });
+                };
                 break;
             case "COUNTDOWN":
                 const conter = { time: 10 };
                 const countdownInterval = setInterval(() => {
-                    this.playersIds.forEach(({ id, disconnect }) => {
+                    for (const [id, { disconnect }] of this.playersIds) {
                         const player = this.getPlayer(id);
                         if (!player) return;
                         this.send();
@@ -339,13 +339,12 @@ class PingPong {
                             message: 'COUNTDOWN',
                             payload: { seconds: conter.time }
                         }));
-                    });
+                    };
 
                     if (conter.time <= 0) {
                         clearInterval(countdownInterval);
                         this.startGame();
                     }
-
                     conter.time--;
                 }, 1000);
                 break;

@@ -17,10 +17,14 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: cd pong-frontend && npm ci
+
+      - name: Install backend dependencies
         run: cd pong-backend && npm ci
 
-      - name: Run tests
+      - name: Run Frontend tests
         run: cd pong-frontend && npm run test
+
+      - name: Run Backend tests
         run: cd pong-backend && npm run test

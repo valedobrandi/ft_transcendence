@@ -22,9 +22,9 @@ export function socketHandler(connection: WebSocket, req: FastifyRequest) {
                 if (match) match.disconnect(player.id);
                 
                 disconnectWebsocket(id);
+                break;
             } 
             
-            break;
         }
     });
 }
