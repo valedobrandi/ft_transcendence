@@ -19,6 +19,8 @@ jobs:
 
       - name: Install dependencies
         run: cd pong-frontend && npm ci
+        run: cd pong-backend && npm ci
 
       - name: Run tests
         run: cd pong-frontend && npm run test
+        run: cd pong-backend && npm run test
