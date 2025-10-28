@@ -6,10 +6,12 @@ import db from '../db.js';
 export default function friend(fastify: FastifyInstance)
 {
     //add friend
-    fastify.post('/user/:id/friends', (request: FastifyRequest<{Params: {user_id: string}, Body: {friend_id: string}}>, reply) => 
+    fastify.post('/user/:id/friends', (request: FastifyRequest<{Params: {id: string}, Body: {friend_id: string}}>, reply) => 
     {
-        const user_id = Number(request.params.user_id);
+        const user_id = Number(request.params.id);
         const friend_id = Number(request.body.friend_id);
+        console.log("USER ",user_id);
+        console.log("FRIEND ", friend_id);
         
         const existIdUser = db.prepare("SELECT * FROM users WHERE id = ?").get(user_id) as User;
         const existIdFriend = db.prepare("SELECT * FROM users WHERE id = ?").get(friend_id) as User;
