@@ -5,6 +5,7 @@
     },
     "scripts": {
         "test:frontend": "cd pong-frontend && npm run test",
-        "test": "npm run test:frontend"
+        "test": "npm run test:frontend",
+        "dev": "docker compose up --build pong-backend pong-frontend"
     }
 }
