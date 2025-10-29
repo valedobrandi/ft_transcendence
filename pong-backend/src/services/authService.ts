@@ -3,11 +3,11 @@ import { AuthModel } from "../models/authModel.js";
 import { connectedRoomInstance } from "../state/connectedRoom.js";
 import db from "../db.js";
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
+const RESEND_API_KEY = process.env.RESEND_API_KEYsss;
 
 class AuthService {
 
-    private resend = new Resend(RESEND_API_KEY);
+    private resend = new Resend(RESEND_API_KEY || "123");
     private authModelInstance = new AuthModel(db);
 
     static generate2FACode(): string {
@@ -30,11 +30,12 @@ class AuthService {
         if (findUserAtDatabase !== undefined) {
             return { valid: false, error: 'username in use' };
         }
-        
+
         const findAtConnectedRoom = connectedRoomInstance.getById(username);
         if (findAtConnectedRoom !== undefined) {
             return { valid: false, error: 'username in use' };
         }
+		connectedRoomInstance.addUser(username);
         return { valid: true };
     }
 

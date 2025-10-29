@@ -11,6 +11,7 @@
         "seed": "node --loader ts-node/esm ./database/seeds/usersTable.ts"
     },
     "dependencies": {
+        "@fastify/cors": "^11.1.0",
         "@fastify/websocket": "^11.2.0",
         "bcrypt": "^6.0.0",
         "better-sqlite3": "^12.4.1",

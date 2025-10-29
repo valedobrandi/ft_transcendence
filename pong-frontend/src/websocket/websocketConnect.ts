@@ -1,11 +1,23 @@
 import { id } from "../app";
+import { setupPaddleListeners } from "../events/paddleListeners";
 import { getSocket } from "../websocket";
+import { websocketReceiver } from "./websocketReceiver";
 
 export function websocketConnect() {
-    getSocket().onopen = () => {
-        getSocket().send(JSON.stringify({
-            type: "CONNECT", 
-            id 
-        }));
-    }
+	const socket = getSocket();
+	if (socket === null) return;
+	socket.onopen = () => {
+		socket.send(JSON.stringify({
+			type: "CONNECT",
+			username: id.username
+		}));
+		websocketReceiver(socket);
+		setupPaddleListeners((up, down) => {
+			socket.send(JSON.stringify({
+				type: "MOVE_PADDLE",
+				username: id.username,
+				payload: { up, down }
+			}))
+		});
+	}
 };

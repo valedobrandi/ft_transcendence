@@ -1,7 +1,5 @@
 import { guestView, intraView, loginView, matchView, registerView, singInView, twoFactorAuthenticationView } from "./views";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
-
 export function navigateTo(path: string, viewFn: (root: HTMLElement) => void) {
     history.pushState({}, "", path);
     const root = document.getElementById("root")!;
@@ -32,19 +30,20 @@ export function setTime(ms: number, func: () => void): Promise<void> {
 
 export async function fetchRequest(
     endpoint: string,
+	method: string,
     headers: Record<string, string>,
     options: Record<string, string> = {}) {
 
-    const url = `${BASE_URL}${endpoint}`;
+    const url = `http://${endpoint}`;
     const defaultHeaders = {
         'Content-Type': 'application/json',
-        // Add auth token 
+        // Add auth token
         // 'Authorization': `Bearer ${token}`,
     };
 
     try {
         const response = await fetch(url, {
-            method: 'GET',
+            method: method,
             headers: { ...defaultHeaders, ...headers },
             ...options,
         });

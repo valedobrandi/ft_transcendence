@@ -39,7 +39,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         const insertNewUserInDB = db.prepare('INSERT INTO users (email, username, password) VALUES (?,?,?)');
         insertNewUserInDB.run(email, username, hash);
 
-        return reply.status(201).send({ message: 'connection sucessfull', payload: { code: undefined } });
+        return reply.status(201).send({ message: 'connected', payload: { code: undefined } });
     });
 
     fastify.post('/login', async (request: FastifyRequest<{ Body: RegisterBody }>, reply) => {

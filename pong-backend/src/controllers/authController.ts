@@ -15,7 +15,7 @@ class AuthController {
             authenticationRoomInstance.delete(username);
             connectedRoomInstance.addUser(username);
             return res.status(200).send({
-                message: 'connection sucessfull', payload: { username }
+                message: 'connected', payload: { username }
             });
         }
         return res.status(400).send({ error: 'Invalid 2FA code' });
@@ -25,11 +25,10 @@ class AuthController {
 
         const { username } = req.body;
         const validation = await this.authServiceInstance.guestLoginValidation(username);
-        
+
         if (validation.valid === true) {
-            connectedRoomInstance.addUser(username);
             return res.status(200).send({
-                message: 'connection sucessfull', payload: { username }
+                message: 'connected', payload: { username }
             });
         }
 

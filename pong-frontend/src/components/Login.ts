@@ -1,5 +1,5 @@
 import { navigateTo } from "../utils";
-import { registerView, singInView } from "../views";
+import { guestView, registerView, singInView } from "../views";
 import { Button } from "./Button";
 
 export function Login(): HTMLElement {
@@ -15,7 +15,7 @@ export function Login(): HTMLElement {
     title.textContent = "Ft_transcendence Ping-Pong";
     viewDiv.appendChild(title);
 
-	const guestBtn = Button("guest", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/guest", registerView));	
+	const guestBtn = Button("guest", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/guest", guestView));
     const singInBtn = Button("login", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/sing-in", singInView));
 	const registerBtn = Button("sing in", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/register", registerView));
 

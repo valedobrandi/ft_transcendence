@@ -6,11 +6,13 @@ import { connectedRoomInstance } from '../state/connectedRoom.js';
 import { waitForMessage } from './utils.js';
 import { gameRoom } from '../state/gameRoom.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
+import { AuthService } from '../services/authService.js';
 
 let port: number | null = null;
 
 beforeAll(async () => {
     vi.spyOn(authenticationRoomInstance, 'verify').mockReturnValue(true);
+
     await fastify.listen({ port: 0 });
     const adress = fastify.server.address();
     if (adress) port = typeof adress === 'string' ? null : adress.port;
@@ -22,16 +24,21 @@ afterAll(async () => {
 
 describe('MATCH', () => {
 
+	const authService = new AuthService();
     it('Start a Match With Sucess', async () => {
         if (!port) throw new Error('Server port not initialized');
         const ws = new WebSocket(`ws://localhost:${port}/ws`);
         let response: any;
 
         await new Promise<void>(resolve => ws.once('open', resolve));
-        ws.on('message', msg => console.log('Received:', msg.toString()));
+
+		authService.guestLoginValidation('test-client-1');
+		authService.guestLoginValidation('test-client-2');
+
+        expect(connectedRoomInstance.size()).toBe(2);
+
         const test_client_1 = JSON.stringify({ type: 'CONNECT', username: 'test-client-1', code: '123456' });
         const test_client_2 = JSON.stringify({ type: 'CONNECT', username: 'test-client-2', code: '123456' });
-
 
         ws.send(test_client_1);
         response = await waitForMessage(ws, "message", "CONNECT_ROOM");
@@ -41,7 +48,6 @@ describe('MATCH', () => {
         response = await waitForMessage(ws, "message", "CONNECT_ROOM");
         expect(response.message).toContain("CONNECT_ROOM");
 
-        expect(connectedRoomInstance.size()).toBe(2);
 
         const match_request_1 = JSON.stringify({ type: 'MATCH', username: 'test-client-1' });
         const match_request_2 = JSON.stringify({ type: 'MATCH', username: 'test-client-2' });

@@ -5,7 +5,7 @@ import type { WebSocket } from 'ws';
 export class ConnectedRoom {
     private room = new Map<string, PlayerType>();
 
-    addUser(name: string) {
+    addUser(name: string): Boolean {
         const user: PlayerType = {
             id: name,
             name: name,
@@ -18,16 +18,19 @@ export class ConnectedRoom {
 
         if (this.room.has(name) === false) {
             this.room.set(name, user);
+			return true;
         }
+		return false;
     }
 
-    addWebsocket(id: string, socket: WebSocket) {
+    addWebsocket(id: string, socket: WebSocket): Boolean {
         const player = this.room.get(id);
         if (player) {
             player.socket = socket;
-            this.room.set(id, player);
             this.broadcast();
+			return true;
         }
+		return false;
     }
 
     dropWebsocket(id: string) {

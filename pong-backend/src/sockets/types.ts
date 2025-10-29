@@ -5,29 +5,29 @@ export type ConnectType = {
 
 export type MatchType = {
     type: 'MATCH';
-    id: string;
     username: string;
+    id: string;
 };
 
 export type MovePaddleType = {
     type: 'MOVE_PADDLE';
-    id: string;
+    username: string;
     payload: { up: boolean; down: boolean };
 };
 
 export type PlayType = {
     type: 'PLAY';
-    id: string;
+    username: string;
 };
 
 export type Tournamentype = {
     type: 'TOURNAMENT';
-    id: string;
+    username: string;
 };
 
 export type InputType = {
     type: 'input';
-    id: string;
+    username: string;
     payload: { up: boolean; down: boolean };
 }
 

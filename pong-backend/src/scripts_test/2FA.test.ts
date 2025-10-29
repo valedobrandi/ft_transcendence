@@ -57,7 +57,7 @@ describe('2FA', () => {
         });
 
         expect(verify2fRoute.statusCode).toBe(200);
-        expect(verify2fRoute.json().message).toBe('connection sucessfull');
+        expect(verify2fRoute.json().message).toBe('connected');
 
         const action = JSON.stringify({ type: 'CONNECT', username: 'alice', code });
         ws.send(action);

@@ -4,9 +4,10 @@ export function InputName() {
 
 	const legend = document.createElement("legend");
 	legend.className = "text-sm font-semibold text-gray-700 upercase";
-	legend.textContent = "NICKNAME";
+	legend.textContent = "USERNAME";
 
 	const nameInput = document.createElement("input");
+	nameInput.id = 'guest-username';
 	nameInput.type = "text";
 	nameInput.placeholder = "...";
 	nameInput.className = `px-4 py-2 border rounded w-full

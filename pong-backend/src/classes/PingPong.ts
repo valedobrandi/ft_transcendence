@@ -101,6 +101,8 @@ class PingPong {
             const normalized = collidePoint / (paddleHeight / 2);
 
             const clamped = Math.max(-1, Math.min(1, normalized));
+			const eased = clamped * Math.abs(clamped);
+			const maxBounceAngle = Math.PI / 3;
             const angle = Math.pow(clamped, 3) * Math.PI / 4;
             const direction = ball.x < 0.5 ? 1 : -1;
 
