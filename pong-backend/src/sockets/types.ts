@@ -1,7 +1,6 @@
 export type ConnectType = {
     type: 'CONNECT';
     username: string;
-    code: string;
 };
 
 export type MatchType = {

@@ -11,7 +11,9 @@ export function joinMatchRoom(id: string) {
     const player = connectedRoomInstance.getById(id);
     if (player == undefined) return;
 	player.status = 'MATCH_QUEUE';
-	player.socket.send(JSON.stringify({ status: 200, message: 'MATCH_ROOM' }))
+    if (player.socket) {
+        player.socket.send(JSON.stringify({ status: 200, message: 'MATCH_ROOM' }))
+    }
 
 	if (matchQueue.size >= 2) {
 		matchQueueEvent.emit('ready');

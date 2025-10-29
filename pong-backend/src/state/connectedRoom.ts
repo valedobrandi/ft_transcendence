@@ -5,11 +5,11 @@ import type { WebSocket } from 'ws';
 export class ConnectedRoom {
     private room = new Map<string, PlayerType>();
 
-    add(name: string, connection: WebSocket) {
+    addUser(name: string) {
         const user: PlayerType = {
             id: name,
             name: name,
-            socket: connection,
+            socket: undefined,
             status: 'CONNECT_ROOM',
             matchId: "",
             tournamentId: "",
@@ -18,13 +18,21 @@ export class ConnectedRoom {
 
         if (this.room.has(name) === false) {
             this.room.set(name, user);
+        }
+    }
+
+    addWebsocket(id: string, socket: WebSocket) {
+        const player = this.room.get(id);
+        if (player) {
+            player.socket = socket;
+            this.room.set(id, player);
             this.broadcast();
         }
     }
 
     dropWebsocket(id: string) {
         const player = this.room.get(id);
-        if (player) player.socket.close();
+        if (player && player.socket) player.socket.close();
     }
 
     disconnect(id: string) {
@@ -38,7 +46,7 @@ export class ConnectedRoom {
         users.unshift({ id: 'INTRA', name: 'INTRA' });
 
         this.room.forEach(({ socket }) => {
-            socket.send(JSON.stringify({ message: 'CONNECTED_USERS', users }));
+           if (socket) socket.send(JSON.stringify({ message: 'CONNECTED_USERS', users }));
         });
     }
 

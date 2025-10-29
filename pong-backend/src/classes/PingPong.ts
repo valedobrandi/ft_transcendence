@@ -155,7 +155,9 @@ class PingPong {
                 const playerLoser = this.getPlayer(this.loserId);
                 if (playerLoser) {
                     playerLoser.status = 'CONNECT_ROOM';
-                    playerLoser.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                    if (playerLoser.socket) {
+                        playerLoser.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                    }
                 }
             }
             gameEvents.emit('tournament_match_end', {
@@ -170,7 +172,9 @@ class PingPong {
                 const player = this.getPlayer(id);
                 if (!player) return;
                 player.status = 'CONNECT_ROOM';
-                player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                if (player.socket) {
+                    player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                }
             };
         }
 
@@ -204,7 +208,7 @@ class PingPong {
         for (const [id, { disconnect }] of this.playersIds) {
             const player = this.getPlayer(id);
             if (!player) continue;
-            if (player.socket.readyState === 1) {
+            if (player && player.socket &&  player.socket.readyState === 1) {
                 player.socket.send(message);
             }
         }
@@ -297,6 +301,7 @@ class PingPong {
                     player.matchId = this.machId;
 
                     console.log(`Sending GAME_ROOM to ${player.id} as ${side}`);
+                    if (!player.socket) return;
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_ROOM',
@@ -310,7 +315,7 @@ class PingPong {
 
                 for (const [id, { disconnect }] of this.playersIds) {
                     const player = this.getPlayer(id);
-                    if (!player) return;
+                    if (!player || !player.socket) return;
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_OVER',
@@ -334,6 +339,7 @@ class PingPong {
                         const player = this.getPlayer(id);
                         if (!player) return;
                         this.send();
+                        if (!player.socket) return;
                         player.socket.send(JSON.stringify({
                             status: 200,
                             message: 'COUNTDOWN',

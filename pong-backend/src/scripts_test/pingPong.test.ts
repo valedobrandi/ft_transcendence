@@ -24,9 +24,9 @@ describe('PingPong Game', () => {
         socket1 = new MockSocket();
         socket2 = new MockSocket();
 
-        connectedRoomInstance.add('player1', socket1 as any);
+        connectedRoomInstance.addUser('player1', socket1 as any);
 
-        connectedRoomInstance.add('player2', socket2 as any);
+        connectedRoomInstance.addUser('player2', socket2 as any);
 
         game = new PingPong('match-1');
         game.createMatch('player1', 'player2');
@@ -79,9 +79,9 @@ describe('PingPong Game - Disconnects', () => {
         socket1 = new MockSocket();
         socket2 = new MockSocket();
 
-        connectedRoomInstance.add('player1', socket1 as any);
+        connectedRoomInstance.addUser('player1', socket1 as any);
 
-        connectedRoomInstance.add('player2', socket2 as any);
+        connectedRoomInstance.addUser('player2', socket2 as any);
 
         game = new PingPong('match-1');
         game.createMatch('player1', 'player2');

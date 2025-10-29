@@ -80,7 +80,7 @@ class Tournament {
         }
         if (this.matchs === this.rounds) {
             this.nextBracket = new Set(this.currentRoundWinners);
-            
+
             if (this.rounds > 1) {
                 for (const winnerId of this.nextBracket) {
                     const player = connectedRoomInstance.getById(winnerId);
@@ -112,8 +112,10 @@ class Tournament {
         const player = connectedRoomInstance.getById(id);;
         if (player) {
             player.chat.sendMessage('INTRA', "Congratulations! You are the champion of the tournament!", player.id);
-            player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
             player.status = 'CONNECT_ROOM';
+            if (player.socket) {
+                player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+            }
         };
         tournamentRoom.delete(this.tournamentId);
         this.cleanup();

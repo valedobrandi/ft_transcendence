@@ -51,7 +51,7 @@ describe('2FA', () => {
             method: 'POST',
             url: '/verify-2fa',
             body: {
-                user: 'alice',
+                username: 'alice',
                 code
             }
         });

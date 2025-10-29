@@ -11,7 +11,7 @@ class ChatManager {
     sendMessage(receiver: string, message: string, sender: string) {
         const send = connectedRoomInstance.getById(this.userId);
 
-        if (send) {
+        if (send && send.socket) {
             send.socket.send(JSON.stringify({
                 message: 'CHAT_MESSAGE',
                 receiver: receiver,
