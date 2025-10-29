@@ -1,10 +1,10 @@
-import { connectedRoom } from "../../state/connectedRoom.js";
 import type { WebSocket } from 'ws';
 import { PlayType } from "../types.js";
 import { gameRoom } from "../../state/gameRoom.js";
+import { connectedRoomInstance } from '../../state/connectedRoom.js';
 
 export function PLAY(data: PlayType, connection: WebSocket) {
-	const player = connectedRoom.get(data.id);
+	const player = connectedRoomInstance.getById(data.id);
 	if (player == undefined) return;
 
 	const room = gameRoom.get(player.matchId);

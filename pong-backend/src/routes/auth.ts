@@ -3,14 +3,20 @@ import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
 import { playerStatus } from '../enum_status/enum_userStatus.js';
-
 import db from '../db.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
+import { GuestPostSchema } from '../types/GuestRoute.js';
 
 export default async function authRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
+
+    fastify.post('/guest', {
+        schema: { body: GuestPostSchema },
+        handler: authController.guestLogin.bind(authController)
+    });
+
     fastify.post('/verify-2fa', authController.veryify2FA.bind(authController));
 
     fastify.post('/register', async (request: FastifyRequest<{ Body: RegisterBody }>, reply) => {
@@ -33,7 +39,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         const insertNewUserInDB = db.prepare('INSERT INTO users (email, username, password) VALUES (?,?,?)');
         insertNewUserInDB.run(email, username, hash);
 
-        return reply.status(201).send({ message: 'User created successfully' });
+        return reply.status(201).send({ message: 'connection sucessfull', payload: { code: undefined } });
     });
 
     fastify.post('/login', async (request: FastifyRequest<{ Body: RegisterBody }>, reply) => {

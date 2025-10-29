@@ -29,7 +29,7 @@ describe('WebSocket connect/disconnect logic', () => {
 
         await new Promise(resolve => ws.once('open', resolve));
         // CONNECT_ROOM should add the client to connectedRoom
-        const action = JSON.stringify({ type: 'CONNECT', id: 'test-client-1', code: 'valid-code' });
+        const action = JSON.stringify({ type: 'CONNECT', username: 'test-client-1', code: 'valid-code' });
 
         ws.send(action);
         

@@ -29,12 +29,11 @@ describe('MATCH', () => {
 
         await new Promise<void>(resolve => ws.once('open', resolve));
         ws.on('message', msg => console.log('Received:', msg.toString()));
-        const test_client_1 = JSON.stringify({ type: 'CONNECT', id: 'test-client-1', code: '123456' });
-        const test_client_2 = JSON.stringify({ type: 'CONNECT', id: 'test-client-2', code: '123456' });
+        const test_client_1 = JSON.stringify({ type: 'CONNECT', username: 'test-client-1', code: '123456' });
+        const test_client_2 = JSON.stringify({ type: 'CONNECT', username: 'test-client-2', code: '123456' });
 
 
         ws.send(test_client_1);
-        ws.on('message', msg => console.log('Received:', msg.toString()));
         response = await waitForMessage(ws, "message", "CONNECT_ROOM");
         expect(response.message).toContain("CONNECT_ROOM");
 
@@ -44,8 +43,8 @@ describe('MATCH', () => {
 
         expect(connectedRoomInstance.size()).toBe(2);
 
-        const match_request_1 = JSON.stringify({ type: 'MATCH', id: 'test-client-1' });
-        const match_request_2 = JSON.stringify({ type: 'MATCH', id: 'test-client-2' });
+        const match_request_1 = JSON.stringify({ type: 'MATCH', username: 'test-client-1' });
+        const match_request_2 = JSON.stringify({ type: 'MATCH', username: 'test-client-2' });
 
         ws.send(match_request_1);
         response = await waitForMessage(ws, "message", "MATCH_ROOM");

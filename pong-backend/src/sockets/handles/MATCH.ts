@@ -5,10 +5,10 @@ import { connectedRoomInstance } from '../../state/connectedRoom.js';
 
 
 export function MATCH(data: MatchType, connection: WebSocket) {
-	const player = connectedRoomInstance.getById(data.id);
+	const player = connectedRoomInstance.getById(data.username);
 	if (player == undefined || player.status != 'CONNECT_ROOM') return;
 
-	console.log(`Player matching: ${data.id}`);
+	console.log(`Player matching: ${data.username}`);
 
 	joinMatchRoom(player.id);
 }
