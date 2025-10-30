@@ -5,6 +5,7 @@ import db from '../db.js'
 
 export default function matchRoute(fastify: FastifyInstance)
 {
+    //create match
     fastify.post('/match', (request: FastifyRequest<{Body: MatchBody}>, reply) => 
     {
         const {player1_id, player2_id} = request.body;
@@ -16,8 +17,7 @@ export default function matchRoute(fastify: FastifyInstance)
             return reply.status(404).send({error: "player1 not found"});
         if (!existPlayer2)
             return reply.status(404).send({error: "player2 not found"});
-
-        
+ 
         const createMatch = db.prepare(`INSERT INTO matches (player1_id, player2_id, match_status) VALUES (?, ?, ?)`);
        
         const result = createMatch.run(player1_id, player2_id, matchStatus.WAITING);
@@ -27,6 +27,7 @@ export default function matchRoute(fastify: FastifyInstance)
         return reply.status(201).send({ message: 'Match created', match_id: result.lastInsertRowid });
     });
 
+    //update match
     fastify.put('/match', (request: FastifyRequest<{ Body: { match_id: number, score_player1: number, score_player2: number } }>, reply) =>
     {
         const { match_id, score_player1, score_player2 } = request.body;

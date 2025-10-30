@@ -7,8 +7,8 @@ async function testRegister()
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      email: 'juliette@hotmail.com',
-      username: 'julie',
+      email: 'jule@hotmail.com',
+      username: 'jule',
       password: 'pass'
     })
   });

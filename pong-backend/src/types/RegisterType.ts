@@ -13,7 +13,6 @@ export type User =
   twoFA_enabled: boolean;
   created_at: string;
   updated_at: string;
-  
 };
 
 export type RegisterBody =

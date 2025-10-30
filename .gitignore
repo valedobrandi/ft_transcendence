@@ -24,6 +24,11 @@ dist-ssr
 *.sln
 *.sw?
 
+#SQLite database
+pong-backend/database.db
+database.db
+*.db
+
 # Node modules
 /node_modules
 # Compilation output
