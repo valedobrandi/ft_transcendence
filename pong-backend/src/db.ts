@@ -13,6 +13,7 @@ db.exec(` CREATE TABLE IF NOT EXISTS users (
     status TEXT DEFAULT '${playerStatus.DISCONNECT}',
     wins INT DEFAULT 0,
     losses INT DEFAULT 0,
+    twoFA_enabled BOOLEAN DEFAULT 0,
     created_at DATE DEFAULT (date('now')),
     updated_at DATE DEFAULT (date('now')))`);
 

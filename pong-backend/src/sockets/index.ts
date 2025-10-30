@@ -1,8 +1,7 @@
 import { FastifyRequest } from "fastify/types/request.js";
 import { handleMessage } from "./handles/handler.js";
 import type { WebSocket } from 'ws';
-import { connectedRoom, disconnectWebsocket } from "../state/connectedRoom.js";
-import { gameRoom } from "../state/gameRoom.js";
+import { connectedRoomInstance } from "../state/connectedRoom.js";
 
 export function socketHandler(connection: WebSocket, req: FastifyRequest) {
     connection.send(JSON.stringify({ type: 'connected', message: 'Welcome!' }));
@@ -11,20 +10,12 @@ export function socketHandler(connection: WebSocket, req: FastifyRequest) {
             const msg = JSON.parse(raw.toString());
             handleMessage(connection, msg);
           } catch (err) {
-            connection.send(JSON.stringify({ type: 'error', error: 'Internal server error' }));
+            connection.send(JSON.stringify({ type: 'error', error: err }));
           }
     });
     connection.on('close', () => {
-        for (const [id, player] of connectedRoom.entries()) {
-            
-            if (player.socket === connection) {
-                const match = gameRoom.get(player.matchId);
-                if (match) match.disconnect(player.id);
-                
-                disconnectWebsocket(id);
-                break;
-            } 
-            
-        }
+        const user = connectedRoomInstance.getBySocket(connection);
+        if (user === undefined) return;
+        connectedRoomInstance.disconnect(user.id);
     });
 }

@@ -1,11 +1,11 @@
+import { connectedRoomInstance } from "../../state/connectedRoom.js";
 import { ChatType } from "../types.js";
-import { connectedRoom } from "../../state/connectedRoom.js";
 
 export function CHAT(data: ChatType) {
 
-    const to = connectedRoom.get(data.receiver);
+    const to = connectedRoomInstance.getById(data.receiver);
 
-    const from = connectedRoom.get(data.sender);
+    const from = connectedRoomInstance.getById(data.sender);
 
     if (!from || !to) return
 

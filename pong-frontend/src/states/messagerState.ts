@@ -1,8 +1,7 @@
 import { id } from "../app";
 import { navigateTo, setTime } from "../utils";
-import { intraView, matchView } from "../views";
 
-export function addMessage(chatId: string, chat: string, sender = id) {
+export function addMessage(chatId: string, chat: string, sender = id.username) {
     if (!messagerState.messages.has(chatId)) {
         messagerState.messages.set(chatId, []);
     }
@@ -23,7 +22,7 @@ export function renderMessages(chatId: string) {
     messages.forEach(msg => {
         const span = document.createElement('span');
         span.className = "font-bold lowercase";
-        span.textContent = msg.sender === id ? `` : `#${chatId}: `;
+        span.textContent = msg.sender === id.username ? `` : `#${chatId}: `;
         const p = document.createElement('p');
         p.id = 'id-message';
         p.className = "m-2 text-xs";
@@ -84,12 +83,12 @@ export const messagerState: MessagerStateType = new Proxy({
                     break;
                 case "GAME_ROOM":
                     setTime(5000, () => {
-                        navigateTo("/match", matchView);
+                        navigateTo("/match");
                     });
                     break;
                 case "GAME_OVER":
                     setTime(5000, () => {
-                        navigateTo("/intra", intraView);
+                        navigateTo("/intra");
                     });
                     break;
             }

@@ -10,6 +10,7 @@ export type User =
   status: playerStatus;
   wins: number;
   losses: number;
+  twoFA_enabled: boolean;
   created_at: string;
   updated_at: string;
 };

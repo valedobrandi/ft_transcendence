@@ -1,5 +1,7 @@
 {
-    "watch": ["src"],
+    "watch": [
+        "src"
+    ],
     "ext": "ts",
-    "exec":  "node --trace-warnings --loader ts-node/esm src/start.ts"
+    "exec": "node --trace-warnings --trace-uncaught --loader ts-node/esm src/start.ts"
 }

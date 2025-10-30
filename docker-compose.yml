@@ -29,9 +29,12 @@ services:
     environment:
       - ADRESS=192.0.7
       - RPC_URL=http://blockchain:8545
+      - RESEND_API_KEY=${RESEND_API_KEY}
     command: npm run dev
     networks:
       - transcedence-network
+    env_file:
+      - .env
 
   blockchain:
     build:
