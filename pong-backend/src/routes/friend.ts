@@ -21,7 +21,7 @@ export default function friend(fastify: FastifyInstance)
 
         const checkUserAlreadyFriend = db.prepare("SELECT * FROM friends WHERE (user_id = ? AND friend_id = ?) OR (friend_id = ? AND user_id = ?)").get(user_id, friend_id, friend_id, user_id);
         if(checkUserAlreadyFriend)
-            return reply.status(404).send({error: "friend exist already"});
+            return reply.status(409).send({error: "friendship already exists"});
 
         db.prepare("INSERT INTO friends (user_id, friend_id) VALUES (?, ?)").run(user_id , friend_id);
 
