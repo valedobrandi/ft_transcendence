@@ -1,8 +1,8 @@
 import { gameEvents } from "../events/gameEvents.js";
+import { connectedRoomInstance } from "../state/connectedRoom.js";
 import { gameRoom } from "../state/gameRoom.js";
 import { userGameStateType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
-import { connectedRoom } from "../state/connectedRoom.js";
 
 const WIN_SCORE = 2
 
@@ -39,7 +39,7 @@ class PingPong {
     }
 
     getPlayer(id: string): PlayerType | undefined {
-        return connectedRoom.get(id) || undefined;
+        return connectedRoomInstance.getById(id) || undefined;
     }
 
     resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
@@ -96,16 +96,17 @@ class PingPong {
             ballTop <= paddleBottom
         ) {
             const paddleCenter = player.y + paddleHeight / 2;
-
             const collidePoint = ball.y - paddleCenter;
             const normalized = collidePoint / (paddleHeight / 2);
-
             const clamped = Math.max(-1, Math.min(1, normalized));
-            const angle = Math.pow(clamped, 3) * Math.PI / 4;
-            const direction = ball.x < 0.5 ? 1 : -1;
 
-            ball.velocityX = direction * ball.speed * Math.cos(angle);
-            ball.velocityY = ball.speed * Math.sin(angle);
+            // Map to a fixed vertical velocity range
+            const maxVerticalSpeed = ball.speed * 0.75;
+            ball.velocityY = clamped * maxVerticalSpeed;
+
+            // Horizontal always goes full speed
+            const direction = ball.x < 0.5 ? 1 : -1;
+            ball.velocityX = direction * Math.sqrt(ball.speed ** 2 - ball.velocityY ** 2);
 
             if (ball.speed < 0.008) {
                 ball.speed += 0.001;
@@ -155,7 +156,9 @@ class PingPong {
                 const playerLoser = this.getPlayer(this.loserId);
                 if (playerLoser) {
                     playerLoser.status = 'CONNECT_ROOM';
-                    playerLoser.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                    if (playerLoser.socket) {
+                        playerLoser.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                    }
                 }
             }
             gameEvents.emit('tournament_match_end', {
@@ -170,7 +173,9 @@ class PingPong {
                 const player = this.getPlayer(id);
                 if (!player) return;
                 player.status = 'CONNECT_ROOM';
-                player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                if (player.socket) {
+                    player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                }
             };
         }
 
@@ -204,7 +209,7 @@ class PingPong {
         for (const [id, { disconnect }] of this.playersIds) {
             const player = this.getPlayer(id);
             if (!player) continue;
-            if (player.socket.readyState === 1) {
+            if (player && player.socket && player.socket.readyState === 1) {
                 player.socket.send(message);
             }
         }
@@ -233,7 +238,6 @@ class PingPong {
         this.side.RIGHT = playerYId;
 
         this.messages("MATCH_CREATED");
-        this.send();
         this.messages("COUNTDOWN");
 
         console.log(`match_created: ${this.machId} between ${playerXId} and ${playerYId}`);
@@ -285,22 +289,22 @@ class PingPong {
 
 
     messages(type: string) {
-        const playerX = Array.from(this.playersIds.keys())[0];
-        const playerY = Array.from(this.playersIds.keys())[0];
+        const [leftId, rightId] = Array.from(this.playersIds.keys());
         switch (type) {
             case "MATCH_CREATED":
                 for (const [id, { disconnect }] of this.playersIds) {
                     const player = this.getPlayer(id);
                     if (!player) return;
                     player.status = 'GAME_ROOM';
-                    const side = id === this.side.LEFT ? 'LEFT' : 'RIGHT';
                     player.matchId = this.machId;
 
-                    console.log(`Sending GAME_ROOM to ${player.id} as ${side}`);
+                    const side = id === leftId ? 'LEFT' : 'RIGHT';
+                    console.log(`Sending GAME_ROOM to ${leftId} as ${rightId}`);
+                    if (!player.socket) return;
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_ROOM',
-                        payload: { message: `${playerX} vs ${playerY}` },
+                        payload: { message: `${leftId} vs ${rightId}` },
                         side: side,
                         id: player.id
                     }));
@@ -310,7 +314,7 @@ class PingPong {
 
                 for (const [id, { disconnect }] of this.playersIds) {
                     const player = this.getPlayer(id);
-                    if (!player) return;
+                    if (!player || !player.socket) return;
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_OVER',
@@ -334,6 +338,7 @@ class PingPong {
                         const player = this.getPlayer(id);
                         if (!player) return;
                         this.send();
+                        if (!player.socket) return;
                         player.socket.send(JSON.stringify({
                             status: 200,
                             message: 'COUNTDOWN',

@@ -5,9 +5,10 @@ import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
 
 export function globalEventListeners() {
-
     setupPaddleListeners((up, down) => {
-        getSocket().send(JSON.stringify({
+		const socket = getSocket();
+		if (socket === null) return;
+        socket.send(JSON.stringify({
             type: "MOVE_PADDLE",
             id: id,
             payload: {up, down}

@@ -3,12 +3,13 @@ export function InputName() {
 	fieldset.className = "border p-4 rounded max-w-xs w-full";
 
 	const legend = document.createElement("legend");
-	legend.className = "text-sm font-semibold text-gray-700";
-	legend.textContent = "Name";
+	legend.className = "text-sm font-semibold text-gray-700 uppercase";
+	legend.textContent = "USERNAME";
 
 	const nameInput = document.createElement("input");
+	nameInput.id = 'guest-username';
 	nameInput.type = "text";
-	nameInput.placeholder = "Enter your name";
+	nameInput.placeholder = "...";
 	nameInput.className = `px-4 py-2 border rounded w-full
 		focus:outline-none focus:ring-2 focus:ring-blue-500`;
 

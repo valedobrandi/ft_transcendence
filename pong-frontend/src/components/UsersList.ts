@@ -9,7 +9,7 @@ export function UsersList(): HTMLDivElement {
         usersDiv.innerHTML = "";
         messagerState.connected.forEach(({ name, id }) => {
 
-            if (userId === id) return;
+            if (userId.username === id) return;
 
              const btn = document.createElement("button");
             // Show the first 10 characters of the name
