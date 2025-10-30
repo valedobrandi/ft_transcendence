@@ -37,7 +37,7 @@ db.exec(` CREATE TABLE IF NOT EXISTS friends (
     friend_id INTEGER NOT NULL,
     created_at DATE DEFAULT (date('now')),
     FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(friend_id) REFERENCES users(id)
+    FOREIGN KEY(friend_id) REFERENCES users(id),
     UNIQUE(user_id, friend_id)
     )`);
   
