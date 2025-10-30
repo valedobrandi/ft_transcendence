@@ -3,7 +3,7 @@ import { AuthModel } from "../models/authModel.js";
 import { connectedRoomInstance } from "../state/connectedRoom.js";
 import db from "../db.js";
 
-const RESEND_API_KEY = process.env.RESEND_API_KEYsss;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 class AuthService {
 
