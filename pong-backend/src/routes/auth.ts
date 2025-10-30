@@ -100,7 +100,7 @@ export default async function authRoutes(fastify: FastifyInstance)
     const { id } = request.params;
     const idUser = Number(id);
 
-    if(!idUser)
+    if(isNaN(idUser) || idUser < 0)
       return reply.status(404).send({error: "id not found"});
 
     db.prepare('UPDATE users SET status = ? WHERE id = ?').run(playerStatus.DISCONNECT, idUser);
