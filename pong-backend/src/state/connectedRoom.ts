@@ -1,6 +1,4 @@
 import { PlayerType } from "../types/PlayerType.js";
-import { matchQueue } from "./gameRoom.js";
-import { tournamentQueue } from "./tournamentRoom.js";
 
 const connectedRoom = new Map<string, PlayerType>();
 
@@ -18,12 +16,11 @@ export function broadcastConnectedRoom() {
 
 export function dropWebSocketConnection(id: string) {
     const player = connectedRoom.get(id);
-    if (player) {
-        player.socket.close();
-    }
+    if (player) player.socket.close();
+    
 }
 
-export function disconnectUser(id: string) {
+export function disconnectWebsocket(id: string) {
     dropWebSocketConnection(id);
     connectedRoom.delete(id);
     broadcastConnectedRoom();
