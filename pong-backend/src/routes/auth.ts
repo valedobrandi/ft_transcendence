@@ -8,9 +8,11 @@ import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { GuestPostSchema } from '../types/GuestRoute.js';
+import { AuthModel } from '../models/authModel.js';
 
 export default async function authRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
+    const authModel = new AuthModel(db);
 
     fastify.post('/guest', {
         schema: { body: GuestPostSchema },
@@ -48,19 +50,19 @@ export default async function authRoutes(fastify: FastifyInstance) {
         if (!email || !username || !password) {
             return reply.status(400).send({ error: 'all fields are mandatory' })
         }
-        const InstructionDBforFindUser = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?')
-        const existingUser = InstructionDBforFindUser.get(email, username) as User | undefined;
+       
+        const existingUser = authModel.findUserByEmailOrUsername(username, email) as User | undefined;
         if (existingUser === undefined) {
             return reply.status(400).send({ error: 'Error user not found' })
         }
         if (existingUser.twoFA_enabled) {
             const authRoom = authenticationRoomInstance;
-            authRoom.add(existingUser.username.toString(), AuthService.generate2FACode());
+            authRoom.add(existingUser.username, AuthService.generate2FACode());
 
             const { data, error } = await authService.sendEmail(
                 existingUser.email,
                 'ft_transcendence Ping-Pong 2FA Code',
-                `<p>Your 2FA code is: <strong>${authRoom.getCode(existingUser.id.toString())}</strong></p>`
+                `<p>Your 2FA code is: <strong>${authRoom.getCode(existingUser.username)}</strong></p>`
             );
             if (error) {
                 return reply.status(400).send({ error });

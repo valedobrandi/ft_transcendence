@@ -6,12 +6,23 @@ import { connectedRoomInstance } from '../state/connectedRoom.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { waitForMessage } from './utils.js';
 import { AuthService } from '../services/authService.js';
+import { AuthModel } from '../models/authModel.js';
 
 
 let port: number | null = null;
 const server = fastify;
 beforeAll(async () => {
-    //vi.spyOn(authenticationRoomInstance, 'verify').mockReturnValue(true);
+    // Mock AuthModel findUserByEmailOrUsername
+    vi.spyOn(AuthModel.prototype, 'findUserByEmailOrUsername')
+        .mockImplementation((email: string, username: string) => {
+            return {
+                email: "alice@example.com",
+                username: "alice",
+                twoFA_enabled: true,
+                password: "hashed_password_1"
+              };
+    });
+
     vi.spyOn(AuthService.prototype, 'sendEmail').mockResolvedValue({
         data: 'mocked-email-id',
         error: null,
@@ -42,6 +53,7 @@ describe('2FA', () => {
             }
         });
 
+        console.log('Login Route Response:', loginRoute.json());
         expect(loginRoute.statusCode).toBe(200);
         // AuthenticationRoom should have the code for user 'alice'
         const code = authenticationRoomInstance.getCode('alice');

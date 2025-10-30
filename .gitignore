@@ -25,6 +25,7 @@ dist-ssr
 *.sw?
 
 #SQLite database
+pong-backend/database.db
 database.db
 *.db
 
@@ -42,4 +43,3 @@ database.db
 /types
 # Hardhat coverage reports
 /coverage
-pong-backend/database.db
