@@ -16,7 +16,6 @@ export type User =
 
 export type RegisterBody =
 {
-  id: number;
   email: string;
   username: string;
   password: string;
