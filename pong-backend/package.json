@@ -7,7 +7,7 @@
         "prestart": "npm run build",
         "start": "node --trace-uncaught --trace-warnings pong-backend/start.js",
         "dev": "nodemon",
-        "test": "docker exec -it pong-backend npx vitest run",
+        "test": "npx vitest --run --reporter verbose",
         "seed": "node --loader ts-node/esm ./database/seeds/usersTable.ts"
     },
     "dependencies": {
