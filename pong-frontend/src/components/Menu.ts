@@ -23,7 +23,7 @@ export function Menu():HTMLDivElement {
     });
     matchBtn.id = "match-btn";
 
-    const tourBtn = Button("TOURNAMENT", "h-10 w-24 rounded", () => {
+    const tourBtn = Button("TOURNAMENT", "h-10 w-30 rounded", () => {
         if (!socket) return;
         socket.send(JSON.stringify({ type: 'TOURNAMENT', username: id.username }));
     });

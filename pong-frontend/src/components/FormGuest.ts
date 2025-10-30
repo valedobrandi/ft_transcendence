@@ -2,7 +2,6 @@ import { id } from "../app";
 import { endpoint } from "../endpoint";
 import { addMessage } from "../states/messagerState";
 import { fetchRequest, navigateTo } from "../utils";
-import { intraView } from "../views";
 import { Button } from "./Button";
 import { HeaderBar } from "./HeaderBar";
 import { InputName } from "./InputName";
@@ -41,7 +40,7 @@ export function FormGuest(): HTMLElement {
 		);
 		if (response.message === 'connected') {
 			id.username = response.payload.username;
-			navigateTo("/intra", intraView);
+			navigateTo("/intra");
 			addMessage("INTRA", `Welcome: ${id.username}`);
 		}
 	};

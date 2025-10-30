@@ -96,18 +96,17 @@ class PingPong {
             ballTop <= paddleBottom
         ) {
             const paddleCenter = player.y + paddleHeight / 2;
-
             const collidePoint = ball.y - paddleCenter;
             const normalized = collidePoint / (paddleHeight / 2);
-
             const clamped = Math.max(-1, Math.min(1, normalized));
-			const eased = clamped * Math.abs(clamped);
-			const maxBounceAngle = Math.PI / 3;
-            const angle = Math.pow(clamped, 3) * Math.PI / 4;
-            const direction = ball.x < 0.5 ? 1 : -1;
 
-            ball.velocityX = direction * ball.speed * Math.cos(angle);
-            ball.velocityY = ball.speed * Math.sin(angle);
+            // Map to a fixed vertical velocity range
+            const maxVerticalSpeed = ball.speed * 0.75;
+            ball.velocityY = clamped * maxVerticalSpeed;
+
+            // Horizontal always goes full speed
+            const direction = ball.x < 0.5 ? 1 : -1;
+            ball.velocityX = direction * Math.sqrt(ball.speed ** 2 - ball.velocityY ** 2);
 
             if (ball.speed < 0.008) {
                 ball.speed += 0.001;
@@ -210,7 +209,7 @@ class PingPong {
         for (const [id, { disconnect }] of this.playersIds) {
             const player = this.getPlayer(id);
             if (!player) continue;
-            if (player && player.socket &&  player.socket.readyState === 1) {
+            if (player && player.socket && player.socket.readyState === 1) {
                 player.socket.send(message);
             }
         }
@@ -239,7 +238,6 @@ class PingPong {
         this.side.RIGHT = playerYId;
 
         this.messages("MATCH_CREATED");
-        this.send();
         this.messages("COUNTDOWN");
 
         console.log(`match_created: ${this.machId} between ${playerXId} and ${playerYId}`);
@@ -291,23 +289,22 @@ class PingPong {
 
 
     messages(type: string) {
-        const playerX = Array.from(this.playersIds.keys())[0];
-        const playerY = Array.from(this.playersIds.keys())[0];
+        const [leftId, rightId] = Array.from(this.playersIds.keys());
         switch (type) {
             case "MATCH_CREATED":
                 for (const [id, { disconnect }] of this.playersIds) {
                     const player = this.getPlayer(id);
                     if (!player) return;
                     player.status = 'GAME_ROOM';
-                    const side = id === this.side.LEFT ? 'LEFT' : 'RIGHT';
                     player.matchId = this.machId;
 
-                    console.log(`Sending GAME_ROOM to ${player.id} as ${side}`);
+                    const side = id === leftId ? 'LEFT' : 'RIGHT';
+                    console.log(`Sending GAME_ROOM to ${leftId} as ${rightId}`);
                     if (!player.socket) return;
                     player.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_ROOM',
-                        payload: { message: `${playerX} vs ${playerY}` },
+                        payload: { message: `${leftId} vs ${rightId}` },
                         side: side,
                         id: player.id
                     }));
