@@ -3,7 +3,7 @@ export function InputName() {
 	fieldset.className = "border p-4 rounded max-w-xs w-full";
 
 	const legend = document.createElement("legend");
-	legend.className = "text-sm font-semibold text-gray-700 upercase";
+	legend.className = "text-sm font-semibold text-gray-700 uppercase";
 	legend.textContent = "USERNAME";
 
 	const nameInput = document.createElement("input");
