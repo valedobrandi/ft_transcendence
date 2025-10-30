@@ -5,9 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  frontend-tets:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -20,11 +19,22 @@ jobs:
       - name: Install frontend dependencies
         run: cd pong-frontend && npm ci
 
-      - name: Install backend dependencies
-        run: cd pong-backend && npm ci
-
       - name: Run Frontend tests
         run: cd pong-frontend && npm run test
+
+  backend-tests:
+    steps:
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install backend dependencies
+        run: cd pong-backend && npm ci
 
       - name: Run Backend tests
         run: cd pong-backend && npm run test

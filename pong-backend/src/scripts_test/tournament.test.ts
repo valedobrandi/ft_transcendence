@@ -64,10 +64,10 @@ describe('Tournament Game', () => {
         socket3 = new MockSocket();
         socket4 = new MockSocket();
 
-        connectedRoomInstance.addUser('player1', socket1 as any);   
-        connectedRoomInstance.addUser('player2', socket2 as any);
-        connectedRoomInstance.addUser('player3', socket3 as any);
-        connectedRoomInstance.addUser('player4', socket4 as any);
+        connectedRoomInstance.addUser('player1');   
+        connectedRoomInstance.addUser('player2');
+        connectedRoomInstance.addUser('player3');
+        connectedRoomInstance.addUser('player4');
 
         
     });
@@ -145,7 +145,7 @@ describe('Tournament Game - Disconnects', () => {
         const players = ['player1', 'player2', 'player3', 'player4'];
         for (const id of players) {
             const socket = new MockSocket();
-            connectedRoomInstance.addUser(id, socket as any);
+            connectedRoomInstance.addUser(id);
         }
     });
 
