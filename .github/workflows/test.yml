@@ -1,4 +1,4 @@
-name: Run Vitest
+name: tests
 
 on:
   pull_request:
@@ -6,6 +6,7 @@ on:
 
 jobs:
   frontend-tests:
+    name: frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,6 +20,7 @@ jobs:
         run: docker run --rm pong-frontend npm run test
 
   backend-tests:
+    name: backend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
