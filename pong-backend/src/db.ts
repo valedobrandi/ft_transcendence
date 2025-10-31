@@ -29,7 +29,17 @@ db.exec(`
     created_at DATE DEFAULT (date('now')),
     FOREIGN KEY(player1_id) REFERENCES users(id),
     FOREIGN KEY(player2_id) REFERENCES users(id)
-  )
-  `);
+  )`);
+
+db.exec(` CREATE TABLE IF NOT EXISTS friends (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    friend_id INTEGER NOT NULL,
+    created_at DATE DEFAULT (date('now')),
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(friend_id) REFERENCES users(id),
+    UNIQUE(user_id, friend_id)
+    )`);
   
 export default db

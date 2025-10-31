@@ -4,8 +4,8 @@
         "sqlite3": "^5.1.7"
     },
     "scripts": {
-        "test:frontend": "cd pong-frontend && npm run test",
-        "test": "npm run test:frontend",
+        "test:frontend": "docker-compose exec -it pong-frontend npm run test",
+        "test:backend": "docker-compose exec -it pong-backend npm run test",
         "build": "docker compose up --build pong-backend pong-frontend",
         "up": "docker compose up pong-backend pong-frontend"
     }
