@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyInstance } from "fastify";
 import { User } from '../types/RegisterType.js';
-import db from '../db.js';
+import db from '../../database/db.js';
 
 
 export default function friend(fastify: FastifyInstance)

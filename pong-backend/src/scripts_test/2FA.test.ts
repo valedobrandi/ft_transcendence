@@ -6,14 +6,14 @@ import { connectedRoomInstance } from '../state/connectedRoom.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { waitForMessage } from './utils.js';
 import { AuthService } from '../services/authService.js';
-import { AuthModel } from '../models/authModel.js';
+import { UsersModel } from '../models/authModel.js';
 
 
 let port: number | null = null;
 const server = fastify;
 beforeAll(async () => {
-    // Mock AuthModel findUserByEmailOrUsername
-    vi.spyOn(AuthModel.prototype, 'findUserByEmailOrUsername')
+    // Mock usersModel findUserByEmailOrUsername
+    vi.spyOn(UsersModel.prototype, 'findUserByEmailOrUsername')
         .mockImplementation((email: string, username: string) => {
             return {
                 email: "alice@example.com",

@@ -1,7 +1,7 @@
 const socket: {websocket: WebSocket | null} = {websocket: null};
 
-export function initSocket(VITE_BACKEND_HOST: string, username: string) {
-    socket.websocket = new WebSocket(`ws://${VITE_BACKEND_HOST}/ws?username=${username}`);
+export function initSocket(VITE_BACKEND_WEBSOCKET: string, username: string) {
+    socket.websocket = new WebSocket(`${VITE_BACKEND_WEBSOCKET}?username=${username}`);
     return socket.websocket;
 }
 

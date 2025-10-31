@@ -43,3 +43,7 @@ database.db
 /types
 # Hardhat coverage reports
 /coverage
+
+/certs
+*.pem
+*.key

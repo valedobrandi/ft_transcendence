@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3'
 
-class AuthModel {
+class UsersModel {
     private db: Database.Database;
     private stmFindUser: Database.Statement;
 
@@ -14,4 +14,4 @@ class AuthModel {
     }
 }
 
-export { AuthModel };
+export { UsersModel };

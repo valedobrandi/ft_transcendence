@@ -26,25 +26,32 @@ const insertUser = db.prepare(`
 
 // Sample users
 const users = [
-  {
-    username: 'alice',
-    email: 'alice@example.com',
-    password: 'hashed_password_1',
-    status: playerStatus.DISCONNECT,
-    twoFA_enabled: 1,
-  },
-  {
-    username: 'bob',
-    email: 'bob@example.com',
-    password: 'hashed_password_2',
-    status: playerStatus.DISCONNECT,
-    twoFA_enabled: 0,
-  },
+    {
+        username: 'guest',
+        email: 'guest@guest.com',
+        password: 'hashed_password_3',
+        status: playerStatus.DISCONNECT,
+        twoFA_enabled: 0,
+    },
+    {
+        username: 'alice',
+        email: 'alice@example.com',
+        password: 'hashed_password_1',
+        status: playerStatus.DISCONNECT,
+        twoFA_enabled: 1,
+    },
+    {
+        username: 'bob',
+        email: 'bob@example.com',
+        password: 'hashed_password_2',
+        status: playerStatus.DISCONNECT,
+        twoFA_enabled: 0,
+    },
 ];
 
 // Insert users
 const insertMany = db.transaction((users) => {
-  for (const user of users) insertUser.run(user);
+    for (const user of users) insertUser.run(user);
 });
 
 insertMany(users);
@@ -58,6 +65,6 @@ const print = db.prepare('SELECT * FROM users').all();
 // Print each user
 console.log('📋 Users Table:');
 for (const user of print) {
-  console.log(user);
+    console.log(user);
 }
 

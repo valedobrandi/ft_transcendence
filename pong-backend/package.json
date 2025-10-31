@@ -8,7 +8,10 @@
         "start": "node --trace-uncaught --trace-warnings pong-backend/start.js",
         "dev": "nodemon",
         "test": "npx vitest --run --reporter verbose",
-        "seed": "node --loader ts-node/esm ./database/seeds/usersTable.ts"
+        "seed": "node --loader ts-node/esm ./database/seeds/users.ts",
+        "print": "node --loader ts-node/esm ./database/printTable.ts",
+        "table": "node --loader ts-node/esm database/db.ts",
+        "database": "npm run table && npm run seed && npm run print"
     },
     "dependencies": {
         "@fastify/cors": "^11.1.0",

@@ -1,14 +1,14 @@
 import { Resend } from "resend";
-import { AuthModel } from "../models/authModel.js";
 import { connectedRoomInstance } from "../state/connectedRoom.js";
-import db from "../db.js";
+import db from "../../database/db.js";
+import { UsersModel } from "../models/usersModel.js";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 class AuthService {
 
     private resend = new Resend(RESEND_API_KEY || "123");
-    private authModelInstance = new AuthModel(db);
+    private usersModelInstance = new UsersModel(db);
 
     static generate2FACode(): string {
         return Math.floor(100000 + Math.random() * 900000).toString();
@@ -25,7 +25,7 @@ class AuthService {
     }
 
     async guestLoginValidation(username: string): Promise<{ valid: boolean; error?: string }> {
-        const findUserAtDatabase = this.authModelInstance.findUserByEmailOrUsername('', username);
+        const findUserAtDatabase = this.usersModelInstance.findUserByEmailOrUsername('', username);
 
         if (findUserAtDatabase !== undefined) {
             return { valid: false, error: 'username in use' };

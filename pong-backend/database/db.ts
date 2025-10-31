@@ -1,8 +1,18 @@
 import Database from 'better-sqlite3'
-import { playerStatus } from './enum_status/enum_userStatus.js';
-import { matchStatus } from './enum_status/enum_matchStatus.js';
+import { playerStatus } from '../src/enum_status/enum_userStatus.js';
+import { matchStatus } from '../src/enum_status/enum_matchStatus.js';
 
 const db = new Database('database.db');
+
+
+db.exec('BEGIN');
+// Drop and recreate the table
+db.exec(`DROP TABLE IF EXISTS matches`);
+// Drop and recreate the table
+db.exec(`DROP TABLE IF EXISTS friends`);
+// Drop and recreate the table
+db.exec(`DROP TABLE IF EXISTS users`);
+db.exec('COMMIT');
 
 db.exec(` CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,17 +29,14 @@ db.exec(` CREATE TABLE IF NOT EXISTS users (
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS matches (
-    match_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    player1_id INTEGER NOT NULL,
-    player2_id INTEGER NOT NULL,
+    match_id TEXT PRIMARY KEY,
+    player1 TEXT NOT NULL,
+    player2 TEXT NOT NULL,
     score1 INTEGER DEFAULT 0,
     score2 INTEGER DEFAULT 0,
-    winner_id INTEGER,
     match_status TEXT DEFAULT '${matchStatus.WAITING}',
-    created_at DATE DEFAULT (date('now')),
-    FOREIGN KEY(player1_id) REFERENCES users(id),
-    FOREIGN KEY(player2_id) REFERENCES users(id)
-  )`);
+    created_at DATE DEFAULT (date('now')))`);
+
 
 db.exec(` CREATE TABLE IF NOT EXISTS friends (
 
@@ -41,5 +48,5 @@ db.exec(` CREATE TABLE IF NOT EXISTS friends (
     FOREIGN KEY(friend_id) REFERENCES users(id),
     UNIQUE(user_id, friend_id)
     )`);
-  
+
 export default db

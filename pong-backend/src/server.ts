@@ -26,7 +26,7 @@ fastify.register(friendRoute);
 await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {
-  origin: true, // or specify allowed origins
+  origin: true,
   methods: ['POST', 'OPTIONS'],
 });
 

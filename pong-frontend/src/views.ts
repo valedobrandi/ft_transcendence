@@ -8,12 +8,12 @@ import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentic
 import { websocketConnect } from "./websocket/websocketConnect";
 import { changeChatHeader, messagerState } from "./states/messagerState";
 import { FormGuest } from "./components/FormGuest";
-import { endpoint } from "./endpoint";
+import { endpoint } from "./endPoints";
 import { initSocket } from "./websocket";
 import { id } from "./app";
 
 export function intraView(root: HTMLElement) {
-	initSocket(endpoint.backend, id.username);
+	initSocket(endpoint.pong_backend_websocket, id.username);
 	root.innerHTML = "";
 	const intraUI = Intra();
 	const menuUI = Menu();

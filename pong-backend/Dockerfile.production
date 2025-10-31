@@ -1,0 +1,37 @@
+# Stage 1: Build
+FROM node:20-bullseye AS builder
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+# Copy source and build
+COPY . .
+
+# Remove test-related files
+RUN rm -rf app/scripts_test
+
+RUN npm run build
+
+# Stage 2: Production runtime
+FROM node:20-bullseye AS production
+WORKDIR /app
+
+# Install only production dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy compiled output and any runtime assets
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/database ./database
+
+RUN useradd -m nodeuser \
+    && chown -R nodeuser:nodeuser /app
+    
+USER nodeuser
+
+ENV NODE_ENV=production
+
+EXPOSE 3000
+
+CMD ["node", "--trace-uncaught", "--trace-warnings", "dist/src/start.js"]

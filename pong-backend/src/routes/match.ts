@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyInstance } from "fastify";
 import { matchStatus } from "../enum_status/enum_matchStatus.js";
 import {MatchBody, Match} from "../types/MatchType.js";
-import db from '../db.js'
+import db from '../../database/db.js'
 
 export default function matchRoute(fastify: FastifyInstance)
 {

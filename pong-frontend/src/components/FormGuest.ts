@@ -1,5 +1,5 @@
 import { id } from "../app";
-import { endpoint } from "../endpoint";
+import { endpoint } from "../endPoints";
 import { addMessage } from "../states/messagerState";
 import { fetchRequest, navigateTo } from "../utils";
 import { Button } from "./Button";
@@ -33,7 +33,7 @@ export function FormGuest(): HTMLElement {
 			return;
 		}
 		const response = await fetchRequest(
-			`${endpoint.backend}/guest`,
+			`/guest`,
 			'POST',
 			{},
 			{ body: JSON.stringify({ username }) }

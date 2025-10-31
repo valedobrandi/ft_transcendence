@@ -1,4 +1,3 @@
-import { id } from "../app";
 import { setActiveCanvas } from "../events/resizeManager";
 import type { BallType } from "../interface/ball";
 import type { drawCircleType } from "../interface/drawCircle";
@@ -13,10 +12,9 @@ import { getSocket } from "../websocket";
 export function RenderGame(): HTMLElement {
 
     const socket = getSocket();
-
-
+    
     let countdown: number | null = null;
-    let gameResult: "WIN" | "LOSE" | null = null;
+    let matchEnd: "YOU WIN!" | 'YOU LOSE!' | null = null;
 
     let currentState: GameStateType | null = null;
     let previousState: GameStateType | null = null;
@@ -92,7 +90,7 @@ export function RenderGame(): HTMLElement {
         }
         ctx.fillStyle = color;
         ctx.font = font;
-        ctx.fillText(text.toString() || '0', x, y);
+        ctx.fillText(text.toString() || '', x, y);
     }
 
     drawText({ text: 0, x: 300, y: 200, color: "white", font: "45px Verdana" });
@@ -126,19 +124,18 @@ export function RenderGame(): HTMLElement {
             } else if (message === "COUNTDOWN") {
                 countdown = payload.seconds;
             } else if (message === "GAME_OVER") {
-                const winnerId = payload.winner;
-                gameResult = id === winnerId ? "WIN" : "LOSE";
+                matchEnd = payload.message;
             }
         };
     }
 
     function drawEndGame(scaleX: number, scaleY: number) {
-        if (gameResult) {
+        if (matchEnd) {
             drawText({
-                text: gameResult === "WIN" ? "YOU WIN!" : "YOU LOSE!",
+                text: matchEnd,
                 x: (0.5 * scaleX) / 2,
                 y: 0.5 * scaleY + 30,
-                color: gameResult === "WIN" ? "green" : "red",
+                color: matchEnd === "YOU WIN!" ? "green" : "red",
                 font: "120px Verdana"
             });
             return;
