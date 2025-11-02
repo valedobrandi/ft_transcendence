@@ -27,8 +27,8 @@ describe('PingPong Game', () => {
         connectedRoomInstance.addUser('player1');
         connectedRoomInstance.addUser('player2');
 
-		connectedRoomInstance.addWebsocket('player1', socket1);
-		connectedRoomInstance.addWebsocket('player2', socket2);
+		connectedRoomInstance.addWebsocket('player1', socket1 as any);
+		connectedRoomInstance.addWebsocket('player2', socket2 as any);
 
         game = new PingPong('match-1');
         game.createMatch('player1', 'player2');
@@ -84,8 +84,8 @@ describe('PingPong Game - Disconnects', () => {
         connectedRoomInstance.addUser('player1');
         connectedRoomInstance.addUser('player2');
 
-		connectedRoomInstance.addWebsocket('player1', socket1);
-		connectedRoomInstance.addWebsocket('player2', socket2);
+		connectedRoomInstance.addWebsocket('player1', socket1 as any);
+		connectedRoomInstance.addWebsocket('player2', socket2 as any);
 
         game = new PingPong('match-1');
         game.createMatch('player1', 'player2');

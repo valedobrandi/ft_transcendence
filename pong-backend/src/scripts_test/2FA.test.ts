@@ -6,7 +6,7 @@ import { connectedRoomInstance } from '../state/connectedRoom.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { waitForMessage } from './utils.js';
 import { AuthService } from '../services/authService.js';
-import { UsersModel } from '../models/authModel.js';
+import { UsersModel } from '../models/usersModel.js';
 
 
 let port: number | null = null;

@@ -26,6 +26,7 @@ services:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
+      - ./database.db:/app/database.db
       - /app/node_modules
     environment:
       - ADRESS=192.0.7

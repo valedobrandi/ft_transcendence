@@ -1,0 +1,23 @@
+export type ChatModelTable = {
+    id: number,
+    user_id: number,
+    blocked_user_id: number,
+}
+
+export type MessageModelTable = {
+    id: number,
+    sender_id: number,
+    receiver_id: number,
+    content: string,
+    timestamp: string,
+}
+
+export type UserModelTable = {
+    id: number,
+    username: string,
+    email: string,
+    password: string,
+    status: string,
+    twoFA_enabled: number,
+    created_at: string,
+}

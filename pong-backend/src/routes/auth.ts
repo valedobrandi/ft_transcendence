@@ -7,7 +7,7 @@ import db from '../../database/db.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
-import { GuestPostSchema } from '../types/GuestRoute.js';
+import { guestPostSchema } from '../types/RouteGuest.js';
 import { UsersModel } from '../models/usersModel.js';
 
 export default async function authRoutes(fastify: FastifyInstance) {
@@ -15,7 +15,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
     const usersModel = new UsersModel(db);
 
     fastify.post('/guest', {
-        schema: { body: GuestPostSchema },
+        schema: { body: guestPostSchema },
         handler: authController.guestLogin.bind(authController)
     });
 

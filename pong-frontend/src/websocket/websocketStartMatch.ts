@@ -7,6 +7,7 @@ export function websocketStartMatch() {
 
 	socket.send(JSON.stringify({
 		type: "PLAY",
-		username: id.username
+		username: id.username,
+        userId: id.id,
 	}));
 };

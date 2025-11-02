@@ -2,8 +2,8 @@ import WebSocket from "ws";
 import ChatManager from "../classes/ChatManager.js";
 
 export interface PlayerType {
-    id: string;
-    name: string;
+    id: number | bigint;
+    username: string;
     status: "CONNECT_ROOM" |
     "MATCH_QUEUE" |
     "TOURNAMENT_QUEUE" |

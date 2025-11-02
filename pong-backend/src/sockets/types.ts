@@ -33,7 +33,9 @@ export type InputType = {
 
 export type ChatType = {
     type: 'CHAT';
+    senderId: number;
     sender: string;
+    receiverId: number;
     receiver: string;
     message: string;
 }

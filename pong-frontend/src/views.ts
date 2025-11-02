@@ -20,7 +20,7 @@ export function intraView(root: HTMLElement) {
 	root.appendChild(menuUI);
 	root.appendChild(intraUI);
 	websocketConnect();
-	changeChatHeader(messagerState.selectChat);
+	changeChatHeader(messagerState.selectChat.name);
 }
 
 export function matchView(root: HTMLElement) {

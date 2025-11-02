@@ -9,13 +9,15 @@ export function websocketConnect() {
 	socket.onopen = () => {
 		socket.send(JSON.stringify({
 			type: "CONNECT",
-			username: id.username
+			username: id.username,
+            userId: id.id,
 		}));
 		websocketReceiver(socket);
 		setupPaddleListeners((up, down) => {
 			socket.send(JSON.stringify({
 				type: "MOVE_PADDLE",
 				username: id.username,
+                userId: id.id,
 				payload: { up, down }
 			}))
 		});

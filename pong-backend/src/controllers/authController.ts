@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
-import { GuestPostDTO } from '../types/GuestRoute.js';
+import { GuestPostDTO } from '../types/RouteGuest.js';
 import { AuthService } from '../services/authService.js';
 import { connectedRoomInstance } from '../state/connectedRoom.js';
 
@@ -8,12 +8,12 @@ class AuthController {
 
     private authServiceInstance = new AuthService();
     async veryify2FA(req: FastifyRequest<{ Body: GuestPostDTO }>, res: FastifyReply): Promise<FastifyReply> {
-        const { username, code } = req.body;
+        const { username, id, code } = req.body;
 
         const isValid = authenticationRoomInstance.verify(username.toString(), code);
         if (isValid === true) {
             authenticationRoomInstance.delete(username);
-            connectedRoomInstance.addUser(username);
+            connectedRoomInstance.addUser(username, Number(id));
             return res.status(200).send({
                 message: 'connected', payload: { username }
             });
@@ -21,18 +21,18 @@ class AuthController {
         return res.status(400).send({ error: 'Invalid 2FA code' });
     }
 
-    async guestLogin(req: FastifyRequest<{ Body: GuestPostDTO }>, res: FastifyReply): Promise<FastifyReply> {
+    guestLogin(req: FastifyRequest<{ Body: GuestPostDTO }>, res: FastifyReply): FastifyReply {
 
         const { username } = req.body;
-        const validation = await this.authServiceInstance.guestLoginValidation(username);
+        const response = this.authServiceInstance.guestLoginValidation(username);
 
-        if (validation.valid === true) {
+        if ('message' in response) {
             return res.status(200).send({
-                message: 'connected', payload: { username }
+                message: response.message, payload: { username: response.username, id: response.id }
             });
         }
 
-        return res.status(400).send({ error: validation.error });
+        return res.status(400).send({ error: response.error });
     }
 }
 

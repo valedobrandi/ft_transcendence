@@ -2,7 +2,7 @@ import { globalEventListeners } from "./events/globalEventListeners";
 import { renderRoute } from "./utils";
 
 export const id = {
-	username: ""
+	username: "", id: -1
 }
 
 export function init() {

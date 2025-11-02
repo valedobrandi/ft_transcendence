@@ -1,5 +1,4 @@
 import { id } from "../app";
-import { endpoint } from "../endPoints";
 import { addMessage } from "../states/messagerState";
 import { fetchRequest, navigateTo } from "../utils";
 import { Button } from "./Button";
@@ -38,8 +37,9 @@ export function FormGuest(): HTMLElement {
 			{},
 			{ body: JSON.stringify({ username }) }
 		);
-		if (response.message === 'connected') {
+		if (response.message === 'success') {
 			id.username = response.payload.username;
+            id.id = response.payload.id;
 			navigateTo("/intra");
 			addMessage("INTRA", `Welcome: ${id.username}`);
 		}

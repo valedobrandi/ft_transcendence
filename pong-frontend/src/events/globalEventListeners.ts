@@ -6,12 +6,12 @@ import { setupPaddleListeners } from "./paddleListeners";
 
 export function globalEventListeners() {
     setupPaddleListeners((up, down) => {
-		const socket = getSocket();
-		if (socket === null) return;
+        const socket = getSocket();
+        if (socket === null) return;
         socket.send(JSON.stringify({
             type: "MOVE_PADDLE",
             id: id,
-            payload: {up, down}
+            payload: { up, down }
         }))
     });
 
@@ -22,9 +22,11 @@ export function globalEventListeners() {
     // Add event to btn #chat-select-chat
     document.addEventListener("click", (event) => {
         const target = event.target as HTMLButtonElement;
-        if (target.tagName === "BUTTON" && target.id === "chat-select-chat") {
-            const chatId = target.value;
-            messagerState.selectChat = chatId;
+        if (target.tagName === "BUTTON" && target.id === "chat-select") {
+            const chatName = target.value;
+            const chatId = target.name;
+            console.log("Selected chat:", chatName, chatId);
+            messagerState.selectChat = { name: chatName, id: Number(chatId) };
         }
     });
 

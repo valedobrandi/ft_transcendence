@@ -1,6 +1,4 @@
-import Database from "better-sqlite3";
-
-const db = new Database('database.db');
+import db from "./db.js";
 
 const usersSchema = db.prepare("PRAGMA table_info(users)").all();
 const users = db.prepare('SELECT * FROM users').all();
@@ -10,6 +8,13 @@ const matchs = db.prepare('SELECT * FROM matches').all();
 
 const friendsSchema = db.prepare("PRAGMA table_info(friends)").all();
 const friends = db.prepare('SELECT * FROM friends').all();
+
+const chatBlockSchema = db.prepare("PRAGMA table_info(chatBlock)").all();
+const chatBlock = db.prepare('SELECT * FROM chatBlock').all();
+
+const messagesSchema = db.prepare("PRAGMA table_info(messages)").all();
+const messages = db.prepare('SELECT * FROM messages').all();
+
 
 console.log('🧬 Users Table Schema:')
 console.table(usersSchema);
@@ -30,4 +35,18 @@ console.table(friendsSchema);
 console.log('📋 Friends Table:')
 for (const friend of friends) {
     console.log(friend);
+}
+
+console.log('🧬 chatBlock Table Schema:')
+console.table(chatBlockSchema);
+console.log('📋 chatBlock Table:')
+for (const chatblockuser of chatBlock) {
+    console.log(chatblockuser);
+}
+
+console.log('🧬 Messages Table Schema:')
+console.table(messagesSchema);
+console.log('📋 Messages Table:')
+for (const message of messages) {
+    console.log(message);
 }

@@ -332,7 +332,7 @@ class PingPong {
                             winner: this.winnerId,
                             drawMatch: this.drawMatch,
                             message: this.drawMatch ? 'DRAW MATCH!' :
-                                this.winnerId === player.name ? 'YOU WIN!' : 'YOU LOSE!'
+                                this.winnerId === player.username ? 'YOU WIN!' : 'YOU LOSE!'
                         },
                         finalScore: {
                             userX: this.gameState.userX.score,
