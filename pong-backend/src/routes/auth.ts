@@ -9,6 +9,10 @@ import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { GuestPostSchema } from '../types/GuestRoute.js';
 import { AuthModel } from '../models/authModel.js';
+import * as JWT from 'jsonwebtoken';
+
+
+import 'dotenv/config';
 
 export default async function authRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
@@ -46,16 +50,21 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
     fastify.post('/login', async (request: FastifyRequest<{ Body: RegisterBody }>, reply) => {
         const { email, username, password } = request.body;
+
+        const time = process.env.JWT_TIME;
+        console.log("TIME{{{", time);
         const authService = new AuthService();
+
         if (!email || !username || !password) {
             return reply.status(400).send({ error: 'all fields are mandatory' })
         }
-       
+
         const existingUser = authModel.findUserByEmailOrUsername(username, email) as User | undefined;
         if (existingUser === undefined) {
             return reply.status(400).send({ error: 'Error user not found' })
         }
-        if (existingUser.twoFA_enabled) {
+        if (existingUser.twoFA_enabled)
+        {
             const authRoom = authenticationRoomInstance;
             authRoom.add(existingUser.username, AuthService.generate2FACode());
 
@@ -69,8 +78,18 @@ export default async function authRoutes(fastify: FastifyInstance) {
             } else {
                 return reply.status(200).send({ message: data });
             }
-        } else {
-            return reply.status(201).send({ message: 'user connected' });
+        } 
+        else
+        {
+            const secret = process.env.JWT_SECRET;
+            if (!secret)
+                return reply.status(500).send({ error: 'JWT secret not configured' });
+            //const time = process.env.JWT_TIME;
+            //const time = '1h';
+            const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username};
+
+            const token = JWT.sign(payload, secret, { expiresIn: '1h'});
+            return reply.status(201).send({ message: 'user connected', token });
         }
     });
 

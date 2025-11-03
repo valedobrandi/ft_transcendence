@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import authRoutes from './routes/auth.js';
 import matchRoute from './routes/match.js';
 import friendRoute from './routes/friend.js';
+import 'dotenv/config';
 
 import websocketRoute from './routes/websocket.js';
 import fastifyCors from '@fastify/cors';

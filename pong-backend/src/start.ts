@@ -1,4 +1,5 @@
 import { fastify } from "./server.js";
+import 'dotenv/config';
 
 const start = async () => {
     try {

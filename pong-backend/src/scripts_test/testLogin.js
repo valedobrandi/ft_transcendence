@@ -8,10 +8,9 @@ async function testLogin()
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify(
         {
-            email: 'julien@hotmail.com',
-            username: 'julien',
+            email: 'jule@hotmail.com',
+            username: 'jule',
             password: 'pass'
-
         })
     });
     const data = await response.json();

@@ -7,6 +7,7 @@
         "test:frontend": "docker-compose exec -it pong-frontend npm run test",
         "test:backend": "docker-compose exec -it pong-backend npm run test",
         "build": "docker compose up --build pong-backend pong-frontend",
-        "up": "docker compose up pong-backend pong-frontend"
+        "up": "docker compose up pong-backend pong-frontend",
+        "dev": "docker exec -it pong-backend"
     }
 }
