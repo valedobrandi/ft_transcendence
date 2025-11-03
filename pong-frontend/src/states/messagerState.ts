@@ -1,6 +1,7 @@
 import { id } from "../app";
 import type { ChatHistory } from "../interface/chatHistory";
 import { navigateTo, setTime } from "../utils";
+import { websocketChatSend } from "../websocket/websocketChatSend";
 
 export function addMessage(history: ChatHistory, sender = id.username) {
     // if (!messagerState.messages.has(history.from)) {
@@ -89,9 +90,11 @@ export const messagerState: MessagerStateType = new Proxy({
             switch (value) {
                 case "TOURNAMENT_ROOM":
                     //addMessage("INTRA", `you have joined the tournament queue.`);
+					websocketChatSend(`you have joined the tournament queue.`, 'INTRA', 1);
                     break;
                 case "MATCH_ROOM":
                     //addMessage("INTRA", `you have joined the match queue.`);
+					websocketChatSend(`you have joined the match queue.`, 'INTRA', 1);
                     break;
                 case "GAME_ROOM":
                     setTime(5000, () => {

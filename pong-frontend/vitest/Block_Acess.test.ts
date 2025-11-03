@@ -1,9 +1,5 @@
 
-import * as websocketModule from '../src/websocket.ts';
 import * as utils from '../src/utils.ts';
-
-import { prettyDOM } from '@testing-library/dom';
-import WS from "jest-websocket-mock";
 import {id, init} from '../src/app.ts'
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { mockCanvas } from './setup.ts';
@@ -32,7 +28,7 @@ describe('Block Acess', () => {
 
         // Expect alert "You must be logged in to access this page." to be preset
         expect(document.body.innerHTML).toContain('You must be logged in to access this page.');
-       
+
     });
 
     it('BLOCK NAVIGATETO /match', async () => {
@@ -43,6 +39,6 @@ describe('Block Acess', () => {
 
         // Expect alert "You must be logged in to access this page." to be preset
         expect(document.body.innerHTML).toContain('You must be logged in to access this page.');
-       
+
     });
 });

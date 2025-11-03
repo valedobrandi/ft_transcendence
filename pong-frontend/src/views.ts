@@ -14,12 +14,12 @@ import { id } from "./app";
 
 export function intraView(root: HTMLElement) {
 	initSocket(endpoint.pong_backend_websocket, id.username);
+	websocketConnect();
 	root.innerHTML = "";
 	const intraUI = Intra();
 	const menuUI = Menu();
 	root.appendChild(menuUI);
 	root.appendChild(intraUI);
-	websocketConnect();
 	changeChatHeader(messagerState.selectChat.name);
 }
 

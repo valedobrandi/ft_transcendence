@@ -1,6 +1,7 @@
 import { playerSideState } from "../context";
-import { addMessage, messagerState } from "../states/messagerState";
+import { messagerState } from "../states/messagerState";
 import { serverState } from "../states/serverState";
+import { websocketChatSend } from "./websocketChatSend";
 
 export function websocketReceiver(socket: WebSocket) {
 	socket.addEventListener('message', (event) => {
@@ -18,6 +19,8 @@ export function websocketReceiver(socket: WebSocket) {
 				break;
 			case 'GAME_ROOM': {
 				//addMessage('INTRA', data.payload.message);
+				websocketChatSend(data.payload.message, 'INTRA', 1);
+
 				playerSideState.side = data.side;
 				messagerState.state = data.message;
 
@@ -29,6 +32,7 @@ export function websocketReceiver(socket: WebSocket) {
 				break;
 			case 'GAME_OVER':
 				//addMessage('INTRA', data.payload.message);
+				websocketChatSend(data.payload.message, 'INTRA', 1);
 				messagerState.state = data.message;
 				break;
 			case 'CONNECTED_USERS':

@@ -1,4 +1,3 @@
-import Database from 'better-sqlite3';
 import { playerStatus } from '../../src/enum_status/enum_userStatus.js';
 import db from '../db.js';
 import { matchStatus } from '../../src/enum_status/enum_matchStatus.js';

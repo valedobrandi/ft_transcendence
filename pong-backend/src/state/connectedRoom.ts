@@ -46,7 +46,7 @@ export class ConnectedRoom {
 
     broadcast() {
         const users = Array.from(this.room.values()).map(({ id, username: name }) => ({ id, name }));
-        users.unshift({ id: 0, name: 'INTRA' });
+        users.unshift({ id: 1, name: 'INTRA' });
 
         this.room.forEach(({ socket }) => {
            if (socket) socket.send(JSON.stringify({ message: 'CONNECTED_USERS', users }));

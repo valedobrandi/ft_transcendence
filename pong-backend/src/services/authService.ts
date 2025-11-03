@@ -32,7 +32,6 @@ class AuthService {
         }
         connectedRoomInstance.addUser(saveAtDatabase.username, Number(saveAtDatabase.id));
         return { message: saveAtDatabase.message, username: saveAtDatabase.username, id: saveAtDatabase.id };
-
     }
 }
 
