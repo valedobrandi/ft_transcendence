@@ -5,12 +5,11 @@
     "scripts": {
         "build": "tsc",
         "prestart": "npm run build",
-        "start": "node --trace-uncaught --trace-warnings pong-backend/start.js",
+        "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "dev": "nodemon",
         "test": "npx vitest --run --reporter verbose",
         "seed": "node --loader ts-node/esm ./database/seeds/users.ts",
         "print": "node --loader ts-node/esm ./database/printTable.ts",
-        "table": "node --loader ts-node/esm database/db.ts",
         "database": "npm run table && npm run seed && npm run print"
     },
     "dependencies": {
@@ -24,7 +23,6 @@
         "resend": "^6.3.0"
     },
     "devDependencies": {
-        "ws": "^8.13.0",
         "@types/bcrypt": "^6.0.0",
         "@types/better-sqlite3": "^7.6.13",
         "@types/node": "^22.18.11",
@@ -32,8 +30,10 @@
         "ethers": "^6.15.0",
         "nodemon": "^3.1.10",
         "ts-node": "^10.9.2",
+        "tsx": "^4.20.6",
         "typescript": "~5.8.0",
-        "vitest": "^4.0.4"
+        "vitest": "^4.0.4",
+        "ws": "^8.13.0"
     },
     "vitest": {
         "test": {

@@ -41,7 +41,7 @@ export function FormGuest(): HTMLElement {
 			id.username = response.payload.username;
             id.id = response.payload.id;
 			navigateTo("/intra");
-			addMessage("INTRA", `Welcome: ${id.username}`);
+			//addMessage("INTRA", `Welcome: ${id.username}`);
 		}
 	};
 

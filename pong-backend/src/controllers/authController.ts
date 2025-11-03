@@ -7,6 +7,7 @@ import { connectedRoomInstance } from '../state/connectedRoom.js';
 class AuthController {
 
     private authServiceInstance = new AuthService();
+	
     async veryify2FA(req: FastifyRequest<{ Body: GuestPostDTO }>, res: FastifyReply): Promise<FastifyReply> {
         const { username, id, code } = req.body;
 

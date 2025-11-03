@@ -27,6 +27,13 @@ export function globalEventListeners() {
             const chatId = target.name;
             console.log("Selected chat:", chatName, chatId);
             messagerState.selectChat = { name: chatName, id: Number(chatId) };
+			const buttons = document.querySelectorAll("#chat-select");
+				buttons.forEach(button => {
+					button.classList.remove("bg-blue-300");
+				});
+				Array.from(document.getElementsByClassName( chatName)).forEach((elem) => {
+					elem.classList.add("bg-blue-300");
+				});
         }
     });
 

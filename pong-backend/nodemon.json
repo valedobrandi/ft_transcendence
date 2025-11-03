@@ -3,5 +3,5 @@
         "src"
     ],
     "ext": "ts",
-    "exec": "node --trace-warnings --trace-uncaught --loader ts-node/esm src/start.ts"
+    "exec": "tsx src/start.ts"
 }

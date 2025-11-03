@@ -17,7 +17,7 @@ export function websocketReceiver(socket: WebSocket) {
 				messagerState.state = data.message;
 				break;
 			case 'GAME_ROOM': {
-				addMessage('INTRA', data.payload.message);
+				//addMessage('INTRA', data.payload.message);
 				playerSideState.side = data.side;
 				messagerState.state = data.message;
 
@@ -28,15 +28,16 @@ export function websocketReceiver(socket: WebSocket) {
 				messagerState.state = data.message;
 				break;
 			case 'GAME_OVER':
-				addMessage('INTRA', data.payload.message);
+				//addMessage('INTRA', data.payload.message);
 				messagerState.state = data.message;
 				break;
 			case 'CONNECTED_USERS':
 				messagerState.connected = data.users;
 				break;
 			case 'CHAT_MESSAGE':
-				const { receiver, chat, sender } = data;
-				addMessage(receiver, chat, sender);
+				if ('history' in data) {
+					messagerState.messages = data.history;
+				}
 				break;
 		}
 	});

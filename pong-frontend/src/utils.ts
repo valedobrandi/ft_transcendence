@@ -53,7 +53,7 @@ export async function fetchRequest(
     const defaultHeaders = {
         'Content-Type': 'application/json',
         // Add auth token
-        // 'Authorization': `Bearer ${token}`,
+        //'Authorization': `Bearer ${token}`,
     };
 
     try {

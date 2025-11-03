@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import { print } from "../server";
 
 /*  id INTEGER PRIMARY KEY AUTOINCREMENT,
     sender_id INTEGER NOT NULL,
@@ -16,11 +17,11 @@ class MessagesModel {
     constructor(db: Database.Database) {
         this.db = db;
         this.stmSaveMessage = db.prepare(`
-            INSERT INTO messages (sender_id, receiver_id, content)
-            VALUES (?, ?, ?)
+            INSERT INTO messages (sender_id, receiver_id, content, sender)
+            VALUES (?, ?, ?, ?)
             `)
         this.stmGetMessages = db.prepare(`
-            SELECT 
+            SELECT
             m.*,
             se.username AS sender_username,
             rc.username AS receiver_username
@@ -34,11 +35,13 @@ class MessagesModel {
 
     saveMessage(senderId: number, receiverId: number, content: string): void {
         console.log('Saving message:', { senderId, receiverId, content });
-        this.stmSaveMessage.run(senderId, receiverId, content);
+        this.stmSaveMessage.run(senderId, receiverId, content, Number(senderId));
     }
 
     getMessages(userId1: number, userId2: number): unknown[] {
-        return this.stmGetMessages.all(userId1, userId2, userId2, userId1);
+        const response =  this.stmGetMessages.all(userId1, userId2, userId2, userId1);
+		print(`Messages between ${userId1} and ${userId2}: ${JSON.stringify(response)}`);
+        return response;
     }
 }
 

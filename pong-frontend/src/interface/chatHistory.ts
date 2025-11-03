@@ -1,7 +1,7 @@
 export type ChatHistory = {
     from: string;
     to: string;
-	senderId: number;
+    senderId: number;
     message: string;
     timestamp: number;
 }

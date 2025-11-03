@@ -16,14 +16,14 @@ export function Login(): HTMLElement {
     viewDiv.appendChild(title);
 
 	const guestBtn = Button("guest", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/guest"));
-   
+
     const singInBtn = Button("login", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/sing-in"));
     singInBtn.setAttribute("disabled", "true");
     singInBtn.className += " opacity-20 cursor-not-allowed";
     singInBtn.className = singInBtn.className.replace("cursor-pointer", "cursor-not-allowed");
 
-	const registerBtn = Button("sing in", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/register"));
-    registerBtn.setAttribute("disabled", "true");
+	const registerBtn = Button("register", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/register"));
+    //registerBtn.setAttribute("disabled", "true");
     registerBtn.className += " opacity-20";
     // filter out cursor-pointer from the class
     registerBtn.className = registerBtn.className.replace("cursor-pointer", "cursor-not-allowed");

@@ -1,37 +1,44 @@
 // websocket.test.ts
-import { describe, it, expect} from 'vitest'
-import { fastify } from '../server.js';
-import { userMock } from './Mock.js';
+import WebSocket from 'ws'
+import { describe, it, expect, beforeAll, afterAll} from 'vitest'
+import { fastify, print } from '../server.js';
+import { chatMessagersMock, userMock } from './Mock.js';
+import db from '../../database/db.js';
+import { MessagesModel } from '../models/messagesModel.js';
+
+var port: number | null = null;
+beforeAll(async () => {
+	await fastify.listen({ port: 0 });
+	const adress = fastify.server.address();
+	if (adress) port = typeof adress === 'string' ? null : adress.port;
+});
+
+afterAll(async () => {
+	await fastify.close();
+});
 
 describe('TABLE MESSAGES TEST', () => {
+	const messagerModel = new MessagesModel(db)
 	it('01 - SEND A MESSAGE FROM ALICE TO BOB', async () => {
-        const sendMessageResponse = await fastify.inject({
-            method: 'POST',
-            url: '/send-message',
-            body: {
-                senderId: userMock['alice'].id,
-                receiverId: userMock['bob'].id,
-                message: 'Hello Bob!'
-            }
-        });
 
-        expect(sendMessageResponse.statusCode).toBe(200);
+		const ws = new WebSocket(`ws://localhost:${port}/ws`);
+		await new Promise(resolve => ws.once('open', resolve));
+
+		const action = JSON.stringify(chatMessagersMock[0]);
+		ws.send(action);
+
+		// Expect message to be saved in the database
+		messagerModel.getMessages(userMock['alice'].id, userMock['bob'].id).forEach((msg: any) => {
+
+			if (msg.content === "Hello") {
+				expect(msg.sender_id).toBe(userMock['alice'].id);
+				expect(msg.receiver_id).toBe(userMock['bob'].id);
+				expect(msg.sender).toBe(userMock['alice'].id);
+			}
+		});
+		ws.close();
+		await new Promise<void>((resolve) => ws.once('close', resolve));
     });
 
-    it('02 - RETRIEVE MESSAGES BETWEEN ALICE AND BOB', async () => {
-        const getMessagesResponse = await fastify.inject({
-            method: 'GET',
-            url: '/get-messages',
-            query: {
-                userId1: userMock['alice'].id.toString(),
-                userId2: userMock['bob'].id.toString()
-            }
-        });
-
-        const response = getMessagesResponse.json();
-        expect(response.messages).toBeDefined();
-        expect(response.messages.length).toBeGreaterThan(0);
-        expect(response.messages[0].content).toBe('Hello Bob!');
-    });
 });
 

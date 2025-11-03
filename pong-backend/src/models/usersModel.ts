@@ -3,6 +3,7 @@ import type { RunResult } from 'better-sqlite3'
 import { resourceLimits } from 'worker_threads';
 import { UserModelTable } from '../types/Tables';
 import { SaveUser } from '../types/RouteGuest';
+import db from '../../database/db';
 
 class UsersModel {
     private db: Database.Database;
@@ -13,8 +14,8 @@ class UsersModel {
         this.db = db;
         this.stmFindUser = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?');
         this.stmSaveGuestUsername = db.prepare(`
-            INSERT INTO users 
-            (username, email, password, status, twoFA_enabled) 
+            INSERT INTO users
+            (username, email, password, status, twoFA_enabled)
             VALUES (?, ?, ?, ?, ?)`
         );
     }
@@ -37,3 +38,4 @@ class UsersModel {
 }
 
 export { UsersModel };
+

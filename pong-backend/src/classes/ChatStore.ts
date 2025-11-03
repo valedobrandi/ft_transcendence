@@ -4,7 +4,7 @@ import { MessageModelTable } from "../types/Tables.js";
 
 class ChatStore {
     private messageModelInstance = new MessagesModel(db);
-    
+
     addMessageToDataBase(senderId: number, receiverId: number, message: string) {
         this.messageModelInstance.saveMessage(Number(senderId), Number(receiverId), message);
     }
@@ -14,6 +14,7 @@ class ChatStore {
         return history.map(msg => ({
             from: msg.sender_id.toString(),
             to: msg.receiver_id.toString(),
+			senderId: msg.sender_id,
             message: msg.content,
             timestamp: new Date(msg.timestamp).getTime()
         }));

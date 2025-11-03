@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3'
-import { ChatModelTable } from '../types/Tables';
+import { ChatModelTable } from '../types/Tables.js';
 
 
 class ChatBlockModel {
@@ -38,12 +38,12 @@ class ChatBlockModel {
         }
     }
 
-  
+
 
     getBlockedUsers(userId: number): ChatModelTable[] {
         try {
             const rows = this.stmGetBlockList.all(userId) as ChatModelTable[];
-            
+
             return rows;
         } catch (error) {
             console.error('Error retrieving blocked users:', error);

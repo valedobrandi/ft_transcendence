@@ -3,7 +3,7 @@
       "lib": ["es2023"],
       "target": "es2022",
       "module": "ESNext",
-      "moduleResolution": "Bundler",
+      "moduleResolution": "node",
       "strict": true,
       "esModuleInterop": true,
       "skipLibCheck": true,
@@ -14,4 +14,4 @@
     },
     "exclude": ["node_modules", "src/scripts_test"]
   }
-  
+

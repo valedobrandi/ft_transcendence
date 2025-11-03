@@ -14,13 +14,12 @@ export function UsersList(): HTMLDivElement {
              const btn = document.createElement("button");
             // Show the first 10 characters of the name
             btn.textContent = `${name.substring(0, 10)}`;
-            btn.className = `flex justify-center items-center border-b 
-                border-gray-300 p-2 w-full text-center hover:bg-gray-100`;
+            btn.className = `${name} flex justify-center items-center border-b
+                border-gray-300 p-2 w-full text-center hover:bg-green-100`;
             btn.id = `chat-select`;
             console.log("Rendering user button for:", name, id);
             btn.value = `${name}`;
             btn.name = `${id}`;
-            
             usersDiv.appendChild(btn);
 
         });
