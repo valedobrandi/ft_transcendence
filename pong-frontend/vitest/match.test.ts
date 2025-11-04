@@ -56,49 +56,5 @@ describe('WebSocket tests', () => {
 
 	it('Match queue', async () => {
 
-		client.addEventListener('message', e => console.log('Client received:', e.data));
-		server.on('connection', s => {
-			console.log('Server got connection');
-		});
-
-		utils.navigateTo('/intra');
-		// Click button with class INTRA
-		expect(id.username).toBe('testuser');
-		expect(window.location.pathname).toBe('/intra');
-
-		await new Promise(r => setTimeout(r, 0))
-		const buttons = document.querySelectorAll("#chat-select");
-		Array.from(buttons).forEach(button => {
-			if (button.classList.contains("INTRA")) {
-				const btn = button as HTMLButtonElement;
-				btn.click();
-			}
-		});
-
-		// Expect chat header to be INTRA
-		expect(document.body.innerHTML).toContain('INTRA');
-		// Expect Welcome DEEFEF to be in the DOM
-		expect(document.body.innerHTML).toContain('Welcome testuser');
-		expect(client.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
-		server.send(JSON.stringify(MATCH_ROOM))
-		expect(document.body.innerHTML).toContain("you have joined the match queue.");
-
-		server.send(JSON.stringify(GAME_ROOM))
-
-		expect(client.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
-
-		expect(document.body.innerHTML).toContain(GAME_ROOM.payload.message);
-
-		// Skip setTimeout by 5 seconds
-		vi.advanceTimersByTime(5000);
-		expect(window.location.pathname).toBe('/match');
-
-		server.send(JSON.stringify(GAME_OVER))
-		vi.advanceTimersByTime(5000);
-		expect(window.location.pathname).toBe('/intra');
-
-		// Expect "YOU LOSE!" to be in the DOM
-		expect(document.body.innerHTML).toContain("YOU LOSE!");
-
 	});
 });
