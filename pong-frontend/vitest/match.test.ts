@@ -1,6 +1,5 @@
 
 import WS from "jest-websocket-mock";
-import * as utils from '../src/utils.ts';
 import * as websocket from '../src/websocket.ts';
 import { id, init } from '../src/app.ts'
 import { beforeEach, describe, it, expect, vi } from 'vitest';
