@@ -1,7 +1,7 @@
 // websocket.test.ts
 import WebSocket from 'ws'
 import { describe, it, expect, beforeAll, afterAll} from 'vitest'
-import { fastify, print } from '../server.js';
+import { fastify } from '../server.js';
 import { chatMessagersMock, userMock } from './Mock.js';
 import db from '../../database/db.js';
 import { MessagesModel } from '../models/messagesModel.js';
