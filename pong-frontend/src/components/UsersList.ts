@@ -16,7 +16,7 @@ export function UsersList(): HTMLDivElement {
             btn.textContent = `${name.substring(0, 10)}`;
             btn.className = `${name} flex justify-center items-center border-b
                 border-gray-300 p-2 w-full text-center hover:bg-green-100`;
-            btn.id = `chat-select`;
+            btn.id = `chat-select-${name}`;
             console.log("Rendering user button for:", name, id);
             btn.value = `${name}`;
             btn.name = `${id}`;
@@ -28,4 +28,13 @@ export function UsersList(): HTMLDivElement {
     render();
     onMessagerChange(render);
     return usersDiv;
+}
+
+
+export function selectChatByButton(button: HTMLButtonElement) {
+    const chatName = button.value;
+    const chatId = button.name;
+    console.log("Selected chat:", chatName, chatId);
+
+    messagerState.selectChat = { name: chatName, id: Number(chatId) };
 }

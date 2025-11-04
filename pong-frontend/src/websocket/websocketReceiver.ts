@@ -1,4 +1,5 @@
 import { playerSideState } from "../context";
+import type { ChatHistory } from "../interface/chatHistory";
 import { messagerState } from "../states/messagerState";
 import { serverState } from "../states/serverState";
 import { websocketChatSend } from "./websocketChatSend";
@@ -40,7 +41,9 @@ export function websocketReceiver(socket: WebSocket) {
 				break;
 			case 'CHAT_MESSAGE':
 				if ('history' in data) {
-					messagerState.messages = data.history;
+					data.history.forEach((msg: ChatHistory) => {
+						// addMessage(msg);
+					});
 				}
 				break;
 		}

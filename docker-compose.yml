@@ -1,4 +1,17 @@
 services:
+
+  cypress:
+    image: cypress/included:12.17.4
+    working_dir: /e2e
+    volumes:
+      - ./cypress:/e2e
+    environment:
+      - CYPRESS_baseUrl=http://frontend:3000
+    depends_on:
+      - pong-frontend
+      - pong-backend
+    command: npx cypress run
+
   pong-frontend:
     build:
       context: ./pong-frontend
@@ -26,7 +39,6 @@ services:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
-      - ./database.db:/app/database.db
       - /app/node_modules
     environment:
       - ADRESS=192.0.7
@@ -51,6 +63,7 @@ services:
     command: npx hardhat node
     networks:
       - transcedence-network
+
 
 volumes:
   pong-backend-data:

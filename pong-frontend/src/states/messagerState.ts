@@ -27,14 +27,6 @@ export function renderMessages(username: string, userId : number) {
 
         const span = document.createElement('span');
         span.className = "font-bold lowercase text-lg";
-		// Show menssage buble differently and rigth / left if sent by self or other
-		if (Number(msg.senderId) === Number(id.id)) {
-			span.classList.add("bg-blue-500");
-			span.classList.add("mr-auto");
-		} else {
-			span.classList.add("bg-gray-300");
-			span.classList.add("ml-auto");
-		}
         span.textContent = Number(msg.senderId) === Number(id.id) ? `` : `#${username}: `;
         const p = document.createElement('p');
         p.id = 'id-message';
@@ -52,7 +44,7 @@ export function onMessagerChange(fn: () => void) {
 }
 
 interface MessagerStateType {
-    messages: ChatHistory[];
+    messages: Map<number, ChatHistory[]>;
     connected: { id: string; name: string }[];
     state: string;
     selectChat: { id: number; name: string };
@@ -78,10 +70,10 @@ export interface MessageType {
 
 
 export const messagerState: MessagerStateType = new Proxy({
-    messages: [],
+    messages: new Map<number, ChatHistory[]>(),
     connected: [],
-    selectChat: { id: 0, name: 'INTRA' },
-    state: "",
+    selectChat: { id: -1, name: '' },
+    state: "",token
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;

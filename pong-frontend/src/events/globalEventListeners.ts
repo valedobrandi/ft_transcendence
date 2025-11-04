@@ -22,12 +22,13 @@ export function globalEventListeners() {
 	// Add event to btn #chat-select-chat
 	document.addEventListener("click", (event) => {
 		const target = event.target as HTMLButtonElement;
-		if (target.tagName === "BUTTON" && target.id === "chat-select") {
+
+		if (target.tagName === "BUTTON" && target.id.startsWith("chat-select-")) {
 			const chatName = target.value;
 			const chatId = target.name;
 			console.log("Selected chat:", chatName, chatId);
 			messagerState.selectChat = { name: chatName, id: Number(chatId) };
-			const buttons = document.querySelectorAll("#chat-select");
+			const buttons = document.querySelectorAll("[id^='chat-select-']");
 			buttons.forEach(button => {
 				button.classList.remove("bg-blue-300");
 			});
@@ -37,21 +38,4 @@ export function globalEventListeners() {
 		}
 	});
 
-	document.addEventListener("click", (event) => {
-		const target = event.target as HTMLButtonElement;
-
-		if (target.id === "save-settings-btn") {
-
-
-		}
-	});
-
-	document.addEventListener("click", (event) => {
-		const target = event.target as HTMLButtonElement;
-
-		if (target.id === "save-settings-btn") {
-
-
-		}
-	});
 }
