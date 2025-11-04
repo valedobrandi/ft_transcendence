@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up SQLite DB
-        run: node /app/database/init.js
+        run: node ./pong-backend/database/init.js
 
       - name: Checkout code
         uses: actions/checkout@v3
