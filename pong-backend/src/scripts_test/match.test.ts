@@ -7,11 +7,16 @@ import { waitForMessage } from './utils.js';
 import { gameRoom } from '../state/gameRoom.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { AuthService } from '../services/authService.js';
+import { UsersModel } from '../models/usersModel.js';
 
 let port: number | null = null;
 
 beforeAll(async () => {
     vi.spyOn(authenticationRoomInstance, 'verify').mockReturnValue(true);
+
+	vi.spyOn(UsersModel.prototype, 'saveGuestUsername').mockImplementation((username: string) => {
+		return { message: 'User saved', username, id: 4 };
+	});
 
     await fastify.listen({ port: 0 });
     const adress = fastify.server.address();

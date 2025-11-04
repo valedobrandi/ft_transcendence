@@ -1,6 +1,4 @@
 import { id } from "../app";
-import { endpoint } from "../endpoint";
-import { addMessage } from "../states/messagerState";
 import { fetchRequest, navigateTo } from "../utils";
 import { Button } from "./Button";
 import { HeaderBar } from "./HeaderBar";
@@ -33,15 +31,15 @@ export function FormGuest(): HTMLElement {
 			return;
 		}
 		const response = await fetchRequest(
-			`${endpoint.backend}/guest`,
+			`/guest`,
 			'POST',
 			{},
 			{ body: JSON.stringify({ username }) }
 		);
-		if (response.message === 'connected') {
+		if (response.message === 'success') {
 			id.username = response.payload.username;
+			id.id = response.payload.id;
 			navigateTo("/intra");
-			addMessage("INTRA", `Welcome: ${id.username}`);
 		}
 	};
 

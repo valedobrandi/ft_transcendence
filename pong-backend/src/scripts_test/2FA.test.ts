@@ -1,19 +1,19 @@
 // websocket.test.ts
-import { beforeAll, afterAll, describe, it, expect, vi } from 'vitest'
+import { beforeAll, afterAll, describe, it, expect, vi, beforeEach } from 'vitest'
 import WebSocket from 'ws'
 import { fastify } from '../server.js';
 import { connectedRoomInstance } from '../state/connectedRoom.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { waitForMessage } from './utils.js';
+import bcrypt from 'bcrypt';
 import { AuthService } from '../services/authService.js';
-import { AuthModel } from '../models/authModel.js';
+import { UsersModel } from '../models/usersModel.js';
 
 
 let port: number | null = null;
-const server = fastify;
 beforeAll(async () => {
-    // Mock AuthModel findUserByEmailOrUsername
-    vi.spyOn(AuthModel.prototype, 'findUserByEmailOrUsername')
+    // Mock usersModel findUserByEmailOrUsername
+    vi.spyOn(UsersModel.prototype, 'findUserByEmailOrUsername')
         .mockImplementation((email: string, username: string) => {
             return {
                 email: "alice@example.com",
@@ -22,6 +22,8 @@ beforeAll(async () => {
                 password: "hashed_password_1"
               };
     });
+	// Mock bycrypt
+    vi.spyOn(bcrypt, 'compare').mockResolvedValue(true);
 
     vi.spyOn(AuthService.prototype, 'sendEmail').mockResolvedValue({
         data: 'mocked-email-id',
@@ -38,6 +40,7 @@ afterAll(async () => {
     await fastify.close();
 });
 
+
 describe('2FA', () => {
     it('1 - AUTHENTICATION WITH SUCESS', async () => {
         const ws = new WebSocket(`ws://localhost:${port}/ws`);
@@ -49,7 +52,8 @@ describe('2FA', () => {
             body: {
                 username: 'alice',
                 email: 'alice@example.com',
-                password: 'hashed_password_1'
+                password: 'hashed_password_1',
+                id: 4
             }
         });
 
@@ -64,7 +68,8 @@ describe('2FA', () => {
             url: '/verify-2fa',
             body: {
                 username: 'alice',
-                code
+                code,
+				id: 4
             }
         });
 

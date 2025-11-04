@@ -33,4 +33,4 @@ jobs:
         run: docker build -t pong-backend .
 
       - name: Run backend tests inside container
-        run: docker run --rm pong-backend npm run test
+        run: docker run --rm pong-backend /bin/sh -c "npm run database && npm run test"

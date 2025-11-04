@@ -10,5 +10,5 @@ export function TOURNAMENT(data: Tournamentype, connection: WebSocket) {
 
 	console.log(`Tournament Player: ${data.username}`);
 
-	joinTournamentRoom(player.id);
+	joinTournamentRoom(player.username);
 }

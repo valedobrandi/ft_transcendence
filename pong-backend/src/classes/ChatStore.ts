@@ -1,18 +1,24 @@
+import db from "../../database/db.js";
+import { MessagesModel } from "../models/messagesModel.js";
+import { MessageModelTable } from "../types/Tables.js";
+
 class ChatStore {
-    constructor(public userA: string, public userB: string) {}
+    private messageModelInstance = new MessagesModel(db);
 
-    messages: { from: string; to:string, message: string; timestamp: number }[] = [];
-
-    addMessage(from: string, to: string, message: string) {
-        this.messages.push({ from, to, message, timestamp: Date.now() });
+    addMessageToDataBase(senderId: number, receiverId: number, message: string) {
+        this.messageModelInstance.saveMessage(Number(senderId), Number(receiverId), message);
     }
 
-    getHistory(user: string): string[] {
-        return this.messages.map(msg => {
-            const prefix = msg.from === this.userA ? 'You' : this.userB;
-            return `${prefix}: ${msg.message}`;
-        });
+    getHistory(senderId: number, receiverId: number) {
+        const history = this.messageModelInstance.getMessages(senderId, receiverId) as MessageModelTable[] | [];
+        return history.map(msg => ({
+            from: msg.sender_id.toString(),
+            to: msg.receiver_id.toString(),
+			senderId: msg.sender_id,
+            message: msg.content,
+            timestamp: new Date(msg.timestamp).getTime()
+        }));
     }
 }
 
-export default ChatStore;
+export const chatStore = new ChatStore();

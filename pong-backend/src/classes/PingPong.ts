@@ -1,4 +1,4 @@
-import { gameEvents } from "../events/gameEvents.js";
+import { GameEvents, gameEvents } from "../events/gameEvents.js";
 import { connectedRoomInstance } from "../state/connectedRoom.js";
 import { gameRoom } from "../state/gameRoom.js";
 import { userGameStateType } from "../types/GameStateType.js";
@@ -126,9 +126,8 @@ class PingPong {
     endMatch() {
         if (this.matchState === 'ENDED') return;
         this.matchState = 'ENDED';
-
+        
         const [playerXScore, playerYScore] = [this.gameState.userX.score, this.gameState.userY.score];
-
         // Compare de score and set winner and loser
         if (playerXScore > playerYScore) {
             this.winnerId = this.side.LEFT;
@@ -141,7 +140,8 @@ class PingPong {
             this.winnerId = this.side.LEFT;
             this.drawMatch = true;
         }
-
+        
+        this.saveMatchHistory(playerXScore, playerYScore);
 
         console.log(`Winner: ${this.winnerId}`);
 
@@ -287,6 +287,16 @@ class PingPong {
         run();
     }
 
+    saveMatchHistory(score1: number, score2: number) {
+        GameEvents.emit('game:savehistory', {
+            matchId: this.machId,
+            player1: this.side.LEFT,
+            player2: this.side.RIGHT,
+            score1: score1,
+            score2: score2,
+        });
+    }
+
 
     messages(type: string) {
         const [leftId, rightId] = Array.from(this.playersIds.keys());
@@ -322,7 +332,7 @@ class PingPong {
                             winner: this.winnerId,
                             drawMatch: this.drawMatch,
                             message: this.drawMatch ? 'DRAW MATCH!' :
-                                this.winnerId === player.id ? 'YOU WIN!' : 'YOU LOSE!'
+                                this.winnerId === player.username ? 'YOU WIN!' : 'YOU LOSE!'
                         },
                         finalScore: {
                             userX: this.gameState.userX.score,

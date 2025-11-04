@@ -5,10 +5,10 @@ import type { WebSocket } from 'ws';
 export class ConnectedRoom {
     private room = new Map<string, PlayerType>();
 
-    addUser(name: string): Boolean {
+    addUser(name: string, id: number | bigint): Boolean {
         const user: PlayerType = {
-            id: name,
-            name: name,
+            id: id,
+            username: name,
             socket: undefined,
             status: 'CONNECT_ROOM',
             matchId: "",
@@ -45,8 +45,8 @@ export class ConnectedRoom {
     }
 
     broadcast() {
-        const users = Array.from(this.room.values()).map(({ id, name }) => ({ id, name }));
-        users.unshift({ id: 'INTRA', name: 'INTRA' });
+        const users = Array.from(this.room.values()).map(({ id, username: name }) => ({ id, name }));
+        users.unshift({ id: 1, name: 'INTRA' });
 
         this.room.forEach(({ socket }) => {
            if (socket) socket.send(JSON.stringify({ message: 'CONNECTED_USERS', users }));

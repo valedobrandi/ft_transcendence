@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  nginx:
+    build:
+      context: ./pong-frontend
+      dockerfile: Dockerfile.production
+    image: pong-nginx:latest
+    container_name: pong-nginx
+    ports:
+      - "443:443"
+    environment:
+      - VITE_PONG_BACKEND_API=http://localhost:3000
+      - VITE_PONG_BACKEND_WEBSOCKET=ws://localhost:3000/ws
+    volumes:
+      # SSL certificates
+      - ./certs:/etc/ssl/private:ro
+      # Nginx configuration
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - pong-backend
+    networks:
+      - transcedence-network
+    restart: unless-stopped
+
+  pong-backend:
+    build:
+      context: ./pong-backend
+      dockerfile: Dockerfile.production
+    image: pong-backend:latest
+    container_name: pong-backend
+    expose:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - ADDRESS=192.0.7
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - DATABASE_PATH={DATABASE_PATH}
+    volumes:
+      - ./pong-backend/database.db:/app/database.db
+    env_file:
+      - .env
+    networks:
+      - transcedence-network
+    restart: unless-stopped
+networks:
+  transcedence-network:
+    driver: bridge

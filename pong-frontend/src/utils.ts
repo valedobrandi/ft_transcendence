@@ -1,5 +1,6 @@
 import { id } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
+import { endpoint } from "./endPoints";
 import { guestView, intraView, loginView, matchView, registerView, singInView, twoFactorAuthenticationView } from "./views";
 
 export function navigateTo(path: string) {
@@ -43,16 +44,16 @@ export function setTime(ms: number, func: () => void): Promise<void> {
 }
 
 export async function fetchRequest(
-    endpoint: string,
+    path: string,
 	method: string,
     headers: Record<string, string>,
     options: Record<string, string> = {}) {
 
-    const url = `http://${endpoint}`;
+    const url = `${endpoint.pong_backend_api}${path}`;
     const defaultHeaders = {
         'Content-Type': 'application/json',
         // Add auth token
-        // 'Authorization': `Bearer ${token}`,
+        //'Authorization': `Bearer ${token}`,
     };
 
     try {
