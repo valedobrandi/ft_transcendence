@@ -1,7 +1,7 @@
 import { navigateTo } from "../utils";
 import { Button } from "./Button";
 
-export function Login(): HTMLElement {
+export function Default(): HTMLElement {
 	const viewDiv = document.createElement("div");
     viewDiv.id = "view-container";
 	viewDiv.className = "flex flex-col items-center h-screen";
@@ -17,12 +17,12 @@ export function Login(): HTMLElement {
 
 	const guestBtn = Button("guest", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/guest"));
 
-    const singInBtn = Button("login", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/login"));
+    const loginBtn = Button("login", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/login"));
 
 	const registerBtn = Button("register", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/register"));
 
 	mainDiv.appendChild(guestBtn);
-	mainDiv.appendChild(singInBtn);
+	mainDiv.appendChild(loginBtn);
     mainDiv.appendChild(registerBtn);
 	viewDiv.appendChild(mainDiv);
 	return viewDiv;

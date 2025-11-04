@@ -5,7 +5,7 @@ import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { id, jwt } from "../app";
 
-export function FormSingIn(): HTMLElement {
+export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
     viewDiv.className = "flex flex-col h-screen";
 
