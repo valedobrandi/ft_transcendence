@@ -36,22 +36,4 @@ export function globalEventListeners() {
 			});
 		}
 	});
-
-	document.addEventListener("click", (event) => {
-		const target = event.target as HTMLButtonElement;
-
-		if (target.id === "save-settings-btn") {
-
-
-		}
-	});
-
-	document.addEventListener("click", (event) => {
-		const target = event.target as HTMLButtonElement;
-
-		if (target.id === "save-settings-btn") {
-
-
-		}
-	});
 }
