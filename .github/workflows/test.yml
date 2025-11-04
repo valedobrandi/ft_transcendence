@@ -25,6 +25,9 @@ jobs:
     name: backend-tests
     runs-on: ubuntu-latest
     steps:
+      - name: Set up SQLite DB
+        run: node --loader ts-node/esm  /app/database/init.js
+
       - name: Checkout code
         uses: actions/checkout@v3
 

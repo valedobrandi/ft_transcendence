@@ -8,9 +8,7 @@
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "dev": "nodemon",
         "test": "npx vitest --run --reporter verbose",
-        "seed": "node --loader ts-node/esm ./database/seeds/users.ts",
-        "print": "node --loader ts-node/esm ./database/printTable.ts",
-        "database": "npm run table && npm run seed && npm run print"
+        "database": "node --loader ts-node/esm /app/database/init.ts"
     },
     "dependencies": {
         "@fastify/cors": "^11.1.0",
