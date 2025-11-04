@@ -1,5 +1,5 @@
 // websocket.test.ts
-import { beforeAll, afterAll, describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeAll, afterAll, describe, it, expect, vi } from 'vitest'
 import WebSocket from 'ws'
 import { fastify } from '../server.js';
 import { connectedRoomInstance } from '../state/connectedRoom.js';
