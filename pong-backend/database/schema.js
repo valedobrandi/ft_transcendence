@@ -1,7 +1,4 @@
-import { matchStatus } from "../src/enum_status/enum_matchStatus.js";
-import { playerStatus } from "../src/enum_status/enum_userStatus.js";
 import db from "./db.js";
-
 
 export function createSchema() {
 
@@ -19,7 +16,7 @@ export function createSchema() {
 			email TEXT UNIQUE NOT NULL,
 			password TEXT NOT NULL,
 			avatar_url TEXT DEFAULT '../images/default_avatar.png',
-			status TEXT DEFAULT '${playerStatus.DISCONNECT}',
+			status TEXT DEFAULT 'disconnect',
 			wins INT DEFAULT 0,
 			losses INT DEFAULT 0,
 			twoFA_enabled BOOLEAN DEFAULT 0,
@@ -32,7 +29,7 @@ export function createSchema() {
 			player2 TEXT NOT NULL,
 			score1 INTEGER DEFAULT 0,
 			score2 INTEGER DEFAULT 0,
-			match_status TEXT DEFAULT '${matchStatus.WAITING}',
+			match_status TEXT DEFAULT 'waiting',
 			created_at DATE DEFAULT (date('now')))`);
 
 	db.exec(` CREATE TABLE IF NOT EXISTS friends (

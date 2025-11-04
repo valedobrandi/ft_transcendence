@@ -8,7 +8,7 @@
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "dev": "nodemon",
         "test": "npx vitest --run --reporter verbose",
-        "database": "node --loader ts-node/esm /app/database/init.ts"
+        "database": "node /app/database/init.js"
     },
     "dependencies": {
         "@fastify/cors": "^11.1.0",
