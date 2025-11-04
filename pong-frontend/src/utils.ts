@@ -11,8 +11,8 @@ export function navigateTo(path: string) {
 const routes: Record<string, (root: HTMLElement) => void> = {
     "/match": matchView,
     "/intra": intraView,
-    "/login": loginView,
-    "/sing-in": singInView,
+    "/": loginView,
+    "/login": singInView,
     "/register": registerView,
     "/guest": guestView,
     "/auth": twoFactorAuthenticationView
@@ -26,7 +26,7 @@ export function renderRoute(path: string) {
     const view = routes[path] || loginView;
 
     if (protectedRoutes.includes(path) && id.username === "") {
-        navigateTo("/login");
+        navigateTo("/");
         const alertBox = CreateAlert("You must be logged in to access this page.", "error");
         const viewContainer = document.getElementById("view-container");
         if (viewContainer) {

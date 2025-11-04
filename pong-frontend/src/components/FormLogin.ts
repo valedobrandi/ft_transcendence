@@ -22,7 +22,7 @@ export function FormSingIn(): HTMLElement {
 	const inputPasswordUI = InputPassword();
 	const inputNameUI = InputName();
 
-    const sendBtn = Button("sing-in", "w-full", () => {});
+    const sendBtn = Button("login", "w-full", () => {});
 
 	viewDiv.appendChild(headerBar);
     viewDiv.appendChild(formElement);

@@ -1,5 +1,5 @@
 import { Intra } from "./components/Intra";
-import { Login } from "./components/Login";
+import { Login } from "./components/PageDefault";
 import { Menu } from "./components/Menu";
 import { RenderGame } from "./components/RenderGame";
 import { Register } from "./components/FormRegister";

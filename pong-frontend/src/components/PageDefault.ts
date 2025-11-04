@@ -17,7 +17,7 @@ export function Login(): HTMLElement {
 
 	const guestBtn = Button("guest", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/guest"));
 
-    const singInBtn = Button("login", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/sing-in"));
+    const singInBtn = Button("login", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/login"));
 
 	const registerBtn = Button("register", "h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/register"));
 
