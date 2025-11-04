@@ -3,12 +3,13 @@ import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
 import { playerStatus } from '../enum_status/enum_userStatus.js';
-import db from '../../database/db.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
+import db from '../../database/db.js'
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { guestPostSchema } from '../types/RouteGuest.js';
 import { UsersModel } from '../models/usersModel.js';
+import JWT from 'jsonwebtoken';
 
 export default async function authRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
@@ -41,27 +42,29 @@ export default async function authRoutes(fastify: FastifyInstance) {
         const insertNewUserInDB = db.prepare('INSERT INTO users (email, username, password) VALUES (?,?,?)');
         insertNewUserInDB.run(email, username, hash);
 
-        return res.status(201).send({ message: 'connected', payload: { code: undefined } });
+        return res.status(201).send({ message: 'success', payload: { code: undefined } });
     });
 
     fastify.post('/login', async (request: FastifyRequest<{ Body: RegisterBody }>, res: FastifyReply) => {
-        const { email, username, password } = request.body;
+        const { username, password } = request.body;
         const authService = new AuthService();
-        if (!email || !username || !password) {
+
+        if (!username || !password) {
             return res.status(400).send({ error: 'All fields are mandatory' })
         }
 
-        const existingUser = usersModel.findUserByEmailOrUsername(username, email) as User | undefined;
+        const existingUser = usersModel.findUserByEmailOrUsername(username) as User | undefined;
         if (existingUser === undefined) {
-            return res.status(400).send({ error: 'Invalid credentials' })
+            return res.status(400).send({ error: 'Invalid credentials hgfhf', existingUser })
         }
 
         const passwordMatches = await bcrypt.compare(password, existingUser.password);
         if (!passwordMatches) {
-          return res.status(401).send({ error: 'Invalid credentials' });
+          return res.status(401).send({ error: 'Invalid credentials jjjj' });
         }
 
-        if (existingUser.twoFA_enabled) {
+        if (existingUser.twoFA_enabled) 
+        {
             const authRoom = authenticationRoomInstance;
             authRoom.add(existingUser.username, AuthService.generate2FACode());
 
@@ -75,8 +78,22 @@ export default async function authRoutes(fastify: FastifyInstance) {
             } else {
                 return res.status(200).send({ message: data });
             }
-        } else {
-            return res.status(201).send({ message: 'user connected' });
+        } 
+        else
+        {
+             const secret = process.env.JWT_SECRET || 'secret';
+             if (!secret)
+             {
+                 return res.status(500).send({ error: 'JWT secret not configured', secret });
+             }
+            const time = process.env.JWT_TIME;
+            const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username};
+
+            const token = JWT.sign(payload, secret, { algorithm: 'HS256', expiresIn: 60 * 60});
+            if(!token)
+                return res.status(404).send({error: "token not found"});
+         
+            return res.status(201).send({ message: 'success', payload: {token, username}});
         }
     });
 

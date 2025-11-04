@@ -6,16 +6,20 @@
         "build": "tsc",
         "prestart": "npm run build",
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
-        "dev": "nodemon",
         "test": "npx vitest --run --reporter verbose",
-        "database": "node /app/database/init.js"
+        "database": "node /app/database/init.js",
+        "print" :"node /app/database/table_print.js",
+        "dev": "nodemon && npm run database",
+        "backend": "docker exec -it pong-backend"
     },
     "dependencies": {
         "@fastify/cors": "^11.1.0",
+        "@fastify/jwt": "^10.0.0",
         "@fastify/websocket": "^11.2.0",
         "bcrypt": "^6.0.0",
         "better-sqlite3": "^12.4.1",
         "fastify": "^5.6.1",
+        "jsonwebtoken": "^9.0.2",
         "node-fetch": "^3.3.2",
         "pino-pretty": "^13.1.2",
         "resend": "^6.3.0"

@@ -3,7 +3,7 @@ import { Login } from "./components/Login";
 import { Menu } from "./components/Menu";
 import { RenderGame } from "./components/RenderGame";
 import { Register } from "./components/FormRegister";
-import { FormSingIn } from "./components/FormSingIn";
+import { FormSingIn } from "./components/FormLogin";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { websocketConnect } from "./websocket/websocketConnect";
 import { changeChatHeader, messagerState } from "./states/messagerState";

@@ -8,6 +8,7 @@ export function InputPassword():HTMLElement {
 
 	const passwordInput = document.createElement("input");
 	passwordInput.type = "password";
+	passwordInput.id = "register_password";
 	passwordInput.placeholder = "Enter your password";
 	passwordInput.className = `px-4 py-2 border rounded w-full
 		focus:outline-none focus:ring-2 focus:ring-blue-500`;
