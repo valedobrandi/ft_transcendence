@@ -1,5 +1,5 @@
 import { id } from "../app";
-import { messagerState } from "../states/messagerState";
+import { messageState } from "../states/messageState";
 import { renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
@@ -27,7 +27,7 @@ export function globalEventListeners() {
 			const chatName = target.value;
 			const chatId = target.name;
 			console.log("Selected chat:", chatName, chatId);
-			messagerState.selectChat = { name: chatName, id: Number(chatId) };
+			messageState.selectChat = { name: chatName, id: Number(chatId) };
 			const buttons = document.querySelectorAll("[id^='chat-select-']");
 			buttons.forEach(button => {
 				button.classList.remove("bg-blue-300");

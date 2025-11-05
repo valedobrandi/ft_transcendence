@@ -39,7 +39,7 @@ class PingPong {
     }
 
     getPlayer(id: string): PlayerType | undefined {
-        return connectedRoomInstance.getById(id) || undefined;
+        return connectedRoomInstance.getByName(id) || undefined;
     }
 
     resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {

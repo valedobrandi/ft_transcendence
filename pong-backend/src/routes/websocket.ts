@@ -1,5 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
-import { socketHandler } from '../sockets/index.js';
+import { socketHandler } from '../websockets/index.js';
 import WebSocket from 'ws';
 import fastifyWebsocket from '@fastify/websocket';
 

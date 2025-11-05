@@ -1,5 +1,5 @@
 import { id } from "../app";
-import { messagerState } from "../states/messagerState";
+import { messageState } from "../states/messageState";
 import { fetchRequest, navigateTo } from "../utils";
 import { Button } from "./Button";
 import { HeaderBar } from "./HeaderBar";

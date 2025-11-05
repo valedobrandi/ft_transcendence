@@ -4,7 +4,7 @@ import { joinTournamentRoom } from "../../state/tournamentRoom.js";
 import { connectedRoomInstance } from '../../state/connectedRoom.js';
 
 export function TOURNAMENT(data: Tournamentype, connection: WebSocket) {
-	const player = connectedRoomInstance.getById(data.username);
+	const player = connectedRoomInstance.getByName(data.username);
 
 	if (player == undefined || player.status != 'CONNECT_ROOM') return;
 

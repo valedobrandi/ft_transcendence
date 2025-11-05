@@ -1,4 +1,4 @@
-import { messagerState, onMessagerChange } from "../states/messagerState";
+import { messageState, onMessageChange } from "../states/messageState";
 import { id as userId }  from "../app";
 
 export function UsersList(): HTMLDivElement {
@@ -7,7 +7,7 @@ export function UsersList(): HTMLDivElement {
 
     function render() {
         usersDiv.innerHTML = "";
-        messagerState.connected.forEach(({ name, id }) => {
+        messageState.connected.forEach(({ name, id }) => {
 
             if (userId.username === name) return;
 
@@ -26,7 +26,7 @@ export function UsersList(): HTMLDivElement {
     }
 
     render();
-    onMessagerChange(render);
+    onMessageChange(render);
     return usersDiv;
 }
 
@@ -36,5 +36,5 @@ export function selectChatByButton(button: HTMLButtonElement) {
     const chatId = button.name;
     console.log("Selected chat:", chatName, chatId);
 
-    messagerState.selectChat = { name: chatName, id: Number(chatId) };
+    messageState.selectChat = { name: chatName, id: Number(chatId) };
 }

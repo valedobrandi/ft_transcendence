@@ -73,7 +73,7 @@ class Tournament {
             this.currentRoundWinners.add(winnerId);
             this.currentBracket.delete(loserId);
 
-            const loserPlayer = connectedRoomInstance.getById(loserId);
+            const loserPlayer = connectedRoomInstance.getByName(loserId);
             if (loserPlayer) {
                 loserPlayer.chat.sendMessage('INTRA', `you have been eliminated from the tournament.`, loserPlayer.username);
             };
@@ -83,7 +83,7 @@ class Tournament {
 
             if (this.rounds > 1) {
                 for (const winnerId of this.nextBracket) {
-                    const player = connectedRoomInstance.getById(winnerId);
+                    const player = connectedRoomInstance.getByName(winnerId);
                     if (player) {
                         player.chat.sendMessage("INTRA", "You have advanced to the next phase!", player.username);
                     }
@@ -109,7 +109,7 @@ class Tournament {
     }
 
     async endTournament(id: string) {
-        const player = connectedRoomInstance.getById(id);;
+        const player = connectedRoomInstance.getByName(id);;
         if (player) {
             player.chat.sendMessage('INTRA', "Congratulations! You are the champion of the tournament!", player.username);
             player.status = 'CONNECT_ROOM';

@@ -5,7 +5,7 @@ import { MATCH } from './MATCH.js';
 import { MOVE_PADDLE } from './MOVE_PADDLE.js';
 import { PLAY } from './PLAY.js';
 import { TOURNAMENT } from './TOURNAMENT.js';
-import { chatHandler } from './CHAT.js';
+import { chatHandler } from './ChatHandler.js';
 
 export function handleMessage(conn: WebSocket, msg: MessageType) {
     if (msg.type !== 'MOVE_PADDLE' && msg.type !== 'input') {

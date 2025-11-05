@@ -1,9 +1,6 @@
 import Database from 'better-sqlite3'
 import type { RunResult } from 'better-sqlite3'
-import { resourceLimits } from 'worker_threads';
-import { UserModelTable } from '../types/Tables';
 import { SaveUser } from '../types/RouteGuest';
-import db from '../../database/db';
 
 class UsersModel {
     private db: Database.Database;

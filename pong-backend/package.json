@@ -8,7 +8,8 @@
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "dev": "nodemon",
         "test": "npx vitest --run --reporter verbose",
-        "database": "node /app/database/init.js"
+        "database": "node /app/database/init.js",
+        "print": "node /app/database/table_print.js"
     },
     "dependencies": {
         "@fastify/cors": "^11.1.0",

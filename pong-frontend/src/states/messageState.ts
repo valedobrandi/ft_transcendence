@@ -1,50 +1,48 @@
 import { id } from "../app";
-import type { ChatHistory } from "../interface/chatHistory";
+import type { ChatMessage } from "../interface/ChatMessage";
 import { navigateTo, setTime } from "../utils";
 import { websocketChatSend } from "../websocket/websocketChatSend";
 
-export function addMessage(history: ChatHistory, sender = id.username) {
-    // if (!messagerState.messages.has(history.from)) {
-    //     messagerState.messages.set(history.from, []);
-    // }
-    // messagerState.messages.get(history.from)!.push({ chat: history.message, sender });
-    // if (history.from === messagerState.selectChat.name) {
-    //     renderMessages(history.from);
-    // }
+export function addIntraMessage(message: string) {
+    messageState.messages.has(1) || messageState.messages.set(1, []);
+    messageState.messages.get(1)!.push({
+    from: 1,
+    to: id.id,
+    senderId: 1,
+    message: message,
+    timestamp: Date.now(),
+});
 }
 
-export function renderMessages(username: string, userId : number) {
+export function renderMessages(selectedChatName: string, selectedChatId : number) {
     const messageBox = document.getElementById('messages');
     if (!messageBox) return;
 
     // Create a new paragraph element for each message
     messageBox.innerHTML = '';
-    messagerState.messages.filter(msg =>
-		Number(msg.senderId) === userId || Number(msg.to) === userId)
-		.forEach(msg => {
-		console.log(`Rendering message for chat from ${msg.senderId} at ${username}:${userId}:`, msg);
-		// Show messages if the to or from matches the selected chat id
-
-        const span = document.createElement('span');
-        span.className = "font-bold lowercase text-lg";
-        span.textContent = Number(msg.senderId) === Number(id.id) ? `` : `#${username}: `;
+    // Get messages from the messageState.messages by selectedChatId
+    const messages = messageState.messages.get(selectedChatId) || [];
+    messages.forEach(msg => {
         const p = document.createElement('p');
-        p.id = 'id-message';
-        p.className = "m-2 text-xs";
+        p.className = "m-2 text-sm";
+        if (Number(msg.from) === Number(id.id)) {
+            p.className += " bg-green-100 p-2 rounded w-fit ml-auto";
+        } else {
+            p.className += " bg-gray-100 p-2 rounded w-fit";
+        }
         p.innerHTML = `${msg.message}`;
         messageBox.appendChild(p);
-        p.prepend(span);
     })
 }
 
-const messagerListeners: (() => void)[] = [];
+const messageListeners: (() => void)[] = [];
 
-export function onMessagerChange(fn: () => void) {
-    messagerListeners.push(fn);
+export function onMessageChange(fn: () => void) {
+    messageListeners.push(fn);
 }
 
 interface MessagerStateType {
-    messages: Map<number, ChatHistory[]>;
+    messages: Map<number, ChatMessage[]>;
     connected: { id: string; name: string }[];
     state: string;
     selectChat: { id: number; name: string };
@@ -58,7 +56,7 @@ export function changeChatHeader(header: string) {
     tab.innerHTML = '';
     tab.textContent = `#${header}`;
     tab.className = 'm-auto font-bold';
-    renderMessages(messagerState.selectChat.name, messagerState.selectChat.id);
+    renderMessages(messageState.selectChat.name, messageState.selectChat.id);
     chatHeader.innerHTML = '';
     chatHeader.appendChild(tab);
 }
@@ -69,11 +67,11 @@ export interface MessageType {
 }
 
 
-export const messagerState: MessagerStateType = new Proxy({
-    messages: new Map<number, ChatHistory[]>(),
+export const messageState: MessagerStateType = new Proxy({
+    messages: new Map<number, ChatMessage[]>(),
     connected: [],
     selectChat: { id: -1, name: '' },
-    state: "",token
+    state: "",
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
@@ -98,24 +96,26 @@ export const messagerState: MessagerStateType = new Proxy({
                         navigateTo("/intra");
                     });
                     break;
+                case "CHAT_MESSAGE":
+                    renderMessages(messageState.selectChat.name, messageState.selectChat.id);
+                    break;
+                case "CHAT_HISTORY":
+                    renderMessages(messageState.selectChat.name, messageState.selectChat.id);
+                    break;
             }
         }
 
         if (prop === 'connected') {
-            messagerListeners.forEach(fn => fn());
+            messageListeners.forEach(fn => fn());
         }
 
         if (prop === 'selectChat') {
-            changeChatHeader(messagerState.selectChat.name);
-            const isIntra = messagerState.selectChat.name === 'INTRA';
+            changeChatHeader(messageState.selectChat.name);
+            const isIntra = messageState.selectChat.name === 'INTRA';
             const chatMenu = document.getElementById("chat-menu");
             if (chatMenu) chatMenu.className = "flex border-b bg-gray-100 h-10";
             if (isIntra && chatMenu) chatMenu.className += " hidden";
         }
-
-		if (prop === 'messages') {
-			renderMessages(messagerState.selectChat.name, messagerState.selectChat.id);
-		}
 
         return true;
     }

@@ -1,6 +1,7 @@
+import { id } from "../app";
 import { playerSideState } from "../context";
-import type { ChatHistory } from "../interface/chatHistory";
-import { messagerState } from "../states/messagerState";
+import type { ChatDataHistory } from "../interface/ChatHistory";
+import { messageState, renderMessages } from "../states/messageState";
 import { serverState } from "../states/serverState";
 import { websocketChatSend } from "./websocketChatSend";
 
@@ -16,36 +17,46 @@ export function websocketReceiver(socket: WebSocket) {
 				break;
 			case 'MATCH_ROOM':
 				serverState.state = data.message;
-				messagerState.state = data.message;
+				messageState.state = data.message;
 				break;
 			case 'GAME_ROOM': {
-				//addMessage('INTRA', data.payload.message);
 				websocketChatSend(data.payload.message, 'INTRA', 1);
 
 				playerSideState.side = data.side;
-				messagerState.state = data.message;
+				messageState.state = data.message;
 
 			}
 				break;
 			case 'TOURNAMENT_ROOM':
 				serverState.state = data.message;
-				messagerState.state = data.message;
+				messageState.state = data.message;
 				break;
 			case 'GAME_OVER':
-				//addMessage('INTRA', data.payload.message);
 				websocketChatSend(data.payload.message, 'INTRA', 1);
-				messagerState.state = data.message;
+				messageState.state = data.message;
 				break;
 			case 'CONNECTED_USERS':
-				messagerState.connected = data.users;
+				messageState.connected = data.users;
 				break;
 			case 'CHAT_MESSAGE':
-				if ('history' in data) {
-					data.history.forEach((msg: ChatHistory) => {
-						// addMessage(msg);
-					});
+				if ('sender' in data && 'history' in data) {
+					// Get the sender id by filter out my own id
+					const sender = data.sender.find((sid: number) => sid !== id.id);
+					if (!sender) return;
+					messageState.messages.set(sender, data.history);
+					messageState.state = data.message;
 				}
 				break;
+			case 'CHAT_HISTORY':
+				if ('history' in data) {
+					data.history.forEach(({ sender, history }: ChatDataHistory) => {
+						const filteredSender = sender.find((sid: number) => sid !== id.id);
+						if (filteredSender) {
+							messageState.messages.set(filteredSender, history);
+						}
+					});
+					messageState.state = data.message;
+				}
 		}
 	});
 

@@ -13,7 +13,7 @@ export class ConnectedRoom {
             status: 'CONNECT_ROOM',
             matchId: "",
             tournamentId: "",
-            chat: new ChatManager(name),
+            chat: new ChatManager(Number(id), name),
         };
 
         if (this.room.has(name) === false) {
@@ -53,10 +53,10 @@ export class ConnectedRoom {
         });
     }
 
-    getById(id: string) {
-        return this.room.get(id);
+    getByName(name: string) {
+        return this.room.get(name);
     }
-
+    
     getBySocket(socket: WebSocket) {
         for (const player of this.room.values()) {
             if (player.socket === socket) {

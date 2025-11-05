@@ -13,6 +13,7 @@ class MessagesModel {
     private db: Database.Database;
     private stmSaveMessage: Database.Statement;
     private stmGetMessages: Database.Statement;
+    private stmGetAllMessages: Database.Statement;
 
     constructor(db: Database.Database) {
         this.db = db;
@@ -20,6 +21,9 @@ class MessagesModel {
             INSERT INTO messages (sender_id, receiver_id, content, sender)
             VALUES (?, ?, ?, ?)
             `)
+        this.stmGetAllMessages = db.prepare(`
+            SELECT * FROM messages
+            WHERE sender_id = ? OR receiver_id = ?`);
         this.stmGetMessages = db.prepare(`
             SELECT
             m.*,
@@ -31,6 +35,12 @@ class MessagesModel {
             WHERE (m.sender_id = ? AND m.receiver_id = ?)
                 OR (m.sender_id = ? AND m.receiver_id = ?)
             ORDER BY m.timestamp ASC`)
+    }
+
+    getAllMessages(userId: number): unknown[] {
+        const response = this.stmGetAllMessages.all(userId, userId);
+        print(`All messages for user ${userId}: ${JSON.stringify(response)}`);
+        return response;
     }
 
     saveMessage(senderId: number, receiverId: number, content: string): void {

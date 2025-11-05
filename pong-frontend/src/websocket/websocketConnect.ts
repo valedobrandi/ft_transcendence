@@ -1,7 +1,7 @@
 import { id } from "../app";
 import { setupPaddleListeners } from "../events/paddleListeners";
+import { addIntraMessage } from "../states/messageState";
 import { getSocket } from "../websocket";
-import { websocketChatSend } from "./websocketChatSend";
 import { websocketReceiver } from "./websocketReceiver";
 
 export function waitForSocketOpen(socket: WebSocket): Promise<void> {
@@ -27,7 +27,7 @@ export function websocketConnect() {
 		}));
 
 		websocketReceiver(socket);
-		websocketChatSend(`Welcome ${id.username}`, 'INTRA', 1);
+		addIntraMessage(`${id.username} connected.`);
 
 		setupPaddleListeners((up, down) => {
 			socket.send(JSON.stringify({
