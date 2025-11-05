@@ -30,10 +30,10 @@ export function globalEventListeners() {
 			messageState.selectChat = { name: chatName, id: Number(chatId) };
 			const buttons = document.querySelectorAll("[id^='chat-select-']");
 			buttons.forEach(button => {
-				button.classList.remove("bg-blue-300");
+				button.classList.remove("bg-gray-100");
 			});
 			Array.from(document.getElementsByClassName(chatName)).forEach((elem) => {
-				elem.classList.add("bg-blue-300");
+				elem.classList.add("bg-gray-100");
 			});
 		}
 	});

@@ -1,9 +1,12 @@
+import db from "../../database/db.js";
 import ChatManager from "../classes/ChatManager.js";
+import { UsersModel } from "../models/usersModel.js";
 import { PlayerType } from "../types/PlayerType.js";
 import type { WebSocket } from 'ws';
 
 export class ConnectedRoom {
     private room = new Map<string, PlayerType>();
+    private usersModelsInstance = new UsersModel(db);
 
     addUser(name: string, id: number | bigint): Boolean {
         const user: PlayerType = {
@@ -28,6 +31,7 @@ export class ConnectedRoom {
         if (player) {
             player.socket = socket;
             this.broadcast();
+            this.broadCastRegisteredUsers();
 			return true;
         }
 		return false;
@@ -42,6 +46,19 @@ export class ConnectedRoom {
         this.dropWebsocket(id);
         this.room.delete(id);
         this.broadcast();
+    }
+
+    broadCastRegisteredUsers() {
+        const registeredUsers = this.usersModelsInstance.getAllUsers().map(user => ({
+            id: user.id,
+            name: user.username
+        }));
+        // Sort by id so that INTRA is first
+        registeredUsers.sort((a, b) => a.id === 1 ? -1 : 1);
+
+        this.room.forEach(({ socket }) => {
+            if (socket) socket.send(JSON.stringify({ message: 'SERVER_USERS', users: registeredUsers }));
+        });
     }
 
     broadcast() {

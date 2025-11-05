@@ -14,7 +14,7 @@ export function addIntraMessage(message: string) {
 });
 }
 
-export function renderMessages(selectedChatName: string, selectedChatId : number) {
+export function renderMessages(_: string, selectedChatId : number) {
     const messageBox = document.getElementById('messages');
     if (!messageBox) return;
 
@@ -41,11 +41,12 @@ export function onMessageChange(fn: () => void) {
     messageListeners.push(fn);
 }
 
-interface MessagerStateType {
+interface MessageStateType {
     messages: Map<number, ChatMessage[]>;
-    connected: { id: string; name: string }[];
-    state: string;
+    serverUsersList: { id: string; name: string }[];
+    friendList: { id: number; name: string }[];
     selectChat: { id: number; name: string };
+    state: string;
 }
 
 export function changeChatHeader(header: string) {
@@ -67,9 +68,10 @@ export interface MessageType {
 }
 
 
-export const messageState: MessagerStateType = new Proxy({
+export const messageState: MessageStateType = new Proxy({
     messages: new Map<number, ChatMessage[]>(),
-    connected: [],
+    serverUsersList: [],
+    friendList: [],
     selectChat: { id: -1, name: '' },
     state: "",
 }, {
@@ -105,7 +107,7 @@ export const messageState: MessagerStateType = new Proxy({
             }
         }
 
-        if (prop === 'connected') {
+        if (prop === 'friendList') {
             messageListeners.forEach(fn => fn());
         }
 
@@ -114,10 +116,12 @@ export const messageState: MessagerStateType = new Proxy({
             const isIntra = messageState.selectChat.name === 'INTRA';
             const chatMenu = document.getElementById("chat-menu");
             if (chatMenu) chatMenu.className = "flex border-b bg-gray-100 h-10";
-            if (isIntra && chatMenu) chatMenu.className += " hidden";
+            if (isIntra && chatMenu) {
+                chatMenu.className += " hidden";
+            };
         }
 
-        return true;
+            return true;
     }
 });
 

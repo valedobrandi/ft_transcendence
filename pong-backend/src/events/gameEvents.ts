@@ -4,7 +4,7 @@ import { GameEventsMap } from '../types/GameEvents';
 
 export const gameEvents = new EventEmitter();
 
-gameEvents.setMaxListeners(100);
+gameEvents.setMaxListeners(10);
 
 class GameEventBus<Events extends Record<string, any>> {
     private listeners = new Map<keyof Events, Function[]>();

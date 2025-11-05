@@ -36,7 +36,7 @@ export function websocketReceiver(socket: WebSocket) {
 				messageState.state = data.message;
 				break;
 			case 'CONNECTED_USERS':
-				messageState.connected = data.users;
+				//messageState.connected = data.users;
 				break;
 			case 'CHAT_MESSAGE':
 				if ('sender' in data && 'history' in data) {
@@ -57,6 +57,11 @@ export function websocketReceiver(socket: WebSocket) {
 					});
 					messageState.state = data.message;
 				}
+				break;
+			case 'SERVER_USERS':
+				if ('users' in data) messageState.friendList = data.users;
+				
+				break;
 		}
 	});
 

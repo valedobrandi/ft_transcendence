@@ -21,7 +21,6 @@ export function intraView(root: HTMLElement) {
 	root.appendChild(menuUI);
 	root.appendChild(intraUI);
 	messageState.selectChat = { id: 1, name: 'INTRA' };
-
 }
 
 export function matchView(root: HTMLElement) {
