@@ -3,7 +3,7 @@ import type { RunResult } from 'better-sqlite3'
 import { resourceLimits } from 'worker_threads';
 import { UserModelTable } from '../types/Tables';
 import { SaveUser } from '../types/RouteGuest';
-import db from '../../database/db';
+
 
 class UsersModel {
     private db: Database.Database;
@@ -20,8 +20,8 @@ class UsersModel {
         );
     }
 
-    findUserByEmailOrUsername(email: string, username: string): any | undefined {
-        return this.stmFindUser.get(email, username);
+    findUserByEmailOrUsername(username: string): any | undefined {
+        return this.stmFindUser.get("", username);
     }
 
     saveGuestUsername(username: string): SaveUser {

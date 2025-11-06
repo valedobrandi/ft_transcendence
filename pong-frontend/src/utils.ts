@@ -1,7 +1,7 @@
 import { id } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
 import { endpoint } from "./endPoints";
-import { guestView, intraView, loginView, matchView, registerView, singInView, twoFactorAuthenticationView } from "./views";
+import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView } from "./views";
 
 export function navigateTo(path: string) {
     history.pushState({}, "", path);
@@ -11,8 +11,8 @@ export function navigateTo(path: string) {
 const routes: Record<string, (root: HTMLElement) => void> = {
     "/match": matchView,
     "/intra": intraView,
+    "/": defaultView,
     "/login": loginView,
-    "/sing-in": singInView,
     "/register": registerView,
     "/guest": guestView,
     "/auth": twoFactorAuthenticationView
@@ -23,10 +23,10 @@ export function renderRoute(path: string) {
 
     console.log(`username: ${id.username}`);
     const root = document.getElementById("root")!;
-    const view = routes[path] || loginView;
+    const view = routes[path] || defaultView;
 
     if (protectedRoutes.includes(path) && id.username === "") {
-        navigateTo("/login");
+        navigateTo("/");
         const alertBox = CreateAlert("You must be logged in to access this page.", "error");
         const viewContainer = document.getElementById("view-container");
         if (viewContainer) {

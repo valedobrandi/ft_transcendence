@@ -7,7 +7,7 @@ export function InputName() {
 	legend.textContent = "USERNAME";
 
 	const nameInput = document.createElement("input");
-	nameInput.id = 'guest-username';
+	nameInput.id = 'register_username';
 	nameInput.type = "text";
 	nameInput.placeholder = "...";
 	nameInput.className = `px-4 py-2 border rounded w-full
