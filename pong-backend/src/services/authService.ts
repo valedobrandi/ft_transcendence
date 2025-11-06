@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import { connectedRoomInstance } from "../state/connectedRoom.js";
 import db from "../../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
-import { SaveUser } from "../types/RouteGuest.js";
+import { userModelReturn } from "../types/RouteGuest.js";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
@@ -25,8 +25,8 @@ class AuthService {
         return { data, error };
     }
 
-    guestLoginValidation(username: string): SaveUser {
-        const saveAtDatabase: SaveUser = this.usersModelInstance.saveGuestUsername(username);
+    guestLoginValidation(username: string): userModelReturn {
+        const saveAtDatabase: userModelReturn = this.usersModelInstance.saveGuestUsername(username);
         if ('error' in saveAtDatabase) {
             return { error: saveAtDatabase.error };
         }

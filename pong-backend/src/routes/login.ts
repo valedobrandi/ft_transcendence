@@ -1,14 +1,11 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
-import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
-import { playerStatus } from '../enum_status/enum_userStatus.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import db from '../../database/db.js'
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { UsersModel } from '../models/usersModel.js';
-import Cookie from '@fastify/cookie';
 
 export default async function loginRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
@@ -32,7 +29,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
           return res.status(401).send({ error: 'Invalid credentials' });
         }
 
-        if (existingUser.twoFA_enabled) 
+        if (existingUser.twoFA_enabled)
         {
             const authRoom = authenticationRoomInstance;
             authRoom.add(existingUser.username, AuthService.generate2FACode());
@@ -47,7 +44,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             } else {
                 return res.status(200).send({ message: data });
             }
-        } 
+        }
         else
         {
             const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username};
@@ -62,13 +59,12 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             if(!accessToken)
                 return res.status(404).send({error: "AccessToken not found"});
 
-            res.setCookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "strict",
-            path: '/refresh-token'
-            });
-            console.log(username);
+            // res.setCookie('refreshToken', refreshToken, {
+            // httpOnly: true,
+            // secure: true,
+            // sameSite: "strict",
+            // path: '/refresh-token'
+            // });
             return res.status(201).send({ message: 'success', payload: {accessToken, username}});
         }
     });

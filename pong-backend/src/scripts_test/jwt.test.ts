@@ -5,19 +5,18 @@ import { fastify } from '../server.js';
 
 
 
-let port: number | null = null;
-beforeAll(async () => {
-	await fastify.listen({ port: 0 });
-	const adress = fastify.server.address();
-	if (adress) port = typeof adress === 'string' ? null : adress.port;
-});
-
-afterAll(async () => {
-	await fastify.close();
-});
 
 
 describe('JWT', () => {
+	beforeAll(async () => {
+		// Mock findUserByEmailOrUsername
+		vi.spyOn(fastify.jwt, 'sign')
+
+	});
+
+	afterAll(async () => {
+
+	});
 	it('1 - GENERATE JWT', async () => {
 		const response = await fetch(`http://localhost:3000/login`, {
 			method: 'POST',

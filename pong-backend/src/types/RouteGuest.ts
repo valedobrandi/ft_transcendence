@@ -12,6 +12,6 @@ export const guestPostSchema = {
     required: ['username'],
 }
 
-export type SaveUser =
+export type userModelReturn =
     | { status: "error", error: string }
     | { message: string; username: string; id: number | bigint };
