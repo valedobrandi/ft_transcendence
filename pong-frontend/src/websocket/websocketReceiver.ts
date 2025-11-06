@@ -1,7 +1,7 @@
 import { id } from "../app";
 import { playerSideState } from "../context";
 import type { ChatDataHistory } from "../interface/ChatHistory";
-import { messageState, renderMessages } from "../states/messageState";
+import { messageState } from "../states/messageState";
 import { serverState } from "../states/serverState";
 import { websocketChatSend } from "./websocketChatSend";
 
@@ -60,7 +60,7 @@ export function websocketReceiver(socket: WebSocket) {
 				break;
 			case 'SERVER_USERS':
 				if ('users' in data) messageState.friendList = data.users;
-				
+
 				break;
 		}
 	});
