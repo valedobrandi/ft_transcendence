@@ -62,13 +62,13 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             if(!accessToken)
                 return res.status(404).send({error: "AccessToken not found"});
 
-            res.setCookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "strict",
-            path: '/refresh-token'
-            });
-            console.log(username);
+            // res.setCookie('refreshToken', refreshToken, {
+            // httpOnly: true,
+            // secure: true,
+            // sameSite: "strict",
+            // path: '/refresh-token'
+            // });
+
             return res.status(201).send({ message: 'success', payload: {accessToken, username}});
         }
     });

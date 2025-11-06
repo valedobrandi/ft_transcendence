@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import db from '../../database/db.js'
-import JWT from 'jsonwebtoken';
 import fs from "fs";
 import path from "path";
 import fastifyMultipart from "@fastify/multipart";

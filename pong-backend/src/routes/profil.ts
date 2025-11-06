@@ -2,13 +2,25 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
+import db from '../../database/db.js'
+import { playerStatus } from '../enum_status/enum_userStatus.js';
+
 
 export default async function profilRoutes(fastify: FastifyInstance) {
 
     fastify.get('/profile', {
         preHandler: [fastify.authenticate],
         handler: (async (request: FastifyRequest, res) => {
-            return res.status(200).send({user: request.user});
+        console.log("Header reçu )))))):", request.headers.authorization);
+
+        try{
+            return res.status(200).send({message: 'success', user: request.user});
+        }
+        catch(error){
+            const err = error as Error;
+            return res.status(404).send({ error: err.message });
+        }
+
         })
     });
     

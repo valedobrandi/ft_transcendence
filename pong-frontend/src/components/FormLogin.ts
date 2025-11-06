@@ -3,7 +3,7 @@ import { HeaderBar } from "./HeaderBar";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
-import { id, jwt } from "../app";
+import { profile, jwt } from "../app";
 
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
@@ -45,13 +45,12 @@ export function FormLogin(): HTMLElement {
             `/login`,
             'POST',
             {},
-            { body: JSON.stringify({ username, password}) }
+            { username, password}
         );
 
         if (response.message === 'success') {
-            jwt.token = response.payload.token;
-            id.username = response.payload.username;
-            console.log(jwt.token);
+            jwt.token = response.payload.accessToken;
+            profile.username = response.payload.username;
             navigateTo("/intra");
         }		
     };

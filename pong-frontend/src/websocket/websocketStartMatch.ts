@@ -1,4 +1,4 @@
-import { id } from "../app";
+import { profile } from "../app";
 import { getSocket } from "../websocket";
 
 export function websocketStartMatch() {
@@ -7,7 +7,7 @@ export function websocketStartMatch() {
 
 	socket.send(JSON.stringify({
 		type: "PLAY",
-		username: id.username,
-        userId: id.id,
+		username: profile.username,
+        userId: profile.id,
 	}));
 };

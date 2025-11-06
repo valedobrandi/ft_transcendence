@@ -1,9 +1,9 @@
-import { id } from "../app";
+import { profile } from "../app";
 import type { ChatHistory } from "../interface/chatHistory";
 import { navigateTo, setTime } from "../utils";
 import { websocketChatSend } from "../websocket/websocketChatSend";
 
-export function addMessage(history: ChatHistory, sender = id.username) {
+export function addMessage(history: ChatHistory, sender = profile.username) {
     // if (!messagerState.messages.has(history.from)) {
     //     messagerState.messages.set(history.from, []);
     // }
@@ -28,14 +28,14 @@ export function renderMessages(username: string, userId : number) {
         const span = document.createElement('span');
         span.className = "font-bold lowercase text-lg";
 		// Show menssage buble differently and rigth / left if sent by self or other
-		if (Number(msg.senderId) === Number(id.id)) {
+		if (Number(msg.senderId) === Number(profile.id)) {
 			span.classList.add("bg-blue-500");
 			span.classList.add("mr-auto");
 		} else {
 			span.classList.add("bg-gray-300");
 			span.classList.add("ml-auto");
 		}
-        span.textContent = Number(msg.senderId) === Number(id.id) ? `` : `#${username}: `;
+        span.textContent = Number(msg.senderId) === Number(profile.id) ? `` : `#${username}: `;
         const p = document.createElement('p');
         p.id = 'id-message';
         p.className = "m-2 text-xs";

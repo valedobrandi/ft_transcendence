@@ -1,4 +1,4 @@
-import { id } from "../app";
+import { profile } from "../app";
 import { messagerState } from "../states/messagerState";
 import { renderRoute } from "../utils";
 import { getSocket } from "../websocket";
@@ -10,7 +10,7 @@ export function globalEventListeners() {
 		if (socket === null) return;
 		socket.send(JSON.stringify({
 			type: "MOVE_PADDLE",
-			id: id,
+			id: profile,
 			payload: { up, down }
 		}))
 	});

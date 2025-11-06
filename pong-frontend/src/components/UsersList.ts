@@ -1,5 +1,5 @@
 import { messagerState, onMessagerChange } from "../states/messagerState";
-import { id as userId }  from "../app";
+import { profile as userId }  from "../app";
 
 export function UsersList(): HTMLDivElement {
     const usersDiv = document.createElement("div");

@@ -1,4 +1,4 @@
-import { id, jwt } from "../app";
+import { profile, jwt } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
 import { Button } from "./Button";
 import { HeaderBar } from "./HeaderBar";
@@ -42,8 +42,8 @@ export function FormGuest(): HTMLElement {
 		);
 
 		if (response.message === 'success') {
-			id.username = response.payload.username;
-			id.id = response.payload.id;
+			profile.username = response.payload.username;
+			profile.id = response.payload.id;
 			navigateTo("/intra");
 		}
 	};
