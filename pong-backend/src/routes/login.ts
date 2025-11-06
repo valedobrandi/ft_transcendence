@@ -68,7 +68,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             sameSite: "strict",
             path: '/refresh-token'
             });
-
+            console.log(username);
             return res.status(201).send({ message: 'success', payload: {accessToken, username}});
         }
     });
