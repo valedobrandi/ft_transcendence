@@ -1,67 +1,51 @@
-
-import WS from "jest-websocket-mock";
-import * as websocket from '../src/websocket.ts';
-import { id, init } from '../src/app.ts'
+import WS from 'jest-websocket-mock';
 import { beforeEach, describe, it, expect, vi, afterEach } from 'vitest';
-import { mockCanvas, } from './setup.ts';
-import * as websocketReceiverModule from '../src/websocket/websocketReceiver.ts';
-import { navigateTo } from "../src/utils.ts";
-const MATCH_ROOM = { status: 200, message: "MATCH_ROOM" };
-
-const GAME_ROOM = {
-	"status": 200,
-	"message": "GAME_ROOM",
-	"payload": {
-		"message": "a584015a-ec23-427d-b19d-732ae868aeaa vs 57ae9a3c-1b1c-493e-8706-ced55f639e65"
-	},
-	"side": "RIGHT",
-	"id": "57ae9a3c-1b1c-493e-8706-ced55f639e65"
-}
-
-const GAME_OVER = {
-	"status": 200,
-	"message": "GAME_OVER",
-	"payload": {
-		"winner": "a584015a-ec23-427d-b19d-732ae868aeaa",
-		"message": "YOU LOSE!"
-	},
-	"finalScore": {
-		"userX": 2,
-		"userY": 0
-	}
-}
+import { mockCanvas } from './setup.ts';
 
 describe('WebSocket tests', () => {
-	var server: WS;
-	const WS_URL = 'ws://localhost:1234';
-	const spyWebsocketReceiver = vi.spyOn(websocketReceiverModule, 'websocketReceiver');
-	beforeEach(async () => {
-		server = new WS('ws://localhost:1234');
+  let server: WS | null = null;
 
-		mockCanvas();
-		id.username = 'testuser';
-		id.id = 1;
-		document.body.innerHTML = '<div id="root"></div>';
-		init();
-	});
+  beforeEach(() => {
+    // provide DOM root and view container used by renderRoute
+    document.body.innerHTML = '<div id="root"><div id="view-container"></div></div>';
+    // optional canvas mock used by some components
+    if (typeof mockCanvas === 'function') mockCanvas();
+  });
 
-	afterEach(() => {
-		server.close();
-		vi.restoreAllMocks();
-	});
+  afterEach(() => {
+    WS.clean();
+    server = null;
+    vi.resetModules(); // ensure mocked modules do not leak between tests
+  });
 
-	it('01 - WEBSOCKET CONNECTED', async () => {
-		const client = websocket.initSocket(WS_URL, "testuser");
-		await server.connected;
-		// Nagivate to /intra
-		navigateTo('/intra');
-		// Expect socket to be open
-		expect(client.readyState).toBe(WebSocket.OPEN);
+  it('opens websocket when navigating to /intra', async () => {
+    // Mock endpoints module before importing app so views will use this websocket URL
+    vi.mock('../src/endPoints', () => ({
+      endpoint: {
+        pong_backend_websocket: `ws://localhost:1234/ws`,
+        pong_backend_api: 'http://localhost:3000/api',
+      },
+    }));
 
-		// Wait for async event dispatch
-		await new Promise((r) => setTimeout(r, 10));
-		console.log(document.body.innerHTML);
+    // Import app after mocking endpoints so the mock is used during module initialization
+    const app = await import('../src/app.ts');
+    const { id, init } = app;
 
-		client.close();
-	});
+    // Ensure user is logged in so protected /intra route will be rendered
+    id.username = 'tester';
+
+    // Start mock server for the exact URL the client will open (includes query param)
+    server = new WS(`ws://localhost:1234/ws?username=${id.username}`);
+
+    // Navigate to /intra and initialize the app which will render the route and open the socket
+    window.history.pushState({}, '', '/intra');
+    // init is synchronous here, but wait for connection from server
+    init();
+
+    // Wait until client connects
+    await server.connected;
+
+    expect(server.clients.length).toBeGreaterThan(0);
+  });
 });
+
