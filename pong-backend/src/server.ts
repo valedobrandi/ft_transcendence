@@ -29,7 +29,6 @@ fastify.decorate('authenticate', async function (request: FastifyRequest, reply:
 	try {
 		//await request.jwtVerify();
 		const verif = await request.jwtVerify();
-		console.log(verif);
 	}
 	catch (err) {
 		reply.send(err);
@@ -37,7 +36,7 @@ fastify.decorate('authenticate', async function (request: FastifyRequest, reply:
 });
 
 fastify.register(Jwt, {
-	secret: process.env.JWT_SECRET ?? 'supersecret'
+	secret: process.env.JWT_SECRET || 'supersecret'
 });
 
 fastify.decorateRequest("userId", null);
