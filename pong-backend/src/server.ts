@@ -25,28 +25,24 @@ const fastify = Fastify({
 	}
 });
 
-  fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
-    try 
-    {
-      //await request.jwtVerify();
-	  const verif = await request.jwtVerify();
-	  console.log(verif);
-    } 
-    catch (err) 
-    {
-      reply.send(err);
-    }
-  });
+fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
+	try {
+		//await request.jwtVerify();
+		const verif = await request.jwtVerify();
+		console.log(verif);
+	}
+	catch (err) {
+		reply.send(err);
+	}
+});
 
 fastify.register(Jwt, {
-  secret: process.env.JWT_SECRET ?? 'supersecret'
+	secret: process.env.JWT_SECRET ?? 'supersecret'
 });
 
 fastify.decorateRequest("userId", null);
 
 fastify.register(loginRoute);
-
-
 fastify.register(authRoutes);
 fastify.register(profilRoutes);
 fastify.register(matchRoute);
