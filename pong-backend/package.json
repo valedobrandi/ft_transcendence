@@ -8,11 +8,12 @@
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "test": "npx vitest --run --reporter verbose",
         "database": "node /app/database/init.js",
-        "print" :"node /app/database/table_print.js",
+        "print": "node /app/database/table_print.js",
         "dev": "nodemon && npm run database",
         "backend": "docker exec -it pong-backend"
     },
     "dependencies": {
+        "@fastify/cookie": "^11.0.2",
         "@fastify/cors": "^11.1.0",
         "@fastify/jwt": "^10.0.0",
         "@fastify/websocket": "^11.2.0",
