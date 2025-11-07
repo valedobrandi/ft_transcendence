@@ -7,8 +7,8 @@
         "prestart": "npm run build",
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "test": "npx vitest --run --reporter verbose",
-        "database": "node ./app/database/init.js",
-        "print": "node ./app/database/table_print.js",
+        "database": "tsx /app/database/init.ts",
+        "print": "tsx /app/database/table_print.ts",
         "dev": "nodemon",
         "backend": "docker exec -it pong-backend"
     },
