@@ -1,9 +1,24 @@
 // websocket.test.ts
-import { describe, it, expect} from 'vitest'
 import { fastify } from '../server.js';
 import { userMock } from './Mock.js';
+import { fastifyServer } from './utils';
+import { createSchema } from '../../database/schema.js';
+import { seedUsers } from '../../database/seeds/seed_users.js';
+import { beforeAll, afterAll, describe, it, expect, vi, beforeEach } from 'vitest'
+
+
+var server: { close: () => any; };
+beforeAll(async () => {
+    server = await fastifyServer();
+});
+
+afterAll(async () => {
+    await server.close();
+});
 
 describe('TABLE CHATBLOCK TEST', () => {
+        createSchema();
+        seedUsers();
 	it('01 - ADD A USER TO THE BLOCK LIST', async () => {
         await fastify.inject({
             method: 'POST',
@@ -25,7 +40,9 @@ describe('TABLE CHATBLOCK TEST', () => {
         });
 
         const response = getBlockedUsers.json();
+        expect(getBlockedUsers.statusCode).toBe(200);
         expect(response.blockedUsers).toBeDefined();
+        console.log(response.blockedUsers);
         expect(response.blockedUsers).toContain(userMock['bob'].id);
     });
 

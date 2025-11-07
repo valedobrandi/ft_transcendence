@@ -6,7 +6,7 @@ import friendRoute from './routes/friend.js';
 import loginRoute from './routes/login.js';
 import websocketRoute from './routes/websocket.js';
 import { registerChatBlockRoutes } from './routes/chatBlock.js';
-import Jwt from '@fastify/jwt';
+import * as jwt from '@fastify/jwt';
 import profilRoutes from './routes/profil.js';
 
 
@@ -28,16 +28,16 @@ const fastify = Fastify({
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
 	try {
 		//await request.jwtVerify();
-		const verif = await request.jwtVerify();
-		console.log(verif);
+		const Verify = await request.jwtVerify();
+		console.log(Verify);
 	}
 	catch (err) {
 		reply.send(err);
 	}
 });
 
-fastify.register(Jwt, {
-	secret: process.env.JWT_SECRET ?? 'supersecret'
+fastify.register(jwt, {
+	secret: process.env.JWT_SECRET || 'supersecret'
 });
 
 fastify.decorateRequest("userId", null);

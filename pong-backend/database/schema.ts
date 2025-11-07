@@ -1,8 +1,4 @@
-import Database from 'better-sqlite3'
-import path from 'path';
-
-const db = new Database(path.resolve('/app/database.db'))
-export default db;
+import db from "./db.js";
 
 export function createSchema() {
 
@@ -24,7 +20,6 @@ export function createSchema() {
 			wins INT DEFAULT 0,
 			losses INT DEFAULT 0,
 			twoFA_enabled BOOLEAN DEFAULT 0,
-			refreshToken TEXT,
 			created_at DATE DEFAULT (date('now')),
 			updated_at DATE DEFAULT (date('now')))`);
 
@@ -71,11 +66,3 @@ export function createSchema() {
 
 	db.exec(` CREATE INDEX IF NOT EXISTS idx_messages_users ON messages (sender_id, receiver_id, timestamp)`);
 }
-
-
-// export const Database={
-//     ...Auth,
-//     ...Login,
-//     ...Refresh,
-//     ...User,
-// }
