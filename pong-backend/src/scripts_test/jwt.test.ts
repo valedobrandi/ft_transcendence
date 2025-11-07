@@ -5,13 +5,16 @@ import { fastifyServer } from './utils';
 import { createSchema } from '../../database/schema';
 import { seedUsers } from '../../database/seeds/seed_users';
 
-var server: { close: () => any; };
+var port: number | null = null;
+
 beforeAll(async () => {
-    server = await fastifyServer();
+    await fastify.listen({ port: 0 });
+    const address = fastify.server.address();
+    if (address) port = typeof address === 'string' ? null : address.port;
 });
 
 afterAll(async () => {
-    await server.close();
+    await fastify.close();
 });
 
 describe('JWT', async () => {
