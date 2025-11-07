@@ -28,6 +28,7 @@ services:
       - ./pong-backend:/app
       - /app/node_modules
     environment:
+      - NODE_ENV=development
       - ADRESS=192.0.7
       - RPC_URL=http://blockchain:8545
       - RESEND_API_KEY=${RESEND_API_KEY}
