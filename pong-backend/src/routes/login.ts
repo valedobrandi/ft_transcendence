@@ -39,11 +39,11 @@ export default async function loginRoutes(fastify: FastifyInstance) {
                 'ft_transcendence Ping-Pong 2FA Code',
                 `<p>Your 2FA code is: <strong>${authRoom.getCode(existingUser.username)}</strong></p>`
             );
-            if (error) {
-                return res.status(400).send({ error });
-            } else {
-                return res.status(200).send({ message: data });
-            }
+
+            if (error) return res.status(400).send({ error });
+
+            return res.status(200).send({ message: data });
+
         }
         else
         {
@@ -53,7 +53,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             if(!refreshToken)
                 return res.status(404).send({error: "RefreshToken not found"});
 
-            db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
+            //db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
 
             const accessToken = fastify.jwt.sign(payload, { expiresIn: '15m' });
             if(!accessToken)

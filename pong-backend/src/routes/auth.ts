@@ -1,12 +1,7 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import bcrypt from 'bcrypt';
-import { RegisterBody, User } from '../types/RegisterType.js';
-import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
-import { playerStatus } from '../enum_status/enum_userStatus.js';
-import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import db from '../../database/db.js'
-import Database from 'better-sqlite3';
-import { AuthService } from '../services/authService.js';
+import bcrypt from 'bcrypt';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { RegisterBody, User } from '../types/RegisterType.js';
 import { AuthController } from '../controllers/authController.js';
 import { guestPostSchema } from '../types/RouteGuest.js';
 import { UsersModel } from '../models/usersModel.js';

@@ -8,10 +8,10 @@ export default async function profilRoutes(fastify: FastifyInstance) {
     fastify.get('/profile', {
         preHandler: [fastify.authenticate],
         handler: (async (request: FastifyRequest, res) => {
-            return res.status(200).send({user: request.user});
+            return res.status(200).send({payload: request.user});
         })
     });
-    
+
     fastify.put('/profil/update/:id', async (request: FastifyRequest<{ Params: { id: number }, Body: RegisterBody }>, res) => {
         const { email, username, password } = request.body;
         const { id } = request.params;

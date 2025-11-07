@@ -6,7 +6,7 @@
         "build": "tsc",
         "prestart": "npm run build",
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
-        "test": "npx vitest --run --reporter verbose",
+        "test": "vitest --run --reporter verbose",
         "database": "tsx /app/database/init.ts",
         "print": "tsx /app/database/table_print.ts",
         "dev": "nodemon",

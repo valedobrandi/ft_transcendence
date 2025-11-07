@@ -1,33 +1,38 @@
 // websocket.test.ts
 import { beforeAll, afterAll, describe, it, expect, vi, beforeEach } from 'vitest'
-import WebSocket from 'ws'
-import { fastify } from '../server.js';
-
-
-
+import { createSchema } from '../../database/schema.js';
 
 
 describe('JWT', () => {
-	beforeAll(async () => {
-		// Mock findUserByEmailOrUsername
-		vi.spyOn(fastify.jwt, 'sign')
 
-	});
+	beforeAll(async () => { createSchema(); });
 
-	afterAll(async () => {
+	afterAll(async () => { createSchema(); });
 
-	});
 	it('1 - GENERATE JWT', async () => {
+		const registerResponse = await fetch(`http://localhost:3000/register`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				email: 'alice@example.com',
+				username: 'alice',
+				password: 'hashed_password_1',
+			}),
+		});
+		expect(registerResponse.status).toBe(201);
+
 		const response = await fetch(`http://localhost:3000/login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(
 				{
-					username: 'lola',
-					password: 'pass',
+					username: 'alice',
+					password: 'hashed_password_1',
 				}
 			)
 		});
+
+		expect(response.status).toBe(201);
 
 		const data = await response.json();
 		expect(data.payload).toHaveProperty('accessToken');
@@ -43,7 +48,9 @@ describe('JWT', () => {
 
 		expect(profile.status).toBe(200);
 		const profileData = await profile.json();
-		expect(profileData.payload).toHaveProperty('username', 'lola');
+		expect(profileData.payload).toHaveProperty('username', 'alice');
+		expect(profileData.payload).toHaveProperty('id', 1);
+
 	});
 
 });
