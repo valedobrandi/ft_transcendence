@@ -6,7 +6,7 @@ import friendRoute from './routes/friend.js';
 import loginRoute from './routes/login.js';
 import websocketRoute from './routes/websocket.js';
 import { registerChatBlockRoutes } from './routes/chatBlock.js';
-import Jwt from '@fastify/jwt';
+import * as jwt from '@fastify/jwt';
 import profilRoutes from './routes/profil.js';
 import cookie from '@fastify/cookie';
 
@@ -25,10 +25,10 @@ const fastify = Fastify({
 });
 
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
-	try 
+	try
 	{
 		await request.jwtVerify();
-		
+
 	}
 	catch (AcessTokenErr)
 	{
@@ -66,8 +66,8 @@ fastify.register(cookie, {
   hook: 'onRequest',                   // parse les cookies tôt
 });
 
-fastify.register(Jwt, {
-	secret: process.env.JWT_SECRET ?? 'supersecret'
+fastify.register(jwt, {
+	secret: process.env.JWT_SECRET || 'supersecret'
 });
 
 fastify.decorateRequest("userId", null);

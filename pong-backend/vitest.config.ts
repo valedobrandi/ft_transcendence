@@ -2,7 +2,8 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    silent: true,
+    silent: false,
     printConsoleTrace: true,
+    setupFiles: ['./vitest.setup.ts'],
   },
 })
