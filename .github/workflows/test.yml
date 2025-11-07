@@ -33,7 +33,7 @@ jobs:
         run: docker build -t pong-backend .
 
       - name: Start backend server
-        run: npm run dev
+        run:  docker run -d --name pong-backend -p 3000:3000 pong-backend
 
       - name: Wait for backend to be ready
         run: sleep 10
