@@ -1,13 +1,18 @@
 // websocket.test.ts
 import { beforeAll, afterAll, describe, it, expect, vi, beforeEach } from 'vitest'
 import { createSchema } from '../../database/schema.js';
-
+import Fastify from 'fastify';
 
 describe('JWT', () => {
+	var server: any;
+	beforeAll(async () => {
+		createSchema();
+	});
 
-	beforeAll(async () => { createSchema(); });
-
-	afterAll(async () => { createSchema(); });
+	afterAll(() => {
+		server.close();
+		createSchema();
+	});
 
 	it('1 - GENERATE JWT', async () => {
 		const registerResponse = await fetch(`http://localhost:3000/register`, {

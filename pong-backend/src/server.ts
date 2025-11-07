@@ -1,12 +1,12 @@
 import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
 import fastifyCors from '@fastify/cors';
+import Jwt from '@fastify/jwt';
 import authRoutes from './routes/auth.js';
 import matchRoute from './routes/match.js';
 import friendRoute from './routes/friend.js';
 import loginRoute from './routes/login.js';
 import websocketRoute from './routes/websocket.js';
 import { registerChatBlockRoutes } from './routes/chatBlock.js';
-import Jwt from '@fastify/jwt';
 import profilRoutes from './routes/profil.js';
 
 

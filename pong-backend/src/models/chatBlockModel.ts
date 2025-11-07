@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3'
 import { ChatModelTable } from '../types/Tables.js';
+import db from '../../database/db.js';
 
 
 class ChatBlockModel {
@@ -38,8 +39,6 @@ class ChatBlockModel {
         }
     }
 
-
-
     getBlockedUsers(userId: number): ChatModelTable[] {
         try {
             const rows = this.stmGetBlockList.all(userId) as ChatModelTable[];
@@ -51,5 +50,11 @@ class ChatBlockModel {
         }
     }
 }
+export const chatBlockModel = new ChatBlockModel(db);
+chatBlockModel.addUserToBlockList(1, 2);
 
 export { ChatBlockModel };
+
+const chatTableModel = new ChatBlockModel(db);
+chatTableModel.getBlockedUsers(1);
+

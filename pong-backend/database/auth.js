@@ -6,14 +6,8 @@ export function existUser(email, username)
 {
     const FindUser = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?') //
     const existingUser = FindUser.get(email, username); //as User | undefined;
-    if (existingUser) 
-    {
-        if (existingUser.email === email)
-            return res.status(400).send({ error: 'Email already in use' })
-        if (existingUser.username === username)
-            return res.status(400).send({ error: 'Username already in use' })
-    }
-}
+    return existingUser;
+    }	
 
 export async function hashPassword(password)
 {
