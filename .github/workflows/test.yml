@@ -32,5 +32,10 @@ jobs:
         working-directory: pong-backend
         run: docker build -t pong-backend .
 
+      - name: Start backend server
+        run: |
+          docker-compose up -d backend
+          sleep 10
+
       - name: Run backend tests inside container
         run: docker run --rm pong-backend /bin/sh -c "npm run database && npm run test"
