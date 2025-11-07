@@ -8,7 +8,7 @@ import db from '../../database/db.js'
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { UsersModel } from '../models/usersModel.js';
-import Cookie from '@fastify/cookie';
+import cookie from '@fastify/cookie';
 
 export default async function loginRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
@@ -58,16 +58,17 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 
             db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
 
-            const accessToken = fastify.jwt.sign(payload, { expiresIn: '15m' });
+            const accessToken = fastify.jwt.sign(payload, { expiresIn: '10h' });
             if(!accessToken)
                 return res.status(404).send({error: "AccessToken not found"});
 
-            // res.setCookie('refreshToken', refreshToken, {
-            // httpOnly: true,
-            // secure: true,
-            // sameSite: "strict",
-            // path: '/refresh-token'
-            // });
+            res.setCookie('refreshToken', refreshToken,
+            {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: "strict",
+                path: '/'
+            });
 
             return res.status(201).send({ message: 'success', payload: {accessToken, username}});
         }

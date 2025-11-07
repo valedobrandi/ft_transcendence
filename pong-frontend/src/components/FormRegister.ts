@@ -53,13 +53,13 @@ export function Register(): HTMLElement {
 
 		const response = await fetchRequest(
 			`/register`,'POST',{},
-			{ body: JSON.stringify({ username, email, password}) }
+			{ username, email, password}
 		);
 
 		if (response.message === 'success') {
 			profile.username = response.payload.username;
 			profile.id = response.payload.id;
-			navigateTo("/intra");
+			navigateTo("/login");
 		}
 	};
     

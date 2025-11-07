@@ -52,7 +52,11 @@ export function FormLogin(): HTMLElement {
             jwt.token = response.payload.accessToken;
             profile.username = response.payload.username;
             navigateTo("/intra");
-        }		
+        }
+        if (response.status == 404)
+        {
+            navigateTo("/");
+        }
     };
 
     return viewDiv;

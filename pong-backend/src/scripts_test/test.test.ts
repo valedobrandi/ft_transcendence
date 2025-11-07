@@ -8,6 +8,7 @@ import { waitForMessage } from './utils.js';
 import bcrypt from 'bcrypt';
 import { AuthService } from '../services/authService.js';
 import { UsersModel } from '../models/usersModel.js';
+import { AuthController } from '../controllers/authController.js';
 
 
 let port: number | null = null;

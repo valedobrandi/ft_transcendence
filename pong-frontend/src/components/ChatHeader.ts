@@ -27,10 +27,11 @@ export function ChatHeader(): HTMLElement{
         {
             if (opt.value === "view-profile")
             {
+                console.log("(opt.value === view-profile")
                 try
                 {
                     const data = await fetchRequest('/profile', 'GET', 
-                    {'Authorization': `Bearer ${jwt.token}`,});
+                    {});
 
                     if (data.message === 'success')
                     {

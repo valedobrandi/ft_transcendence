@@ -1,4 +1,4 @@
-import { profile } from "./app";
+import { jwt, profile } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
 import { endpoint } from "./endPoints";
 import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView, profileView} from "./views";
@@ -20,7 +20,7 @@ const routes: Record<string, (root: HTMLElement) => void> = {
 };
 
 export function renderRoute(path: string) {
-    const protectedRoutes = ["/match", "/intra"];
+    const protectedRoutes = ["/match", "/intra", "/profile"];
 
     console.log(`username: ${profile.username}`);
     const root = document.getElementById("root")!;
@@ -89,6 +89,7 @@ export async function fetchRequest
     const defaultHeaders =
     {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwt.token}`
     };
 
     try
@@ -103,6 +104,7 @@ export async function fetchRequest
             const error = await response.json().catch(() => ({}));
             throw new Error(error.message || `API error (${response.status})`);
         }
+        if ('accessToken' in response) jwt.token = response.accessToken as string;
 
         return await response.json();
     } 

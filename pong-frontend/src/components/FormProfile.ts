@@ -6,6 +6,12 @@ import { HeaderBar } from "./HeaderBar";
 import { profile } from "../app";
 
 
+function Email()
+{
+
+}
+
+
 function Username()
 {
 	const fieldset = document.createElement("fieldset");
@@ -15,15 +21,15 @@ function Username()
 	legend.className = "text-sm font-semibold text-gray-700";
 	legend.textContent = `Username: ${profile.username}`;
 
-	const passwordInput = document.createElement("input");
-	passwordInput.type = "password";
-	passwordInput.id = "register_password";
-	passwordInput.placeholder = "Enter your password";
-	passwordInput.className = `px-4 py-2 border rounded w-full
-		focus:outline-none focus:ring-2 focus:ring-blue-500`;
+	// const passwordInput = document.createElement("input");
+	// passwordInput.type = "password";
+	// passwordInput.id = "register_password";
+	// passwordInput.placeholder = "Enter your password";
+	// passwordInput.className = `px-4 py-2 border rounded w-full
+	// 	focus:outline-none focus:ring-2 focus:ring-blue-500`;
 
 	fieldset.appendChild(legend);
-	fieldset.appendChild(passwordInput);
+	//fieldset.appendChild(passwordInput);
 
 	return fieldset;
 }
@@ -43,6 +49,7 @@ export function ProfilePage():HTMLElement
     };
 
     const usernameElement = Username();
+	// const emailElemant = Email();
 
     viewDiv.appendChild(headerBar);
     viewDiv.appendChild(formElement);
