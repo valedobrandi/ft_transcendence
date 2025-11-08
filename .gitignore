@@ -47,3 +47,7 @@ database.db
 /certs
 *.pem
 *.key
+
+# Git submodule tests
+pong-frontend/vitest/*
+pong-backend/vitest/*
