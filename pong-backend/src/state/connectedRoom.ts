@@ -73,7 +73,16 @@ export class ConnectedRoom {
     getByName(name: string) {
         return this.room.get(name);
     }
-    
+
+    getById(id: number | bigint) {
+        for (const player of this.room.values()) {
+            if (player.id === id) {
+                return player;
+            }
+        }
+        return undefined;
+    }
+
     getBySocket(socket: WebSocket) {
         for (const player of this.room.values()) {
             if (player.socket === socket) {

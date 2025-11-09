@@ -6,10 +6,24 @@ import { chatStore } from "./ChatStore.js";
 class ChatManager {
     private id: number;
     private username: string;
+    private blockedSet: Set<number | bigint>;
 
     constructor(id: number, username: string) {
         this.id = id;
         this.username = username;
+        this.blockedSet = new Set();
+    }
+
+    addToBlockedUsers(blockedUsers: number[]) {
+        this.blockedSet = new Set(blockedUsers);
+    }
+
+    removeFromBlockedUsers(blockedUserId: number) {
+        this.blockedSet.delete(blockedUserId);
+    }
+
+    isUserBlocked(userId: number): boolean {
+        return this.blockedSet.has(userId);
     }
 
     getConversationId(userA: string, userB: string): string {
@@ -21,7 +35,7 @@ class ChatManager {
 
         if (send && send.socket) {
             send.socket.send(JSON.stringify(
-                chatHandler.sendSocket().CHAT_MESSAGE(sender, history)
+                chatHandler.controller().CHAT_MESSAGE(sender, history)
             ));
         };
 
@@ -33,7 +47,7 @@ class ChatManager {
 
         const getChatHistory = chatStore.getChatHistories(this.id);
         user.socket.send(JSON.stringify(
-            chatHandler.sendSocket().CHAT_HISTORY(getChatHistory)
+            chatHandler.controller().CHAT_HISTORY(getChatHistory)
         ));
     }
 }

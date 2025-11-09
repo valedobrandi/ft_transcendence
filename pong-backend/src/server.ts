@@ -4,7 +4,7 @@ import authRoutes from './routes/auth.js';
 import matchRoute from './routes/match.js';
 import friendRoute from './routes/friend.js';
 import websocketRoute from './routes/websocket.js';
-import { registerChatBlockRoutes } from './routes/chatBlock.js';
+import chatBlockRoutes from './routes/chatBlock.js';
 
 const fastify = Fastify({
 	logger: {
@@ -20,13 +20,11 @@ const fastify = Fastify({
 	}
 });
 
-
 fastify.register(authRoutes);
 fastify.register(matchRoute);
 fastify.register(friendRoute);
-fastify.register(registerChatBlockRoutes);
+fastify.register(chatBlockRoutes);
 await fastify.register(websocketRoute);
-
 
 await fastify.register(fastifyCors, {
 	origin: true,

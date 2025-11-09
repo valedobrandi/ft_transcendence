@@ -12,6 +12,6 @@
     "ts-node": {
       "esm": true
     },
-    "exclude": ["node_modules", "src/scripts_test"]
+    "exclude": ["node_modules", "vitest"]
   }
 

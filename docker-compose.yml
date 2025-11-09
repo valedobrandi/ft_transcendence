@@ -21,6 +21,7 @@ services:
       - "5173:5173"
     volumes:
       - ./pong-frontend:/app
+      - ./tests/frontend:/app/vitest
       - /app/node_modules
     environment:
       - VITE_PONG_BACKEND_API=http://localhost:3000
@@ -39,6 +40,7 @@ services:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
+      - ./tests/backend:/app/vitest
       - /app/node_modules
     environment:
       - ADRESS=192.0.7

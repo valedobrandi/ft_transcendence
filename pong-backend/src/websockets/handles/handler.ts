@@ -28,7 +28,7 @@ export function handleMessage(conn: WebSocket, msg: MessageType) {
             TOURNAMENT(msg, conn);
             break;
         case 'CHAT':
-            chatHandler.receiver(msg);
+            chatHandler.service(msg);
             break;
     }
 }

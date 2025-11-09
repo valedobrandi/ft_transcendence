@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { chatBlockDeleteSchema, chatBlockGetSchema, chatBlockPostSchema } from "../types/RouteChatBlock.js";
 import { ChatBlockController } from "../controllers/chatBlockControllers.js";
 
-async function registerChatBlockRoutes(fastify: FastifyInstance) {
+function chatBlockRoutes(fastify: FastifyInstance) {
     const chatBlockControllerInstance = new ChatBlockController();
 
     fastify.post('/block-user', {
@@ -21,4 +21,4 @@ async function registerChatBlockRoutes(fastify: FastifyInstance) {
     });
 }
 
-export { registerChatBlockRoutes };
+export default chatBlockRoutes;
