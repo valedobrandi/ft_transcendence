@@ -21,8 +21,8 @@ class UsersModel {
         this.stmGetAllUsers = db.prepare('SELECT id, username FROM users');
     }
 
-    findUserByEmailOrUsername(email: string, username: string): any | undefined {
-        return this.stmFindUser.get(email, username);
+    findUserByEmailOrUsername(username: string): any | undefined {
+        return this.stmFindUser.get("", username);
     }
 
     saveGuestUsername(username: string): SaveUser {

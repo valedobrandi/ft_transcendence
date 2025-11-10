@@ -3,5 +3,5 @@
         "src"
     ],
     "ext": "ts",
-    "exec": "npx tsx src/start.ts"
+    "exec": "npx tsx ./src/start.ts"
 }

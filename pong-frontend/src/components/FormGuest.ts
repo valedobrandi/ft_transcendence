@@ -1,5 +1,4 @@
-import { id } from "../app";
-import { messageState } from "../states/messageState";
+import { id, jwt } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
 import { Button } from "./Button";
 import { HeaderBar } from "./HeaderBar";
@@ -24,19 +23,24 @@ export function FormGuest(): HTMLElement {
 
 	formElement.onsubmit = async (e) => {
 		e.preventDefault();
+
 		const getInput = document.getElementById('guest-username') as HTMLInputElement;
 		if (getInput === null) return;
+
 		const username = getInput.value.trim();
+
 		if (username.length < 3) {
 			alert("nickname not valid.");
 			return;
 		}
+
 		const response = await fetchRequest(
-			`/guest`,
+			`/login`,
 			'POST',
 			{},
 			{ body: JSON.stringify({ username }) }
 		);
+
 		if (response.message === 'success') {
 			id.username = response.payload.username;
 			id.id = response.payload.id;

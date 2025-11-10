@@ -43,9 +43,12 @@ services:
       - ./tests/backend:/app/vitest
       - /app/node_modules
     environment:
+      - NODE_ENV=development
       - ADRESS=192.0.7
       - RPC_URL=http://blockchain:8545
       - RESEND_API_KEY=${RESEND_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_TIME=${JWT_TIME}
     command: npm run dev
     networks:
       - transcedence-network

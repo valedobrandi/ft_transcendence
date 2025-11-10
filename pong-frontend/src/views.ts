@@ -1,9 +1,9 @@
 import { Intra } from "./components/Intra";
-import { Login } from "./components/Login";
+import { Default } from "./components/PageDefault";
 import { Menu } from "./components/Menu";
 import { RenderGame } from "./components/RenderGame";
 import { Register } from "./components/FormRegister";
-import { FormSingIn } from "./components/FormSingIn";
+import { FormLogin } from "./components/FormLogin";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { websocketConnect } from "./websocket/websocketConnect";
 import { messageState } from "./states/messageState";
@@ -32,9 +32,9 @@ export function matchView(root: HTMLElement) {
 	root.appendChild(container);
 }
 
-export function loginView(root: HTMLElement) {
+export function defaultView(root: HTMLElement) {
 	root.innerHTML = "";
-	const loginUI = Login();
+	const loginUI = Default();
 	root.appendChild(loginUI);
 }
 
@@ -50,9 +50,9 @@ export function guestView(root: HTMLElement) {
     }
 }
 
-export function singInView(root: HTMLElement) {
+export function loginView(root: HTMLElement) {
 	root.innerHTML = "";
-	const SingUI = FormSingIn();
+	const SingUI = FormLogin();
 	root.appendChild(SingUI);
 }
 

@@ -46,8 +46,12 @@ database.db
 
 /certs
 *.pem
+<<<<<<< HEAD
 *.key
 
 # Git submodule tests
 pong-frontend/vitest/*
 pong-backend/vitest/*
+=======
+*.keyft_transcendence.pdf
+>>>>>>> main

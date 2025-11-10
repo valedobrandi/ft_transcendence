@@ -13,5 +13,5 @@ export const guestPostSchema = {
 }
 
 export type SaveUser =
-    | { error: string }
+    | { status: "error", error: string }
     | { message: string; username: string; id: number | bigint };

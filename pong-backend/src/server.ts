@@ -1,10 +1,14 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
 import fastifyCors from '@fastify/cors';
 import authRoutes from './routes/auth.js';
 import matchRoute from './routes/match.js';
 import friendRoute from './routes/friend.js';
+import loginRoute from './routes/login.js';
 import websocketRoute from './routes/websocket.js';
-import chatBlockRoutes from './routes/chatBlock.js';
+import * as jwt from '@fastify/jwt';
+import profilRoutes from './routes/profil.js';
+
+
 
 const fastify = Fastify({
 	logger: {
@@ -20,7 +24,26 @@ const fastify = Fastify({
 	}
 });
 
+fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
+	try {
+		//await request.jwtVerify();
+		const Verify = await request.jwtVerify();
+		console.log(Verify);
+	}
+	catch (err) {
+		reply.send(err);
+	}
+});
+
+fastify.register(jwt, {
+	secret: process.env.JWT_SECRET || 'supersecret'
+});
+
+fastify.decorateRequest("userId", null);
+
+fastify.register(loginRoute);
 fastify.register(authRoutes);
+fastify.register(profilRoutes);
 fastify.register(matchRoute);
 fastify.register(friendRoute);
 fastify.register(chatBlockRoutes);

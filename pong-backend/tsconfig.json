@@ -7,6 +7,8 @@
       "strict": true,
       "esModuleInterop": true,
       "skipLibCheck": true,
+      "allowSyntheticDefaultImports": true,
+      "resolveJsonModule": true,
       "outDir": "dist"
     },
     "ts-node": {
@@ -14,4 +16,3 @@
     },
     "exclude": ["node_modules", "vitest"]
   }
-
