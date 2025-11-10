@@ -11,26 +11,45 @@ jobs:
     name: frontend-tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout code and submodules
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-      - name: Build frontend Docker image
-        working-directory: pong-frontend
-        run: docker build -t pong-frontend .
+      - name: Create empty .env file
+        run: touch .env
 
-      - name: Run frontend tests inside container
-        run: docker run --rm pong-frontend npm run test
+      - name: Build frontend container
+        run: docker compose build pong-frontend
+
+      - name: Run frontend tests
+        run: docker compose run --rm pong-frontend npx vitest --run --reporter verbose
+
+      - name: Clean up
+        run: docker compose down --volumes
 
   backend-tests:
     name: backend-tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout code and submodules
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-      - name: Build backend Docker image
-        working-directory: pong-backend
-        run: docker build -t pong-backend .
+      - name: Create empty .env file
+        run: touch .env
 
-      - name: Run backend tests inside container
-        run: docker run --rm pong-backend /bin/sh -c "npm run database && npm run test"
+
+      - name: Build backend container
+        run: docker compose build pong-backend
+
+      - name: Create database
+        run: docker compose run --rm pong-backend npx tsx /app/database/init.ts
+
+      - name: Run backend tests
+        run: docker compose run --rm pong-backend npx vitest --run --reporter verbose
+
+      - name: Clean up
+        run: docker compose down --volumes
+

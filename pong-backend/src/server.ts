@@ -5,59 +5,68 @@ import matchRoute from './routes/match.js';
 import friendRoute from './routes/friend.js';
 import loginRoute from './routes/login.js';
 import websocketRoute from './routes/websocket.js';
-import { registerChatBlockRoutes } from './routes/chatBlock.js';
 import * as jwt from '@fastify/jwt';
-import profilRoutes from './routes/profil.js';
+import profilRoute from './routes/profil.js';
+import chatBlockRoute from './routes/chatBlock.js';
 
 
 
 const fastify = Fastify({
-	logger: {
-		level: 'info',
-		transport: {
-			target: 'pino-pretty',
-			options: {
-				colorize: true,
-				translateTime: 'SYS:standard',
-				ignore: 'pid,hostname',
-			},
-		},
-	}
+    logger: {
+        level: 'info',
+        transport: {
+            target: 'pino-pretty',
+            options: {
+                colorize: true,
+                translateTime: 'SYS:standard',
+                ignore: 'pid,hostname',
+            },
+        },
+    }
 });
 
-fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
-	try {
-		//await request.jwtVerify();
-		const Verify = await request.jwtVerify();
-		console.log(Verify);
-	}
-	catch (err) {
-		reply.send(err);
-	}
-});
-
-fastify.register(jwt, {
-	secret: process.env.JWT_SECRET || 'supersecret'
-});
+declare module 'fastify' {
+  interface FastifyRequest {
+    userId: number | null;
+  }
+}
 
 fastify.decorateRequest("userId", null);
 
+fastify.decorate('authenticate', async function (request: FastifyRequest, res: FastifyReply) {
+    try {
+        const decoded = await request.jwtVerify();
+        print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
+        request.userId = decoded.id;
+        if (!request.userId) {
+            res.code(401).send({ error: 'Unauthorized' });
+        }
+    }
+    catch (err) {
+        res.code(401).send({ error: 'Unauthorized' });
+    }
+});
+
+fastify.register(jwt, {
+    secret: process.env.JWT_SECRET || 'supersecret'
+});
+
+
 fastify.register(loginRoute);
 fastify.register(authRoutes);
-fastify.register(profilRoutes);
+fastify.register(profilRoute);
 fastify.register(matchRoute);
 fastify.register(friendRoute);
-fastify.register(registerChatBlockRoutes);
+fastify.register(chatBlockRoute);
 await fastify.register(websocketRoute);
 
-
 await fastify.register(fastifyCors, {
-	origin: true,
-	methods: ['POST', 'OPTIONS'],
+    origin: true,
+    methods: ['POST', 'OPTIONS'],
 });
 
 export function print(message: string) {
-	console.log(`[Log]: ${message}`);
+    console.log(`[Log]: ${message}`);
 }
 
 export { fastify };

@@ -1,7 +1,6 @@
+import { ChatMessage } from "./ChatMessage";
+
 export type ChatHistory = {
-    from: string;
-    to: string;
-	senderId: number;
-    message: string;
-    timestamp: number;
-}
+    sender: number[];
+    history: ChatMessage[];
+};

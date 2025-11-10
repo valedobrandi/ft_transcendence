@@ -1,4 +1,17 @@
 services:
+
+  cypress:
+    image: cypress/included:12.17.4
+    working_dir: /e2e
+    volumes:
+      - ./cypress:/e2e
+    environment:
+      - CYPRESS_baseUrl=http://frontend:3000
+    depends_on:
+      - pong-frontend
+      - pong-backend
+    command: npx cypress run
+
   pong-frontend:
     build:
       context: ./pong-frontend
@@ -8,6 +21,7 @@ services:
       - "5173:5173"
     volumes:
       - ./pong-frontend:/app
+      - ./tests/frontend:/app/vitest
       - /app/node_modules
     environment:
       - VITE_PONG_BACKEND_API=http://localhost:3000
@@ -26,6 +40,7 @@ services:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
+      - ./tests/backend:/app/vitest
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -53,6 +68,7 @@ services:
     command: npx hardhat node
     networks:
       - transcedence-network
+
 
 volumes:
   pong-backend-data:

@@ -1,5 +1,5 @@
 import { GameEvents, gameEvents } from "../events/gameEvents.js";
-import { connectedRoomInstance } from "../state/connectedRoom.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { gameRoom } from "../state/gameRoom.js";
 import { userGameStateType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
@@ -39,7 +39,7 @@ class PingPong {
     }
 
     getPlayer(id: string): PlayerType | undefined {
-        return connectedRoomInstance.getById(id) || undefined;
+        return connectedRoomInstance.getByName(id) || undefined;
     }
 
     resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {

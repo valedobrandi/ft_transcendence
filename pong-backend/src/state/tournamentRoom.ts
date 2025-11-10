@@ -1,6 +1,6 @@
 import { Tournament } from "../classes/Tournament.js";
 import { tournamentEvent } from "../events/tournamentQueueEvent.js";
-import { connectedRoomInstance } from "./connectedRoom.js";
+import { connectedRoomInstance } from "./ConnectedRoom.js";
 
 export const tournamentQueue: Set<string> = new Set();
 
@@ -8,7 +8,7 @@ export const tournamentRoom = new Map<string, Tournament>();
 
 export function joinTournamentRoom(id: string) {
     tournamentQueue.add(id);
-    const player = connectedRoomInstance.getById(id);
+    const player = connectedRoomInstance.getByName(id);
     if (player == undefined) return;
     player.status = 'TOURNAMENT_ROOM';
 
@@ -54,7 +54,7 @@ tournamentEvent.on('ready', () => {
     const newTournament = new Tournament(tournamentId);
 
     for (const id of tournamentPlayers) {
-        const player = connectedRoomInstance.getById(id);
+        const player = connectedRoomInstance.getByName(id);
         if (player == undefined) continue;
         player.tournamentId = tournamentId;
         newTournament.add(id);

@@ -1,5 +1,5 @@
 import { id } from "../app";
-import { messagerState } from "../states/messagerState";
+import { messageState } from "../states/messageState";
 import { renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
@@ -22,36 +22,20 @@ export function globalEventListeners() {
 	// Add event to btn #chat-select-chat
 	document.addEventListener("click", (event) => {
 		const target = event.target as HTMLButtonElement;
-		if (target.tagName === "BUTTON" && target.id === "chat-select") {
+
+		if (target.tagName === "BUTTON" && target.id.startsWith("chat-select-")) {
 			const chatName = target.value;
 			const chatId = target.name;
 			console.log("Selected chat:", chatName, chatId);
-			messagerState.selectChat = { name: chatName, id: Number(chatId) };
-			const buttons = document.querySelectorAll("#chat-select");
+			messageState.selectChat = { name: chatName, id: Number(chatId) };
+			const buttons = document.querySelectorAll("[id^='chat-select-']");
 			buttons.forEach(button => {
-				button.classList.remove("bg-blue-300");
+				button.classList.remove("bg-gray-100");
 			});
 			Array.from(document.getElementsByClassName(chatName)).forEach((elem) => {
-				elem.classList.add("bg-blue-300");
+				elem.classList.add("bg-gray-100");
 			});
 		}
 	});
 
-	document.addEventListener("click", (event) => {
-		const target = event.target as HTMLButtonElement;
-
-		if (target.id === "save-settings-btn") {
-
-
-		}
-	});
-
-	document.addEventListener("click", (event) => {
-		const target = event.target as HTMLButtonElement;
-
-		if (target.id === "save-settings-btn") {
-
-
-		}
-	});
 }

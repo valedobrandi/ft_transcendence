@@ -1,26 +1,38 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ChatBlockService } from "../services/chatBlockService.js";
 import { ChatBlockDeleteDTO, ChatBlockGetDTO, ChatBlockPostDTO } from "../types/RouteChatBlock.js";
+import { statusCodeMessage } from "../types/FastifyResponse.js";
 
 class ChatBlockController {
     private chatBlockServiceInstance = new ChatBlockService();
 
-    blockUser(req: FastifyRequest<{Body: ChatBlockPostDTO}>, res: FastifyReply) {
-        const { userId, blockedUserId } = req.body;
-        this.chatBlockServiceInstance.addUserToBlockList(Number(userId), Number(blockedUserId));
-        return res.status(200).send({ message: 'user blocked successfully' });
+    blockUser(req: FastifyRequest<{Querystring: ChatBlockPostDTO}>, res: FastifyReply) {
+        const id = Number(req.userId);
+		const friendId = Number(req.query.id);
+        const { status } = this.chatBlockServiceInstance.addUserToBlockList(id, friendId);
+        if (status === "success") {
+            return res.status(200).send({ message: statusCodeMessage[200] });
+        }
+        return res.status(400).send({ message: statusCodeMessage[400] });
     }
 
-    unblockUser(req: FastifyRequest<{Body: ChatBlockDeleteDTO}>, res: FastifyReply) {
-        const { userId, blockedUserId } = req.body;
-        this.chatBlockServiceInstance.deleteUserFromBlockList(Number(userId), Number(blockedUserId));
-        return res.status(200).send({ message: 'user unblocked successfully' });
+    unblockUser(req: FastifyRequest<{Querystring: ChatBlockDeleteDTO}>, res: FastifyReply) {
+        const id = Number(req.userId);
+		const friendId = Number(req.query.id);
+        const { status } = this.chatBlockServiceInstance.deleteUserFromBlockList(id, friendId);
+        if (status === "success") {
+            return res.status(200).send({ message: statusCodeMessage[200] });
+        }
+        return res.status(400).send({ message: statusCodeMessage[400] });
     }
 
-    async getBlockedUsers(req: FastifyRequest<{Querystring: ChatBlockGetDTO}>, res: FastifyReply) {
-        const { userId } = req.query;
-        const blockedUsers = await this.chatBlockServiceInstance.getBlockedUsers(Number(userId));
-        return res.status(200).send({ blockedUsers });
+    getBlockedUsers(req: FastifyRequest, res: FastifyReply) {
+        const id = Number(req.userId);
+        const { status, data } = this.chatBlockServiceInstance.getBlockedUsers(id);
+        if (status === "success") {
+            return res.status(200).send({ payload: data });
+        }
+        return res.status(400).send({ message: statusCodeMessage[400] });
     }
 }
 
