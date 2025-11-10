@@ -10,7 +10,7 @@ class FriendService {
 		if (status === 'error') {
 			return { status, data };
 		}
-		connectedRoomInstance.playerFriendSet().save(userId.toString(), data);
+		connectedRoomInstance.friendListSet(userId).save(data);
 		return { status, data };
 	}
 
@@ -19,7 +19,7 @@ class FriendService {
 		if (status === 'error') {
 			return { status, data };
 		}
-		connectedRoomInstance.playerFriendSet().add(userId.toString(), friendId);
+		connectedRoomInstance.friendListSet(userId).add(friendId);
 		return { status, data };
 	}
 
@@ -28,7 +28,7 @@ class FriendService {
 		if (status === 'error') {
 			return { status, data };
 		}
-		connectedRoomInstance.playerFriendSet().delete(userId.toString(), friendId);
+		connectedRoomInstance.friendListSet(userId).delete(friendId);
 		return { status, data };
 	}
 }

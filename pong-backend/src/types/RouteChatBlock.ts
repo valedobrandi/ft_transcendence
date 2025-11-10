@@ -1,11 +1,9 @@
 export type ChatBlockPostDTO = {
-    userId: number;
-    blockedUserId: number;
+    id: string;
 }
 
 export type ChatBlockDeleteDTO = {
-    userId: number;
-    blockedUserId: number;
+    id: string;
 }
 
 export type ChatBlockGetDTO = {

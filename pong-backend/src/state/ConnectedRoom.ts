@@ -1,3 +1,4 @@
+import { get } from "http";
 import db from "../../database/db.js";
 import ChatManager from "../classes/ChatManager.js";
 import { UsersModel } from "../models/usersModel.js";
@@ -27,28 +28,27 @@ export class ConnectedRoom {
 		return false;
     }
 
-    playerFriendSet() {
+    friendListSet(id: number | bigint) {
+        const player = this.getById(id);
+        if (player === undefined) throw new Error(`${id} Disconnected.`);
         return {
-            add: (username: string, friendId: number | bigint) => {
-                const player = this.room.get(username);
-                if (player) {
-                    player.friendSet.add(friendId);
-                }
+            add: (friendId: number | bigint) => {
+                player.friendSet.add(friendId);
                 this.broadcastConnectedUsers();
             },
-            delete: (username: string, friendId: number | bigint) => {
-                const player = this.room.get(username);
-                if (player) {
-                    player.friendSet.delete(friendId);
-                }
+            delete: (friendId: number | bigint) => {
+                player.friendSet.delete(friendId);
                 this.broadcastConnectedUsers();
             },
-            save: (username: string, payload: number[]) => {
-                const player = this.room.get(username);
-                if (player) {
-                    player.friendSet = new Set(payload);
-                }
+            save: (payload: number[]) => {
+                player.friendSet = new Set(payload);
                 this.broadcastConnectedUsers();
+            },
+            get: () => {
+                return Array.from(player.friendSet);
+            },
+            has: (friendId: number | bigint) => {
+                return player.friendSet.has(friendId);
             }
         };
     }

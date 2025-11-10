@@ -29,13 +29,6 @@ export default function friend(fastify: FastifyInstance) {
 
 	fastify.get('/friends-list', {
 		preHandler: fastify.authenticate,
-		schema: {
-			querystring: {
-				type: 'object',
-				properties: { id: { type: 'string' } },
-				required: ['id']
-			}
-		},
 		handler: friendsControllerInstance.getFriendsList.bind(friendsControllerInstance)
 	});
 }

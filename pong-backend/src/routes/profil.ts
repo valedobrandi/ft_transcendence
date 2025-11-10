@@ -3,12 +3,12 @@ import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
 
-export default async function profilRoutes(fastify: FastifyInstance) {
+export default async function profilRoute(fastify: FastifyInstance) {
 
     fastify.get('/profile', {
         preHandler: [fastify.authenticate],
         handler: (async (request: FastifyRequest, res) => {
-            return res.status(200).send({user: request.user});
+            return res.status(200).send({user: request.userId});
         })
     });
     

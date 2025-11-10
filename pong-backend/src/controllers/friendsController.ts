@@ -1,3 +1,4 @@
+import { print } from "../server";
 import { FriendService } from "../services/friendService";
 import { FastifyReply, FastifyRequest } from "fastify";
 
@@ -8,18 +9,18 @@ export interface FriendListDTO {
 class FriendsController {
 	private friendsService = new FriendService()
 
-	getFriendsList(req: FastifyRequest<{Querystring: FriendListDTO}>, res: FastifyReply) {
-		const id = Number(req.query.id);
+	getFriendsList(req: FastifyRequest, res: FastifyReply) {
+		const id = Number(req.userId);
 		const {status, data} = this.friendsService.getFriendsList(id);
 		if (status === 'error') {
 			return res.status(500).send({message : status} );
 		}
-		return res.status(200).send({status, data});
+		return res.status(200).send({status, payload:data});
 	}
 
 	addFriend(req: FastifyRequest<{Querystring: FriendListDTO, Body: {id: number}}>, res: FastifyReply) {
 		const id = Number(req.userId);
-		const friendId = Number(req.body.id);
+		const friendId = Number(req.query.id);
 		const {status, data} = this.friendsService.addFriend(id, friendId);
 		if (status === 'error') {
 			return res.status(500).send({message : status} );
@@ -29,7 +30,7 @@ class FriendsController {
 
 	removeFriend(req: FastifyRequest<{Querystring: FriendListDTO}>, res: FastifyReply) {
 		const id = Number(req.userId);
-		const friendId = Number(req.body.id);
+		const friendId = Number(req.query.id);
 		const {status, data} = this.friendsService.removeFriend(id, friendId);
 		if (status === 'error') {
 			return res.status(500).send({message : status} );

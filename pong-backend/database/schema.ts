@@ -1,6 +1,6 @@
 import db from "./db.js";
 
-export function createSchema() {
+export async function createSchema() {
 
 	db.exec('BEGIN');
 	db.exec(`DROP TABLE IF EXISTS messages`);

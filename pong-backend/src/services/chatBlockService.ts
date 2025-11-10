@@ -9,9 +9,9 @@ class ChatBlockService {
     addUserToBlockList(userId: number, blockedUserId: number) {
         const { status, data } = this.chatBlockInstance.addUserToBlockList(userId, blockedUserId);
         if (status === "success") {
-            const user = connectedRoomInstance.getById(blockedUserId);
+            const user = connectedRoomInstance.getById(userId);
             if (user !== undefined) {
-                user.chat.addToBlockedUsers([userId]);
+                user.chat.addToBlockedUsers([blockedUserId]);
             }
         }
         return { status, data };

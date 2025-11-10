@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3'
+import { print } from '../server';
 
 export type FriendsTableModel = {
 	friend_id: number;
@@ -41,11 +42,16 @@ class FriendsModel {
 	}
 
 	addFriend(userId: number, friendId: number): AddFriend  {
-		const response = this.stmAddFriend.run(userId, friendId);
-		if (response.changes === 0) {
-			return { status: 'error', data: {} };
-		}
-		return { status: 'success', data: {} };
+        try {
+            const response = this.stmAddFriend.run(userId, friendId);
+            if (response.changes === 0) {
+                return { status: 'error', data: {} };
+            }
+            return { status: 'success', data: {} };
+        } catch (error) {
+            print(`[ERROR] Unable to add friend: ${error}`);
+            return { status: 'error', data: {} };
+        }
 	}
 
 	removeFriend(userId: number, friendId: number): RemoveFriend {
