@@ -1,7 +1,7 @@
 import { FastifyRequest } from "fastify/types/request.js";
 import { handleMessage } from "./handles/handler.js";
 import type { WebSocket } from 'ws';
-import { connectedRoomInstance } from "../state/connectedRoom.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 
 export function socketHandler(connection: WebSocket, req: FastifyRequest) {
     connection.send(JSON.stringify({ type: 'connected', message: 'Welcome!' }));

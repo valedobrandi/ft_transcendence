@@ -1,4 +1,4 @@
-import { connectedRoomInstance } from "../../state/connectedRoom.js";
+import { connectedRoomInstance } from "../../state/ConnectedRoom.js";
 import type { WebSocket } from 'ws';
 import { ConnectType } from "../types.js";
 import { print } from "../../server.js";

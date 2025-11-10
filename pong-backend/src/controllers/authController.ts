@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import { GuestPostDTO } from '../types/RouteGuest.js';
 import { AuthService } from '../services/authService.js';
-import { connectedRoomInstance } from '../state/connectedRoom.js';
+import { connectedRoomInstance } from '../state/ConnectedRoom.js';
 
 class AuthController {
 

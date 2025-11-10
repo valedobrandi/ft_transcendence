@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { connectedRoomInstance } from "../state/connectedRoom.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { UsersModel } from "../models/usersModel.js";
 import { SaveUser } from "../types/RouteGuest.js";
 import db from "../../database/db.js";

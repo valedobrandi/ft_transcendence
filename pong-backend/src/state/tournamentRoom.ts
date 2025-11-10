@@ -1,6 +1,6 @@
 import { Tournament } from "../classes/Tournament.js";
 import { tournamentEvent } from "../events/tournamentQueueEvent.js";
-import { connectedRoomInstance } from "./connectedRoom.js";
+import { connectedRoomInstance } from "./ConnectedRoom.js";
 
 export const tournamentQueue: Set<string> = new Set();
 

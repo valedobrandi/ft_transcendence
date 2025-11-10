@@ -17,6 +17,7 @@ export class ConnectedRoom {
             matchId: "",
             tournamentId: "",
             chat: new ChatManager(Number(id), name),
+            friendSet: new Set<number | bigint>(),
         };
 
         if (this.room.has(name) === false) {
@@ -26,11 +27,37 @@ export class ConnectedRoom {
 		return false;
     }
 
+    playerFriendSet() {
+        return {
+            add: (username: string, friendId: number | bigint) => {
+                const player = this.room.get(username);
+                if (player) {
+                    player.friendSet.add(friendId);
+                }
+                this.broadcastConnectedUsers();
+            },
+            delete: (username: string, friendId: number | bigint) => {
+                const player = this.room.get(username);
+                if (player) {
+                    player.friendSet.delete(friendId);
+                }
+                this.broadcastConnectedUsers();
+            },
+            save: (username: string, payload: number[]) => {
+                const player = this.room.get(username);
+                if (player) {
+                    player.friendSet = new Set(payload);
+                }
+                this.broadcastConnectedUsers();
+            }
+        };
+    }
+
     addWebsocket(id: string, socket: WebSocket): Boolean {
         const player = this.room.get(id);
         if (player) {
             player.socket = socket;
-            this.broadcast();
+            this.broadcastConnectedUsers();
             this.broadCastRegisteredUsers();
 			return true;
         }
@@ -45,7 +72,7 @@ export class ConnectedRoom {
     disconnect(id: string) {
         this.dropWebsocket(id);
         this.room.delete(id);
-        this.broadcast();
+        this.broadcastConnectedUsers();
     }
 
     broadCastRegisteredUsers() {
@@ -61,12 +88,15 @@ export class ConnectedRoom {
         });
     }
 
-    broadcast() {
-        const users = Array.from(this.room.values()).map(({ id, username: name }) => ({ id, name }));
-        users.unshift({ id: 1, name: 'INTRA' });
-
-        this.room.forEach(({ socket }) => {
-           if (socket) socket.send(JSON.stringify({ message: 'CONNECTED_USERS', users }));
+    broadcastConnectedUsers() {
+        this.room.forEach(({ friendSet, socket}) => {
+            const friendListMap = Array.from(friendSet).map(friendId => {
+                const isConnected = this.getById(friendId) ? true : false;
+                return { id: friendId, isConnected };
+            });
+           if (socket) {
+               socket.send(JSON.stringify({ message: 'FRIEND_LIST', payload: friendListMap }));
+           }
         });
     }
 

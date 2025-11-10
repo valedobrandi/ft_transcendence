@@ -1,4 +1,4 @@
-import { connectedRoomInstance } from "../../state/connectedRoom.js";
+import { connectedRoomInstance } from "../../state/ConnectedRoom.js";
 import { gameRoom } from "../../state/gameRoom.js";
 import { MovePaddleType } from "../types.js";
 

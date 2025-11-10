@@ -1,7 +1,10 @@
 import { FastifyInstance } from "fastify";
+import { friendsControllerInstance } from "../controllers/friendsController";
 
 export default function friend(fastify: FastifyInstance) {
-	fastify.post('/friendlist/:id', {
+
+	fastify.post('/add-friend', {
+		preHandler: fastify.authenticate,
 		schema: {
 			querystring: {
 				type: 'object',
@@ -9,11 +12,30 @@ export default function friend(fastify: FastifyInstance) {
 				required: ['id']
 			}
 		},
-		handler: () => { }
+		handler: friendsControllerInstance.addFriend.bind(friendsControllerInstance)
+	});
+	
+	fastify.delete('/remove-friend', {
+		preHandler: fastify.authenticate,
+		schema: {
+			querystring: {
+				type: 'object',
+				properties: { id: { type: 'string' } },
+				required: ['id']
+			}
+		},
+		handler: friendsControllerInstance.removeFriend.bind(friendsControllerInstance)
 	});
 
-	fastify.delete('/friendlist/:id', {
-		schema: {},
-		handler: () => { }
+	fastify.get('/friends-list', {
+		preHandler: fastify.authenticate,
+		schema: {
+			querystring: {
+				type: 'object',
+				properties: { id: { type: 'string' } },
+				required: ['id']
+			}
+		},
+		handler: friendsControllerInstance.getFriendsList.bind(friendsControllerInstance)
 	});
 }

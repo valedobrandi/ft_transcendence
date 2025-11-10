@@ -1,5 +1,5 @@
 import { chatHandler } from "../websockets/handles/ChatHandler.js";
-import { connectedRoomInstance } from "../state/connectedRoom.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { ChatMessage } from "../types/ChatMessage.js";
 import { chatStore } from "./ChatStore.js";
 

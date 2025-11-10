@@ -1,4 +1,4 @@
-export const codes = {
+export const statusCodeMessage = {
     200: 'OK',
     400: 'Bad Request',
     401: 'Unauthorized',

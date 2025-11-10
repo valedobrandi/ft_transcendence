@@ -1,5 +1,5 @@
 import { gameEvents } from "../events/gameEvents.js";
-import { connectedRoomInstance } from "../state/connectedRoom.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { tournamentRoom } from "../state/tournamentRoom.js";
 import { EndMatchEventType } from "../types/EndMatchEventType.js";
 import { PingPong } from "./PingPong.js";

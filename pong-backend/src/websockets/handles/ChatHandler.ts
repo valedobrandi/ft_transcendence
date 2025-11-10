@@ -1,5 +1,5 @@
 import { chatStore } from "../../classes/ChatStore.js";
-import { connectedRoomInstance } from "../../state/connectedRoom.js";
+import { connectedRoomInstance } from "../../state/ConnectedRoom.js";
 import { ChatHistory } from "../../types/ChatHistory.js";
 import { ChatMessage } from "../../types/ChatMessage.js";
 import { ChatType } from "../types.js";

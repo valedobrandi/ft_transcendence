@@ -1,7 +1,7 @@
 import type { WebSocket } from 'ws';
 import { MatchType } from "../types.js";
 import { joinMatchRoom } from "../../state/gameRoom.js";
-import { connectedRoomInstance } from '../../state/connectedRoom.js';
+import { connectedRoomInstance } from '../../state/ConnectedRoom.js';
 
 
 export function MATCH(data: MatchType, connection: WebSocket) {

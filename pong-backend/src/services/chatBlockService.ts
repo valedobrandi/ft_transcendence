@@ -1,7 +1,7 @@
 import db from "../../database/db.js";
 import { ChatBlockModel } from "../models/chatBlockModel.js";
 import { print } from "../server.js";
-import { connectedRoomInstance } from "../state/connectedRoom.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 
 class ChatBlockService {
     private chatBlockInstance = new ChatBlockModel(db);

@@ -1,6 +1,6 @@
 import { PingPong } from "../classes/PingPong.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";
-import { connectedRoomInstance } from "./connectedRoom.js";
+import { connectedRoomInstance } from "./ConnectedRoom.js";
 
 export const matchQueue: Set<string> = new Set();
 
