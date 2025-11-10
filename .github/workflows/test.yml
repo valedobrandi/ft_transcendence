@@ -16,6 +16,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Create empty .env file
+        run: touch .env
+
       - name: Build frontend container
         run: docker compose build pong-frontend
 
@@ -33,6 +36,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Create empty .env file
+        run: touch .env
 
       - name: Build backend container
         run: docker compose build pong-backend
