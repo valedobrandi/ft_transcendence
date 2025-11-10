@@ -48,7 +48,7 @@ export function ProfilePage(): HTMLElement {
 		"relative z-10 px-6 pt-8 flex-1 flex flex-col items-center justify-center mb-8";
 
 	const card = document.createElement("div");
-	card.className = "place-self-center w-fit px-16 py-8 rounded-xl bg-mblue-500 opacity-80";
+	card.className = "place-self-center w-fit px-16 py-8 rounded-xl bg-mblue-500 opacity-80 ";
 
 	// Welcome
 	const h3 = document.createElement("h3");
@@ -176,16 +176,35 @@ export function ProfilePage(): HTMLElement {
 
 	const passewordLabel = document.createElement("label");
 	passewordLabel.className = "font-abee text-smoky-white";
-	passewordLabel.textContent = `Password : ****** `;
+	passewordLabel.textContent = `Password: `;
 	passewordSection.appendChild(passewordLabel);
 
+	
+	
+	
+	
+	
 	const passewordInput = document.createElement("input");
 	passewordInput.id = "change_name_input";
-	passewordInput.type = "password";
-	passewordInput.placeholder = "change Password";
+	passewordInput.type = " actual password";
+	passewordInput.placeholder = "current Password";
 	passewordInput.className =
-		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
+	"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
 	passewordSection.appendChild(passewordInput);
+	
+	const passewordLabels = document.createElement("label");
+	passewordLabels.className = "font-abee text-smoky-white";
+	passewordLabels.textContent = `New password: `;
+	passewordSection.appendChild(passewordLabels);
+
+
+	const newpassewordInput = document.createElement("input");
+	// // newpassewordInput.id = "change_name_input";
+	newpassewordInput.type = "New password";
+	newpassewordInput.placeholder = "**********";
+	newpassewordInput.className =
+		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
+	passewordSection.appendChild(newpassewordInput);
 
 	card.appendChild(passewordSection);
 
