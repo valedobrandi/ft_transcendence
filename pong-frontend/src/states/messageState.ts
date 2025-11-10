@@ -1,4 +1,4 @@
-import { id } from "../app";
+import { profile } from "../app";
 import type { ChatMessage } from "../interface/ChatMessage";
 import { navigateTo, setTime } from "../utils";
 import { websocketChatSend } from "../websocket/websocketChatSend";
@@ -7,7 +7,7 @@ export function addIntraMessage(message: string) {
     messageState.messages.has(1) || messageState.messages.set(1, []);
     messageState.messages.get(1)!.push({
     from: 1,
-    to: id.id,
+    to: profile.id,
     senderId: 1,
     message: message,
     timestamp: Date.now(),
@@ -25,7 +25,7 @@ export function renderMessages(_: string, selectedChatId : number) {
     messages.forEach(msg => {
         const p = document.createElement('p');
         p.className = "m-2 text-sm";
-        if (Number(msg.from) === Number(id.id)) {
+        if (Number(msg.from) === Number(profile.id)) {
             p.className += " bg-green-100 p-2 rounded w-fit ml-auto";
         } else {
             p.className += " bg-gray-100 p-2 rounded w-fit";
