@@ -34,7 +34,7 @@ class AuthService {
         }
 
         // Look for existing user
-        const existingUser = this.usersModelInstance.findUserByEmailOrUsername('', username);
+        const existingUser = this.usersModelInstance.findUserByEmailOrUsername(username);
         if (existingUser) {
             connectedRoomInstance.addUser(existingUser.username, Number(existingUser.id));
             return { message: 'success', username: existingUser.username, id: existingUser.id };

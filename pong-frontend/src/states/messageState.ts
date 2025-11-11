@@ -4,17 +4,23 @@ import { navigateTo, setTime } from "../utils";
 import { websocketChatSend } from "../websocket/websocketChatSend";
 
 export function addIntraMessage(message: string) {
+    console.log(message);
+    
     messageState.messages.has(1) || messageState.messages.set(1, []);
     messageState.messages.get(1)!.push({
-    from: 1,
-    to: id.id,
-    senderId: 1,
-    message: message,
-    timestamp: Date.now(),
-});
+        from: 1,
+        to: id.id,
+        senderId: 1,
+        message: message,
+        timestamp: Date.now(),
+    });
+
+    messageState.state = "CHAT_MESSAGE";
 }
 
-export function renderMessages(_: string, selectedChatId : number) {
+export function renderMessages(_: string, selectedChatId: number) {
+    console.log("Rendering messages for chat ID:", selectedChatId);
+    console.log("Messages:", messageState.messages);
     const messageBox = document.getElementById('messages');
     if (!messageBox) return;
 
@@ -24,7 +30,7 @@ export function renderMessages(_: string, selectedChatId : number) {
     const messages = messageState.messages.get(selectedChatId) || [];
     messages.forEach(msg => {
         const p = document.createElement('p');
-        p.className = "m-2 text-sm";
+        p.className = "m-2 text-sm text-black";
         if (Number(msg.from) === Number(id.id)) {
             p.className += " bg-green-100 p-2 rounded w-fit ml-auto";
         } else {
@@ -41,13 +47,6 @@ export function onMessageChange(fn: () => void) {
     messageListeners.push(fn);
 }
 
-interface MessageStateType {
-    messages: Map<number, ChatMessage[]>;
-    serverUsersList: { id: string; name: string }[];
-    friendList: { id: number; name: string }[];
-    selectChat: { id: number; name: string };
-    state: string;
-}
 
 export function changeChatHeader(header: string) {
     const chatHeader = document.getElementById('chat-tabs');
@@ -67,11 +66,20 @@ export interface MessageType {
     sender: string;
 }
 
+export interface MessageStateType {
+    messages: Map<number, ChatMessage[]>;
+    serverUsers: { id: number; name: string }[];
+    friendList: { id: number; name: string }[];
+    connectedUsers: { id: number; name: string }[];
+    selectChat: { id: number; name: string };
+    state: string;
+}
 
 export const messageState: MessageStateType = new Proxy({
     messages: new Map<number, ChatMessage[]>(),
-    serverUsersList: [],
+    serverUsers: [],
     friendList: [],
+    connectedUsers: [],
     selectChat: { id: -1, name: '' },
     state: "",
 }, {
@@ -82,11 +90,11 @@ export const messageState: MessageStateType = new Proxy({
             switch (value) {
                 case "TOURNAMENT_ROOM":
                     //addMessage("INTRA", `you have joined the tournament queue.`);
-					websocketChatSend(`you have joined the tournament queue.`, 'INTRA', 1);
+                    websocketChatSend(`you have joined the tournament queue.`, 'INTRA', 1);
                     break;
                 case "MATCH_ROOM":
                     //addMessage("INTRA", `you have joined the match queue.`);
-					websocketChatSend(`you have joined the match queue.`, 'INTRA', 1);
+                    websocketChatSend(`you have joined the match queue.`, 'INTRA', 1);
                     break;
                 case "GAME_ROOM":
                     setTime(5000, () => {
@@ -107,22 +115,30 @@ export const messageState: MessageStateType = new Proxy({
             }
         }
 
-        if (prop === 'friendList') {
-            messageListeners.forEach(fn => fn());
-        }
 
         if (prop === 'selectChat') {
             changeChatHeader(messageState.selectChat.name);
             const isIntra = messageState.selectChat.name === 'INTRA';
             const chatMenu = document.getElementById("chat-menu");
-            if (chatMenu) chatMenu.className = "flex border-b bg-gray-100 h-10";
+            if (chatMenu) chatMenu.classList.remove("hidden");
             if (isIntra && chatMenu) {
-                chatMenu.className += " hidden";
+                chatMenu.classList.add("hidden");
             };
         }
 
-            return true;
+        if (prop === 'friendList') {
+            messageListeners.forEach(fn => fn());
+        }
+
+        if (prop === 'serverUsers') {
+            messageListeners.forEach(fn => fn());
+        }
+
+        if (prop === 'connectedUsers') {
+            messageListeners.forEach(fn => fn());
+        }
+
+        return true;
     }
 });
-
 

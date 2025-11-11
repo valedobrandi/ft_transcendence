@@ -6,7 +6,7 @@ export default function friend(fastify: FastifyInstance) {
 	fastify.post('/add-friend', {
 		preHandler: fastify.authenticate,
 		schema: {
-			querystring: {
+			body: {
 				type: 'object',
 				properties: { id: { type: 'string' } },
 				required: ['id']
@@ -18,7 +18,7 @@ export default function friend(fastify: FastifyInstance) {
 	fastify.delete('/remove-friend', {
 		preHandler: fastify.authenticate,
 		schema: {
-			querystring: {
+			body: {
 				type: 'object',
 				properties: { id: { type: 'string' } },
 				required: ['id']

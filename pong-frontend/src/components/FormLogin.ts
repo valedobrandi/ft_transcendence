@@ -4,6 +4,7 @@ import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { id, jwt } from "../app";
+import { messageState } from "../states/messageState";
 
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
@@ -49,9 +50,15 @@ export function FormLogin(): HTMLElement {
         );
 
         if (response.message === 'success') {
-            jwt.token = response.payload.token;
+            jwt.token = response.payload.accessToken;
             id.username = response.payload.username;
-            console.log(jwt.token);
+            id.id = response.payload.id;
+            const [friendsList] = await Promise.all([
+                fetchRequest('/friends-list', 'GET', {}),
+            ]);
+            if (friendsList.message === 'success') {
+                messageState.friendList = friendsList.payload;
+            }
             navigateTo("/intra");
         }		
     };

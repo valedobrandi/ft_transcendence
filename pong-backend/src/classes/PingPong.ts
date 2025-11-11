@@ -1,4 +1,4 @@
-import { GameEvents, gameEvents } from "../events/gameEvents.js";
+import { eventsBus, events } from "../events/EventsBus.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { gameRoom } from "../state/gameRoom.js";
 import { userGameStateType } from "../types/GameStateType.js";
@@ -161,7 +161,7 @@ class PingPong {
                     }
                 }
             }
-            gameEvents.emit('tournament_match_end', {
+            events.emit('tournament_match_end', {
                 matchId: this.machId,
                 winnerId: this.winnerId,
                 loserId: this.loserId,
@@ -288,7 +288,7 @@ class PingPong {
     }
 
     saveMatchHistory(score1: number, score2: number) {
-        GameEvents.emit('game:savehistory', {
+        eventsBus.emit('game:savehistory', {
             matchId: this.machId,
             player1: this.side.LEFT,
             player2: this.side.RIGHT,

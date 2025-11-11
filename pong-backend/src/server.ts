@@ -8,6 +8,7 @@ import websocketRoute from './routes/websocket.js';
 import * as jwt from '@fastify/jwt';
 import profilRoute from './routes/profil.js';
 import chatBlockRoute from './routes/chatBlock.js';
+import { eventsRoutes } from './routes/events.js';
 
 
 
@@ -55,6 +56,7 @@ fastify.register(jwt, {
 fastify.register(loginRoute);
 fastify.register(authRoutes);
 fastify.register(profilRoute);
+fastify.register(eventsRoutes);
 fastify.register(matchRoute);
 fastify.register(friendRoute);
 fastify.register(chatBlockRoute);

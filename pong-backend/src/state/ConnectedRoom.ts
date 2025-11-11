@@ -1,4 +1,3 @@
-import { get } from "http";
 import db from "../../database/db.js";
 import ChatManager from "../classes/ChatManager.js";
 import { UsersModel } from "../models/usersModel.js";
@@ -32,8 +31,8 @@ export class ConnectedRoom {
         const player = this.getById(id);
         if (player === undefined) throw new Error(`${id} Disconnected.`);
         return {
-            add: (friendId: number | bigint) => {
-                player.friendSet.add(friendId);
+            add: (id: number | bigint, username: string) => {
+                player.friendSet.add(id);
                 this.broadcastConnectedUsers();
             },
             delete: (friendId: number | bigint) => {
@@ -84,7 +83,7 @@ export class ConnectedRoom {
         registeredUsers.sort((a, b) => a.id === 1 ? -1 : 1);
 
         this.room.forEach(({ socket }) => {
-            if (socket) socket.send(JSON.stringify({ message: 'SERVER_USERS', users: registeredUsers }));
+            if (socket) socket.send(JSON.stringify({ status: 200, message: 'SERVER_USERS', users: registeredUsers }));
         });
     }
 

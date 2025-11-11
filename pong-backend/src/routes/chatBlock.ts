@@ -1,11 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { chatBlockDeleteSchema, chatBlockGetSchema, chatBlockPostSchema } from "../types/RouteChatBlock.js";
 import { ChatBlockController } from "../controllers/chatBlockControllers.js";
 
 function chatBlockRoute(fastify: FastifyInstance) {
     const chatBlockControllerInstance = new ChatBlockController();
 
-    fastify.post('/block-user', {
+    fastify.post('/add-block', {
         preHandler: [fastify.authenticate],
         schema: {
 			querystring: {
@@ -17,7 +16,7 @@ function chatBlockRoute(fastify: FastifyInstance) {
         handler: chatBlockControllerInstance.blockUser.bind(chatBlockControllerInstance)
     });
 
-    fastify.delete('/unblock-user', {
+    fastify.delete('/remove-block', {
         preHandler: [fastify.authenticate],
         schema: {
 			querystring: {
@@ -29,7 +28,7 @@ function chatBlockRoute(fastify: FastifyInstance) {
         handler: chatBlockControllerInstance.unblockUser.bind(chatBlockControllerInstance)
     });
 
-    fastify.get('/blocked-users', {
+    fastify.get('/block-list', {
         preHandler: [fastify.authenticate],
         handler: chatBlockControllerInstance.getBlockedUsers.bind(chatBlockControllerInstance)
     });

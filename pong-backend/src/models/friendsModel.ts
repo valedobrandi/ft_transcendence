@@ -35,18 +35,12 @@ class FriendsModel {
 
 	getFriendsList(userId: number): GetFriendsList {
 		const response =  this.stmGetFriendsList.all(userId) as FriendsTableModel[];
-		if (response.length === 0) {
-			return { status: 'error', data: [] };
-		}
 		return { status: 'success',data: response.map(row => row.friend_id) };
 	}
 
 	addFriend(userId: number, friendId: number): AddFriend  {
         try {
             const response = this.stmAddFriend.run(userId, friendId);
-            if (response.changes === 0) {
-                return { status: 'error', data: {} };
-            }
             return { status: 'success', data: {} };
         } catch (error) {
             print(`[ERROR] Unable to add friend: ${error}`);
@@ -56,9 +50,6 @@ class FriendsModel {
 
 	removeFriend(userId: number, friendId: number): RemoveFriend {
 		const response = this.stmRemoveFriend.run(userId, friendId);
-		if (response.changes === 0) {
-			return { status: 'error', data: {} };
-		}
 		return { status: 'success', data: {} };
 	}
 }

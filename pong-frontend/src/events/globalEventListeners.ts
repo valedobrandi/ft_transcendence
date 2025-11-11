@@ -1,41 +1,69 @@
 import { id } from "../app";
-import { messageState } from "../states/messageState";
-import { renderRoute } from "../utils";
+import { addIntraMessage, messageState } from "../states/messageState";
+import { fetchRequest, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
 
 export function globalEventListeners() {
-	setupPaddleListeners((up, down) => {
-		const socket = getSocket();
-		if (socket === null) return;
-		socket.send(JSON.stringify({
-			type: "MOVE_PADDLE",
-			id: id,
-			payload: { up, down }
-		}))
-	});
+  // Skip if not in game page
+  if (window.location.pathname === "/match") {
+    setupPaddleListeners((up, down) => {
+      const socket = getSocket();
+      if (socket === null) return;
+      socket.send(
+        JSON.stringify({
+          type: "MOVE_PADDLE",
+          id: id,
+          payload: { up, down },
+        })
+      );
+    });
+  }
 
-	window.addEventListener("popstate", () => {
-		renderRoute(window.location.pathname);
-	});
+  window.addEventListener("popstate", () => {
+    renderRoute(window.location.pathname);
+  });
 
-	// Add event to btn #chat-select-chat
-	document.addEventListener("click", (event) => {
-		const target = event.target as HTMLButtonElement;
+  // Add event to btn #chat-select-chat
+  document.addEventListener("click", async (event) => {
+    const target = event.target as HTMLButtonElement;
+    const button = target.closest("button");
 
-		if (target.tagName === "BUTTON" && target.id.startsWith("chat-select-")) {
-			const chatName = target.value;
-			const chatId = target.name;
-			console.log("Selected chat:", chatName, chatId);
-			messageState.selectChat = { name: chatName, id: Number(chatId) };
-			const buttons = document.querySelectorAll("[id^='chat-select-']");
-			buttons.forEach(button => {
-				button.classList.remove("bg-gray-100");
-			});
-			Array.from(document.getElementsByClassName(chatName)).forEach((elem) => {
-				elem.classList.add("bg-gray-100");
-			});
-		}
-	});
+    if (button && button.id === "btn-friend-list") {
+      var response = await fetchRequest(
+        `/add-event`,
+        "POST",
+        {},
+        {
+          body: JSON.stringify({
+            to_id: messageState.selectChat.id,
+            from_id: Number(id.id),
+            type: "friend:add",
+            message: "",
+          }),
+        }
+      );
+      if (response.status === "success") {
+        addIntraMessage(
+          `Friend request sent to ${messageState.selectChat.name}`
+        );
+      }
+      return;
+    }
 
+    if (button && button.id === "select-chat-btn") {
+      const chatName = button.value;
+      const chatId = button.name;
+      console.log("Selected chat:", chatName, chatId);
+      messageState.selectChat = { name: chatName, id: Number(chatId) };
+      const buttons = document.querySelectorAll("#select-chat-btn");
+      buttons.forEach((button) => {
+        button.classList.remove("bg-gray-100");
+      });
+      Array.from(document.getElementsByClassName(chatName)).forEach((elem) => {
+        elem.classList.add("bg-gray-100");
+      });
+      return;
+    }
+  });
 }

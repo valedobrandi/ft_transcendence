@@ -1,4 +1,4 @@
-import { gameEvents } from "../events/gameEvents.js";
+import { events } from "../events/EventsBus.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { tournamentRoom } from "../state/tournamentRoom.js";
 import { EndMatchEventType } from "../types/EndMatchEventType.js";
@@ -23,8 +23,8 @@ class Tournament {
             this.reportMatchResult(report);
         }
 
-        gameEvents.on('tournament_match_end', matchEndedListener);
-        this.cleanup = () => gameEvents.off('tournament_match_end', matchEndedListener);
+        events.on('tournament_match_end', matchEndedListener);
+        this.cleanup = () => events.off('tournament_match_end', matchEndedListener);
     }
 
 

@@ -8,6 +8,7 @@ export async function createSchema() {
 	db.exec(`DROP TABLE IF EXISTS friends`);
 	db.exec(`DROP TABLE IF EXISTS users`);
 	db.exec(`DROP TABLE IF EXISTS chatblock`);
+	db.exec(`DROP TABLE IF EXISTS events`);
 	db.exec('COMMIT');
 
 	db.exec(` CREATE TABLE IF NOT EXISTS users (
@@ -65,4 +66,15 @@ export async function createSchema() {
 			`);
 
 	db.exec(` CREATE INDEX IF NOT EXISTS idx_messages_users ON messages (sender_id, receiver_id, timestamp)`);
+
+	db.exec(`CREATE TABLE IF NOT EXISTS events (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			type TEXT NOT NULL,
+			from_id INTEGER,
+			to_id INTEGER,
+			payload TEXT,
+			status TEXT DEFAULT 'pending',
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(from_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY(to_id) REFERENCES users(id) ON DELETE CASCADE)`);
 }

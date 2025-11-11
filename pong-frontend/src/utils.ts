@@ -1,4 +1,4 @@
-import { id } from "./app";
+import { id, jwt } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
 import { endpoint } from "./endPoints";
 import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView } from "./views";
@@ -46,15 +46,17 @@ export function setTime(ms: number, func: () => void): Promise<void> {
 export async function fetchRequest(
     path: string,
 	method: string,
-    headers: Record<string, string>,
-    options: Record<string, string> = {}) {
+    headers: Record<string, string> = {},
+    options: RequestInit = {}) {
 
     const url = `${endpoint.pong_backend_api}${path}`;
-    const defaultHeaders = {
-        'Content-Type': 'application/json',
+    const defaultHeaders:Record<string, string> = {
         // Add auth token
-        //'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${jwt.token}`,
     };
+    if (method === 'POST' || method === 'PUT') {
+        defaultHeaders['Content-Type'] = 'application/json';
+    }
 
     try {
         const response = await fetch(url, {

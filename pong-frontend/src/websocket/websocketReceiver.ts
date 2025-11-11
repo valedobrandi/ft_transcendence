@@ -21,7 +21,6 @@ export function websocketReceiver(socket: WebSocket) {
 				break;
 			case 'GAME_ROOM': {
 				websocketChatSend(data.payload.message, 'INTRA', 1);
-
 				playerSideState.side = data.side;
 				messageState.state = data.message;
 
@@ -59,8 +58,9 @@ export function websocketReceiver(socket: WebSocket) {
 				}
 				break;
 			case 'SERVER_USERS':
-				if ('users' in data) messageState.friendList = data.users;
-
+				if ('users' in data) {
+					messageState.serverUsers = data.users;
+				} 
 				break;
 		}
 	});

@@ -4,6 +4,7 @@ import { websocketChatSend } from "../websocket/websocketChatSend";
 export function ChatSendInput(): HTMLDivElement {
     const inputDiv = document.createElement("div");
     inputDiv.className = "border border w-full min-h-20 flex";
+    inputDiv.id = "chat-send-container";
 
     const form = document.createElement("form");
     form.className = "border w-full flex";

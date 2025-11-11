@@ -15,6 +15,9 @@ const chatBlock = db.prepare('SELECT * FROM chatBlock').all();
 const messagesSchema = db.prepare("PRAGMA table_info(messages)").all();
 const messages = db.prepare('SELECT * FROM messages').all();
 
+const eventsSchema = db.prepare("PRAGMA table_info(events)").all();
+const events = db.prepare('SELECT * FROM events').all();
+
 
 console.log('🧬 Users Table Schema:')
 console.table(usersSchema);
@@ -49,4 +52,11 @@ console.table(messagesSchema);
 console.log('📋 Messages Table:')
 for (const message of messages) {
     console.log(message);
+}
+
+console.log('🧬 Events Table Schema:')
+console.table(eventsSchema);
+console.log('📋 Events Table:')
+for (const event of events) {
+    console.log(event);
 }

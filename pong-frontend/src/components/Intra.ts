@@ -2,9 +2,9 @@ import { ChatHeader } from "./ChatHeader";
 import { ChatSendInput } from "./ChatSendInput";
 import { Settings } from "./Settings";
 import { UsersList } from "./UsersList";
+import { messageState } from "../states/messageState";
 
 export function Intra(): HTMLElement {
-
     const mainDiv = document.createElement("div");
     mainDiv.id = "main-chat-container";
     mainDiv.className = "flex h-screen p-1";
@@ -15,7 +15,7 @@ export function Intra(): HTMLElement {
 
     const chatWidget = document.createElement("div");
     chatWidget.id = "chatWidget";
-    chatWidget.className = "border w-full h-full flex flex-col";
+    chatWidget.className = "border w-fit min-w-fit h-full flex flex-col";
 
     const chatTabs = document.createElement("div");
     chatTabs.id = "chat-tabs";
@@ -29,15 +29,15 @@ export function Intra(): HTMLElement {
 
     const messages = document.createElement("div");
     messages.id = "messages";
-    messages.className = "flex-1 overflow-y-auto p-2";
+    messages.className = "flex-1 overflow-y-auto p-2 min-w-[528px]";
 
     chatWidget.appendChild(chatTabs);
     chatWidget.appendChild(chatMenu);
     chatWidget.appendChild(messages);
 
     const usersDiv = document.createElement("div");
-    usersDiv.id = "users";
-    usersDiv.className = "border border flex-grow min-w-3xs";
+    usersDiv.id = "users-list";
+    usersDiv.className = "border w-xs";
 
     const contentDiv = document.createElement("div");
     contentDiv.className = "flex flex-grow";
@@ -47,9 +47,9 @@ export function Intra(): HTMLElement {
     contentDiv.appendChild(usersDiv);
 
     const usersListUI = UsersList();
-    usersDiv.appendChild(usersListUI!);
 
-    chatDiv.appendChild(contentDiv)
+    usersDiv.appendChild(usersListUI!);
+    chatDiv.appendChild(contentDiv);
 
     const inputDiv = ChatSendInput();
     chatDiv.appendChild(inputDiv);

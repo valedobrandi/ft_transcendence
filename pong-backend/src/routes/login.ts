@@ -6,6 +6,7 @@ import db from '../../database/db.js'
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { UsersModel } from '../models/usersModel.js';
+import { connectedRoomInstance } from '../state/ConnectedRoom.js';
 
 export default async function loginRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
@@ -47,7 +48,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
         } 
         else
         {
-            const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username};
+            const payload = {id: existingUser.id, username: existingUser.username};
 
             // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
             // if(!refreshToken)
@@ -65,8 +66,10 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             // sameSite: "strict",
             // path: '/refresh-token'
             // });
-            console.log(username);
-            return res.status(201).send({ message: 'success', payload: {accessToken, username}});
+
+            // Add user to connectedRoomInstance
+            connectedRoomInstance.addUser(existingUser.username, existingUser.id);
+            return res.status(201).send({ message: 'success', payload: {accessToken, ...payload}});
         }
     });
 }
