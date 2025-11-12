@@ -73,8 +73,7 @@ export class ConnectedRoom {
 			name: user.username
 		}));
 		// Sort by id so that INTRA is first
-		registeredUsers.sort((a, b) => a.id === 1 ? -1 : 1);
-
+		registeredUsers.sort((a, b) => a.id === 1 ? -1 : 1).splice(0,1);
 		this.room.forEach(({ socket }) => {
 			if (socket) socket.send(JSON.stringify({ status: 200, message: 'SERVER_USERS', users: registeredUsers }));
 		});
