@@ -10,10 +10,6 @@ const AVATAR_DEFAUT = "/default/avatar_default.jpg"
 const AVATAR1 = "/default/avatar1.jpg"
 const AVATAR2 = "/default/avatar2.jpg"
 const AVATAR3 = "/default/avatar3.jpg"
-// À adapter selon ton projet
-// import { API_URL, fetchWithAuth } from "./api";
-// import { AVATAR_DEFAUT, AVATAR1, AVATAR2, AVATAR3, languageSvg } from "./assets";
-// import { upload_avatar, bind_user_avatar_upload, update_name } from "./profileHelpers";
 
 export function ProfilePage(): HTMLElement {
 	const root = document.createElement("div");
@@ -118,7 +114,7 @@ export function ProfilePage(): HTMLElement {
 	const avatarFile = document.createElement("input");
 	avatarFile.id = "avatarFile";
 	avatarFile.type = "file";
-	avatarFile.accept = "image/*";
+	avatarFile.accept = "image/png,image/jpeg";
 	avatarFile.className = "hidden";
 	avatarSection.appendChild(avatarFile);
 
@@ -178,11 +174,6 @@ export function ProfilePage(): HTMLElement {
 	passewordLabel.className = "font-abee text-smoky-white";
 	passewordLabel.textContent = `Password: `;
 	passewordSection.appendChild(passewordLabel);
-
-	
-	
-	
-	
 	
 	const passewordInput = document.createElement("input");
 	passewordInput.id = "change_name_input";
@@ -237,11 +228,6 @@ export function ProfilePage(): HTMLElement {
 	langLink.appendChild(langImg);
 	footerInner.appendChild(langLink);
 
-	// const rights = document.createElement("p");
-	// rights.className = "text-center text-md font-bagel text-smoky-white";
-	// rights.textContent = "All rights reserved";
-	// footerInner.appendChild(rights);
-
 	footer.appendChild(footerInner);
 	// root.appendChild(footer);
 
@@ -252,23 +238,25 @@ export function ProfilePage(): HTMLElement {
 }
 
 export async function handleProfilePage(): Promise<void> {
-	const token = localStorage.getItem("accessToken");
+			console.log("handleProfilePage called");
+		console.log("DOM check:", {
+		preview: document.getElementById("avatarPreview"),
+		grid: document.getElementById("avatarGrid"),
+		plus: document.getElementById("pickFileAvatar"),
+		file: document.getElementById("avatarFile"),
+	});
 
-	if (!token) {
+	let data;
+	try {
+		data = await fetchRequest(`/profile`, 'GET', {}, {});
+	} catch (err) {
+		console.error("Erreur réseau sur /profile:", err);
 		window.location.hash = "/login";
 		return;
 	}
 
-	const res = await fetchWithAuth(`${API_URL}/me`, {
-		method: "GET",
-		headers: {
-			Authorization: `Bearer ${token}`,
-		},
-	});
-
-	const data = await res.json();
-
-	if (!data.success) {
+	if (data.message !== "success") {
+		console.warn("Profile non accessible:", data);
 		window.location.hash = "/login";
 		return;
 	}
@@ -283,17 +271,14 @@ export async function handleProfilePage(): Promise<void> {
 	if (emailSpan) emailSpan.textContent = user.email;
 	if (nameInput) nameInput.value = user.name ?? "";
 
-	// Si tu as déjà ces helpers, tu peux les réutiliser
 	upload_avatar(user);
 	bind_user_avatar_upload(user);
-	// update_email();
 	update_name();
 
-	// Logout simple (à adapter si besoin)
 	const logoutBtn = document.getElementById("logout");
 	if (logoutBtn) {
 		logoutBtn.addEventListener("click", () => {
-			localStorage.removeItem("accessToken");
+			localStorage.removeItem("accessToken"); // au cas où tu l’utilises plus tard
 			window.location.hash = "/login";
 		});
 	}
@@ -335,11 +320,13 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }): vo
 		const fd = new FormData();
 		fd.append("avatar", f);
 		try{
-			const res = await fetchWithAuth(`${API_URL}/avatar`,
-				{
-					method: "POST",
-					body: fd,					
-				});
+			const res = await fetchRequest(
+					`avatar`,
+					'POST',
+					{},
+					{fd}
+
+			);
 			if (!res.ok) {
 				console.error("Server error:", res.status, await res.text());
 				
@@ -364,11 +351,14 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }): vo
 	});
 };
 
-export function upload_avatar(user: { avatar_url: string|null }):void
-{
-	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
-	const grid = document.getElementById("avatarGrid")!;
-	if (!preview || !grid) return;
+export function upload_avatar(user: { avatar_url: string | null }): void {
+	const preview = document.getElementById("avatarPreview") as HTMLImageElement | null;
+	const grid = document.getElementById("avatarGrid") as HTMLDivElement | null;
+
+	if (!preview || !grid) {
+		console.warn("upload_avatar: avatarPreview ou avatarGrid introuvable dans le DOM");
+		return;
+	}
 
 	// Fallback si l'image échoue (évite une image cassée)
 	preview.onerror = () => {
@@ -376,62 +366,71 @@ export function upload_avatar(user: { avatar_url: string|null }):void
 		preview.src = AVATAR_DEFAUT;
 	};
 
+	// Image initiale
 	preview.src = user.avatar_url || AVATAR_DEFAUT;
-	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn"); //la liste (NodeList) de tous tes boutons avec la classe .preset-btn
-	// querySelectorAll(".preset-btn") : API DOM (navigateur). Sélectionne tous les éléments qui ont la classe .preset-btn.
 
-	function highlight(btn :HTMLButtonElement | null)
-	{
-		presetButtons.forEach(function(button){ // boutton est le paramètre de la fonction, c’est chaque bouton de la liste, un HTMLButtonElement.
+	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn");
+
+	function highlight(btn: HTMLButtonElement | null) {
+		presetButtons.forEach((button) => {
 			button.classList.remove("ring-4", "ring-indigo-400");
 		});
-		if(btn)
-		btn.classList.add("ring-4", "ring-indigo-400");
+		if (btn) {
+			button.classList.add("ring-4", "ring-indigo-400");
+		}
 	}
 
+	// On détermine le bouton sélectionné au chargement
 	let selected: HTMLButtonElement | null = null;
 
-	presetButtons.forEach(b => {
-		if (b.dataset.src === user.avatar_url) 
+	presetButtons.forEach((b) => {
+		if (b.dataset.src === user.avatar_url) {
 			selected = b;
+		}
 	});
 
 	highlight(selected);
 
-	presetButtons.forEach((btn) =>{
-		btn.addEventListener("click", async() =>{
+	// IMPORTANT : on clique sur les boutons d'avatar
+	presetButtons.forEach((btn) => {
+		btn.addEventListener("click", async () => {
 			const url = btn.dataset.src || AVATAR_DEFAUT;
+
+			// On met à jour tout de suite côté UI
 			preview.src = url;
 			highlight(btn);
-			try{
-				const res = await fetchWithAuth(`${API_URL}/avatar`,
-					{
-						method: "PUT",
-						headers: {
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify({ avatar_url: url }),					
-					}
+
+			try {
+				const res = await fetchRequest(
+					`/avatar`,          // <-- note le "/" au début
+					"PUT",
+					{},
+					{ avatar_url: url }
 				);
+
+				// Si ton fetchRequest THROW sur !res.ok, le code suivant ne sera pas exécuté
 				if (!res.ok) {
 					console.error("Server error:", res.status, await res.text());
+					// ⚠️ On NE remet PAS l'ancienne image ici,
+					// on laisse l'UI changer même si le backend est pas prêt
 					return;
 				}
-				console.log("✅ change avatar update:");
-				// selectedBtn = btn;
+
+				console.log("✅ change avatar update");
 				user.avatar_url = url;
-			}
-
-			catch (err)
-			{
+				selected = btn;
+			} catch (err) {
 				console.error("❌ change avatar update failed:", err);
-				preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-				highlight(selected);
-
+				// ⚠️ AVANT tu remettais l’ancienne image ici → visuellement “ça ne bougeait pas”
+				// on ne revert plus pour que le clic soit visible.
+				// Si tu veux vraiment revert uniquement en cas de problème réseau critique :
+				// preview.src = user.avatar_url ?? AVATAR_DEFAUT;
+				// highlight(selected);
 			}
 		});
 	});
 }
+
 
 
 
@@ -472,48 +471,3 @@ export function update_name(): void
 	})
 
 }
-
-// function Email()
-// {
-
-// }
-
-
-// function Username()
-// {
-// 	const fieldset = document.createElement("fieldset");
-// 	fieldset.className = "border p-4 rounded max-w-xs w-full";
-
-// 	const legend = document.createElement("legend");
-// 	legend.className = "text-sm font-semibold text-gray-700";
-// 	legend.textContent = `Username: ${profile.username}`;
-
-// 	fieldset.appendChild(legend);
-
-// 	return fieldset;
-// }
-
-// export function ProfilePage():HTMLElement
-// {
-// 	const viewDiv = document.createElement("div");
-//     viewDiv.className = "flex flex-col h-screen";
-
-//     const headerBar = HeaderBar("Profile");
-
-//     const formElement = document.createElement("form");
-// 	formElement.className = "flex flex-col justify-center items-center flex-grow gap-2 maw-w-sm mx-auto";
-
-//     formElement.onsubmit = (e) => {
-//         e.preventDefault();
-//     };
-
-//     const usernameElement = Username();
-// 	// const emailElemant = Email();
-
-//     viewDiv.appendChild(headerBar);
-//     viewDiv.appendChild(formElement);
-
-//     formElement.appendChild(usernameElement);
-    
-//     return viewDiv;
-// }
