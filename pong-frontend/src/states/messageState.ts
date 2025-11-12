@@ -5,7 +5,7 @@ import { websocketChatSend } from "../websocket/websocketChatSend";
 
 export function addIntraMessage(message: string) {
     console.log(message);
-    
+
     messageState.messages.has(1) || messageState.messages.set(1, []);
     messageState.messages.get(1)!.push({
         from: 1,
@@ -66,10 +66,20 @@ export interface MessageType {
     sender: string;
 }
 
+export type ServerUsersList = {
+	id: number;
+	name: string;
+};
+
+export type FriendListType = {
+	id: number;
+	isConnected: boolean;
+};
+
 export interface MessageStateType {
     messages: Map<number, ChatMessage[]>;
-    serverUsers: { id: number; name: string }[];
-    friendList: { id: number; name: string }[];
+    serverUsers: ServerUsersList[];
+    friendList: FriendListType[];
     connectedUsers: { id: number; name: string }[];
     selectChat: { id: number; name: string };
     state: string;

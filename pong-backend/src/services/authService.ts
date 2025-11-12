@@ -27,7 +27,7 @@ class AuthService {
 
     guestLoginValidation(username: string): SaveUser {
         // Look if the user is connected in the room
-        const connectedUser = connectedRoomInstance.getByName(username);
+        const connectedUser = connectedRoomInstance.getById(username);
         if (connectedUser) {
             // Disconnect user first
             connectedRoomInstance.disconnect(username);

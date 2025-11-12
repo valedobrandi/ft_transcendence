@@ -4,7 +4,7 @@ import { MovePaddleType } from "../types.js";
 
 export function MOVE_PADDLE(data: MovePaddleType) {
     const { username, payload } = data;
-    const player = connectedRoomInstance.getByName(username);
+    const player = connectedRoomInstance.getById(username);
     if (!player || !player.matchId) return;
     const room = gameRoom.get(player.matchId);
     if (!room) return;

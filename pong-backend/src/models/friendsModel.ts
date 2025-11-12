@@ -54,4 +54,3 @@ class FriendsModel {
 	}
 }
 
-export default FriendsModel;

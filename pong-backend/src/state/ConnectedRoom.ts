@@ -5,7 +5,7 @@ import { PlayerType } from "../types/PlayerType.js";
 import type { WebSocket } from 'ws';
 
 export class ConnectedRoom {
-    private room = new Map<string, PlayerType>();
+    private room = new Map<number | bigint, PlayerType>();
     private usersModelsInstance = new UsersModel(db);
 
     addUser(name: string, id: number | bigint): Boolean {
@@ -20,8 +20,8 @@ export class ConnectedRoom {
             friendSet: new Set<number | bigint>(),
         };
 
-        if (this.room.has(name) === false) {
-            this.room.set(name, user);
+        if (this.room.has(id) === false) {
+            this.room.set(id, user);
 			return true;
         }
 		return false;
@@ -31,7 +31,7 @@ export class ConnectedRoom {
         const player = this.getById(id);
         if (player === undefined) throw new Error(`${id} Disconnected.`);
         return {
-            add: (id: number | bigint, username: string) => {
+            add: (id: number | bigint) => {
                 player.friendSet.add(id);
                 this.broadcastConnectedUsers();
             },
@@ -52,8 +52,8 @@ export class ConnectedRoom {
         };
     }
 
-    addWebsocket(id: string, socket: WebSocket): Boolean {
-        const player = this.room.get(id);
+    addWebsocket(id: number, socket: WebSocket): Boolean {
+        const player = this.room.get(Number(id));
         if (player) {
             player.socket = socket;
             this.broadcastConnectedUsers();
@@ -63,14 +63,14 @@ export class ConnectedRoom {
 		return false;
     }
 
-    dropWebsocket(id: string) {
-        const player = this.room.get(id);
+    dropWebsocket(id: number) {
+        const player = this.room.get(Number(id));
         if (player && player.socket) player.socket.close();
     }
 
-    disconnect(id: string) {
-        this.dropWebsocket(id);
-        this.room.delete(id);
+    disconnect(id: number) {
+        this.dropWebsocket(Number(id));
+        this.room.delete(Number(id));
         this.broadcastConnectedUsers();
     }
 
@@ -99,17 +99,9 @@ export class ConnectedRoom {
         });
     }
 
-    getByName(name: string) {
-        return this.room.get(name);
-    }
-
     getById(id: number | bigint) {
-        for (const player of this.room.values()) {
-            if (player.id === id) {
-                return player;
-            }
-        }
-        return undefined;
+        return this.room.get(Number(id));
+
     }
 
     getBySocket(socket: WebSocket) {
@@ -121,8 +113,8 @@ export class ConnectedRoom {
         return undefined;
     }
 
-    has(id: string) {
-        return this.room.has(id);
+    has(id: number | bigint) {
+        return this.room.has(Number(id));
     }
 
     size() {

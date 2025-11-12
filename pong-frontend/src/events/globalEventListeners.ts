@@ -31,10 +31,9 @@ export function globalEventListeners() {
 
     if (button && button.id === `accept-friend-request`) {
       var tagName = button.name;
-      var response = await fetchRequest('\add-friend', 'POST', {}, 
-        {
-          body:JSON.stringify({id: tagName})
-        })
+	  const eventId = button.getAttribute("eventid");
+      var response = await fetchRequest('/add-friend', 'POST', {},
+        { body:JSON.stringify({id: tagName, event_id: eventId}) })
     }
 
     if (button && button.id === "btn-friend-list") {

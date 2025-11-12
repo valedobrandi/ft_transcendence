@@ -47,24 +47,11 @@ export function FormLogin(): HTMLElement {
             jwt.token = response.payload.accessToken;
             id.username = response.payload.username;
             id.id = response.payload.id;
-            const [friendsList, pendingEvents] = await Promise.all([
+            const [friendsList] = await Promise.all([
                 fetchRequest('/friends-list', 'GET', {}),
-                fetchRequest('/to-events', 'GET')
             ]);
             if (friendsList.message === 'success') {
                 messageState.friendList = friendsList.payload;
-            }
-            if (pendingEvents.message === 'success') {
-                const { payload } = pendingEvents.json();
-                switch (pendingEvents.payload.type) {
-                    case 'friend:add':
-                        const getSender = messageState.serverUsers
-                            .find(({ id }) => Number(id) === Number(payload.id))
-                        addIntraMessage(`${getSender} has send a friend request ${btnLink(getSender)}`)
-                        break;
-                    default:
-                        break;
-                }
             }
             navigateTo("/intra");
         }
@@ -73,8 +60,3 @@ export function FormLogin(): HTMLElement {
     return viewDiv;
 }
 
-function btnLink(friend: number): string {
-    return (
-        `<button id="accept-friend-request name=${friend}"> YES <\button>`
-    )
-}

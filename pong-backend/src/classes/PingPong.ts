@@ -39,7 +39,7 @@ class PingPong {
     }
 
     getPlayer(id: string): PlayerType | undefined {
-        return connectedRoomInstance.getByName(id) || undefined;
+        return connectedRoomInstance.getById(id) || undefined;
     }
 
     resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
@@ -126,7 +126,7 @@ class PingPong {
     endMatch() {
         if (this.matchState === 'ENDED') return;
         this.matchState = 'ENDED';
-        
+
         const [playerXScore, playerYScore] = [this.gameState.userX.score, this.gameState.userY.score];
         // Compare de score and set winner and loser
         if (playerXScore > playerYScore) {
@@ -140,7 +140,7 @@ class PingPong {
             this.winnerId = this.side.LEFT;
             this.drawMatch = true;
         }
-        
+
         this.saveMatchHistory(playerXScore, playerYScore);
 
         console.log(`Winner: ${this.winnerId}`);

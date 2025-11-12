@@ -1,10 +1,6 @@
-import { messageState, onMessageChange } from "../states/messageState";
+import { messageState, onMessageChange, type FriendListType, type ServerUsersList } from "../states/messageState";
 import { id as userId } from "../app";
 
-export type ListOfUsers = {
-    id: number;
-    name: string;
-};
 
 export type ListType = "FRIENDS" | "SERVER";
 
@@ -16,8 +12,7 @@ export function LiveStatusIndicator(isOnline: boolean): HTMLSpanElement {
 }
 
 export function List(
-    users: ListOfUsers[],
-    connected: ListOfUsers[] | [],
+    users: (ServerUsersList | FriendListType)[],
     type: ListType
 ): HTMLDivElement {
     const usersDiv = document.createElement("div");
@@ -29,34 +24,34 @@ export function List(
 
         // FilterOut friends form server users
         if (type === "SERVER") {
-            users = users.filter(
-                (user) =>
+            users = users.filter((user) =>
                     !messageState.friendList.find((friend) => friend.id === user.id)
             );
         }
 
-        users.forEach(({ name, id }) => {
-            if (userId.username === name) return;
+        users.forEach((user) => {
+            if (Number(userId.id) === Number(user.id)) return;
+			// Get name form serverUsers
+			const serverUSer = messageState.serverUsers.find((u) => u.id === user.id);
+			const name = serverUSer ? serverUSer.name : "Unknown";
             const btn = document.createElement("button");
-
-            const liveStatusIndicatorUI = LiveStatusIndicator(
-                connected.map((user) => user.id).includes(id)
-            );
-
-            if (type === "FRIENDS") {
-                btn.appendChild(liveStatusIndicatorUI);
-            }
+			var userLiveStatus: HTMLSpanElement = document.createElement("span");
+			console.log("User info:", user, type);
+			if (type === "FRIENDS") {
+				userLiveStatus = LiveStatusIndicator(user.isConnected);
+				btn.appendChild(userLiveStatus);
+			}
 
             const btnText = document.createElement("span");
-            btnText.textContent = ` ${name.substring(0, 10)}`;
+            btnText.textContent = ` ${name}`;
             btn.appendChild(btnText);
 
             btn.className = `${name} flex items-center border-b
                 border-gray-300 p-2 w-full text-center hover:bg-gray-100`;
             btn.id = `select-chat-btn`;
-            console.log("Rendering user button for:", name, id);
+            console.log("Rendering user button for:", name, user.id);
             btn.value = `${name}`;
-            btn.name = `${id}`;
+            btn.name = `${user.id}`;
             usersDiv.appendChild(btn);
         });
         // Add bg-gray-100 to the selected chat button
@@ -78,22 +73,21 @@ export function UsersList(): HTMLDivElement {
     function render() {
         usersDiv.innerHTML = "";
 
-        const usersListUI = List(messageState.serverUsers, [], "SERVER");
+        const usersListUI = List(messageState.serverUsers, "SERVER");
         usersDiv.appendChild(usersListUI);
 
         const friendListTitle = document.createElement("h2");
         friendListTitle.textContent = "FRIENDS LIST";
         friendListTitle.className =
             "text-center text-blue-900 border-blue-900 border";
-            
+
         const friendListUI = List(
             messageState.friendList,
-            messageState.connectedUsers,
             "FRIENDS"
         );
 
-        usersDiv.appendChild(friendListUI);
         usersDiv.appendChild(friendListTitle);
+        usersDiv.appendChild(friendListUI);
     }
     render();
     onMessageChange(render);

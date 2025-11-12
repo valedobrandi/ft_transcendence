@@ -60,7 +60,12 @@ export function websocketReceiver(socket: WebSocket) {
 			case 'SERVER_USERS':
 				if ('users' in data) {
 					messageState.serverUsers = data.users;
-				} 
+				}
+				break;
+			case 'FRIEND_LIST':
+				if ('payload' in data) {
+					messageState.friendList = data.payload;
+				}
 				break;
 		}
 	});

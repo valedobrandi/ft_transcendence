@@ -10,11 +10,11 @@ class ChatHandler {
         const {receiverId, senderId, receiver, sender, message} = data;
 
         var isBlocked;
-        const to = connectedRoomInstance.getByName(receiver);
-        const from = connectedRoomInstance.getByName(sender);
+        const to = connectedRoomInstance.getById(receiver);
+        const from = connectedRoomInstance.getById(sender);
 
         if (to !== undefined) isBlocked = to.chat.isUserBlocked(senderId) ? 1 : 0;
-        
+
         chatStore.addMessageToDataBase(senderId, receiverId, message, isBlocked);
         const history = chatStore.getHistory(senderId, receiverId);
 

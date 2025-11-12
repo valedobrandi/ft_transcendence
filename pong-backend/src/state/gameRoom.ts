@@ -8,7 +8,7 @@ export const gameRoom = new Map<string, PingPong>();
 
 export function joinMatchRoom(id: string) {
 	matchQueue.add(id);
-    const player = connectedRoomInstance.getByName(id);
+    const player = connectedRoomInstance.getById(id);
     if (player == undefined) return;
 	player.status = 'MATCH_QUEUE';
     if (player.socket) {

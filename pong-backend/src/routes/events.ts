@@ -3,7 +3,7 @@ import Database from 'better-sqlite3';
 import db from "../../database/db";
 import { statusCode } from "../types/statusCode";
 
-type InsertEventReturn = {
+type EventOnChangeDB = {
     status: 'error' | 'success';
     data: { message: string };
 };
@@ -62,7 +62,7 @@ function eventsRoutes(fastify: FastifyInstance) {
 
 class EventsController {
     private eventsServiceInstance = new EventsService();
-    
+
     insertEvent(req: FastifyRequest<{ Body: InsertEventBody }>, res: FastifyReply) {
         const { to_id, from_id, type, message } = req.body;
         const { status, data } = this.eventsServiceInstance.insertEvent(to_id, from_id, type, message);
@@ -80,6 +80,7 @@ class EventsController {
         const { status, data } = this.eventsServiceInstance.getFromEvents(id);
         return res.status(statusCode('OK')).send({ status, data });
     }
+
 }
 
 class EventsService {
@@ -113,6 +114,11 @@ class EventsService {
         const {status, data} = this.eventsModelInstance.getFromEvents(from_id);
         return { status, data };
     }
+
+	deleteEvent(eventId: number) {
+		const { status, data } = this.eventsModelInstance.deleteEvent(eventId);
+		return { status, data };
+	}
 }
 
 class EventsModel {
@@ -121,18 +127,21 @@ class EventsModel {
     private stmGetToEvents: Database.Statement;
     private stmGetFromEvents: Database.Statement;
     private stmGetDuplicateEvent: Database.Statement;
+	private stmDeleteEvent: Database.Statement;
 
     constructor(db: Database.Database) {
         this.db = db;
         this.stmInsertEvent = db.prepare(
-            `INSERT INTO 
-                events (type, from_id, to_id, payload) 
+            `INSERT INTO
+                events (type, from_id, to_id, payload)
                 VALUES (@type, @fromId, @toId, @payload)`);
         this.stmGetToEvents = db.prepare(`SELECT * FROM events WHERE to_id=@toId`);
         this.stmGetFromEvents = db.prepare(`SELECT * FROM events WHERE from_id=@fromId`);
         this.stmGetDuplicateEvent = db.prepare(
-            `SELECT * FROM events 
+            `SELECT * FROM events
                 WHERE type=@type AND from_id=@fromId AND to_id=@toId`);
+		this.stmDeleteEvent = db.prepare(
+			`DELETE FROM events WHERE id=@eventId`);
     }
 
     getDuplicateEvent(type: string, fromId: number, toId: number): GetEvents {
@@ -140,7 +149,7 @@ class EventsModel {
         return { status: 'success', data: response };
     }
 
-    insertEvent(type: string, fromId: number, toId: number, payload: string): InsertEventReturn {
+    insertEvent(type: string, fromId: number, toId: number, payload: string): EventOnChangeDB {
         const response = this.stmInsertEvent.run({ type, fromId, toId, payload });
         if (response.changes === 1) {
             return { status: 'success', data: { message: 'event inserted' } };
@@ -157,6 +166,14 @@ class EventsModel {
         const response = this.stmGetFromEvents.all({ fromId });
         return { status: 'success', data: response };
     }
+
+	deleteEvent(eventId: number): EventOnChangeDB {
+		const response = this.stmDeleteEvent.run({ eventId });
+		if (response.changes === 1) {
+			return { status: 'success', data: { message: 'event deleted' } };
+		}
+		return { status: 'error', data: { message: 'event not deleted' } };
+	}
 }
 
 export { eventsRoutes, EventsController, EventsService, EventsModel };

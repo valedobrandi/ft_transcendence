@@ -6,10 +6,11 @@ import { MOVE_PADDLE } from './MOVE_PADDLE.js';
 import { PLAY } from './PLAY.js';
 import { TOURNAMENT } from './TOURNAMENT.js';
 import { chatHandler } from './ChatHandler.js';
+import { print } from '../../server.js';
 
 export function handleMessage(conn: WebSocket, msg: MessageType) {
     if (msg.type !== 'MOVE_PADDLE' && msg.type !== 'input') {
-        console.log('Received message:', msg);
+        print(`[WEBSOCKET] Received message of type: ${msg.type}`);
     }
     switch (msg.type) {
         case 'CONNECT':
