@@ -1,18 +1,22 @@
-import { Button } from "./Button";
-import { HeaderBar } from "./HeaderBar";
+import { FancyButton } from "./Button";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { id, jwt } from "../app";
+import { CreateAlert } from "./CreateAlert";
 
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
     viewDiv.className = "flex flex-col h-screen";
 
-    const headerBar = HeaderBar("LOGIN");
+    const title = document.createElement("h1");
+    title.className = "game-font text-6xl text-center mb-10 text-[hsl(345,100%,47%)] text-shadow-lg/30 pt-20";
+    title.textContent = "WELCOME BACK";
 
     const formElement = document.createElement("form");
     formElement.className = "flex flex-col justify-center items-center flex-grow gap-2 maw-w-sm mx-auto";
+	// viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
+	// viewDiv.style.backgroundSize = "cover";
 
     formElement.onsubmit = (event) => {
         event.preventDefault();
@@ -22,9 +26,9 @@ export function FormLogin(): HTMLElement {
 	const inputPasswordUI = InputPassword();
 	const inputNameUI = InputName();
 
-    const sendBtn = Button("login", "w-full", () => {});
+    const sendBtn = FancyButton("login", "scale-100 h-14 w-60 game-font tracking-widest text-lg", () => {});
 
-	viewDiv.appendChild(headerBar);
+	viewDiv.appendChild(title);
     viewDiv.appendChild(formElement);
 	formElement.appendChild(inputNameUI);
 	formElement.appendChild(inputPasswordUI);
@@ -53,7 +57,13 @@ export function FormLogin(): HTMLElement {
             id.username = response.payload.username;
             console.log(jwt.token);
             navigateTo("/intra");
-        }		
+        }
+        else if (response.status === 'error') {
+            const existingAlert = document.getElementById("alert-popup");
+            if (existingAlert)
+                existingAlert.remove();
+            document.getElementById('root')?.prepend(CreateAlert(response.message));
+        }
     };
 
     return viewDiv;
