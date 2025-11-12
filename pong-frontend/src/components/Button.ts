@@ -8,3 +8,23 @@ export function Button(label: string, style = "", onClick: () => void): HTMLElem
 
 	return buttonElement;
 }
+
+export function FancyButton(label: string, style = "", onClick: () => void): HTMLElement {
+    const buttonElement = document.createElement("button");
+    buttonElement.className = `button-fancy-pushable ${style}`;
+    buttonElement.setAttribute("role", "button");
+
+    const edge = document.createElement("span");
+    edge.className = "button-fancy-edge";
+
+    const front = document.createElement("span");
+    front.className = "button-fancy-front text";
+    front.textContent = label;
+
+    buttonElement.appendChild(edge);
+    buttonElement.appendChild(front);
+
+    buttonElement.onclick = onClick;
+
+    return (buttonElement);
+}
