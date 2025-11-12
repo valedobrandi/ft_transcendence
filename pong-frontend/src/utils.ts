@@ -86,7 +86,7 @@ export async function fetchRequest
 {
     const url = `${endpoint.pong_backend_api}${path}`;
 
-    const defaultHeaders =
+    const defaultHeaders: Record<string, string> =
     {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${jwt.token}`

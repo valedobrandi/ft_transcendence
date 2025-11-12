@@ -9,7 +9,7 @@ class UsersModel {
     private db: Database.Database;
     private stmFindUser: Database.Statement;
     private stmSaveUser: Database.Statement;
-
+   
     constructor(db: Database.Database) {
         this.db = db;
         this.stmFindUser = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?');
@@ -20,8 +20,12 @@ class UsersModel {
         );
     }
 
-    findUserByEmailOrUsername(username: string): any | undefined {
+    findUserByUsername(username: string): any | undefined {
         return this.stmFindUser.get("", username);
+    }
+
+    findUserByEmail(email: string): any | undefined {
+        return this.stmFindUser.get(email, "");
     }
 
     insertUser() {

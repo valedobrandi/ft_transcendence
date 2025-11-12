@@ -10,6 +10,10 @@ const AVATAR_DEFAUT = "/default/avatar_default.jpg"
 const AVATAR1 = "/default/avatar1.jpg"
 const AVATAR2 = "/default/avatar2.jpg"
 const AVATAR3 = "/default/avatar3.jpg"
+// À adapter selon ton projet
+// import { API_URL, fetchWithAuth } from "./api";
+// import { AVATAR_DEFAUT, AVATAR1, AVATAR2, AVATAR3, languageSvg } from "./assets";
+// import { upload_avatar, bind_user_avatar_upload, update_name } from "./profileHelpers";
 
 export function ProfilePage(): HTMLElement {
 	const root = document.createElement("div");
@@ -137,7 +141,7 @@ export function ProfilePage(): HTMLElement {
 	emailSection1.appendChild(emailLabel);
 
 	const emailInput = document.createElement("input");
-	emailInput.id = "change_Email_input";
+	emailInput.id = "change_email_input";
 	emailInput.type = "text";
 	emailInput.placeholder = "change Email";
 	emailInput.className =
@@ -190,8 +194,8 @@ export function ProfilePage(): HTMLElement {
 
 
 	const newpassewordInput = document.createElement("input");
-	// // newpassewordInput.id = "change_name_input";
-	newpassewordInput.type = "New password";
+	newpassewordInput.id = "new_password_input";
+	newpassewordInput.type = "password";
 	newpassewordInput.placeholder = "**********";
 	newpassewordInput.className =
 		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
@@ -204,6 +208,76 @@ export function ProfilePage(): HTMLElement {
 	const sendBtn = Button("Change profil", "w-full", () => {});
 	sendBtn.className =	"mt-4 w-full h-10 rounded-md px-3 bg-pink-400 text-white outline-none";
 	card.appendChild(sendBtn);
+
+	sendBtn.addEventListener("click", async () => {
+	const nameEl  = document.getElementById("change_name_input") as HTMLInputElement | null;
+	const mailEl  = document.getElementById("change_email_input") as HTMLInputElement | null;
+	const curPwdEl = document.getElementById("current_password_input") as HTMLInputElement | null;
+	const newPwdEl = document.getElementById("new_password_input") as HTMLInputElement | null;
+
+	const nextName = nameEl?.value.trim() ?? "";
+	const nextMail = mailEl?.value.trim() ?? "";
+	const curPwd   = curPwdEl?.value ?? "";
+	const newPwd   = newPwdEl?.value ?? "";
+
+	const payload: Record<string, unknown> = {};
+	if (nextName && nextName !== profile.username)
+	{
+		payload.username = nextName;
+		console.log("PROFIL = ", payload.username);
+	}
+	if (nextMail && nextMail !== profile.email)
+	{
+		payload.email = nextMail;
+	}
+
+
+	if (curPwd && newPwd)
+	{
+		payload.current_password = curPwd;
+		payload.password = newPwd;
+	} 
+	else if (curPwd || newPwd) 
+	{
+		console.warn("Pour changer le mot de passe, remplis les deux champs.");
+		return;
+	}
+
+	if (Object.keys(payload).length === 0)
+	{
+		console.info("Aucune modification à envoyer.");
+		return;
+	}
+
+	try {
+	sendBtn.setAttribute('disabled','true');
+	const data = await fetchRequest("/update", "PUT", {}, payload);
+	
+	if (data.message === 'success')
+	{
+		profile.username = data.username;
+		profile.email = data.email;
+		console.log("PROFIL = ", profile.username);
+		console.log("PROFIL = ", profile.username);
+		window.location.reload();	
+	}
+	else 
+		console.error("Erreur lors du chargement du profil :", data);
+
+	if (payload.username) profile.username = String(payload.username);
+	if (payload.email)    profile.email    = String(payload.email);
+
+	
+	if (nameEl) nameEl.value = profile.username ?? "";
+	if (mailEl) mailEl.value = profile.email ?? "";
+
+	console.log("Profil mis à jour", data);
+	} catch (e) {
+	console.error("Erreur réseau :", e);
+	} finally {
+	sendBtn.setAttribute('disabled','false');;
+	}
+	});
 
 	main.appendChild(card);
 	root.appendChild(main);
