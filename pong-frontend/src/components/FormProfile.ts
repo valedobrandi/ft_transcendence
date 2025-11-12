@@ -36,7 +36,6 @@ export function ProfilePage(): HTMLElement {
 	homeLink.className =
 		"rounded-md bg-dark-blue px-6 py-2 font-bagel text-smoky-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/60";
 	homeLink.textContent = "Home";
-	
 
 	// headerInner.appendChild(title);
 	headerInner.appendChild(homeLink);
@@ -119,7 +118,7 @@ export function ProfilePage(): HTMLElement {
 	const avatarFile = document.createElement("input");
 	avatarFile.id = "avatarFile";
 	avatarFile.type = "file";
-	avatarFile.accept = "image/*";
+	avatarFile.accept = "image/png,image/jpeg";
 	avatarFile.className = "hidden";
 	avatarSection.appendChild(avatarFile);
 
@@ -304,283 +303,246 @@ export function ProfilePage(): HTMLElement {
 	langLink.appendChild(langImg);
 	footerInner.appendChild(langLink);
 
-	// const rights = document.createElement("p");
-	// rights.className = "text-center text-md font-bagel text-smoky-white";
-	// rights.textContent = "All rights reserved";
-	// footerInner.appendChild(rights);
-
 	footer.appendChild(footerInner);
 	// root.appendChild(footer);
 
 	// Lance la logique de récupération des infos utilisateur
-	//void handleProfilePage();
+	void handleProfilePage();
 
 	return root;
 }
 
-// export async function handleProfilePage(): Promise<void> {
-// 	const token = localStorage.getItem("accessToken");
+export async function handleProfilePage(): Promise<void> {
+			console.log("handleProfilePage called");
+		console.log("DOM check:", {
+		preview: document.getElementById("avatarPreview"),
+		grid: document.getElementById("avatarGrid"),
+		plus: document.getElementById("pickFileAvatar"),
+		file: document.getElementById("avatarFile"),
+	});
 
-// 	if (!token) {
-// 		window.location.hash = "/login";
-// 		return;
-// 	}
+	let data;
+	try {
+		data = await fetchRequest(`/profile`, 'GET', {}, {});
+	} catch (err) {
+		console.error("Erreur réseau sur /profile:", err);
+		window.location.hash = "/login";
+		return;
+	}
 
-// 	const res = await fetchWithAuth(`${API_URL}/me`, {
-// 		method: "GET",
-// 		headers: {
-// 			Authorization: `Bearer ${token}`,
-// 		},
-// 	});
+	if (data.message !== "success") {
+		console.warn("Profile non accessible:", data);
+		window.location.hash = "/login";
+		return;
+	}
 
-// 	const data = await res.json();
+	const user = data.user;
 
-// 	if (!data.success) {
-// 		window.location.hash = "/login";
-// 		return;
-// 	}
+	const usernameSpan = document.getElementById("username");
+	const emailSpan = document.getElementById("useremail");
+	const nameInput = document.getElementById("change_name_input") as HTMLInputElement | null;
 
-// 	const user = data.user;
+	if (usernameSpan) usernameSpan.textContent = user.name;
+	if (emailSpan) emailSpan.textContent = user.email;
+	if (nameInput) nameInput.value = user.name ?? "";
 
-// 	const usernameSpan = document.getElementById("username");
-// 	const emailSpan = document.getElementById("useremail");
-// 	const nameInput = document.getElementById("change_name_input") as HTMLInputElement | null;
+	upload_avatar(user);
+	bind_user_avatar_upload(user);
+	update_name();
 
-// 	if (usernameSpan) usernameSpan.textContent = user.name;
-// 	if (emailSpan) emailSpan.textContent = user.email;
-// 	if (nameInput) nameInput.value = user.name ?? "";
+	const logoutBtn = document.getElementById("logout");
+	if (logoutBtn) {
+		logoutBtn.addEventListener("click", () => {
+			localStorage.removeItem("accessToken"); // au cas où tu l’utilises plus tard
+			window.location.hash = "/login";
+		});
+	}
+}
 
-// 	// Si tu as déjà ces helpers, tu peux les réutiliser
-// 	upload_avatar(user);
-// 	bind_user_avatar_upload(user);
-// 	// update_email();
-// 	update_name();
+export function bind_user_avatar_upload(user: { avatar_url: string | null }): void 
+{
+	//recuperer les bouttons
+	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
+	const plusBtn = document.getElementById("pickFileAvatar") as HTMLButtonElement;
+	const fileInput = document.getElementById("avatarFile") as HTMLInputElement;
 
-// 	// Logout simple (à adapter si besoin)
-// 	const logoutBtn = document.getElementById("logout");
-// 	if (logoutBtn) {
-// 		logoutBtn.addEventListener("click", () => {
-// 			localStorage.removeItem("accessToken");
-// 			window.location.hash = "/login";
-// 		});
-// 	}
-// }
+	// si on charge une image invalide → fallback
+  	preview.onerror = () => {
+    	preview.onerror = null;
+    	preview.src = AVATAR_DEFAUT;
+	};
+	// ouvre le file picker, fileInput.click() pour ouvrir le sélecteur de fichiers.
+	plusBtn.addEventListener("click", () => fileInput.click());
 
-// export function bind_user_avatar_upload(user: { avatar_url: string | null }): void 
-// {
-// 	//recuperer les bouttons
-// 	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
-// 	const plusBtn = document.getElementById("pickFileAvatar") as HTMLButtonElement;
-// 	const fileInput = document.getElementById("avatarFile") as HTMLInputElement;
+	fileInput.addEventListener("change", async() => {
+		const f = fileInput.files?.[0]
+		if (!f)
+			return ;
 
-// 	// si on charge une image invalide → fallback
-//   	preview.onerror = () => {
-//     	preview.onerror = null;
-//     	preview.src = AVATAR_DEFAUT;
-// 	};
-// 	// ouvre le file picker, fileInput.click() pour ouvrir le sélecteur de fichiers.
-// 	plusBtn.addEventListener("click", () => fileInput.click());
+		const allow = ["image/png", "image/jpeg"];
+		const size_photo = 5 * 1024 * 1024;
 
-// 	fileInput.addEventListener("change", async() => {
-// 		const f = fileInput.files?.[0]
-// 		if (!f)
-// 			return ;
+		if (!allow.includes(f.type) || f.size > size_photo)
+		{
+			fileInput.value = "";
+			console.log("image format error");
+			return ;
+		}
 
-// 		const allow = ["image/png", "image/jpeg"];
-// 		const size_photo = 5 * 1024 * 1024;
+		const url = URL.createObjectURL(f);
+		preview.src = url;
 
-// 		if (!allow.includes(f.type) || f.size > size_photo)
-// 		{
-// 			fileInput.value = "";
-// 			console.log("image format error");
-// 			return ;
-// 		}
+		const fd = new FormData();
+		fd.append("avatar", f);
+		try{
+			const res = await fetchRequest(
+					`avatar`,
+					'POST',
+					{},
+					{fd}
 
-// 		const url = URL.createObjectURL(f);
-// 		preview.src = url;
-
-// 		const fd = new FormData();
-// 		fd.append("avatar", f);
-// 		try{
-// 			const res = await fetchWithAuth(`${API_URL}/avatar`,
-// 				{
-// 					method: "POST",
-// 					body: fd,					
-// 				});
-// 			if (!res.ok) {
-// 				console.error("Server error:", res.status, await res.text());
+			);
+			if (!res.ok) {
+				console.error("Server error:", res.status, await res.text());
 				
-// 				return;
-// 			}
-// 			const data = await res.json() as {avatar_url:string};
-// 			const { avatar_url } = data; 
-// 			console.log("✅ avatar upload success:");
-// 			preview.src = avatar_url;
-// 			user.avatar_url = avatar_url;
-// 		}
-// 		catch
-// 		{
-// 			console.error("Upload failed:");
-// 	    	preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-// 		}
-// 		finally
-// 		{
-// 			URL.revokeObjectURL(url);
-// 			fileInput.value = "";
-// 		}
-// 	});
-// };
+				return;
+			}
+			const data = await res.json() as {avatar_url:string};
+			const { avatar_url } = data; 
+			console.log("✅ avatar upload success:");
+			preview.src = avatar_url;
+			user.avatar_url = avatar_url;
+		}
+		catch
+		{
+			console.error("Upload failed:");
+	    	preview.src = user.avatar_url ?? AVATAR_DEFAUT;
+		}
+		finally
+		{
+			URL.revokeObjectURL(url);
+			fileInput.value = "";
+		}
+	});
+};
 
-// export function upload_avatar(user: { avatar_url: string|null }):void
-// {
-// 	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
-// 	const grid = document.getElementById("avatarGrid")!;
-// 	if (!preview || !grid) return;
+export function upload_avatar(user: { avatar_url: string | null }): void {
+	const preview = document.getElementById("avatarPreview") as HTMLImageElement | null;
+	const grid = document.getElementById("avatarGrid") as HTMLDivElement | null;
 
-// 	// Fallback si l'image échoue (évite une image cassée)
-// 	preview.onerror = () => {
-// 		preview.onerror = null;
-// 		preview.src = AVATAR_DEFAUT;
-// 	};
+	if (!preview || !grid) {
+		console.warn("upload_avatar: avatarPreview ou avatarGrid introuvable dans le DOM");
+		return;
+	}
 
-// 	preview.src = user.avatar_url || AVATAR_DEFAUT;
-// 	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn"); //la liste (NodeList) de tous tes boutons avec la classe .preset-btn
-// 	// querySelectorAll(".preset-btn") : API DOM (navigateur). Sélectionne tous les éléments qui ont la classe .preset-btn.
+	// Fallback si l'image échoue (évite une image cassée)
+	preview.onerror = () => {
+		preview.onerror = null;
+		preview.src = AVATAR_DEFAUT;
+	};
 
-// 	function highlight(btn :HTMLButtonElement | null)
-// 	{
-// 		presetButtons.forEach(function(button){ // boutton est le paramètre de la fonction, c’est chaque bouton de la liste, un HTMLButtonElement.
-// 			button.classList.remove("ring-4", "ring-indigo-400");
-// 		});
-// 		if(btn)
-// 		btn.classList.add("ring-4", "ring-indigo-400");
-// 	}
+	// Image initiale
+	preview.src = user.avatar_url || AVATAR_DEFAUT;
 
-// 	let selected: HTMLButtonElement | null = null;
+	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 
-// 	presetButtons.forEach(b => {
-// 		if (b.dataset.src === user.avatar_url) 
-// 			selected = b;
-// 	});
+	function highlight(btn: HTMLButtonElement | null) {
+		presetButtons.forEach((button) => {
+			button.classList.remove("ring-4", "ring-indigo-400");
+		});
+		if (btn) {
+			button.classList.add("ring-4", "ring-indigo-400");
+		}
+	}
 
-// 	highlight(selected);
+	// On détermine le bouton sélectionné au chargement
+	let selected: HTMLButtonElement | null = null;
 
-// 	presetButtons.forEach((btn) =>{
-// 		btn.addEventListener("click", async() =>{
-// 			const url = btn.dataset.src || AVATAR_DEFAUT;
-// 			preview.src = url;
-// 			highlight(btn);
-// 			try{
-// 				const res = await fetchWithAuth(`${API_URL}/avatar`,
-// 					{
-// 						method: "PUT",
-// 						headers: {
-// 							"Content-Type": "application/json"
-// 						},
-// 						body: JSON.stringify({ avatar_url: url }),					
-// 					}
-// 				);
-// 				if (!res.ok) {
-// 					console.error("Server error:", res.status, await res.text());
-// 					return;
-// 				}
-// 				console.log("✅ change avatar update:");
-// 				// selectedBtn = btn;
-// 				user.avatar_url = url;
-// 			}
+	presetButtons.forEach((b) => {
+		if (b.dataset.src === user.avatar_url) {
+			selected = b;
+		}
+	});
 
-// 			catch (err)
-// 			{
-// 				console.error("❌ change avatar update failed:", err);
-// 				preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-// 				highlight(selected);
+	highlight(selected);
 
-// 			}
-// 		});
-// 	});
-// }
+	// IMPORTANT : on clique sur les boutons d'avatar
+	presetButtons.forEach((btn) => {
+		btn.addEventListener("click", async () => {
+			const url = btn.dataset.src || AVATAR_DEFAUT;
+
+			// On met à jour tout de suite côté UI
+			preview.src = url;
+			highlight(btn);
+
+			try {
+				const res = await fetchRequest(
+					`/avatar`,          // <-- note le "/" au début
+					"PUT",
+					{},
+					{ avatar_url: url }
+				);
+
+				// Si ton fetchRequest THROW sur !res.ok, le code suivant ne sera pas exécuté
+				if (!res.ok) {
+					console.error("Server error:", res.status, await res.text());
+					// ⚠️ On NE remet PAS l'ancienne image ici,
+					// on laisse l'UI changer même si le backend est pas prêt
+					return;
+				}
+
+				console.log("✅ change avatar update");
+				user.avatar_url = url;
+				selected = btn;
+			} catch (err) {
+				console.error("❌ change avatar update failed:", err);
+				// ⚠️ AVANT tu remettais l’ancienne image ici → visuellement “ça ne bougeait pas”
+				// on ne revert plus pour que le clic soit visible.
+				// Si tu veux vraiment revert uniquement en cas de problème réseau critique :
+				// preview.src = user.avatar_url ?? AVATAR_DEFAUT;
+				// highlight(selected);
+			}
+		});
+	});
+}
 
 
 
-// export function update_name(): void
-// {
-// 	const button = document.getElementById("ChangeName") as HTMLButtonElement | null;
-// 	if (!button) return;
+
+export function update_name(): void
+{
+	const button = document.getElementById("ChangeName") as HTMLButtonElement | null;
+	if (!button) return;
 	
-// 	button.addEventListener("click", async(event) =>{
-// 		event.preventDefault();
-// 		const changename = ((document.getElementById("change_name_input") as HTMLInputElement).value.trim());
-// 		try{
-// 			const res = await fetchRequest(
-// 					`submit`,
-// 					'POST',
-// 					{},
-// 					{ name: changename}
+	button.addEventListener("click", async(event) =>{
+		event.preventDefault();
+		const changename = ((document.getElementById("change_name_input") as HTMLInputElement).value.trim());
+		try{
+			const res = await fetchRequest(
+					`submit`,
+					'POST',
+					{},
+					{ name: changename}
 
-// 			);
-// 			if (res.status === 409) {
-// 				//wait the message error
-// 				const err = await res.json().catch(() => ({}));
-// 				console.warn("change name conflict:", err);
-// 				return;
-// 			}
-// 			if (!res.ok) {
-// 				console.error("Server error:", res.status, await res.text());
-// 				return;
-// 			}
-// 			const data = await res.json();
-// 			console.log("✅ change name update:", data);
-// 			window.location.reload();
-// 		}
-// 		catch (err)
-// 		{
-// 			console.error("❌ change name update failed:", err);
-// 		}
-// 	})
+			);
+			if (res.status === 409) {
+				//wait the message error
+				const err = await res.json().catch(() => ({}));
+				console.warn("change name conflict:", err);
+				return;
+			}
+			if (!res.ok) {
+				console.error("Server error:", res.status, await res.text());
+				return;
+			}
+			const data = await res.json();
+			console.log("✅ change name update:", data);
+			window.location.reload();
+		}
+		catch (err)
+		{
+			console.error("❌ change name update failed:", err);
+		}
+	})
 
-// }
-
-// function Email()
-// {
-
-// }
-
-
-// function Username()
-// {
-// 	const fieldset = document.createElement("fieldset");
-// 	fieldset.className = "border p-4 rounded max-w-xs w-full";
-
-// 	const legend = document.createElement("legend");
-// 	legend.className = "text-sm font-semibold text-gray-700";
-// 	legend.textContent = `Username: ${profile.username}`;
-
-// 	fieldset.appendChild(legend);
-
-// 	return fieldset;
-// }
-
-// export function ProfilePage():HTMLElement
-// {
-// 	const viewDiv = document.createElement("div");
-//     viewDiv.className = "flex flex-col h-screen";
-
-//     const headerBar = HeaderBar("Profile");
-
-//     const formElement = document.createElement("form");
-// 	formElement.className = "flex flex-col justify-center items-center flex-grow gap-2 maw-w-sm mx-auto";
-
-//     formElement.onsubmit = (e) => {
-//         e.preventDefault();
-//     };
-
-//     const usernameElement = Username();
-// 	// const emailElemant = Email();
-
-//     viewDiv.appendChild(headerBar);
-//     viewDiv.appendChild(formElement);
-
-//     formElement.appendChild(usernameElement);
-    
-//     return viewDiv;
-// }
+}
