@@ -36,6 +36,7 @@ export function ProfilePage(): HTMLElement {
 	homeLink.className =
 		"rounded-md bg-dark-blue px-6 py-2 font-bagel text-smoky-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/60";
 	homeLink.textContent = "Home";
+	
 
 	// headerInner.appendChild(title);
 	headerInner.appendChild(homeLink);
@@ -141,7 +142,7 @@ export function ProfilePage(): HTMLElement {
 	emailSection1.appendChild(emailLabel);
 
 	const emailInput = document.createElement("input");
-	emailInput.id = "change_Email_input";
+	emailInput.id = "change_email_input";
 	emailInput.type = "text";
 	emailInput.placeholder = "change Email";
 	emailInput.className =
@@ -151,6 +152,7 @@ export function ProfilePage(): HTMLElement {
 	card.appendChild(emailSection1);
 
 	// ---------- Change name ----------
+
 	const nameSection = document.createElement("section");
 	nameSection.className = "flex flex-col gap-2 mt-4";
 
@@ -180,8 +182,8 @@ export function ProfilePage(): HTMLElement {
 	passewordSection.appendChild(passewordLabel);
 
 	const passewordInput = document.createElement("input");
-	passewordInput.id = "change_name_input";
-	passewordInput.type = " actual password";
+	passewordInput.id = "current_password_input";
+	passewordInput.type = "password";
 	passewordInput.placeholder = "current Password";
 	passewordInput.className =
 	"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
@@ -194,8 +196,8 @@ export function ProfilePage(): HTMLElement {
 
 
 	const newpassewordInput = document.createElement("input");
-	// // newpassewordInput.id = "change_name_input";
-	newpassewordInput.type = "New password";
+	newpassewordInput.id = "new_password_input";
+	newpassewordInput.type = "password";
 	newpassewordInput.placeholder = "**********";
 	newpassewordInput.className =
 		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
@@ -208,6 +210,76 @@ export function ProfilePage(): HTMLElement {
 	const sendBtn = Button("Change profil", "w-full", () => {});
 	sendBtn.className =	"mt-4 w-full h-10 rounded-md px-3 bg-pink-400 text-white outline-none";
 	card.appendChild(sendBtn);
+
+	sendBtn.addEventListener("click", async () => {
+	const nameEl  = document.getElementById("change_name_input") as HTMLInputElement | null;
+	const mailEl  = document.getElementById("change_email_input") as HTMLInputElement | null;
+	const curPwdEl = document.getElementById("current_password_input") as HTMLInputElement | null;
+	const newPwdEl = document.getElementById("new_password_input") as HTMLInputElement | null;
+
+	const nextName = nameEl?.value.trim() ?? "";
+	const nextMail = mailEl?.value.trim() ?? "";
+	const curPwd   = curPwdEl?.value ?? "";
+	const newPwd   = newPwdEl?.value ?? "";
+
+	const payload: Record<string, unknown> = {};
+	if (nextName && nextName !== profile.username)
+	{
+		payload.username = nextName;
+		console.log("PROFIL = ", payload.username);
+	}
+	if (nextMail && nextMail !== profile.email)
+	{
+		payload.email = nextMail;
+	}
+
+
+	if (curPwd && newPwd)
+	{
+		payload.current_password = curPwd;
+		payload.password = newPwd;
+	} 
+	else if (curPwd || newPwd) 
+	{
+		console.warn("Pour changer le mot de passe, remplis les deux champs.");
+		return;
+	}
+
+	if (Object.keys(payload).length === 0)
+	{
+		console.info("Aucune modification à envoyer.");
+		return;
+	}
+
+	try {
+	sendBtn.setAttribute('disabled','true');
+	const data = await fetchRequest("/update", "PUT", {}, payload);
+	
+	if (data.message === 'success')
+	{
+		profile.username = data.username;
+		profile.email = data.email;
+		console.log("PROFIL = ", profile.username);
+		console.log("PROFIL = ", profile.username);
+		window.location.reload();	
+	}
+	else 
+		console.error("Erreur lors du chargement du profil :", data);
+
+	if (payload.username) profile.username = String(payload.username);
+	if (payload.email)    profile.email    = String(payload.email);
+
+	
+	if (nameEl) nameEl.value = profile.username ?? "";
+	if (mailEl) mailEl.value = profile.email ?? "";
+
+	console.log("Profil mis à jour", data);
+	} catch (e) {
+	console.error("Erreur réseau :", e);
+	} finally {
+	sendBtn.setAttribute('disabled','false');;
+	}
+	});
 
 	main.appendChild(card);
 	root.appendChild(main);
@@ -241,232 +313,232 @@ export function ProfilePage(): HTMLElement {
 	// root.appendChild(footer);
 
 	// Lance la logique de récupération des infos utilisateur
-	void handleProfilePage();
+	//void handleProfilePage();
 
 	return root;
 }
 
-export async function handleProfilePage(): Promise<void> {
-	const token = localStorage.getItem("accessToken");
+// export async function handleProfilePage(): Promise<void> {
+// 	const token = localStorage.getItem("accessToken");
 
-	if (!token) {
-		window.location.hash = "/login";
-		return;
-	}
+// 	if (!token) {
+// 		window.location.hash = "/login";
+// 		return;
+// 	}
 
-	const res = await fetchWithAuth(`${API_URL}/me`, {
-		method: "GET",
-		headers: {
-			Authorization: `Bearer ${token}`,
-		},
-	});
+// 	const res = await fetchWithAuth(`${API_URL}/me`, {
+// 		method: "GET",
+// 		headers: {
+// 			Authorization: `Bearer ${token}`,
+// 		},
+// 	});
 
-	const data = await res.json();
+// 	const data = await res.json();
 
-	if (!data.success) {
-		window.location.hash = "/login";
-		return;
-	}
+// 	if (!data.success) {
+// 		window.location.hash = "/login";
+// 		return;
+// 	}
 
-	const user = data.user;
+// 	const user = data.user;
 
-	const usernameSpan = document.getElementById("username");
-	const emailSpan = document.getElementById("useremail");
-	const nameInput = document.getElementById("change_name_input") as HTMLInputElement | null;
+// 	const usernameSpan = document.getElementById("username");
+// 	const emailSpan = document.getElementById("useremail");
+// 	const nameInput = document.getElementById("change_name_input") as HTMLInputElement | null;
 
-	if (usernameSpan) usernameSpan.textContent = user.name;
-	if (emailSpan) emailSpan.textContent = user.email;
-	if (nameInput) nameInput.value = user.name ?? "";
+// 	if (usernameSpan) usernameSpan.textContent = user.name;
+// 	if (emailSpan) emailSpan.textContent = user.email;
+// 	if (nameInput) nameInput.value = user.name ?? "";
 
-	// Si tu as déjà ces helpers, tu peux les réutiliser
-	upload_avatar(user);
-	bind_user_avatar_upload(user);
-	// update_email();
-	update_name();
+// 	// Si tu as déjà ces helpers, tu peux les réutiliser
+// 	upload_avatar(user);
+// 	bind_user_avatar_upload(user);
+// 	// update_email();
+// 	update_name();
 
-	// Logout simple (à adapter si besoin)
-	const logoutBtn = document.getElementById("logout");
-	if (logoutBtn) {
-		logoutBtn.addEventListener("click", () => {
-			localStorage.removeItem("accessToken");
-			window.location.hash = "/login";
-		});
-	}
-}
+// 	// Logout simple (à adapter si besoin)
+// 	const logoutBtn = document.getElementById("logout");
+// 	if (logoutBtn) {
+// 		logoutBtn.addEventListener("click", () => {
+// 			localStorage.removeItem("accessToken");
+// 			window.location.hash = "/login";
+// 		});
+// 	}
+// }
 
-export function bind_user_avatar_upload(user: { avatar_url: string | null }): void 
-{
-	//recuperer les bouttons
-	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
-	const plusBtn = document.getElementById("pickFileAvatar") as HTMLButtonElement;
-	const fileInput = document.getElementById("avatarFile") as HTMLInputElement;
+// export function bind_user_avatar_upload(user: { avatar_url: string | null }): void 
+// {
+// 	//recuperer les bouttons
+// 	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
+// 	const plusBtn = document.getElementById("pickFileAvatar") as HTMLButtonElement;
+// 	const fileInput = document.getElementById("avatarFile") as HTMLInputElement;
 
-	// si on charge une image invalide → fallback
-  	preview.onerror = () => {
-    	preview.onerror = null;
-    	preview.src = AVATAR_DEFAUT;
-	};
-	// ouvre le file picker, fileInput.click() pour ouvrir le sélecteur de fichiers.
-	plusBtn.addEventListener("click", () => fileInput.click());
+// 	// si on charge une image invalide → fallback
+//   	preview.onerror = () => {
+//     	preview.onerror = null;
+//     	preview.src = AVATAR_DEFAUT;
+// 	};
+// 	// ouvre le file picker, fileInput.click() pour ouvrir le sélecteur de fichiers.
+// 	plusBtn.addEventListener("click", () => fileInput.click());
 
-	fileInput.addEventListener("change", async() => {
-		const f = fileInput.files?.[0]
-		if (!f)
-			return ;
+// 	fileInput.addEventListener("change", async() => {
+// 		const f = fileInput.files?.[0]
+// 		if (!f)
+// 			return ;
 
-		const allow = ["image/png", "image/jpeg"];
-		const size_photo = 5 * 1024 * 1024;
+// 		const allow = ["image/png", "image/jpeg"];
+// 		const size_photo = 5 * 1024 * 1024;
 
-		if (!allow.includes(f.type) || f.size > size_photo)
-		{
-			fileInput.value = "";
-			console.log("image format error");
-			return ;
-		}
+// 		if (!allow.includes(f.type) || f.size > size_photo)
+// 		{
+// 			fileInput.value = "";
+// 			console.log("image format error");
+// 			return ;
+// 		}
 
-		const url = URL.createObjectURL(f);
-		preview.src = url;
+// 		const url = URL.createObjectURL(f);
+// 		preview.src = url;
 
-		const fd = new FormData();
-		fd.append("avatar", f);
-		try{
-			const res = await fetchWithAuth(`${API_URL}/avatar`,
-				{
-					method: "POST",
-					body: fd,					
-				});
-			if (!res.ok) {
-				console.error("Server error:", res.status, await res.text());
+// 		const fd = new FormData();
+// 		fd.append("avatar", f);
+// 		try{
+// 			const res = await fetchWithAuth(`${API_URL}/avatar`,
+// 				{
+// 					method: "POST",
+// 					body: fd,					
+// 				});
+// 			if (!res.ok) {
+// 				console.error("Server error:", res.status, await res.text());
 				
-				return;
-			}
-			const data = await res.json() as {avatar_url:string};
-			const { avatar_url } = data; 
-			console.log("✅ avatar upload success:");
-			preview.src = avatar_url;
-			user.avatar_url = avatar_url;
-		}
-		catch
-		{
-			console.error("Upload failed:");
-	    	preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-		}
-		finally
-		{
-			URL.revokeObjectURL(url);
-			fileInput.value = "";
-		}
-	});
-};
+// 				return;
+// 			}
+// 			const data = await res.json() as {avatar_url:string};
+// 			const { avatar_url } = data; 
+// 			console.log("✅ avatar upload success:");
+// 			preview.src = avatar_url;
+// 			user.avatar_url = avatar_url;
+// 		}
+// 		catch
+// 		{
+// 			console.error("Upload failed:");
+// 	    	preview.src = user.avatar_url ?? AVATAR_DEFAUT;
+// 		}
+// 		finally
+// 		{
+// 			URL.revokeObjectURL(url);
+// 			fileInput.value = "";
+// 		}
+// 	});
+// };
 
-export function upload_avatar(user: { avatar_url: string|null }):void
-{
-	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
-	const grid = document.getElementById("avatarGrid")!;
-	if (!preview || !grid) return;
+// export function upload_avatar(user: { avatar_url: string|null }):void
+// {
+// 	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
+// 	const grid = document.getElementById("avatarGrid")!;
+// 	if (!preview || !grid) return;
 
-	// Fallback si l'image échoue (évite une image cassée)
-	preview.onerror = () => {
-		preview.onerror = null;
-		preview.src = AVATAR_DEFAUT;
-	};
+// 	// Fallback si l'image échoue (évite une image cassée)
+// 	preview.onerror = () => {
+// 		preview.onerror = null;
+// 		preview.src = AVATAR_DEFAUT;
+// 	};
 
-	preview.src = user.avatar_url || AVATAR_DEFAUT;
-	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn"); //la liste (NodeList) de tous tes boutons avec la classe .preset-btn
-	// querySelectorAll(".preset-btn") : API DOM (navigateur). Sélectionne tous les éléments qui ont la classe .preset-btn.
+// 	preview.src = user.avatar_url || AVATAR_DEFAUT;
+// 	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn"); //la liste (NodeList) de tous tes boutons avec la classe .preset-btn
+// 	// querySelectorAll(".preset-btn") : API DOM (navigateur). Sélectionne tous les éléments qui ont la classe .preset-btn.
 
-	function highlight(btn :HTMLButtonElement | null)
-	{
-		presetButtons.forEach(function(button){ // boutton est le paramètre de la fonction, c’est chaque bouton de la liste, un HTMLButtonElement.
-			button.classList.remove("ring-4", "ring-indigo-400");
-		});
-		if(btn)
-		btn.classList.add("ring-4", "ring-indigo-400");
-	}
+// 	function highlight(btn :HTMLButtonElement | null)
+// 	{
+// 		presetButtons.forEach(function(button){ // boutton est le paramètre de la fonction, c’est chaque bouton de la liste, un HTMLButtonElement.
+// 			button.classList.remove("ring-4", "ring-indigo-400");
+// 		});
+// 		if(btn)
+// 		btn.classList.add("ring-4", "ring-indigo-400");
+// 	}
 
-	let selected: HTMLButtonElement | null = null;
+// 	let selected: HTMLButtonElement | null = null;
 
-	presetButtons.forEach(b => {
-		if (b.dataset.src === user.avatar_url) 
-			selected = b;
-	});
+// 	presetButtons.forEach(b => {
+// 		if (b.dataset.src === user.avatar_url) 
+// 			selected = b;
+// 	});
 
-	highlight(selected);
+// 	highlight(selected);
 
-	presetButtons.forEach((btn) =>{
-		btn.addEventListener("click", async() =>{
-			const url = btn.dataset.src || AVATAR_DEFAUT;
-			preview.src = url;
-			highlight(btn);
-			try{
-				const res = await fetchWithAuth(`${API_URL}/avatar`,
-					{
-						method: "PUT",
-						headers: {
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify({ avatar_url: url }),					
-					}
-				);
-				if (!res.ok) {
-					console.error("Server error:", res.status, await res.text());
-					return;
-				}
-				console.log("✅ change avatar update:");
-				// selectedBtn = btn;
-				user.avatar_url = url;
-			}
+// 	presetButtons.forEach((btn) =>{
+// 		btn.addEventListener("click", async() =>{
+// 			const url = btn.dataset.src || AVATAR_DEFAUT;
+// 			preview.src = url;
+// 			highlight(btn);
+// 			try{
+// 				const res = await fetchWithAuth(`${API_URL}/avatar`,
+// 					{
+// 						method: "PUT",
+// 						headers: {
+// 							"Content-Type": "application/json"
+// 						},
+// 						body: JSON.stringify({ avatar_url: url }),					
+// 					}
+// 				);
+// 				if (!res.ok) {
+// 					console.error("Server error:", res.status, await res.text());
+// 					return;
+// 				}
+// 				console.log("✅ change avatar update:");
+// 				// selectedBtn = btn;
+// 				user.avatar_url = url;
+// 			}
 
-			catch (err)
-			{
-				console.error("❌ change avatar update failed:", err);
-				preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-				highlight(selected);
+// 			catch (err)
+// 			{
+// 				console.error("❌ change avatar update failed:", err);
+// 				preview.src = user.avatar_url ?? AVATAR_DEFAUT;
+// 				highlight(selected);
 
-			}
-		});
-	});
-}
+// 			}
+// 		});
+// 	});
+// }
 
 
 
-export function update_name(): void
-{
-	const button = document.getElementById("ChangeName") as HTMLButtonElement | null;
-	if (!button) return;
+// export function update_name(): void
+// {
+// 	const button = document.getElementById("ChangeName") as HTMLButtonElement | null;
+// 	if (!button) return;
 	
-	button.addEventListener("click", async(event) =>{
-		event.preventDefault();
-		const changename = ((document.getElementById("change_name_input") as HTMLInputElement).value.trim());
-		try{
-			const res = await fetchRequest(
-					`submit`,
-					'POST',
-					{},
-					{ name: changename}
+// 	button.addEventListener("click", async(event) =>{
+// 		event.preventDefault();
+// 		const changename = ((document.getElementById("change_name_input") as HTMLInputElement).value.trim());
+// 		try{
+// 			const res = await fetchRequest(
+// 					`submit`,
+// 					'POST',
+// 					{},
+// 					{ name: changename}
 
-			);
-			if (res.status === 409) {
-				//wait the message error
-				const err = await res.json().catch(() => ({}));
-				console.warn("change name conflict:", err);
-				return;
-			}
-			if (!res.ok) {
-				console.error("Server error:", res.status, await res.text());
-				return;
-			}
-			const data = await res.json();
-			console.log("✅ change name update:", data);
-			window.location.reload();
-		}
-		catch (err)
-		{
-			console.error("❌ change name update failed:", err);
-		}
-	})
+// 			);
+// 			if (res.status === 409) {
+// 				//wait the message error
+// 				const err = await res.json().catch(() => ({}));
+// 				console.warn("change name conflict:", err);
+// 				return;
+// 			}
+// 			if (!res.ok) {
+// 				console.error("Server error:", res.status, await res.text());
+// 				return;
+// 			}
+// 			const data = await res.json();
+// 			console.log("✅ change name update:", data);
+// 			window.location.reload();
+// 		}
+// 		catch (err)
+// 		{
+// 			console.error("❌ change name update failed:", err);
+// 		}
+// 	})
 
-}
+// }
 
 // function Email()
 // {

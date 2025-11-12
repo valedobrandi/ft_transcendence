@@ -33,12 +33,12 @@ export default function profilRoute(fastify: FastifyInstance)
         schema: {
             type: 'object',
             properties: {
-                username: { type: 'string' },
-                    email: {type: 'string'},
-                    password: {type: 'string'}
+                username: { type: 'string', minLength: 1 },
+                    email: {type: 'string', format: 'email' },
+                    password: {type: 'string', minLength: 8 }
             
            },
-           required: ['username', 'email', 'password'],
+           additionalProperties: false,
         },
         handler: profileController.updateUser.bind(profileController)
         })

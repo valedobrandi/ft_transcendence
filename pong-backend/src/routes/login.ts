@@ -22,7 +22,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             return res.status(400).send({ error: 'All fields are mandatory' })
         }
 
-        const existingUser = usersModel.findUserByEmailOrUsername(username) as User | undefined;
+        const existingUser = usersModel.findUserByUsername(username) as User | undefined;
         if (existingUser === undefined) {
             return res.status(400).send({ error: 'Invalid credentials', existingUser })
         }
