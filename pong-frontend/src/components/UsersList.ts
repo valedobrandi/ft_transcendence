@@ -36,7 +36,6 @@ export function List(
 			const name = serverUSer ? serverUSer.name : "Unknown";
             const btn = document.createElement("button");
 			var userLiveStatus: HTMLSpanElement = document.createElement("span");
-			console.log("User info:", user, type);
 			if (type === "FRIENDS") {
 				userLiveStatus = LiveStatusIndicator(user.isConnected);
 				btn.appendChild(userLiveStatus);
@@ -49,7 +48,6 @@ export function List(
             btn.className = `${name} flex items-center border-b
                 border-gray-300 p-2 w-full text-center hover:bg-gray-100`;
             btn.id = `select-chat-btn`;
-            console.log("Rendering user button for:", name, user.id);
             btn.value = `${name}`;
             btn.name = `${user.id}`;
             usersDiv.appendChild(btn);

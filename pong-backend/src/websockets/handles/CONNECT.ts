@@ -14,7 +14,6 @@ export function CONNECT(data: ConnectType, connection: WebSocket) {
         print(`Error: User not found after connection: ${data.username}`);
         return;
     }
-    print(`Player connected: ${data.username}`);
-    print(`[Sending chat history to]: ${data.username}`);
+
     user.chat.sendHistory();
 }

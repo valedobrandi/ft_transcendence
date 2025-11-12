@@ -1,6 +1,7 @@
-import { FastifyInstance, FastifyReply, FastifyRequest  } from "fastify";
-import { statusCode } from "../types/statusCode";
 import Database from 'better-sqlite3'
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { print } from '../server.js';
+import { statusCode } from "../types/statusCode";
 import db from "../../database/db";
 import { EventsModel } from "./events";
 import { connectedRoomInstance } from "../state/ConnectedRoom";
@@ -8,6 +9,26 @@ import { connectedRoomInstance } from "../state/ConnectedRoom";
 export interface FriendListDTO {
 	id: string;
 	event_id?: string;
+}
+
+
+export type FriendsTableModel = {
+	friend_id: number;
+}
+
+export type GetFriendsList = {
+	status: 'success' | 'error';
+	data: number[] | [];
+}
+
+export type AddFriend = {
+	status: 'success' | 'error';
+	data: {};
+}
+
+export type RemoveFriend = {
+	status: 'success' | 'error';
+	data: {};
 }
 
 
@@ -49,26 +70,26 @@ class FriendsController {
 
 	getFriendsList(req: FastifyRequest, res: FastifyReply) {
 		const id = Number(req.userId);
-		const {status, data} = this.friendsService.getFriendsList(id);
-		return res.status(statusCode('OK')).send({message: status, payload: data});
+		const { status, data } = this.friendsService.getFriendsList(id);
+		return res.status(statusCode('OK')).send({ message: status, payload: data });
 	}
 
-	addFriend(req: FastifyRequest<{Body: FriendListDTO}>, res: FastifyReply) {
+	addFriend(req: FastifyRequest<{ Body: FriendListDTO }>, res: FastifyReply) {
 		const id = Number(req.userId);
 		const friendId = Number(req.body.id);
 
 		const eventId = req.body.event_id ? Number(req.body.event_id) : undefined;
 
-		const {status, data} = this.friendsService.addFriend(id, friendId, eventId);
+		const { status, data } = this.friendsService.addFriend(id, friendId, eventId);
 
-		return res.status(statusCode('OK')).send({message: status, data});
+		return res.status(statusCode('OK')).send({ message: status, data });
 	}
 
-	removeFriend(req: FastifyRequest<{Body: FriendListDTO}>, res: FastifyReply) {
+	removeFriend(req: FastifyRequest<{ Body: FriendListDTO }>, res: FastifyReply) {
 		const id = Number(req.userId);
 		const friendId = Number(req.body.id);
-		const {status, data} = this.friendsService.removeFriend(id, friendId);
-		return res.status(statusCode('OK')).send({message: status, data});
+		const { status, data } = this.friendsService.removeFriend(id, friendId);
+		return res.status(statusCode('OK')).send({ message: status, data });
 	}
 }
 
@@ -79,7 +100,11 @@ class FriendService {
 	getFriendsList(userId: number) {
 		const { status, data } = this.friendModelInstance.getFriendsList(userId);
 		connectedRoomInstance.friendListSet(userId).save(data);
-		return { status, data };
+		const createFriendList = data.map((friendId: number) => ({
+			id: friendId,
+			isConnected: connectedRoomInstance.getById(friendId) ? true : false
+		}));
+		return { status, data: createFriendList };
 	}
 
 	addFriend(userId: number, friendId: number, eventId?: number) {
@@ -100,26 +125,6 @@ class FriendService {
 	}
 }
 
-import { print } from '../server';
-
-export type FriendsTableModel = {
-	friend_id: number;
-}
-
-export type GetFriendsList = {
-	status: 'success' | 'error';
-	data: number[] | [];
-}
-
-export type AddFriend = {
-	status: 'success' | 'error';
-	data: {};
-}
-
-export type RemoveFriend = {
-	status: 'success' | 'error';
-	data: {};
-}
 
 class FriendsModel {
 	private db: Database.Database;
@@ -135,11 +140,11 @@ class FriendsModel {
 	}
 
 	getFriendsList(userId: number): GetFriendsList {
-		const response =  this.stmGetFriendsList.all(userId) as FriendsTableModel[];
-		return { status: 'success',data: response.map(row => row.friend_id) };
+		const response = this.stmGetFriendsList.all(userId);
+		return { status: 'success', data: response.map(row => row.friend_id) };
 	}
 
-	addFriend(userId: number, friendId: number): AddFriend  {
+	addFriend(userId: number, friendId: number): AddFriend {
 		try {
 			const response = this.stmAddFriend.run(userId, friendId);
 			return { status: 'success', data: {} };

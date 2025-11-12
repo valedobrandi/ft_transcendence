@@ -62,9 +62,12 @@ export function websocketReceiver(socket: WebSocket) {
 					messageState.serverUsers = data.users;
 				}
 				break;
-			case 'FRIEND_LIST':
+			case 'FRIEND_STATUS_UPDATE':
 				if ('payload' in data) {
-					messageState.friendList = data.payload;
+					messageState.friendList = messageState.friendList
+						.map((user) => user.id === data.payload.id
+							? { ...user, isConnected: data.payload.isConnected }
+							: user);
 				}
 				break;
 		}
