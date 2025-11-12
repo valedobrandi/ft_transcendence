@@ -29,11 +29,16 @@ export function globalEventListeners() {
     const target = event.target as HTMLButtonElement;
     const button = target.closest("button");
 
+    if (button && button.id === `accept-friend-request`) {
+      var tagName = button.name;
+      var response = await fetchRequest('\add-friend', 'POST', {}, 
+        {
+          body:JSON.stringify({id: tagName})
+        })
+    }
+
     if (button && button.id === "btn-friend-list") {
-      var response = await fetchRequest(
-        `/add-event`,
-        "POST",
-        {},
+      var response = await fetchRequest(`/add-event`, "POST", {},
         {
           body: JSON.stringify({
             to_id: messageState.selectChat.id,

@@ -8,7 +8,7 @@ type InsertEventReturn = {
     data: { message: string };
 };
 
-type EventsDB = {
+type NewEventsDB = {
     id: number;
     type: string;
     from_id: number;
@@ -19,7 +19,7 @@ type EventsDB = {
 
 type GetEvents = {
     status: 'error' | 'success';
-    data: EventsDB[];
+    data: NewEventsDB[];
 }
 
 type InsertEventBody = {
@@ -49,21 +49,13 @@ function eventsRoutes(fastify: FastifyInstance) {
 
     fastify.get('/to-events', {
         preHandler: [fastify.authenticate],
-        schema: {
-            types: 'object',
-            properties: {id: { type: 'number' }},
-            required: ['id']
-        },
+        schema: {},
         handler: eventsControllerInstance.getToEvents.bind(eventsControllerInstance)
     });
 
     fastify.get('/from-events', {
         preHandler: [fastify.authenticate],
-        schema: {
-            types: 'object',
-            properties: {id: { type: 'number' }},
-            required: ['id']
-        },
+        schema: {},
         handler: eventsControllerInstance.getFromEvents.bind(eventsControllerInstance)
     });
 }
