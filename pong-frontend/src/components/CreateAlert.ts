@@ -1,6 +1,7 @@
 export function CreateAlert(message: string, type: 'error' | 'success' = 'error'): HTMLElement {
     const wrapper = document.createElement('div');
     wrapper.classList.add("absolute", "inset-x-0", "top-0", "z-[50]", "w-full");
+    wrapper.id = "alert-popup"
     if (type === 'error') {
         wrapper.classList.add("bg-red-100", "border", "border-red-400", "text-red-700", "px-4", "py-3", "rounded", "relative");
     }
