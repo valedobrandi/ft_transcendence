@@ -7,16 +7,19 @@ import { CreateAlert } from "./CreateAlert";
 
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
-    viewDiv.className = "flex flex-col h-screen";
+	viewDiv.className = "flex items-center justify-center h-screen";
+	viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
+	viewDiv.style.backgroundSize = "cover";
+
+    const card = document.createElement("div");
+    card.className = "flex flex-col items-center bg-gray-950 border-4 border-gray-700 rounded-2xl shadow-lg px-20 py-12 w-[520px]";
 
     const title = document.createElement("h1");
-    title.className = "game-font text-6xl text-center mb-10 text-[hsl(345,100%,47%)] text-shadow-lg/30 pt-20";
+    title.className = "game-font text-5xl text-[hsl(345,100%,47%)] text-shadow-lg/30 mb-8 text-center";
     title.textContent = "WELCOME BACK";
 
     const formElement = document.createElement("form");
-    formElement.className = "flex flex-col justify-center items-center flex-grow gap-2 maw-w-sm mx-auto";
-	// viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
-	// viewDiv.style.backgroundSize = "cover";
+    formElement.className = "flex flex-col justify-center items-center flex-grow gap-8";
 
     formElement.onsubmit = (event) => {
         event.preventDefault();
@@ -28,8 +31,6 @@ export function FormLogin(): HTMLElement {
 
     const sendBtn = FancyButton("login", "scale-100 h-14 w-60 game-font tracking-widest text-lg", () => {});
 
-	viewDiv.appendChild(title);
-    viewDiv.appendChild(formElement);
 	formElement.appendChild(inputNameUI);
 	formElement.appendChild(inputPasswordUI);
     formElement.appendChild(sendBtn);
@@ -65,6 +66,10 @@ export function FormLogin(): HTMLElement {
             document.getElementById('root')?.prepend(CreateAlert(response.message));
         }
     };
+
+    card.appendChild(title);
+    card.appendChild(formElement);
+    viewDiv.appendChild(card);
 
     return viewDiv;
 }
