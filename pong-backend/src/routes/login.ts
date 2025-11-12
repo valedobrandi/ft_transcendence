@@ -17,18 +17,25 @@ export default async function loginRoutes(fastify: FastifyInstance) {
         const { username, password } = request.body;
         const authService = new AuthService();
 
-        if (!username || !password) {
-            return res.status(400).send({ error: 'All fields are mandatory' })
+        if (!username && !password) {
+            return res.status(206).send({ status: 'error', message: 'All fields are mandatory' })
+        }
+
+        if (!username) {
+            return res.status(206).send({ status: 'error', message: 'Username field is mandatory' })
+        }
+        else if (!password) {
+            return res.status(206).send({ status: 'error', message: 'Password field is mandatory' })
         }
 
         const existingUser = usersModel.findUserByUsername(username) as User | undefined;
         if (existingUser === undefined) {
-            return res.status(400).send({ error: 'Invalid credentials', existingUser })
+            return res.status(206).send({ status: 'error', message: 'This username does not exist', existingUser })
         }
 
         const passwordMatches = await bcrypt.compare(password, existingUser.password);
         if (!passwordMatches) {
-          return res.status(401).send({ error: 'Invalid credentials' });
+          return res.status(206).send({ status: 'error', message: 'Incorrect password' });
         }
 
         if (existingUser.twoFA_enabled)
