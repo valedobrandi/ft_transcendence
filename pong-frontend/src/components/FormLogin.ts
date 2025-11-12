@@ -47,9 +47,12 @@ export function FormLogin(): HTMLElement {
             jwt.token = response.payload.accessToken;
             id.username = response.payload.username;
             id.id = response.payload.id;
+
             const [friendsList] = await Promise.all([
                 fetchRequest('/friends-list', 'GET', {}),
+
             ]);
+
             if (friendsList.message === 'success') {
                 messageState.friendList = friendsList.payload;
             }

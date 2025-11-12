@@ -39,8 +39,7 @@ export async function createSchema() {
 			friend_id INTEGER NOT NULL,
 			created_at DATE DEFAULT (date('now')),
 			FOREIGN KEY(user_id) REFERENCES users(id),
-			FOREIGN KEY(friend_id) REFERENCES users(id),
-			UNIQUE(user_id, friend_id)
+			FOREIGN KEY(friend_id) REFERENCES users(id)
 			)`);
 
 	db.exec(` CREATE TABLE IF NOT EXISTS chatblock (
@@ -49,8 +48,7 @@ export async function createSchema() {
 			blocked_user_id INTEGER NOT NULL,
 			created_at DATE DEFAULT (date('now')),
 			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-			FOREIGN KEY(blocked_user_id) REFERENCES users(id) ON DELETE CASCADE,
-			UNIQUE(user_id, blocked_user_id)
+			FOREIGN KEY(blocked_user_id) REFERENCES users(id) ON DELETE CASCADE
 			)`);
 
 	db.exec(` CREATE TABLE IF NOT EXISTS messages (

@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import Database from 'better-sqlite3';
 import db from "../../database/db";
 import { statusCode } from "../types/statusCode";
+import { connectedRoomInstance } from "../state/ConnectedRoom";
 
 type EventOnChangeDB = {
     status: 'error' | 'success';
@@ -66,6 +67,25 @@ class EventsController {
     insertEvent(req: FastifyRequest<{ Body: InsertEventBody }>, res: FastifyReply) {
         const { to_id, from_id, type, message } = req.body;
         const { status, data } = this.eventsServiceInstance.insertEvent(to_id, from_id, type, message);
+		// Lookout for the destination user to send real-time notification (if connected)
+		if (status === 'success') {
+			const user = connectedRoomInstance.getById(to_id);
+			if (user && user.socket) {
+				const newEvent: NewEventsDB = {
+					id: data.id,
+					type,
+					from_id,
+					to_id,
+					payload: message,
+					timestamp: new Date().toISOString()
+				};
+				user.socket.send(JSON.stringify({
+					status: statusCode('OK'),
+					type: 'NEW_EVENT',
+					data: newEvent
+				}));
+			}
+		}
         return res.status(statusCode('OK')).send({ status, message: data.message, })
     }
 

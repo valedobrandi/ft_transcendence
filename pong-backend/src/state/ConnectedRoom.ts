@@ -47,15 +47,13 @@ export class ConnectedRoom {
 		};
 	}
 
-	async addWebsocket(id: number, socket: WebSocket): Promise<Boolean> {
+	addWebsocket(id: number, socket: WebSocket) {
 		const player = this.room.get(Number(id));
 		if (player) {
 			player.socket = socket;
 			this.broadCastRegisteredUsers();
-			await this.broadcastFriendList(Number(id));
-			return true;
+			this.broadcastFriendList(Number(id));
 		}
-		return false;
 	}
 
 	dropWebsocket(id: number) {
@@ -63,8 +61,8 @@ export class ConnectedRoom {
 		if (player && player.socket) player.socket.close();
 	}
 
-	async disconnect(id: number | bigint) {
-		await this.broadcastFriendList(Number(id), false);
+	disconnect(id: number | bigint) {
+		this.broadcastFriendList(Number(id), false);
 		this.dropWebsocket(Number(id));
 		this.room.delete(Number(id));
 	}
@@ -82,14 +80,14 @@ export class ConnectedRoom {
 		});
 	}
 
-	async broadcastFriendList(id: number | bigint, isConnected: boolean = true) {
+	broadcastFriendList(id: number | bigint, isConnected: boolean = true) {
 
 		const user = this.getById(id); if (user === undefined) return;
 
-		const task = Array.from(user.friendSet).map( async (t) => {
+		Array.from(user.friendSet).forEach((t) => {
 			const friend = this.getById(t);
 			if (friend && friend.socket) {
-				friend.socket.sendAsync(JSON.stringify(
+				friend.socket.send(JSON.stringify(
 					{
 						statusCode: 200,
 						message: 'FRIEND_STATUS_UPDATE',
@@ -97,7 +95,6 @@ export class ConnectedRoom {
 					}));
 			}
 		});
-		await Promise.all(task);
 	}
 
 	getById(id: number | bigint) {

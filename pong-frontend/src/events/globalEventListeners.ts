@@ -1,5 +1,5 @@
 import { id } from "../app";
-import { addIntraMessage, messageState } from "../states/messageState";
+import { addIntraMessage, deleteIntraMessage, messageState } from "../states/messageState";
 import { fetchRequest, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
@@ -32,8 +32,16 @@ export function globalEventListeners() {
     if (button && button.id === `accept-friend-request`) {
       var tagName = button.name;
 	  const eventId = button.getAttribute("eventid");
-      var response = await fetchRequest('/add-friend', 'POST', {},
-        { body:JSON.stringify({id: tagName, event_id: eventId}) })
+
+	  var response = await fetchRequest('/add-friend', 'POST', {},
+		{ body:JSON.stringify({id: tagName, event_id: eventId}) })
+
+	  const parentMsg = button.closest("p");
+	  if (parentMsg) {
+		  parentMsg.remove();
+		  const tagId = parentMsg.id.replace("msg-index-", "");
+		  deleteIntraMessage(Number(tagId));
+	  }
     }
 
     if (button && button.id === "btn-friend-list") {
@@ -47,6 +55,7 @@ export function globalEventListeners() {
           }),
         }
       );
+	  button.disabled = true;
       if (response.status === "success") {
         addIntraMessage(
           `Friend request sent to ${messageState.selectChat.name}`
@@ -56,8 +65,10 @@ export function globalEventListeners() {
     }
 
     if (button && button.id === "select-chat-btn") {
+
       const chatName = button.value;
       const chatId = button.name;
+
       console.log("Selected chat:", chatName, chatId);
       messageState.selectChat = { name: chatName, id: Number(chatId) };
       const buttons = document.querySelectorAll("#select-chat-btn");

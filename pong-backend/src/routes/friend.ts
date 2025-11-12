@@ -11,7 +11,6 @@ export interface FriendListDTO {
 	event_id?: string;
 }
 
-
 export type FriendsTableModel = {
 	friend_id: number;
 }
@@ -30,7 +29,6 @@ export type RemoveFriend = {
 	status: 'success' | 'error';
 	data: {};
 }
-
 
 function friendsRoute(fastify: FastifyInstance) {
 
@@ -108,13 +106,15 @@ class FriendService {
 	}
 
 	addFriend(userId: number, friendId: number, eventId?: number) {
+		const response = this.friendModelInstance.getFriendStatus(userId, friendId);
+		if (response) {
+			return { status: 'success', data: {} };
+		}
 		this.friendModelInstance.addFriend(userId, friendId);
-		this.friendModelInstance.addFriend(friendId, userId);
 		if (eventId) {
 			this.eventsModelInstance.deleteEvent(eventId);
 		}
 		connectedRoomInstance.friendListSet(userId).add(friendId);
-		connectedRoomInstance.friendListSet(friendId).add(userId);
 		return { status: 'success', data: {} };
 	}
 
@@ -131,12 +131,14 @@ class FriendsModel {
 	private stmGetFriendsList: Database.Statement;
 	private stmAddFriend: Database.Statement;
 	private stmRemoveFriend: Database.Statement;
+	private stmGetFriendStatus: Database.Statement;
 
 	constructor(db: Database.Database) {
 		this.db = db;
 		this.stmGetFriendsList = db.prepare('SELECT friend_id FROM friends WHERE user_id = ?');
 		this.stmAddFriend = db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)');
 		this.stmRemoveFriend = db.prepare('DELETE FROM friends WHERE user_id = ? AND friend_id = ?');
+		this.stmGetFriendStatus = db.prepare('SELECT * FROM friends WHERE user_id = ? AND friend_id = ?');
 	}
 
 	getFriendsList(userId: number): GetFriendsList {
@@ -144,9 +146,14 @@ class FriendsModel {
 		return { status: 'success', data: response.map(row => row.friend_id) };
 	}
 
+	getFriendStatus(userId: number, friendId: number): boolean {
+		const response = this.stmGetFriendStatus.get(userId, friendId);
+		return response !== undefined;
+	}
+
 	addFriend(userId: number, friendId: number): AddFriend {
 		try {
-			const response = this.stmAddFriend.run(userId, friendId);
+			this.stmAddFriend.run(userId, friendId);
 			return { status: 'success', data: {} };
 		} catch (error) {
 			print(`[ERROR] Unable to add friend: ${error}`);

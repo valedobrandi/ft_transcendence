@@ -55,6 +55,13 @@ const users = [
 		password: hashed_password('123'),
 		status: 'disconnect',
 		twoFA_enabled: 0,
+	},
+	{
+		username: 'lola',
+		email: 'lola@example.com',
+		password: hashed_password('123'),
+		status: 'disconnect',
+		twoFA_enabled: 0,
 	}
 ];
 

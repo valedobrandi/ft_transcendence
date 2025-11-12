@@ -41,10 +41,9 @@ export async function websocketConnect() {
 						if (getSender === undefined) break;
 						addIntraMessage(
 							`${getSender.name} has send a friend request
-								${btnLink(getSender.id, "YES", eventId)} / ${btnLink(getSender.id, "NO", eventId)}`
+								${btnLink(getSender.id, "YES", eventId)}
+								${btnLink(getSender.id, "NO", eventId)}`
 						);
-						break;
-					default:
 						break;
 				}
 			}
@@ -64,7 +63,15 @@ export async function websocketConnect() {
 };
 
 function btnLink(friendId: number, text: string, eventId: number): string {
+	const btnBg = text === "YES" ? "bg-green-500" : "bg-red-500";
     return (
-        `<button id="accept-friend-request" name="${friendId}" eventid="${eventId}"> ${text} </button>`
+        `<button
+			id="accept-friend-request"
+			name="${friendId}"
+			eventid="${eventId}"
+			class="${btnBg} text-white ml-4 p-1 rounded text-xs"
+		>
+			${text}
+		</button>`
     )
 }

@@ -48,8 +48,10 @@ export function List(
             btn.className = `${name} flex items-center border-b
                 border-gray-300 p-2 w-full text-center hover:bg-gray-100`;
             btn.id = `select-chat-btn`;
+
             btn.value = `${name}`;
             btn.name = `${user.id}`;
+			
             usersDiv.appendChild(btn);
         });
         // Add bg-gray-100 to the selected chat button

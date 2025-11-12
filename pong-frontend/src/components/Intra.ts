@@ -1,8 +1,8 @@
 import { ChatHeader } from "./ChatHeader";
+import { SystemMessageChat } from "./ChatIntra";
 import { ChatSendInput } from "./ChatSendInput";
 import { Settings } from "./Settings";
 import { UsersList } from "./UsersList";
-import { messageState } from "../states/messageState";
 
 export function Intra(): HTMLElement {
     const mainDiv = document.createElement("div");
@@ -11,7 +11,7 @@ export function Intra(): HTMLElement {
 
     const chatDiv = document.createElement("div");
     chatDiv.id = "chat-container";
-    chatDiv.className = "w-full flex flex-col flex-grow";
+    chatDiv.className = "w-full flex flex-col";
 
     const chatWidget = document.createElement("div");
     chatWidget.id = "chatWidget";
@@ -31,6 +31,7 @@ export function Intra(): HTMLElement {
     messages.id = "messages";
     messages.className = "flex-1 overflow-y-auto p-2 min-w-[528px]";
 
+    const inputDiv = ChatSendInput();
     chatWidget.appendChild(chatTabs);
     chatWidget.appendChild(chatMenu);
     chatWidget.appendChild(messages);
@@ -41,6 +42,11 @@ export function Intra(): HTMLElement {
 
     const contentDiv = document.createElement("div");
     contentDiv.className = "flex flex-grow";
+	contentDiv.id = "content-div";
+
+	const intraContainer = SystemMessageChat();
+
+    chatWidget.appendChild(inputDiv);
 
     mainDiv.appendChild(chatDiv);
     contentDiv.appendChild(chatWidget);
@@ -50,9 +56,8 @@ export function Intra(): HTMLElement {
 
     usersDiv.appendChild(usersListUI!);
     chatDiv.appendChild(contentDiv);
+	chatDiv.appendChild(intraContainer);
 
-    const inputDiv = ChatSendInput();
-    chatDiv.appendChild(inputDiv);
 
     const settingsUI = Settings();
     mainDiv.appendChild(settingsUI!);
