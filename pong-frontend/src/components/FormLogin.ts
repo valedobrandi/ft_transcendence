@@ -54,7 +54,12 @@ export function FormLogin(): HTMLElement {
             ]);
 
             if (friendsList.message === 'success') {
-                messageState.friendList = friendsList.payload;
+                const newFriendList = friendsList.payload.map((friend: any) => ({
+                    id: friend.id,
+                    isConnected: friend.isConnected,
+                }));
+                messageState.friendList = newFriendList;
+                console.log("[FRIEND LIST ON LOGIN]", messageState.friendList);
             }
             navigateTo("/intra");
         }

@@ -3,6 +3,7 @@ import Database from 'better-sqlite3';
 import db from "../../database/db";
 import { statusCode } from "../types/statusCode";
 import { connectedRoomInstance } from "../state/ConnectedRoom";
+import { print } from "../server";
 
 type EventOnChangeDB = {
     status: 'error' | 'success';
@@ -59,6 +60,7 @@ function eventsRoutes(fastify: FastifyInstance) {
         schema: {},
         handler: eventsControllerInstance.getFromEvents.bind(eventsControllerInstance)
     });
+
     fastify.delete('/delete-event', {
         preHandler: [fastify.authenticate],
         schema: {
@@ -98,7 +100,7 @@ class EventsController {
     }
 
     deleteEvent(req: FastifyRequest<{ querystring: { eventId: number } }>, res: FastifyReply) {
-        const { eventId } = req.params;
+        const eventId = Number(req.query.eventId);
         const { status, data } = this.eventsServiceInstance.deleteEvent(eventId);
         return res.status(statusCode('OK')).send({ status, message: data.message });
     }
@@ -201,11 +203,12 @@ class EventsModel {
     }
 
     deleteEvent(eventId: number): EventOnChangeDB {
-        const response = this.stmDeleteEvent.run({ eventId });
-        if (response.changes === 1) {
-            return { status: 'success', data: { message: 'event deleted' } };
+        const { changes } = this.stmDeleteEvent.run({ eventId: Number(eventId) });
+        print(`[DELETE] Event ID ${eventId}, changes: ${changes}`);
+        if (changes === 1) {
+            return { status: 'success', data: { message: 'event removed' } };
         }
-        return { status: 'error', data: { message: 'event not deleted' } };
+        return { status: 'error', data: { message: 'event not removed' } };
     }
 }
 

@@ -1,8 +1,6 @@
 import db from "../../database/db.js";
 import ChatManager from "../classes/ChatManager.js";
 import { UsersModel } from "../models/usersModel.js";
-import FriendsModel from "../routes/friend.js";
-import { print } from "../server.js";
 import { PlayerType } from "../types/PlayerType.js";
 import type { WebSocket } from 'ws';
 
@@ -29,22 +27,25 @@ export class ConnectedRoom {
 		return false;
 	}
 
-	friendListSet(requestId: number | bigint) {
-		const player = this.getById(requestId);
-		if (player === undefined) throw new Error(`${requestId} Disconnected.`);
+	friendListSet(useServiceRequestId: number | bigint) {
+		const sender = this.getById(useServiceRequestId);
+		if (sender === undefined) return;
 		return {
 			add: (id: number | bigint) => {
-				print(`Adding friend ${id}`);
-				player.friendSet.add(id);
-				this.sendUpdateStatus(requestId, id);
+				//print(`Adding friend ${id}`);
+				sender.friendSet.add(id);
+				this.sendUpdateStatus(id, sender.id);
 			},
 			delete: (friendId: number | bigint) => {
-				player.friendSet.delete(friendId);
-				this.broadcastFriendList(friendId);
+				sender.friendSet.delete(friendId);
+				this.broadcastFriendStatus(friendId);
 			},
 			save: (payload: number[]) => {
-				player.friendSet = new Set(payload);
+				sender.friendSet = new Set(payload);
 			},
+			get: () => {
+				return Array.from(sender.friendSet);
+			}
 		};
 	}
 
@@ -53,7 +54,7 @@ export class ConnectedRoom {
 		if (player) {
 			player.socket = socket;
 			this.broadCastRegisteredUsers();
-			this.broadcastFriendList(Number(id));
+			this.broadcastFriendStatus(Number(player.id));
 		}
 	}
 
@@ -63,8 +64,8 @@ export class ConnectedRoom {
 	}
 
 	disconnect(id: number | bigint) {
-		this.broadcastFriendList(Number(id), false);
 		this.dropWebsocket(Number(id));
+		this.broadcastFriendStatus(Number(id), true);
 		this.room.delete(Number(id));
 	}
 
@@ -80,25 +81,25 @@ export class ConnectedRoom {
 		});
 	}
 
-	sendUpdateStatus(id: number | bigint, friendId: number | bigint) {
-		const sender = this.getById(id);
+	sendUpdateStatus(senderId: number | bigint, userListId: number | bigint, disconnect: boolean) {
+		const sender = this.getById(senderId);
 			if (sender && sender.socket) {
-				const isConnected = this.has(friendId);
+				const isConnected = disconnect ? !this.has(userListId) : this.has(userListId);
 				sender.socket.send(JSON.stringify(
 					{
 						statusCode: 200,
 						message: 'FRIEND_STATUS_UPDATE',
-						payload: { id, isConnected }
+						payload: { id: userListId, isConnected }
 					}));
 			}
 	}
 
-	broadcastFriendList(id: number | bigint, isConnected: boolean = true) {
+	broadcastFriendStatus(id: number | bigint, disconnect = false) {
 
-		const user = this.getById(id); if (user === undefined) return;
+		const userList = this.getById(id); if (userList === undefined) return;
 
-		Array.from(user.friendSet).forEach((t) => {
-			this.sendUpdateStatus(t, id);
+		Array.from(userList.friendSet).forEach((senderId) => {
+			this.sendUpdateStatus(senderId, userList.id, disconnect);
 		});
 	}
 

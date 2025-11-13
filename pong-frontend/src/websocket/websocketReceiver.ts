@@ -5,7 +5,6 @@ import { messageState } from "../states/messageState";
 import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketChatSend } from "./websocketChatSend";
-import { fetchRequest } from "../utils";
 
 export async function websocketReceiver(socket: WebSocket) {
 	socket.addEventListener('message', async (event) => {
@@ -66,10 +65,15 @@ export async function websocketReceiver(socket: WebSocket) {
 				break;
 			case 'FRIEND_STATUS_UPDATE':
 				if ('payload' in data) {
-					messageState.friendList = messageState.friendList
-						.map((user) => user.id === data.payload.id
-							? { ...user, isConnected: data.payload.isConnected }
-							: user);
+					const updateFriend = data.payload;
+					const friend = messageState.friendList.find(friend => friend.id === updateFriend.id);
+					if (friend === undefined) {
+						messageState.friendList = [...messageState.friendList, updateFriend];
+						break;
+					}
+					friend.isConnected = updateFriend.isConnected;
+					const newFriendList = messageState.friendList.filter(friend => friend.id !== updateFriend.id);
+					messageState.friendList = [...newFriendList, friend];;
 				}
 				break;
 			case 'event:new':

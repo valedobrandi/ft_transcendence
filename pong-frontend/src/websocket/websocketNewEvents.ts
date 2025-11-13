@@ -38,8 +38,7 @@ async function websocketNewEvents() {
 					addIntraMessage(`Your friend request has been accepted.`);
 					const response = await fetchRequest('/add-friend', 'POST', {},
 						{ body: JSON.stringify({ id: from_id }) })
-					if (response.status === 'success') {
-						messageState.friendList = response.data;
+					if (response.message === 'success') {
 						await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
 					}
 					break;

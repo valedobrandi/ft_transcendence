@@ -35,7 +35,7 @@ export function eventListeners() {
 
       const response = await fetchRequest('/add-friend', 'POST', {},
         { body: JSON.stringify({ id: tagName }) })
-      if (response.status === "success") {
+      if (response.message === "success") {
         await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
       }
       const parentMsg = button.closest("p");
@@ -57,9 +57,6 @@ export function eventListeners() {
           }),
         }
       );
-
-      button.setAttribute("disabled", "true");
-      button.classList.add("opacity-50");
 
       if (response.status === "success") {
         addIntraMessage(

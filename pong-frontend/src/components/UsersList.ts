@@ -19,49 +19,47 @@ export function List(
     usersDiv.id = "users-list-container";
     usersDiv.className = "overflow-y-auto";
 
-    function render() {
-        usersDiv.innerHTML = "";
+    usersDiv.innerHTML = "";
 
-        // FilterOut friends form server users
-        if (type === "SERVER") {
-            users = users.filter((user) =>
-                    !messageState.friendList.find((friend) => friend.id === user.id)
-            );
+    // FilterOut friends form server users
+    if (type === "SERVER") {
+        users = users.filter((user) =>
+                !messageState.friendList.find((friend) => friend.id === user.id)
+        );
+    }
+
+    users.forEach((user) => {
+        if (Number(userId.id) === Number(user.id)) return;
+        // Get name form serverUsers
+        const serverUSer = messageState.serverUsers.find((u) => u.id === user.id);
+        const name = serverUSer ? serverUSer.name : "Unknown";
+        const btn = document.createElement("button");
+        var userLiveStatus: HTMLSpanElement = document.createElement("span");
+        if (type === "FRIENDS") {
+            userLiveStatus = LiveStatusIndicator(user.isConnected);
+            btn.appendChild(userLiveStatus);
         }
 
-        users.forEach((user) => {
-            if (Number(userId.id) === Number(user.id)) return;
-			// Get name form serverUsers
-			const serverUSer = messageState.serverUsers.find((u) => u.id === user.id);
-			const name = serverUSer ? serverUSer.name : "Unknown";
-            const btn = document.createElement("button");
-			var userLiveStatus: HTMLSpanElement = document.createElement("span");
-			if (type === "FRIENDS") {
-				userLiveStatus = LiveStatusIndicator(user.isConnected);
-				btn.appendChild(userLiveStatus);
-			}
+        const btnText = document.createElement("span");
+        btnText.textContent = ` ${name}`;
+        btn.appendChild(btnText);
 
-            const btnText = document.createElement("span");
-            btnText.textContent = ` ${name}`;
-            btn.appendChild(btnText);
-
-            btn.className = `${name} flex items-center border-b
+        btn.className = `${name} flex items-center border-b
                 border-gray-300 p-2 w-full text-center hover:bg-gray-100`;
-            btn.id = `select-chat-btn`;
+        btn.id = `select-chat-btn`;
 
-            btn.value = `${name}`;
-            btn.name = `${user.id}`;
-			
-            usersDiv.appendChild(btn);
-        });
-        // Add bg-gray-100 to the selected chat button
-        Array.from(
-            document.getElementsByClassName(messageState.selectChat.name)
-        ).forEach((elem) => {
-            elem.classList.add("bg-gray-100");
-        });
-    }
-    render();
+        btn.value = `${name}`;
+        btn.name = `${user.id}`;
+
+        usersDiv.appendChild(btn);
+    });
+    // Add bg-gray-100 to the selected chat button
+    Array.from(
+        document.getElementsByClassName(messageState.selectChat.name)
+    ).forEach((elem) => {
+        elem.classList.add("bg-gray-100");
+    });
+
     return usersDiv;
 }
 

@@ -157,6 +157,7 @@ export const messageState: MessageStateType = new Proxy({
 
         if (prop === 'friendList') {
             messageListeners.forEach(fn => fn());
+            console.log("Friend list updated:", messageState.friendList);
         }
 
         if (prop === 'serverUsers') {

@@ -64,7 +64,7 @@ await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {
 	origin: true,
-	methods: ['POST', 'OPTIONS'],
+	methods: ['POST', 'OPTIONS', 'GET', 'DELETE', 'PUT'],
 });
 
 export function print(message: string) {

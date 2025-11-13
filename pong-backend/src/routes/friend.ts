@@ -3,7 +3,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { print } from '../server.js';
 import { statusCode } from "../types/statusCode";
 import db from "../../database/db";
-import { EventsModel, EventsService } from "./events";
+import { EventsService } from "./events";
 import { connectedRoomInstance } from "../state/ConnectedRoom";
 
 export interface FriendListDTO {
@@ -76,7 +76,7 @@ class FriendsController {
 		const friendId = Number(req.body.id);
 
 		const { status, data } = this.friendsService.addFriend(id, friendId);
-		
+
 		return res.status(statusCode('OK')).send({ message: status, data });
 	}
 
@@ -96,28 +96,29 @@ class FriendService {
 
 	getFriendsList(userId: number) {
 		const { status, data } = this.friendModelInstance.getFriendsList(userId);
-		connectedRoomInstance.friendListSet(userId).save(data);
-		const createFriendList = data.map((friendId: number) => ({
+		connectedRoomInstance.friendListSet(userId).save(data.filter(id => id !== Number(userId)));
+		const createFriendList = connectedRoomInstance.friendListSet(userId)
+			.get().map((friendId: number | bigint) => ({
 			id: friendId,
-			isConnected: connectedRoomInstance.getById(friendId) ? true : false
+			isConnected: connectedRoomInstance.has(friendId) ? true : false
 		}));
 		return { status, data: createFriendList };
 	}
 
-	addFriend(userId: number, friendId: number) {
-		const response = this.friendModelInstance.getFriendStatus(userId, friendId);
+	addFriend(requestId: number, friendId: number) {
+		const response = this.friendModelInstance.getFriendStatus(requestId, friendId);
 		if (response === false) {
-			this.friendModelInstance.addFriend(userId, friendId);
+			this.friendModelInstance.addFriend(requestId, friendId);
 			//Notify friend
 			this.eventsServiceInstance.insertEvent(
 				friendId,
-				userId,
+				requestId,
 				'friend:accepted',
 				'Your friend request has been accepted.'
 			);
 		}
 
-		connectedRoomInstance.friendListSet(userId).add(friendId);
+		connectedRoomInstance.friendListSet(requestId).add(friendId);
 
 		return { status: 'success', data: {} };
 	}
@@ -139,7 +140,10 @@ class FriendsModel {
 
 	constructor(db: Database.Database) {
 		this.db = db;
-		this.stmGetFriendsList = db.prepare('SELECT friend_id FROM friends WHERE user_id = ?');
+		this.stmGetFriendsList = db.prepare(
+			`SELECT friend_id AS friendId FROM friends WHERE user_id = ?
+				UNION
+					SELECT user_id AS friendId FROM friends WHERE friend_id = ?`);
 		this.stmAddFriend = db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)');
 		this.stmRemoveFriend = db.prepare('DELETE FROM friends WHERE user_id = ? AND friend_id = ?');
 		this.stmGetFriendStatus = db.prepare(
@@ -149,8 +153,8 @@ class FriendsModel {
 	}
 
 	getFriendsList(userId: number): GetFriendsList {
-		const response = this.stmGetFriendsList.all(userId);
-		return { status: 'success', data: response.map(row => row.friend_id) };
+		const response = this.stmGetFriendsList.all(userId, userId);
+		return { status: 'success', data: response.map(row => row.friendId) };
 	}
 
 	getFriendStatus(userId: number, friendId: number): boolean {
