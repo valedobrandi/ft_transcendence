@@ -7,7 +7,7 @@ function chatBlockRoute(fastify: FastifyInstance) {
     fastify.post('/add-block', {
         preHandler: [fastify.authenticate],
         schema: {
-			querystring: {
+			body: {
 				type: 'object',
 				properties: { id: { type: 'string' } },
 				required: ['id']

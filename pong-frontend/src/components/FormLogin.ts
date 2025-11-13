@@ -4,7 +4,7 @@ import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { id, jwt } from "../app";
-import { addIntraMessage, messageState } from "../states/messageState";
+import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 
 export function FormLogin(): HTMLElement {
     const viewDiv = document.createElement("div");
@@ -48,9 +48,9 @@ export function FormLogin(): HTMLElement {
             id.username = response.payload.username;
             id.id = response.payload.id;
 
-            const [friendsList] = await Promise.all([
+            const [friendsList, blockedList] = await Promise.all([
                 fetchRequest('/friends-list', 'GET', {}),
-
+                fetchRequest('/block-list', 'GET', {})
             ]);
 
             if (friendsList.message === 'success') {
@@ -58,8 +58,11 @@ export function FormLogin(): HTMLElement {
                     id: friend.id,
                     isConnected: friend.isConnected,
                 }));
-                messageState.friendList = newFriendList;
-                console.log("[FRIEND LIST ON LOGIN]", messageState.friendList);
+                stateProxyHandler.friendList = newFriendList;
+                console.log("[FRIEND LIST ON LOGIN]", stateProxyHandler.friendList);
+            }
+            if (blockedList.message === 'success') {
+                stateProxyHandler.chatBlockList = blockedList.payload;
             }
             navigateTo("/intra");
         }

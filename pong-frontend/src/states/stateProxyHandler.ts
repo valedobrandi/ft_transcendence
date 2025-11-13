@@ -4,46 +4,46 @@ import { navigateTo, setTime } from "../utils";
 import { websocketChatSend } from "../websocket/websocketChatSend";
 
 export function addIntraMessage(message: string) {
-	messageState.systemMessages = [...messageState.systemMessages, {
-		message: message,
-		index: (messageState.systemMessages.length),
-	}];
-	messageState.state = "SYSTEM_MESSAGE";
+    stateProxyHandler.systemMessages = [...stateProxyHandler.systemMessages, {
+        message: message,
+        index: (stateProxyHandler.systemMessages.length),
+    }];
+    stateProxyHandler.state = "SYSTEM_MESSAGE";
 }
 
 export function deleteIntraMessage(index: number) {
-	messageState.systemMessages = messageState.systemMessages.filter(msg => msg.index !== index);
-	messageState.state = "SYSTEM_MESSAGE";
+    stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.filter(msg => msg.index !== index);
+    stateProxyHandler.state = "SYSTEM_MESSAGE";
 }
 
 export function renderSystemMessages() {
-	console.log("Rendering system messages");
-	const messageBox = document.getElementById('system-messages');
-	if (!messageBox) return;
+    console.log("Rendering system messages");
+    const messageBox = document.getElementById('system-messages');
+    if (!messageBox) return;
 
-	messageBox.innerHTML = '';
-	messageState.systemMessages.forEach(msg => {
-		const p = document.createElement('p');
-		p.id = `msg-index-${msg.index}`;
-		p.className = "m-2 text-sm text-black bg-yellow-100 p-2 rounded w-fit";
-		p.innerHTML = `${msg.message}`;
-		messageBox.appendChild(p);
-	});
+    messageBox.innerHTML = '';
+    stateProxyHandler.systemMessages.forEach(msg => {
+        const p = document.createElement('p');
+        p.id = `msg-index-${msg.index}`;
+        p.className = "m-2 text-sm text-black bg-yellow-100 p-2 rounded w-fit";
+        p.innerHTML = `${msg.message}`;
+        messageBox.appendChild(p);
+    });
 }
 
 export function renderChatMessages(_: string, selectedChatId: number) {
     console.log("Rendering messages for chat ID:", selectedChatId);
-    console.log("Messages:", messageState.messages);
+    console.log("Messages:", stateProxyHandler.messages);
     const messageBox = document.getElementById('messages');
     if (!messageBox) return;
 
     // Create a new paragraph element for each message
     messageBox.innerHTML = '';
     // Get messages from the messageState.messages by selectedChatId
-    const messages = messageState.messages.get(selectedChatId) || [];
+    const messages = stateProxyHandler.messages.get(selectedChatId) || [];
     messages.forEach(msg => {
         const p = document.createElement('p');
-		p.id = `msg-${msg.timestamp}`;
+        p.id = `msg-${msg.timestamp}`;
         p.className = "m-2 text-sm text-black";
         if (Number(msg.from) === Number(id.id)) {
             p.className += " bg-green-100 p-2 rounded w-fit ml-auto";
@@ -55,12 +55,11 @@ export function renderChatMessages(_: string, selectedChatId: number) {
     })
 }
 
-const messageListeners: (() => void)[] = [];
+export const messageListeners: (() => void)[] = [];
 
 export function onMessageChange(fn: () => void) {
     messageListeners.push(fn);
 }
-
 
 export function changeChatHeader(header: string) {
     const chatHeader = document.getElementById('chat-tabs');
@@ -70,7 +69,7 @@ export function changeChatHeader(header: string) {
     tab.innerHTML = '';
     tab.textContent = `#${header}`;
     tab.className = 'm-auto font-bold';
-    renderChatMessages(messageState.selectChat.name, messageState.selectChat.id);
+    renderChatMessages(stateProxyHandler.selectChat.name, stateProxyHandler.selectChat.id);
     chatHeader.innerHTML = '';
     chatHeader.appendChild(tab);
 }
@@ -81,33 +80,54 @@ export interface MessageType {
 }
 
 export type ServerUsersList = {
-	id: number;
-	name: string;
+    id: number;
+    name: string;
 };
 
 export type FriendListType = {
-	id: number;
-	isConnected: boolean;
+    id: number;
+    isConnected: boolean;
 };
 
-export interface MessageStateType {
+type StateKey = keyof StateProxyHandler;
+
+const listeners: Record<StateKey, (() => void)[]> = {
+    messages: [],
+    serverUsers: [],
+    friendList: [],
+    chatBlockList: [],
+    connectedUsers: [],
+    selectChat: [],
+    state: [],
+    systemMessages: [],
+};
+
+
+export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
+    listeners[key].push(fn);
+}
+
+
+export interface StateProxyHandler {
     messages: Map<number, ChatMessage[]>;
     serverUsers: ServerUsersList[];
     friendList: FriendListType[];
+    chatBlockList: number[];
     connectedUsers: { id: number; name: string }[];
     selectChat: { id: number; name: string };
     state: string;
-	systemMessages: {index: number; message: string}[];
+    systemMessages: { index: number; message: string }[];
 }
 
-export const messageState: MessageStateType = new Proxy({
+export const stateProxyHandler: StateProxyHandler = new Proxy({
     messages: new Map<number, ChatMessage[]>(),
     serverUsers: [],
     friendList: [],
+    chatBlockList: [],
     connectedUsers: [],
     selectChat: { id: -1, name: '' },
     state: "",
-	systemMessages: [],
+    systemMessages: [],
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
@@ -133,31 +153,37 @@ export const messageState: MessageStateType = new Proxy({
                     });
                     break;
                 case "CHAT_MESSAGE":
-                    renderChatMessages(messageState.selectChat.name, messageState.selectChat.id);
+                    renderChatMessages(stateProxyHandler.selectChat.name, stateProxyHandler.selectChat.id);
                     break;
                 case "CHAT_HISTORY":
-                    renderChatMessages(messageState.selectChat.name, messageState.selectChat.id);
+                    renderChatMessages(stateProxyHandler.selectChat.name, stateProxyHandler.selectChat.id);
                     break;
-				case "SYSTEM_MESSAGE":
-					renderSystemMessages();
-					break;
+                case "SYSTEM_MESSAGE":
+                    renderSystemMessages();
+                    break;
             }
+        }
+
+        const key = prop as StateKey;
+        if (listeners[key]) {
+            listeners[key].forEach(fn => fn());
         }
 
 
         if (prop === 'selectChat') {
-            changeChatHeader(messageState.selectChat.name);
-            const isIntra = messageState.selectChat.id === -1;
+            changeChatHeader(stateProxyHandler.selectChat.name);
+            const isIntra = stateProxyHandler.selectChat.id === -1;
             const chatMenu = document.getElementById("chat-menu");
             if (chatMenu) chatMenu.classList.remove("hidden");
             if (isIntra && chatMenu) {
                 chatMenu.classList.add("hidden");
             };
+            messageListeners.forEach(fn => fn());
         }
 
         if (prop === 'friendList') {
             messageListeners.forEach(fn => fn());
-            console.log("Friend list updated:", messageState.friendList);
+            console.log("Friend list updated:", stateProxyHandler.friendList);
         }
 
         if (prop === 'serverUsers') {

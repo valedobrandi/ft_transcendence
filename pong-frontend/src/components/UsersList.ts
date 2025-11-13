@@ -1,4 +1,4 @@
-import { messageState, onMessageChange, type FriendListType, type ServerUsersList } from "../states/messageState";
+import { stateProxyHandler, onMessageChange, type FriendListType, type ServerUsersList } from "../states/stateProxyHandler";
 import { id as userId } from "../app";
 
 
@@ -24,14 +24,14 @@ export function List(
     // FilterOut friends form server users
     if (type === "SERVER") {
         users = users.filter((user) =>
-                !messageState.friendList.find((friend) => friend.id === user.id)
+                !stateProxyHandler.friendList.find((friend) => friend.id === user.id)
         );
     }
 
     users.forEach((user) => {
         if (Number(userId.id) === Number(user.id)) return;
         // Get name form serverUsers
-        const serverUSer = messageState.serverUsers.find((u) => u.id === user.id);
+        const serverUSer = stateProxyHandler.serverUsers.find((u) => u.id === user.id);
         const name = serverUSer ? serverUSer.name : "Unknown";
         const btn = document.createElement("button");
         var userLiveStatus: HTMLSpanElement = document.createElement("span");
@@ -55,7 +55,7 @@ export function List(
     });
     // Add bg-gray-100 to the selected chat button
     Array.from(
-        document.getElementsByClassName(messageState.selectChat.name)
+        document.getElementsByClassName(stateProxyHandler.selectChat.name)
     ).forEach((elem) => {
         elem.classList.add("bg-gray-100");
     });
@@ -71,7 +71,7 @@ export function UsersList(): HTMLDivElement {
     function render() {
         usersDiv.innerHTML = "";
 
-        const usersListUI = List(messageState.serverUsers, "SERVER");
+        const usersListUI = List(stateProxyHandler.serverUsers, "SERVER");
         usersDiv.appendChild(usersListUI);
 
         const friendListTitle = document.createElement("h2");
@@ -80,7 +80,7 @@ export function UsersList(): HTMLDivElement {
             "text-center text-blue-900 border-blue-900 border";
 
         const friendListUI = List(
-            messageState.friendList,
+            stateProxyHandler.friendList,
             "FRIENDS"
         );
 
@@ -97,5 +97,5 @@ export function selectChatByButton(button: HTMLButtonElement) {
     const chatId = button.name;
     console.log("Selected chat:", chatName, chatId);
 
-    messageState.selectChat = { name: chatName, id: Number(chatId) };
+    stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
 }

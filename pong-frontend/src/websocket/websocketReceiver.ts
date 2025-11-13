@@ -1,7 +1,7 @@
 import { id } from "../app";
 import { playerSideState } from "../context";
 import type { ChatDataHistory } from "../interface/ChatHistory";
-import { addIntraMessage, messageState } from "../states/messageState";
+import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
 
@@ -17,22 +17,22 @@ export async function websocketReceiver(socket: WebSocket) {
 				break;
 			case 'MATCH_ROOM':
 				serverState.state = data.message;
-				messageState.state = data.message;
+				stateProxyHandler.state = data.message;
 				break;
 			case 'GAME_ROOM': {
 				addIntraMessage(data.payload.message);
 				playerSideState.side = data.side;
-				messageState.state = data.message;
+				stateProxyHandler.state = data.message;
 
 			}
 				break;
 			case 'TOURNAMENT_ROOM':
 				serverState.state = data.message;
-				messageState.state = data.message;
+				stateProxyHandler.state = data.message;
 				break;
 			case 'GAME_OVER':
 				addIntraMessage(data.payload.message);
-				messageState.state = data.message;
+				stateProxyHandler.state = data.message;
 				break;
 			case 'CONNECTED_USERS':
 				//messageState.connected = data.users;
@@ -42,8 +42,8 @@ export async function websocketReceiver(socket: WebSocket) {
 					// Get the sender id by filter out my own id
 					const sender = data.sender.find((sid: number) => sid !== id.id);
 					if (!sender) return;
-					messageState.messages.set(sender, data.history);
-					messageState.state = data.message;
+					stateProxyHandler.messages.set(sender, data.history);
+					stateProxyHandler.state = data.message;
 				}
 				break;
 			case 'CHAT_HISTORY':
@@ -51,28 +51,28 @@ export async function websocketReceiver(socket: WebSocket) {
 					data.history.forEach(({ sender, history }: ChatDataHistory) => {
 						const filteredSender = sender.find((sid: number) => sid !== id.id);
 						if (filteredSender) {
-							messageState.messages.set(filteredSender, history);
+							stateProxyHandler.messages.set(filteredSender, history);
 						}
 					});
-					messageState.state = data.message;
+					stateProxyHandler.state = data.message;
 				}
 				break;
 			case 'SERVER_USERS':
 				if ('users' in data) {
-					messageState.serverUsers = data.users;
+					stateProxyHandler.serverUsers = data.users;
 				}
 				break;
 			case 'FRIEND_STATUS_UPDATE':
 				if ('payload' in data) {
 					const updateFriend = data.payload;
-					const friend = messageState.friendList.find(friend => friend.id === updateFriend.id);
+					const friend = stateProxyHandler.friendList.find(friend => friend.id === updateFriend.id);
 					if (friend === undefined) {
-						messageState.friendList = [...messageState.friendList, updateFriend];
+						stateProxyHandler.friendList = [...stateProxyHandler.friendList, updateFriend];
 						break;
 					}
 					friend.isConnected = updateFriend.isConnected;
-					const newFriendList = messageState.friendList.filter(friend => friend.id !== updateFriend.id);
-					messageState.friendList = [...newFriendList, friend];;
+					const newFriendList = stateProxyHandler.friendList.filter(friend => friend.id !== updateFriend.id);
+					stateProxyHandler.friendList = [...newFriendList, friend];;
 				}
 				break;
 			case 'event:new':

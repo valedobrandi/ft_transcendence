@@ -1,4 +1,4 @@
-import { addIntraMessage, messageState } from "../states/messageState";
+import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { fetchRequest } from "../utils";
 
 function btnLink(friendId: number, text: string, eventId: number): string {
@@ -26,7 +26,7 @@ async function websocketNewEvents() {
 
 			switch (type) {
 				case 'friend:add':
-					const getSender = messageState.serverUsers
+					const getSender = stateProxyHandler.serverUsers
 						.find(({ id }) => Number(id) === Number(from_id));
 					if (getSender === undefined) break;
 					addIntraMessage(

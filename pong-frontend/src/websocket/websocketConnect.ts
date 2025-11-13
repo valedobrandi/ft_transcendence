@@ -1,6 +1,6 @@
 import { id } from "../app";
 import { setupPaddleListeners } from "../events/paddleListeners";
-import { addIntraMessage } from "../states/messageState";
+import { addIntraMessage } from "../states/stateProxyHandler";
 import { getSocket } from "../websocket";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketReceiver } from "./websocketReceiver";

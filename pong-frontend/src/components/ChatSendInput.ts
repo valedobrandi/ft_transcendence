@@ -1,4 +1,4 @@
-import { messageState } from "../states/messageState";
+import { stateProxyHandler } from "../states/stateProxyHandler";
 import { websocketChatSend } from "../websocket/websocketChatSend";
 
 export function ChatSendInput(): HTMLDivElement {
@@ -30,7 +30,7 @@ export function ChatSendInput(): HTMLDivElement {
         event.preventDefault();
         const message = input.value.trim();
         if (message) {
-            const {name, id} = messageState.selectChat;
+            const {name, id} = stateProxyHandler.selectChat;
             websocketChatSend(message, name, id);
             input.value = "";
         }

@@ -7,9 +7,9 @@ import { statusCode } from "../types/statusCode.js";
 class ChatBlockController {
     private chatBlockServiceInstance = new ChatBlockService();
 
-    blockUser(req: FastifyRequest<{Querystring: ChatBlockPostDTO}>, res: FastifyReply) {
+    blockUser(req: FastifyRequest<{body: ChatBlockPostDTO}>, res: FastifyReply) {
         const id = Number(req.userId);
-		const friendId = Number(req.query.id);
+		const friendId = Number(req.body.id);
         const { status } = this.chatBlockServiceInstance.addUserToBlockList(id, friendId);
         if (status === "success") {
             return res.status(statusCode('OK')).send({ message: status });

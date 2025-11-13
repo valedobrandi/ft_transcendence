@@ -1,5 +1,6 @@
 import { id } from "../app";
-import { addIntraMessage, deleteIntraMessage, messageState } from "../states/messageState";
+import { setButtonToBlockState, setButtonToUnblockState } from "../components/ChatHeader";
+import { addIntraMessage, deleteIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { fetchRequest, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
@@ -28,67 +29,109 @@ export function eventListeners() {
   document.addEventListener("click", async (event) => {
     const target = event.target as HTMLButtonElement;
     const button = target.closest("button");
-
-    if (button && button.id === `accept-friend-request`) {
-      var tagName = button.name;
-      const eventId = button.getAttribute("eventid");
-      const action = button.getAttribute("action");
-
-      if (action === "accept") {
-        const response = await fetchRequest('/add-friend', 'POST', {},
-          { body: JSON.stringify({ id: tagName }) })
-        if (response.message === "success") {
-          await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
-        }
-      }
-
-      if (action === "decline") {
-        await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
-      }
-
-      const parentMsg = button.closest("p");
-      if (parentMsg) {
-        parentMsg.remove();
-        const tagId = parentMsg.id.replace("msg-index-", "");
-        deleteIntraMessage(Number(tagId));
-      }
-    }
-
-    if (button && button.id === "btn-friend-list") {
-      var response = await fetchRequest(`/add-event`, "POST", {},
+    if (!button) return;
+    console.log("Button clicked:", button.id);
+    switch (button.id) {
+      case "btn-block-user":
         {
-          body: JSON.stringify({
-            to_id: messageState.selectChat.id,
-            from_id: Number(id.id),
-            type: "friend:add",
-            message: "",
-          }),
+          const response = await fetchRequest(`/add-block`, "POST", {},
+            {
+              body: JSON.stringify({
+                id: stateProxyHandler.selectChat.id,
+              }),
+            }
+          );
+ 
+          if (response.message === "success") {
+            addIntraMessage(
+              `User ${stateProxyHandler.selectChat.name} has been blocked.`
+            );
+            await fetchRequest('/block-list', 'GET', {}).then((data) => {
+              if (data.message === 'success') {
+                stateProxyHandler.chatBlockList = data.payload;
+              }
+            });
+          }
         }
-      );
+        break
+      case "btn-unblock-user":
+        {
+          const response = await fetchRequest(`/remove-block?id=${stateProxyHandler.selectChat.id}`, "DELETE", {});
 
-      if (response.status === "success") {
-        addIntraMessage(
-          `Friend request sent to ${messageState.selectChat.name}`
-        );
-      }
-      return;
-    }
+          if (response.message === "success") {
+            addIntraMessage(
+              `User ${stateProxyHandler.selectChat.name} has been unblocked.`
+            );
+            await fetchRequest('/block-list', 'GET', {}).then((data) => {
+              if (data.message === 'success') {
+                stateProxyHandler.chatBlockList = data.payload;
+              }
+            });
+          }
+        }
+        break;
+      case "select-chat-btn":
+        {
+          const chatName = button.value;
+          const chatId = button.name;
 
-    if (button && button.id === "select-chat-btn") {
+          console.log("Selected chat:", chatName, chatId);
+          stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
+          const buttons = document.querySelectorAll("#select-chat-btn");
+          buttons.forEach((button) => {
+            button.classList.remove("bg-gray-100");
+          });
+          Array.from(document.getElementsByClassName(chatName)).forEach((elem) => {
+            elem.classList.add("bg-gray-100");
+          });
+        }
+        break;
+      case "accept-friend-request":
+        {
+          const tagName = button.name;
+          const eventId = button.getAttribute("eventid");
+          const action = button.getAttribute("action");
 
-      const chatName = button.value;
-      const chatId = button.name;
+          if (action === "accept") {
+            const response = await fetchRequest('/add-friend', 'POST', {},
+              { body: JSON.stringify({ id: tagName }) })
+            if (response.message === "success") {
+              await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
+            }
+          }
 
-      console.log("Selected chat:", chatName, chatId);
-      messageState.selectChat = { name: chatName, id: Number(chatId) };
-      const buttons = document.querySelectorAll("#select-chat-btn");
-      buttons.forEach((button) => {
-        button.classList.remove("bg-gray-100");
-      });
-      Array.from(document.getElementsByClassName(chatName)).forEach((elem) => {
-        elem.classList.add("bg-gray-100");
-      });
-      return;
+          if (action === "decline") {
+            await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
+          }
+
+          const parentMsg = button.closest("p");
+          if (parentMsg) {
+            parentMsg.remove();
+            const tagId = parentMsg.id.replace("msg-index-", "");
+            deleteIntraMessage(Number(tagId));
+          }
+        }
+        break;
+      case "btn-friend-list":
+        {
+          var response = await fetchRequest(`/add-event`, "POST", {},
+            {
+              body: JSON.stringify({
+                to_id: stateProxyHandler.selectChat.id,
+                from_id: Number(id.id),
+                type: "friend:add",
+                message: "",
+              }),
+            }
+          );
+
+          if (response.status === "success") {
+            addIntraMessage(
+              `Friend request sent to ${stateProxyHandler.selectChat.name}`
+            );
+          }
+        }
+        break;
     }
   });
 }

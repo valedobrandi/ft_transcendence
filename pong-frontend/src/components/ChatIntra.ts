@@ -1,4 +1,4 @@
-import { messageState, onMessageChange } from "../states/messageState";
+import { stateProxyHandler, onMessageChange } from "../states/stateProxyHandler";
 
 export function SystemMessageChat() {
 	const intraContainer = document.createElement("div");
@@ -22,7 +22,7 @@ export function SystemMessageChat() {
 
 		intraContainer.appendChild(chatTabs);
 		chatTabs.appendChild(title);
-		messageState.systemMessages.forEach(msg => {
+		stateProxyHandler.systemMessages.forEach(msg => {
 			const p = document.createElement('p');
 			p.id = `msg-index-${msg.index}`;
 			p.className = "m-2 text-sm text-black bg-yellow-100 p-2 rounded w-fit";
