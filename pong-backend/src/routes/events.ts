@@ -59,6 +59,19 @@ function eventsRoutes(fastify: FastifyInstance) {
         schema: {},
         handler: eventsControllerInstance.getFromEvents.bind(eventsControllerInstance)
     });
+    fastify.delete('/delete-event', {
+        preHandler: [fastify.authenticate],
+        schema: {
+            querystring: {
+                type: 'object',
+                properties: {
+                    eventId: { type: 'number' }
+                },
+            },
+            required: ['eventId']
+        },
+        handler: eventsControllerInstance.deleteEvent.bind(eventsControllerInstance)
+    });
 }
 
 class EventsController {
@@ -67,25 +80,8 @@ class EventsController {
     insertEvent(req: FastifyRequest<{ Body: InsertEventBody }>, res: FastifyReply) {
         const { to_id, from_id, type, message } = req.body;
         const { status, data } = this.eventsServiceInstance.insertEvent(to_id, from_id, type, message);
-		// Lookout for the destination user to send real-time notification (if connected)
-		if (status === 'success') {
-			const user = connectedRoomInstance.getById(to_id);
-			if (user && user.socket) {
-				const newEvent: NewEventsDB = {
-					id: data.id,
-					type,
-					from_id,
-					to_id,
-					payload: message,
-					timestamp: new Date().toISOString()
-				};
-				user.socket.send(JSON.stringify({
-					status: statusCode('OK'),
-					type: 'NEW_EVENT',
-					data: newEvent
-				}));
-			}
-		}
+        // Try to send notification
+
         return res.status(statusCode('OK')).send({ status, message: data.message, })
     }
 
@@ -101,44 +97,61 @@ class EventsController {
         return res.status(statusCode('OK')).send({ status, data });
     }
 
+    deleteEvent(req: FastifyRequest<{ querystring: { eventId: number } }>, res: FastifyReply) {
+        const { eventId } = req.params;
+        const { status, data } = this.eventsServiceInstance.deleteEvent(eventId);
+        return res.status(statusCode('OK')).send({ status, message: data.message });
+    }
+
 }
 
 class EventsService {
     private eventsModelInstance = new EventsModel(db);
 
     insertEvent(to_id: number, from_id: number, type: string, message: string) {
-        switch (type) {
-            case 'friend:add':
-                // Check if friend request already exists could be added here
-                const duplicates = this.eventsModelInstance.getDuplicateEvent(type, from_id, to_id);
-                if (duplicates.data.length > 0) {
-                    return { status: 'error', data: { message: 'duplicate event' } };
-                }
-                break;
-            case 'friend:accept':
-            case 'friend:reject':
-                break;
-            default:
-                return { status: 'error', data: { message: 'invalid event type' } };
+
+        const duplicates = this.eventsModelInstance.getDuplicateEvent(type, from_id, to_id);
+        if (duplicates.data.length > 0) {
+            return { status: 'error', data: { message: 'event registered' } };
         }
+
         const { status, data } = this.eventsModelInstance.insertEvent(type, from_id, to_id, message);
+
+        if (status === 'success') {
+            const user = connectedRoomInstance.getById(to_id);
+            if (user && user.socket) {
+                const newEvent = {
+                    to_id,
+                    from_id,
+                    type,
+                    message
+                };
+                user.socket.send(JSON.stringify({
+                    id: data.message,
+                    status: statusCode('OK'),
+                    message: 'event:new',
+                    data: newEvent
+                }));
+            }
+        }
+
         return { status, data };
     }
 
     getToEvents(to_id: number) {
-        const {status, data} = this.eventsModelInstance.getToEvents(to_id);
+        const { status, data } = this.eventsModelInstance.getToEvents(to_id);
         return { status, data };
     }
 
     getFromEvents(from_id: number) {
-        const {status, data} = this.eventsModelInstance.getFromEvents(from_id);
+        const { status, data } = this.eventsModelInstance.getFromEvents(from_id);
         return { status, data };
     }
 
-	deleteEvent(eventId: number) {
-		const { status, data } = this.eventsModelInstance.deleteEvent(eventId);
-		return { status, data };
-	}
+    deleteEvent(eventId: number) {
+        const { status, data } = this.eventsModelInstance.deleteEvent(eventId);
+        return { status, data };
+    }
 }
 
 class EventsModel {
@@ -147,7 +160,7 @@ class EventsModel {
     private stmGetToEvents: Database.Statement;
     private stmGetFromEvents: Database.Statement;
     private stmGetDuplicateEvent: Database.Statement;
-	private stmDeleteEvent: Database.Statement;
+    private stmDeleteEvent: Database.Statement;
 
     constructor(db: Database.Database) {
         this.db = db;
@@ -160,8 +173,8 @@ class EventsModel {
         this.stmGetDuplicateEvent = db.prepare(
             `SELECT * FROM events
                 WHERE type=@type AND from_id=@fromId AND to_id=@toId`);
-		this.stmDeleteEvent = db.prepare(
-			`DELETE FROM events WHERE id=@eventId`);
+        this.stmDeleteEvent = db.prepare(
+            `DELETE FROM events WHERE id=@eventId`);
     }
 
     getDuplicateEvent(type: string, fromId: number, toId: number): GetEvents {
@@ -170,9 +183,9 @@ class EventsModel {
     }
 
     insertEvent(type: string, fromId: number, toId: number, payload: string): EventOnChangeDB {
-        const response = this.stmInsertEvent.run({ type, fromId, toId, payload });
-        if (response.changes === 1) {
-            return { status: 'success', data: { message: 'event inserted' } };
+        const { lastInsertRowid, changes } = this.stmInsertEvent.run({ type, fromId, toId, payload });
+        if (changes === 1) {
+            return { status: 'success', data: { message: lastInsertRowid } };
         }
         return { status: 'error', data: { message: 'event not inserted' } };
     }
@@ -187,13 +200,13 @@ class EventsModel {
         return { status: 'success', data: response };
     }
 
-	deleteEvent(eventId: number): EventOnChangeDB {
-		const response = this.stmDeleteEvent.run({ eventId });
-		if (response.changes === 1) {
-			return { status: 'success', data: { message: 'event deleted' } };
-		}
-		return { status: 'error', data: { message: 'event not deleted' } };
-	}
+    deleteEvent(eventId: number): EventOnChangeDB {
+        const response = this.stmDeleteEvent.run({ eventId });
+        if (response.changes === 1) {
+            return { status: 'success', data: { message: 'event deleted' } };
+        }
+        return { status: 'error', data: { message: 'event not deleted' } };
+    }
 }
 
 export { eventsRoutes, EventsController, EventsService, EventsModel };

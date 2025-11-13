@@ -57,20 +57,20 @@ export async function fetchRequest(
     if (method === 'POST' || method === 'PUT') {
         defaultHeaders['Content-Type'] = 'application/json';
     }
-
+    console.log(`[REQUEST] ${method} ${url} with options:`, options);
     try {
         const response = await fetch(url, {
             method: method,
             headers: { ...defaultHeaders, ...headers },
             ...options,
         });
-
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.message || 'API error');
         }
-
-        return await response.json();
+        const data = await response.json();
+        console.log(`[RESPONSE] ${method} ${url} response:`, data);
+        return data;
     } catch (err) {
         console.error(`Fetch error on ${endpoint}:`, err);
         throw err;

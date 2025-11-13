@@ -3,10 +3,12 @@ import { playerSideState } from "../context";
 import type { ChatDataHistory } from "../interface/ChatHistory";
 import { messageState } from "../states/messageState";
 import { serverState } from "../states/serverState";
+import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketChatSend } from "./websocketChatSend";
+import { fetchRequest } from "../utils";
 
-export function websocketReceiver(socket: WebSocket) {
-	socket.addEventListener('message', (event) => {
+export async function websocketReceiver(socket: WebSocket) {
+	socket.addEventListener('message', async (event) => {
 		const data = JSON.parse(event.data);
 		if (data.message != 'STATE') {
 			console.log('Message from server ', data);
@@ -70,8 +72,9 @@ export function websocketReceiver(socket: WebSocket) {
 							: user);
 				}
 				break;
+			case 'event:new':
+				await websocketNewEvents();
+				break;
 		}
 	});
-
-
 }

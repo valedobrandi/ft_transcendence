@@ -29,13 +29,14 @@ export class ConnectedRoom {
 		return false;
 	}
 
-	friendListSet(id: number | bigint) {
-		const player = this.getById(id);
-		if (player === undefined) throw new Error(`${id} Disconnected.`);
+	friendListSet(requestId: number | bigint) {
+		const player = this.getById(requestId);
+		if (player === undefined) throw new Error(`${requestId} Disconnected.`);
 		return {
 			add: (id: number | bigint) => {
+				print(`Adding friend ${id}`);
 				player.friendSet.add(id);
-				this.broadcastFriendList(id);
+				this.sendUpdateStatus(requestId, id);
 			},
 			delete: (friendId: number | bigint) => {
 				player.friendSet.delete(friendId);
@@ -73,10 +74,23 @@ export class ConnectedRoom {
 			name: user.username
 		}));
 		// Sort by id so that INTRA is first
-		registeredUsers.sort((a, b) => a.id === 1 ? -1 : 1).splice(0,1);
+		registeredUsers.sort((a, b) => a.id === 1 ? -1 : 1).splice(0, 1);
 		this.room.forEach(({ socket }) => {
 			if (socket) socket.send(JSON.stringify({ status: 200, message: 'SERVER_USERS', users: registeredUsers }));
 		});
+	}
+
+	sendUpdateStatus(id: number | bigint, friendId: number | bigint) {
+		const sender = this.getById(id);
+			if (sender && sender.socket) {
+				const isConnected = this.has(friendId);
+				sender.socket.send(JSON.stringify(
+					{
+						statusCode: 200,
+						message: 'FRIEND_STATUS_UPDATE',
+						payload: { id, isConnected }
+					}));
+			}
 	}
 
 	broadcastFriendList(id: number | bigint, isConnected: boolean = true) {
@@ -84,15 +98,7 @@ export class ConnectedRoom {
 		const user = this.getById(id); if (user === undefined) return;
 
 		Array.from(user.friendSet).forEach((t) => {
-			const friend = this.getById(t);
-			if (friend && friend.socket) {
-				friend.socket.send(JSON.stringify(
-					{
-						statusCode: 200,
-						message: 'FRIEND_STATUS_UPDATE',
-						payload: { id, isConnected }
-					}));
-			}
+			this.sendUpdateStatus(t, id);
 		});
 	}
 

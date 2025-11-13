@@ -4,7 +4,7 @@ import { fetchRequest, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
 
-export function globalEventListeners() {
+export function eventListeners() {
   // Skip if not in game page
   if (window.location.pathname === "/match") {
     setupPaddleListeners((up, down) => {
@@ -31,17 +31,19 @@ export function globalEventListeners() {
 
     if (button && button.id === `accept-friend-request`) {
       var tagName = button.name;
-	  const eventId = button.getAttribute("eventid");
+      const eventId = button.getAttribute("eventid");
 
-	  var response = await fetchRequest('/add-friend', 'POST', {},
-		{ body:JSON.stringify({id: tagName, event_id: eventId}) })
-
-	  const parentMsg = button.closest("p");
-	  if (parentMsg) {
-		  parentMsg.remove();
-		  const tagId = parentMsg.id.replace("msg-index-", "");
-		  deleteIntraMessage(Number(tagId));
-	  }
+      const response = await fetchRequest('/add-friend', 'POST', {},
+        { body: JSON.stringify({ id: tagName }) })
+      if (response.status === "success") {
+        await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
+      }
+      const parentMsg = button.closest("p");
+      if (parentMsg) {
+        parentMsg.remove();
+        const tagId = parentMsg.id.replace("msg-index-", "");
+        deleteIntraMessage(Number(tagId));
+      }
     }
 
     if (button && button.id === "btn-friend-list") {
@@ -55,7 +57,10 @@ export function globalEventListeners() {
           }),
         }
       );
-	  button.disabled = true;
+
+      button.setAttribute("disabled", "true");
+      button.classList.add("opacity-50");
+
       if (response.status === "success") {
         addIntraMessage(
           `Friend request sent to ${messageState.selectChat.name}`

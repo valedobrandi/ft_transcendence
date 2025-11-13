@@ -3,12 +3,11 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { print } from '../server.js';
 import { statusCode } from "../types/statusCode";
 import db from "../../database/db";
-import { EventsModel } from "./events";
+import { EventsModel, EventsService } from "./events";
 import { connectedRoomInstance } from "../state/ConnectedRoom";
 
 export interface FriendListDTO {
 	id: string;
-	event_id?: string;
 }
 
 export type FriendsTableModel = {
@@ -37,8 +36,8 @@ function friendsRoute(fastify: FastifyInstance) {
 		schema: {
 			body: {
 				type: 'object',
-				properties: { id: { type: 'string' }, event_id: { type: 'string' } },
-				required: ['id', 'event_id']
+				properties: { id: { type: 'string' } },
+				required: ['id']
 			}
 		},
 		handler: friendsControllerInstance.addFriend.bind(friendsControllerInstance)
@@ -76,24 +75,24 @@ class FriendsController {
 		const id = Number(req.userId);
 		const friendId = Number(req.body.id);
 
-		const eventId = req.body.event_id ? Number(req.body.event_id) : undefined;
-
-		const { status, data } = this.friendsService.addFriend(id, friendId, eventId);
-
+		const { status, data } = this.friendsService.addFriend(id, friendId);
+		
 		return res.status(statusCode('OK')).send({ message: status, data });
 	}
 
 	removeFriend(req: FastifyRequest<{ Body: FriendListDTO }>, res: FastifyReply) {
 		const id = Number(req.userId);
 		const friendId = Number(req.body.id);
+
 		const { status, data } = this.friendsService.removeFriend(id, friendId);
+
 		return res.status(statusCode('OK')).send({ message: status, data });
 	}
 }
 
 class FriendService {
 	private friendModelInstance = new FriendsModel(db);
-	private eventsModelInstance = new EventsModel(db);
+	private eventsServiceInstance = new EventsService();
 
 	getFriendsList(userId: number) {
 		const { status, data } = this.friendModelInstance.getFriendsList(userId);
@@ -105,16 +104,21 @@ class FriendService {
 		return { status, data: createFriendList };
 	}
 
-	addFriend(userId: number, friendId: number, eventId?: number) {
+	addFriend(userId: number, friendId: number) {
 		const response = this.friendModelInstance.getFriendStatus(userId, friendId);
-		if (response) {
-			return { status: 'success', data: {} };
+		if (response === false) {
+			this.friendModelInstance.addFriend(userId, friendId);
+			//Notify friend
+			this.eventsServiceInstance.insertEvent(
+				friendId,
+				userId,
+				'friend:accepted',
+				'Your friend request has been accepted.'
+			);
 		}
-		this.friendModelInstance.addFriend(userId, friendId);
-		if (eventId) {
-			this.eventsModelInstance.deleteEvent(eventId);
-		}
+
 		connectedRoomInstance.friendListSet(userId).add(friendId);
+
 		return { status: 'success', data: {} };
 	}
 
@@ -138,7 +142,10 @@ class FriendsModel {
 		this.stmGetFriendsList = db.prepare('SELECT friend_id FROM friends WHERE user_id = ?');
 		this.stmAddFriend = db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)');
 		this.stmRemoveFriend = db.prepare('DELETE FROM friends WHERE user_id = ? AND friend_id = ?');
-		this.stmGetFriendStatus = db.prepare('SELECT * FROM friends WHERE user_id = ? AND friend_id = ?');
+		this.stmGetFriendStatus = db.prepare(
+			`SELECT * FROM friends 
+				WHERE user_id = ? AND friend_id = ? 
+					OR user_id = ? AND friend_id = ?`);
 	}
 
 	getFriendsList(userId: number): GetFriendsList {
@@ -147,7 +154,7 @@ class FriendsModel {
 	}
 
 	getFriendStatus(userId: number, friendId: number): boolean {
-		const response = this.stmGetFriendStatus.get(userId, friendId);
+		const response = this.stmGetFriendStatus.get(userId, friendId, friendId, userId);
 		return response !== undefined;
 	}
 

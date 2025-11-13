@@ -1,8 +1,8 @@
 import { id } from "../app";
 import { setupPaddleListeners } from "../events/paddleListeners";
-import { addIntraMessage, messageState } from "../states/messageState";
-import { fetchRequest } from "../utils";
+import { addIntraMessage } from "../states/messageState";
 import { getSocket } from "../websocket";
+import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketReceiver } from "./websocketReceiver";
 
 export function waitForSocketOpen(socket: WebSocket): Promise<void> {
@@ -30,24 +30,7 @@ export async function websocketConnect() {
 		websocketReceiver(socket);
 		addIntraMessage(`${id.username} connected.`);
 
-		const {status, data} = await fetchRequest('/to-events', 'GET')
-		if (status === 'success') {
-			for (const event of data) {
-				const { type, from_id, id: eventId } = event;
-				switch (type) {
-					case 'friend:add':
-						const getSender = messageState.serverUsers
-							.find(({ id }) => Number(id) === Number(from_id))
-						if (getSender === undefined) break;
-						addIntraMessage(
-							`${getSender.name} has send a friend request
-								${btnLink(getSender.id, "YES", eventId)}
-								${btnLink(getSender.id, "NO", eventId)}`
-						);
-						break;
-				}
-			}
-		}
+		await websocketNewEvents();
 
 
 		setupPaddleListeners((up, down) => {
@@ -62,16 +45,3 @@ export async function websocketConnect() {
 	}
 };
 
-function btnLink(friendId: number, text: string, eventId: number): string {
-	const btnBg = text === "YES" ? "bg-green-500" : "bg-red-500";
-    return (
-        `<button
-			id="accept-friend-request"
-			name="${friendId}"
-			eventid="${eventId}"
-			class="${btnBg} text-white ml-4 p-1 rounded text-xs"
-		>
-			${text}
-		</button>`
-    )
-}

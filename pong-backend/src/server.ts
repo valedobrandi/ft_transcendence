@@ -13,17 +13,17 @@ import { eventsRoutes } from './routes/events.js';
 
 
 const fastify = Fastify({
-	// logger: {
-	// 	level: 'info',
-	// 	transport: {
-	// 		target: 'pino-pretty',
-	// 		options: {
-	// 			colorize: true,
-	// 			translateTime: 'SYS:standard',
-	// 			ignore: 'pid,hostname',
-	// 		},
-	// 	},
-	// }
+	logger: {
+		level: 'info',
+		transport: {
+			target: 'pino-pretty',
+			options: {
+				colorize: true,
+				translateTime: 'SYS:standard',
+				ignore: 'pid,hostname,time,level,version,remoteAddress,remotePort,host',
+			},
+		},
+	}
 });
 
 declare module 'fastify' {
