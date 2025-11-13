@@ -45,10 +45,10 @@ export async function createSchema() {
 	db.exec(` CREATE TABLE IF NOT EXISTS chatblock (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER NOT NULL,
-			blocked_user_id INTEGER NOT NULL,
+			blockedId INTEGER NOT NULL,
 			created_at DATE DEFAULT (date('now')),
 			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-			FOREIGN KEY(blocked_user_id) REFERENCES users(id) ON DELETE CASCADE
+			FOREIGN KEY(blockedId) REFERENCES users(id) ON DELETE CASCADE
 			)`);
 
 	db.exec(` CREATE TABLE IF NOT EXISTS messages (
@@ -57,7 +57,7 @@ export async function createSchema() {
 			receiver_id INTEGER NOT NULL,
 			content TEXT NOT NULL,
 			sender INTEGER NOT NULL,
-			delivered BOOLEAN DEFAULT 1,
+			isBlocked BOOLEAN DEFAULT 0,
 			timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE,
 			FOREIGN KEY(receiver_id) REFERENCES users(id) ON DELETE CASCADE)

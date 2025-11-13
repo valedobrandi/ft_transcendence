@@ -31,7 +31,6 @@ export function ChatSendInput(): HTMLDivElement {
         const message = input.value.trim();
         if (message) {
             const {name, id} = messageState.selectChat;
-
             websocketChatSend(message, name, id);
             input.value = "";
         }

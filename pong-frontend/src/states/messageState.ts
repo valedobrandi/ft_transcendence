@@ -147,7 +147,7 @@ export const messageState: MessageStateType = new Proxy({
 
         if (prop === 'selectChat') {
             changeChatHeader(messageState.selectChat.name);
-            const isIntra = messageState.selectChat.name === 'INTRA';
+            const isIntra = messageState.selectChat.id === -1;
             const chatMenu = document.getElementById("chat-menu");
             if (chatMenu) chatMenu.classList.remove("hidden");
             if (isIntra && chatMenu) {

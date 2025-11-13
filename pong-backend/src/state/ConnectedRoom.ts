@@ -29,12 +29,13 @@ export class ConnectedRoom {
 
 	friendListSet(useServiceRequestId: number | bigint) {
 		const sender = this.getById(useServiceRequestId);
-		if (sender === undefined) return;
+		if (sender === undefined) throw new Error("disconnected");
 		return {
 			add: (id: number | bigint) => {
 				//print(`Adding friend ${id}`);
 				sender.friendSet.add(id);
-				this.sendUpdateStatus(id, sender.id);
+				this.sendUpdateStatus(id, sender.id, false);
+				this.sendUpdateStatus(sender.id, id, false);
 			},
 			delete: (friendId: number | bigint) => {
 				sender.friendSet.delete(friendId);

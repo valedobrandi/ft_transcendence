@@ -20,7 +20,7 @@ export function intraView(root: HTMLElement) {
 	const menuUI = Menu();
 	root.appendChild(menuUI);
 	root.appendChild(intraUI);
-	messageState.selectChat = { id: 1, name: 'INTRA' };
+	messageState.selectChat = { id: -1, name: 'Bienvenue dans le chat !' };
 }
 
 export function matchView(root: HTMLElement) {

@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3'
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { print } from '../server.js';
+import { fastify, print } from '../server.js';
 import { statusCode } from "../types/statusCode";
 import db from "../../database/db";
 import { EventsService } from "./events";
@@ -92,7 +92,6 @@ class FriendsController {
 
 class FriendService {
 	private friendModelInstance = new FriendsModel(db);
-	private eventsServiceInstance = new EventsService();
 
 	getFriendsList(userId: number) {
 		const { status, data } = this.friendModelInstance.getFriendsList(userId);
@@ -106,19 +105,20 @@ class FriendService {
 	}
 
 	addFriend(requestId: number, friendId: number) {
-		const response = this.friendModelInstance.getFriendStatus(requestId, friendId);
+		const response = this.friendModelInstance.checkFriendsStatus(requestId, friendId);
 		if (response === false) {
 			this.friendModelInstance.addFriend(requestId, friendId);
-			//Notify friend
-			this.eventsServiceInstance.insertEvent(
-				friendId,
-				requestId,
-				'friend:accepted',
-				'Your friend request has been accepted.'
-			);
+			try {
+				connectedRoomInstance.friendListSet(requestId).add(friendId);
+			} catch (error) {
+				fastify.log.error(error);
+			}
+			try {
+				connectedRoomInstance.friendListSet(friendId).add(requestId);
+			} catch (error) {
+				fastify.log.error(error);
+			}
 		}
-
-		connectedRoomInstance.friendListSet(requestId).add(friendId);
 
 		return { status: 'success', data: {} };
 	}
@@ -157,7 +157,7 @@ class FriendsModel {
 		return { status: 'success', data: response.map(row => row.friendId) };
 	}
 
-	getFriendStatus(userId: number, friendId: number): boolean {
+	checkFriendsStatus(userId: number, friendId: number): boolean {
 		const response = this.stmGetFriendStatus.get(userId, friendId, friendId, userId);
 		return response !== undefined;
 	}

@@ -8,6 +8,7 @@ function btnLink(friendId: number, text: string, eventId: number): string {
 			id="accept-friend-request"
 			name="${friendId}"
 			eventid="${eventId}"
+			action="${text === "YES" ? "accept" : "decline"}"
 			class="${btnBg} text-white ml-4 p-1 rounded text-xs"
 		>
 			${text}
@@ -33,16 +34,6 @@ async function websocketNewEvents() {
 							 	${btnLink(getSender.id, "YES", eventId)}
 							 		${btnLink(getSender.id, "NO", eventId)}`
 					);
-					break;
-				case 'friend:accepted':
-					addIntraMessage(`Your friend request has been accepted.`);
-					const response = await fetchRequest('/add-friend', 'POST', {},
-						{ body: JSON.stringify({ id: from_id }) })
-					if (response.message === 'success') {
-						await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
-					}
-					break;
-				default:
 					break;
 			}
 		}

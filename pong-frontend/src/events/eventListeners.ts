@@ -32,12 +32,20 @@ export function eventListeners() {
     if (button && button.id === `accept-friend-request`) {
       var tagName = button.name;
       const eventId = button.getAttribute("eventid");
+      const action = button.getAttribute("action");
 
-      const response = await fetchRequest('/add-friend', 'POST', {},
-        { body: JSON.stringify({ id: tagName }) })
-      if (response.message === "success") {
+      if (action === "accept") {
+        const response = await fetchRequest('/add-friend', 'POST', {},
+          { body: JSON.stringify({ id: tagName }) })
+        if (response.message === "success") {
+          await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
+        }
+      }
+
+      if (action === "decline") {
         await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
       }
+
       const parentMsg = button.closest("p");
       if (parentMsg) {
         parentMsg.remove();

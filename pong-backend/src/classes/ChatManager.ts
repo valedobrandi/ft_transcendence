@@ -43,12 +43,12 @@ class ChatManager {
 
     sendHistory() {
         const user = connectedRoomInstance.getById(this.id);
-        if (!user || !user.socket) return;
-
-        const getChatHistory = chatStore.getChatHistories(this.id);
-        user.socket.send(JSON.stringify(
-            chatHandler.controller().CHAT_HISTORY(getChatHistory)
-        ));
+        if (user && user.socket) {
+            const getChatHistory = chatStore.getChatHistories(this.id);
+            user.socket.send(JSON.stringify(
+                chatHandler.controller().CHAT_HISTORY(getChatHistory)
+            ));
+        }
     }
 }
 
