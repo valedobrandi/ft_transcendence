@@ -5,6 +5,7 @@ export function ChatHeader(): HTMLDivElement {
     const chatMenu = document.createElement("div");
     chatMenu.id = "chat-menu";
     chatMenu.className = "flex border-b bg-gray-100 h-10 shrink-0";
+    chatMenu.classList.add("justify-between");
 
     function onRender() {
         chatMenu.innerHTML = ""
@@ -23,9 +24,11 @@ export function ChatHeader(): HTMLDivElement {
             btn.value = opt.value;
             btn.textContent = opt.text;
             const { selectChat, chatBlockList } = stateProxyHandler;
-            setButtonToUnblockState(btn);
-            if (chatBlockList.includes(selectChat.id) && opt.value === "block-user") {
-                setButtonToBlockState(btn);
+            if (opt.value === "block-user") {
+                setButtonToUnblockState(btn);
+                if (chatBlockList.includes(selectChat.id)) {
+                    setButtonToBlockState(btn);
+                }
             }
             chatMenu.appendChild(btn);
         })
