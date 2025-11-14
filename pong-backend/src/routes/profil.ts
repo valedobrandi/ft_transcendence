@@ -28,21 +28,22 @@ export default function profilRoute(fastify: FastifyInstance)
             })
         });
 
-    fastify.put('/update', {
+        fastify.put('/update', {
         preHandler: [fastify.authenticate],
         schema: {
+            body: {
             type: 'object',
             properties: {
-                username: { type: 'string', minLength: 1 },
-                    email: {type: 'string', format: 'email' },
-                    password: {type: 'string', minLength: 8 }
-            
-           },
-           additionalProperties: false,
-        },
-        handler: profileController.updateUser.bind(profileController)
-        })
-    }
+                username: { type: 'string', minLength: 3 },
+                email: { type: 'string', format: 'email' },
+                password: { type: 'string' },
+                current_password: { type: 'string', minLength: 2 },
+            },
+            additionalProperties: false
+            }
+        }
+        }, profileController.updateUser.bind(profileController));
+}
 
 
 // fastify.put('/profil/update/:id', async (request: FastifyRequest<{ Params: { id: number }, Body: RegisterBody }>, res) => {

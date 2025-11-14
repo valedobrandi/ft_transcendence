@@ -172,6 +172,7 @@ export function ProfilePage(): HTMLElement {
 
 
 	// ---------- Change passeword ----------
+	
 	const passewordSection = document.createElement("section");
 	passewordSection.className = "flex flex-col gap-2 mt-4";
 
@@ -225,7 +226,6 @@ export function ProfilePage(): HTMLElement {
 	if (nextName && nextName !== profile.username)
 	{
 		payload.username = nextName;
-		console.log("PROFIL = ", payload.username);
 	}
 	if (nextMail && nextMail !== profile.email)
 	{
@@ -251,15 +251,14 @@ export function ProfilePage(): HTMLElement {
 	}
 
 	try {
-	sendBtn.setAttribute('disabled','true');
+	//sendBtn.setAttribute('disabled','true');
 	const data = await fetchRequest("/update", "PUT", {}, payload);
 	
 	if (data.message === 'success')
 	{
-		profile.username = data.username;
-		profile.email = data.email;
-		console.log("PROFIL = ", profile.username);
-		console.log("PROFIL = ", profile.username);
+		profile.username = data.payload.username;
+		profile.email = data.payload.email;
+
 		window.location.reload();	
 	}
 	else 
@@ -276,10 +275,9 @@ export function ProfilePage(): HTMLElement {
 	} catch (e) {
 	console.error("Erreur réseau :", e);
 	} finally {
-	sendBtn.setAttribute('disabled','false');;
+	//endBtn.setAttribute('disabled','false');;
 	}
 	});
-
 	main.appendChild(card);
 	root.appendChild(main);
 
@@ -409,7 +407,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }): vo
 			}
 			const data = await res.json() as {avatar_url:string};
 			const { avatar_url } = data; 
-			console.log("✅ avatar upload success:");
+			console.log("avatar upload success:");
 			preview.src = avatar_url;
 			user.avatar_url = avatar_url;
 		}
@@ -486,17 +484,17 @@ export function upload_avatar(user: { avatar_url: string | null }): void {
 				// Si ton fetchRequest THROW sur !res.ok, le code suivant ne sera pas exécuté
 				if (!res.ok) {
 					console.error("Server error:", res.status, await res.text());
-					// ⚠️ On NE remet PAS l'ancienne image ici,
+					// On NE remet PAS l'ancienne image ici,
 					// on laisse l'UI changer même si le backend est pas prêt
 					return;
 				}
 
-				console.log("✅ change avatar update");
+				console.log("change avatar update");
 				user.avatar_url = url;
 				selected = btn;
 			} catch (err) {
-				console.error("❌ change avatar update failed:", err);
-				// ⚠️ AVANT tu remettais l’ancienne image ici → visuellement “ça ne bougeait pas”
+				console.error("change avatar update failed:", err);
+				// AVANT tu remettais l’ancienne image ici → visuellement “ça ne bougeait pas”
 				// on ne revert plus pour que le clic soit visible.
 				// Si tu veux vraiment revert uniquement en cas de problème réseau critique :
 				// preview.src = user.avatar_url ?? AVATAR_DEFAUT;
