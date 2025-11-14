@@ -1,3 +1,4 @@
+import { profile } from "../app";
 import { ChatHeader } from "./ChatHeader";
 import { ChatSendInput } from "./ChatSendInput";
 import { Settings } from "./Settings";
@@ -24,13 +25,13 @@ export function Intra(): HTMLElement {
     const chatMenu = ChatHeader();
 
     const p = document.createElement("p");
-    p.textContent = "Bienvenue dans le chat !";
-    chatWidget.appendChild(p);
-
+    p.textContent = `Bienvenue dans le chat ${profile.username} !`;
+    
     const messages = document.createElement("div");
     messages.id = "messages";
     messages.className = "flex-1 overflow-y-auto p-2";
-
+    
+    chatWidget.appendChild(p);
     chatWidget.appendChild(chatTabs);
     chatWidget.appendChild(chatMenu);
     chatWidget.appendChild(messages);

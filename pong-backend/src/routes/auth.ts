@@ -14,7 +14,6 @@ import { UsersModel } from '../models/usersModel.js';
 
 export default async function authRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
-    const usersModel = new UsersModel(db);
 
     fastify.post('/guest', {
         schema: { body: guestPostSchema },

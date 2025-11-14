@@ -1,8 +1,8 @@
 import { globalEventListeners } from "./events/globalEventListeners";
 import { renderRoute } from "./utils";
 
-export const id = {
-	username: "", id: -1
+export const profile = {
+	username: "", id: -1, email: ""
 }
 
 export const jwt = {token: ""};

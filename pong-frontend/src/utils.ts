@@ -1,7 +1,7 @@
-import { id } from "./app";
+import { jwt, profile } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
 import { endpoint } from "./endPoints";
-import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView } from "./views";
+import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView, profileView} from "./views";
 
 export function navigateTo(path: string) {
     history.pushState({}, "", path);
@@ -15,17 +15,18 @@ const routes: Record<string, (root: HTMLElement) => void> = {
     "/login": loginView,
     "/register": registerView,
     "/guest": guestView,
-    "/auth": twoFactorAuthenticationView
+    "/auth": twoFactorAuthenticationView,
+    "/profile": profileView
 };
 
 export function renderRoute(path: string) {
-    const protectedRoutes = ["/match", "/intra"];
+    const protectedRoutes = ["/match", "/intra", "/profile"];
 
-    console.log(`username: ${id.username}`);
+    console.log(`username: ${profile.username}`);
     const root = document.getElementById("root")!;
     const view = routes[path] || defaultView;
 
-    if (protectedRoutes.includes(path) && id.username === "") {
+    if (protectedRoutes.includes(path) && profile.username === "") {
         navigateTo("/");
         const alertBox = CreateAlert("You must be logged in to access this page.", "error");
         const viewContainer = document.getElementById("view-container");
@@ -43,34 +44,73 @@ export function setTime(ms: number, func: () => void): Promise<void> {
     });
 }
 
-export async function fetchRequest(
-    path: string,
-	method: string,
-    headers: Record<string, string>,
-    options: Record<string, string> = {}) {
+// export async function fetchRequest(
+//     path: string,
+// 	method: string,
+//     headers: Record<string, string>,
+//     options: Record<string, string> = {}) {
 
+//     const url = `${endpoint.pong_backend_api}${path}`;
+//     const defaultHeaders = {
+//         'Content-Type': 'application/json',
+//         // Add auth token
+//         //'Authorization': `Bearer ${token}`,
+//     };
+
+//     try {
+//         const response = await fetch(url, {
+//             method: method,
+//             headers: { ...defaultHeaders, ...headers },
+//             ...options,
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message || 'API error');
+//         }
+
+//         return await response.json();
+//     } catch (err) {
+//         console.error(`Fetch error on ${endpoint}:`, err);
+//         throw err;
+//     }
+// }
+
+export async function fetchRequest
+(
+    path: string,
+    method: string,
+    headers: Record<string, string> = {},
+    body?: any
+) 
+{
     const url = `${endpoint.pong_backend_api}${path}`;
-    const defaultHeaders = {
+
+    const defaultHeaders: Record<string, string> =
+    {
         'Content-Type': 'application/json',
-        // Add auth token
-        //'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${jwt.token}`
     };
 
-    try {
+    try
+    {
         const response = await fetch(url, {
-            method: method,
-            headers: { ...defaultHeaders, ...headers },
-            ...options,
-        });
+        method,
+        headers: { ...defaultHeaders, ...headers },
+        body: method !== 'GET' && body !== undefined ? JSON.stringify(body) : undefined,});
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'API error');
+        if (!response.ok)
+        {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || `API error (${response.status})`);
         }
+        if ('accessToken' in response) jwt.token = response.accessToken as string;
 
         return await response.json();
-    } catch (err) {
-        console.error(`Fetch error on ${endpoint}:`, err);
+    } 
+    catch (err)
+    {
+        console.error(`Fetch error on ${url}:`, err);
         throw err;
     }
 }

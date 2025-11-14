@@ -37,3 +37,4 @@ class ChatBlockController {
 }
 
 export { ChatBlockController };
+

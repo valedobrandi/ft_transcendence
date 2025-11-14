@@ -1,4 +1,5 @@
 import db from '../db.js';
+import bcrypt from 'bcrypt';
 
 // Sample users
 const users = [
@@ -27,6 +28,13 @@ const users = [
 		username: 'bob',
 		email: 'bob@example.com',
 		password: 'hashed_password_2',
+		status: 'disconnect',
+		twoFA_enabled: 0,
+	},
+	{
+		username: 'lola',
+		email: 'lola@example.com',
+		password: bcrypt.hashSync('pass', 10),
 		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
