@@ -17,12 +17,19 @@ const AVATAR3 = "/default/avatar3.jpg"
 
 export function ProfilePage(): HTMLElement {
 	const root = document.createElement("div");
-	root.className = "relative min-h-screen flex flex-col bg-gradient-to-r from-mblue-500 to-mblue-100";
+	root.className = "relative min-h-screen flex flex-col";
 
 	// Background image
-	const bg = document.createElement("div");
-	bg.className = "absolute inset-0 bg-[url('/paw.png')] bg-no-repeat bg-[position:150%_center]";
-	root.appendChild(bg);
+	 const bg = document.createElement("div");
+  bg.className = `
+    absolute inset-0
+    bg-[url('/default/.jpg')]
+    bg-[length:100%_auto]
+    bg-center
+    bg-no-repeat
+    z-0
+`;
+    root.appendChild(bg);
 
 	// ---------- HEADER ----------
 	const header = document.createElement("header");
@@ -142,7 +149,7 @@ export function ProfilePage(): HTMLElement {
 
 	const emailInput = document.createElement("input");
 	emailInput.id = "change_email_input";
-	emailInput.type = "text";
+	emailInput.type = "email";
 	emailInput.placeholder = "change Email";
 	emailInput.className =
 		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
@@ -184,6 +191,7 @@ export function ProfilePage(): HTMLElement {
 	const passewordInput = document.createElement("input");
 	passewordInput.id = "current_password_input";
 	passewordInput.type = "password";
+	passewordInput.autocomplete = "off";
 	passewordInput.placeholder = "current Password";
 	passewordInput.className =
 	"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
@@ -232,7 +240,6 @@ export function ProfilePage(): HTMLElement {
 		payload.email = nextMail;
 	}
 
-
 	if (curPwd && newPwd)
 	{
 		payload.current_password = curPwd;
@@ -240,13 +247,15 @@ export function ProfilePage(): HTMLElement {
 	} 
 	else if (curPwd || newPwd) 
 	{
-		console.warn("Pour changer le mot de passe, remplis les deux champs.");
+		console.warn("To change the password, fill in both fields.");
+		alert("To change the password, fill in both fields.");
 		return;
 	}
 
 	if (Object.keys(payload).length === 0)
 	{
-		console.info("Aucune modification à envoyer.");
+		console.info("No changes to send.");
+		alert("No changes to send.");
 		return;
 	}
 
@@ -259,10 +268,14 @@ export function ProfilePage(): HTMLElement {
 		profile.username = data.payload.username;
 		profile.email = data.payload.email;
 
+		console.log("Profile updated", data);
 		window.location.reload();	
 	}
-	else 
-		console.error("Erreur lors du chargement du profil :", data);
+	else
+	{
+		console.error("Error loading profile: ", data);
+		alert("Error loading profile: " + (data.error || "Erreur inconnue"));
+	}
 
 	if (payload.username) profile.username = String(payload.username);
 	if (payload.email)    profile.email    = String(payload.email);
@@ -271,9 +284,9 @@ export function ProfilePage(): HTMLElement {
 	if (nameEl) nameEl.value = profile.username ?? "";
 	if (mailEl) mailEl.value = profile.email ?? "";
 
-	console.log("Profil mis à jour", data);
 	} catch (e) {
 	console.error("Erreur réseau :", e);
+	alert("Erreur lors de la mise à jour : " + (e || "Erreur inconnue"));
 	} finally {
 	//endBtn.setAttribute('disabled','false');;
 	}
