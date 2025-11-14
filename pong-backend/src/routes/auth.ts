@@ -26,19 +26,25 @@ export default async function authRoutes(fastify: FastifyInstance) {
     fastify.post('/register', async (request: FastifyRequest<{ Body: RegisterBody }>, res: FastifyReply) => {
         const { email, username, password } = request.body;
 
-        if (!email || !username || !password)
-            return res.status(400).send({ error: 'all fields are mandatory' });
-
-
+        if (!email && !username && !password)
+            return res.status(206).send({ status: 'error', message: 'All fields are mandatory' });
+        if (!username)
+            return res.status(206).send({ status: 'error', message: 'Username field is mandatory' });
+        if (username.length < 3)
+            return res.status(206).send({ status: 'error', message: 'Username must contain at least 3 characters' });
+        if (!email)
+            return res.status(206).send({ status: 'error', message: 'Email field is mandatory' });
+        if (!password)
+            return res.status(206).send({ status: 'error', message: 'Password field is mandatory' });
         // const resultat = existUser()
 
         const InstructionDBforFindUser = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?')
         const existingUser = InstructionDBforFindUser.get(email, username) as User | undefined;
         if (existingUser) {
             if (existingUser.email === email)
-                return res.status(400).send({ error: 'Email already in use' })
+                return res.status(206).send({ status: 'error', message: 'Email already in use' })
             if (existingUser.username === username)
-                return res.status(400).send({ error: 'Username already in use' })
+                return res.status(206).send({ status: 'error', message: 'Username already in use' })
         }
 
         const hash = await bcrypt.hash(password, 10);
