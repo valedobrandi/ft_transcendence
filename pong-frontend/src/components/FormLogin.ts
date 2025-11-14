@@ -11,30 +11,41 @@ export function FormLogin(): HTMLElement {
 	viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
 	viewDiv.style.backgroundSize = "cover";
 
+    // Create a card to store Form
     const card = document.createElement("div");
     card.className = "flex flex-col items-center bg-gray-950 border-4 border-gray-700 rounded-2xl shadow-lg px-20 py-12 w-[520px]";
 
-    const title = document.createElement("h1");
-    title.className = "game-font text-5xl text-[hsl(345,100%,47%)] text-shadow-lg/30 mb-8 text-center";
-    title.textContent = "WELCOME BACK";
-
+    // Create a form to store Title + Inputs + Button
     const formElement = document.createElement("form");
-    formElement.className = "flex flex-col justify-center items-center flex-grow gap-8";
+    formElement.className = "flex flex-col justify-center items-center flex-grow gap-20";
 
     formElement.onsubmit = (event) => {
         event.preventDefault();
         console.log("2FA code submitted");
     };
 
-	const inputPasswordUI = InputPassword();
+    // Add a title to the form
+    const title = document.createElement("h1");
+    title.className = "game-font text-5xl text-[hsl(345,100%,47%)] text-shadow-lg/30 mb-8 text-center";
+    title.textContent = "WELCOME BACK";
+    formElement.appendChild(title);
+
+    // Add inputs Name + Password to the form
+    const inputContainer = document.createElement("div");
+    inputContainer.className = "flex flex-col gap-10 w-full";
+
 	const inputNameUI = InputName();
+	inputContainer.appendChild(inputNameUI);
+	const inputPasswordUI = InputPassword();
+	inputContainer.appendChild(inputPasswordUI);
 
-    const sendBtn = FancyButton("login", "scale-100 h-14 w-60 game-font tracking-widest text-lg", () => {});
+    formElement.appendChild(inputContainer);
 
-	formElement.appendChild(inputNameUI);
-	formElement.appendChild(inputPasswordUI);
-    formElement.appendChild(sendBtn);
+    // Add button to the form
+    const loginButton = FancyButton("login", "scale-100 h-14 w-60 game-font tracking-widest text-lg", () => {});
+    formElement.appendChild(loginButton);
 
+    // Check inputs information
     formElement.onsubmit = async (e) => 
     {
         e.preventDefault();
@@ -67,7 +78,6 @@ export function FormLogin(): HTMLElement {
         }
     };
 
-    card.appendChild(title);
     card.appendChild(formElement);
     viewDiv.appendChild(card);
 
