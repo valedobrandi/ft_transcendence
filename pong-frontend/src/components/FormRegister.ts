@@ -1,39 +1,54 @@
-import { Button } from "./Button";
-import { HeaderBar } from "./HeaderBar";
+import { FancyButton } from "./Button";
 import { InputEmail } from "./InputEmail";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { id, jwt } from "../app";
+import { CreateAlert } from "./CreateAlert";
 
 export function Register(): HTMLElement {
 	const viewDiv = document.createElement("div");
-	viewDiv.className = "flex flex-col h-screen";
+	viewDiv.className = "flex items-center justify-center h-screen";
+	viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
+	viewDiv.style.backgroundSize = "cover";
 
-	const headerBar = HeaderBar("Register");
+	// Create a card to store Form
+	const card = document.createElement("div");
+	card.className = "flex flex-col items-center bg-gray-950 border-4 border-gray-700 rounded-2xl shadow-lg px-20 py-12 w-[520px]";
 
+	// Create a form to store Title + Inputs + Button
 	const formElement = document.createElement("form");
-	formElement.className = "flex flex-col justify-center items-center flex-grow gap-2 maw-w-sm mx-auto";
+	formElement.className = "flex flex-col justify-center items-center flex-grow gap-20";
 
     formElement.onsubmit = (e) => {
         e.preventDefault();
         console.log("2FA code submitted");
     };
 
-	const inputPasswordUI = InputPassword();
+	// Add a title to the form
+	const title = document.createElement("h1");
+	title.className = "game-font text-5xl text-[hsl(345,100%,47%)] text-shadow-lg/30 mb-8 text-center";
+	title.textContent = "WELCOME";
+	formElement.appendChild(title);
+
+	// Add inputs Name + Email + Password to the form
+	const inputContainer = document.createElement("div");
+	inputContainer.className = "flex flex-col gap-10 w-full";
+
 	const inputNameUI = InputName();
-	const inputEmailUi = InputEmail();
+	inputContainer.appendChild(inputNameUI);
+	const inputEmailUI = InputEmail();
+	inputContainer.appendChild(inputEmailUI);
+	const inputPasswordUI = InputPassword();
+	inputContainer.appendChild(inputPasswordUI);
 
-    const sendBtn = Button("register", "w-full", () => {});
-    
-	viewDiv.appendChild(headerBar);
-	viewDiv.appendChild(formElement);
-    
-	formElement.appendChild(inputNameUI);
-	formElement.appendChild(inputEmailUi);
-	formElement.appendChild(inputPasswordUI);
-    formElement.appendChild(sendBtn);
+	formElement.appendChild(inputContainer);
 
+	// Add button to the form
+    const registerButton = FancyButton("register", "scale-100 h-14 w-60 game-font tracking-widest text-lg", () => {});
+	formElement.appendChild(registerButton);
+
+	// Check inputs information
 	formElement.onsubmit = async (e) => {
 		e.preventDefault();
 
@@ -46,11 +61,6 @@ export function Register(): HTMLElement {
 		const email = email_input.value.trim();
 		const password = password_input.value.trim();
 
-		if (username.length < 3) {
-			alert("username not valid.");
-			return;
-		}
-
 		const response = await fetchRequest(
 			`/register`,'POST',{},
 			{ body: JSON.stringify({ username, email, password}) }
@@ -61,7 +71,16 @@ export function Register(): HTMLElement {
 			id.id = response.payload.id;
 			navigateTo("/intra");
 		}
+		else if (response.status === 'error') {
+			const existingAlert = document.getElementById("alert-popup");
+			if (existingAlert)
+				existingAlert.remove();
+			document.getElementById('root')?.prepend(CreateAlert(response.message));
+		}
 	};
-    
+
+	card.appendChild(formElement);
+	viewDiv.appendChild(card);
+
 	return viewDiv;
 }
