@@ -2,32 +2,57 @@ import db from '../db.js';
 import bcrypt from 'bcrypt';
 
 // Sample users
+function hashed_password(password: string) {
+	return bcrypt.hashSync(password, 10);
+}
+
 const users = [
 	{
 		username: 'INTRA',
 		email: 'admin',
-		password: 'hashed_password_admin',
+		password: hashed_password('admin'),
 		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
-		username: 'guest',
-		email: 'guest@guest.com',
-		password: 'hashed_password_3',
+		username: 'john_doe',
+		email: 'john_doe@example.com',
+		password: hashed_password('123'),
 		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
-		username: 'alice',
-		email: 'alice@example.com',
-		password: 'hashed_password_1',
+		username: 'NoobMaster',
+		email: 'NoobMaster@example.com',
+		password: hashed_password('123'),
 		status: 'disconnect',
-		twoFA_enabled: 1,
+		twoFA_enabled: 0,
 	},
 	{
-		username: 'bob',
-		email: 'bob@example.com',
-		password: 'hashed_password_2',
+		username: 'bobMarley',
+		email: 'bobMarley@example.com',
+		password: hashed_password('123'),
+		status: 'disconnect',
+		twoFA_enabled: 0,
+	},
+	{
+		username: 'proGamer',
+		email: 'proGamer@example.com',
+		password: hashed_password('123'),
+		status: 'disconnect',
+		twoFA_enabled: 0,
+	},
+	{
+		username: 'aliceWonder',
+		email: 'aliceWonder@example.com',
+		password: hashed_password('123'),
+		status: 'disconnect',
+		twoFA_enabled: 0,
+	},
+	{
+		username: 'charlie123',
+		email: 'charlie123@example.com',
+		password: hashed_password('123'),
 		status: 'disconnect',
 		twoFA_enabled: 0,
 	},

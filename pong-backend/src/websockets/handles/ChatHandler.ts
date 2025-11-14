@@ -1,22 +1,31 @@
+import db from "../../../database/db.js";
 import { chatStore } from "../../classes/ChatStore.js";
+import { ChatBlockModel } from "../../models/chatBlockModel.js";
+import { print } from "../../server.js";
 import { connectedRoomInstance } from "../../state/ConnectedRoom.js";
 import { ChatHistory } from "../../types/ChatHistory.js";
 import { ChatMessage } from "../../types/ChatMessage.js";
 import { ChatType } from "../types.js";
 
 class ChatHandler {
+    private chatBlockModel = new ChatBlockModel(db);
 
     service(data: ChatType) {
         const {receiverId, senderId, receiver, sender, message} = data;
 
-        var isBlocked;
-        const to = connectedRoomInstance.getByName(receiver);
-        const from = connectedRoomInstance.getByName(sender);
+        print(`[CHAT] senderId: ${senderId} receiverId: ${receiverId}: ${message}`);
 
-        if (to !== undefined) isBlocked = to.chat.isUserBlocked(senderId) ? 1 : 0;
+        const to = connectedRoomInstance.getById(Number(receiverId));
+        const from = connectedRoomInstance.getById(Number(senderId));
+
+        // Check the chatBlock database to see if the receiver has blocked the sender
+        const chatBlockDB = this.chatBlockModel.getBlockedUsers(Number(receiverId))
+            .data.includes(Number(senderId))
         
-        chatStore.addMessageToDataBase(senderId, receiverId, message, isBlocked);
-        const history = chatStore.getHistory(senderId, receiverId);
+        const isBlocked = chatBlockDB ? 1 : 0;
+
+        chatStore.addMessageToDataBase(Number(senderId), Number(receiverId), message, isBlocked);
+        const history = chatStore.getHistory(Number(senderId), Number(receiverId));
 
         // Extract [senderId, receiverId] from history
         const participants = chatStore.getSenders(history);

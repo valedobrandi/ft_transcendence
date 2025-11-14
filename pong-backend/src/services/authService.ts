@@ -27,14 +27,14 @@ class AuthService {
 
     guestLoginValidation(username: string): SaveUser {
         // Look if the user is connected in the room
-        const connectedUser = connectedRoomInstance.getByName(username);
+        const connectedUser = connectedRoomInstance.getById(username);
         if (connectedUser) {
             // Disconnect user first
             connectedRoomInstance.disconnect(username);
         }
 
         // Look for existing user
-        const existingUser = this.usersModelInstance.findUserByEmailOrUsername('', username);
+        const existingUser = this.usersModelInstance.findUserByEmailOrUsername(username);
         if (existingUser) {
             connectedRoomInstance.addUser(existingUser.username, Number(existingUser.id));
             return { message: 'success', username: existingUser.username, id: existingUser.id };

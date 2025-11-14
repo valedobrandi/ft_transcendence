@@ -1,4 +1,4 @@
-import { globalEventListeners } from "./events/globalEventListeners";
+import { eventListeners } from "./events/eventListeners";
 import { renderRoute } from "./utils";
 
 export const profile = {
@@ -9,5 +9,5 @@ export const jwt = {token: ""};
 
 export function init() {
     renderRoute(window.location.pathname);
-    globalEventListeners();
+    eventListeners();
 }

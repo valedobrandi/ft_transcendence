@@ -1,4 +1,4 @@
-import { jwt, profile } from "./app";
+import { profile, jwt } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
 import { endpoint } from "./endPoints";
 import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView, profileView} from "./views";
@@ -76,38 +76,71 @@ export function setTime(ms: number, func: () => void): Promise<void> {
 //     }
 // }
 
+// export async function fetchRequest
+// (
+// export async function fetchRequest(
+//     path: string,
+// 	method: string,
+//     headers: Record<string, string>,
+//     options: Record<string, string> = {}) {
+
+//     const url = `${endpoint.pong_backend_api}${path}`;
+//     const defaultHeaders = {
+//         'Content-Type': 'application/json',
+//         // Add auth token
+//         //'Authorization': `Bearer ${token}`,
+//     };
+
+//     try {
+//         const response = await fetch(url, {
+//             method: method,
+//             headers: { ...defaultHeaders, ...headers },
+//             ...options,
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message || 'API error');
+//         }
+
+//         return await response.json();
+//     } catch (err) {
+//         console.error(`Fetch error on ${endpoint}:`, err);
+//         throw err;
+//     }
+// }
+
 export async function fetchRequest
 (
     path: string,
-    method: string,
+	method: string,
     headers: Record<string, string> = {},
-    body?: any
-) 
-{
+    options: RequestInit = {}) {
+
     const url = `${endpoint.pong_backend_api}${path}`;
-
-    const defaultHeaders: Record<string, string> =
-    {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwt.token}`
+    const defaultHeaders:Record<string, string> = {
+        // Add auth token
+        'Authorization': `Bearer ${jwt.token}`,
     };
-
-    try
-    {
+    if (method === 'POST' || method === 'PUT') {
+        defaultHeaders['Content-Type'] = 'application/json';
+    }
+    console.log(`[REQUEST] ${method} ${url} with options:`, options);
+    try {
         const response = await fetch(url, {
-        method,
-        headers: { ...defaultHeaders, ...headers },
-        body: method !== 'GET' && body !== undefined ? JSON.stringify(body) : undefined,});
-
-        if (!response.ok)
-        {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(error.message || `API error (${response.status})`);
+            method: method,
+            headers: { ...defaultHeaders, ...headers },
+            ...options,
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'API error');
         }
         if ('accessToken' in response) jwt.token = response.accessToken as string;
-
-        return await response.json();
-    } 
+        const data = await response.json();
+        console.log(`[RESPONSE] ${method} ${url} response:`, data);
+        return data;
+    }
     catch (err)
     {
         console.error(`Fetch error on ${url}:`, err);

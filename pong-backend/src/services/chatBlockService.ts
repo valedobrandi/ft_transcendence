@@ -31,8 +31,7 @@ class ChatBlockService {
     getBlockedUsers(userId: number){
         const { status, data } = this.chatBlockInstance.getBlockedUsers(userId);
         if (status === "success") {
-            const blockedIds = data.map(entry => Number(entry.blocked_user_id));
-            return { status, data: blockedIds };
+            return { status, data };
         }
         return { status, data };
     }

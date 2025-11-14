@@ -8,6 +8,7 @@ export async function createSchema() {
 	db.exec(`DROP TABLE IF EXISTS friends`);
 	db.exec(`DROP TABLE IF EXISTS users`);
 	db.exec(`DROP TABLE IF EXISTS chatblock`);
+	db.exec(`DROP TABLE IF EXISTS events`);
 	db.exec('COMMIT');
 
 	db.exec(` CREATE TABLE IF NOT EXISTS users (
@@ -38,18 +39,16 @@ export async function createSchema() {
 			friend_id INTEGER NOT NULL,
 			created_at DATE DEFAULT (date('now')),
 			FOREIGN KEY(user_id) REFERENCES users(id),
-			FOREIGN KEY(friend_id) REFERENCES users(id),
-			UNIQUE(user_id, friend_id)
+			FOREIGN KEY(friend_id) REFERENCES users(id)
 			)`);
 
 	db.exec(` CREATE TABLE IF NOT EXISTS chatblock (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER NOT NULL,
-			blocked_user_id INTEGER NOT NULL,
+			blockedId INTEGER NOT NULL,
 			created_at DATE DEFAULT (date('now')),
 			FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-			FOREIGN KEY(blocked_user_id) REFERENCES users(id) ON DELETE CASCADE,
-			UNIQUE(user_id, blocked_user_id)
+			FOREIGN KEY(blockedId) REFERENCES users(id) ON DELETE CASCADE
 			)`);
 
 	db.exec(` CREATE TABLE IF NOT EXISTS messages (
@@ -58,11 +57,22 @@ export async function createSchema() {
 			receiver_id INTEGER NOT NULL,
 			content TEXT NOT NULL,
 			sender INTEGER NOT NULL,
-			delivered BOOLEAN DEFAULT 1,
+			isBlocked BOOLEAN DEFAULT 0,
 			timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE,
 			FOREIGN KEY(receiver_id) REFERENCES users(id) ON DELETE CASCADE)
 			`);
 
 	db.exec(` CREATE INDEX IF NOT EXISTS idx_messages_users ON messages (sender_id, receiver_id, timestamp)`);
+
+	db.exec(`CREATE TABLE IF NOT EXISTS events (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			type TEXT NOT NULL,
+			from_id INTEGER,
+			to_id INTEGER,
+			payload TEXT,
+			status TEXT DEFAULT 'pending',
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(from_id) REFERENCES users(id) ON DELETE CASCADE,
+			FOREIGN KEY(to_id) REFERENCES users(id) ON DELETE CASCADE)`);
 }

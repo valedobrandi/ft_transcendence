@@ -1,4 +1,4 @@
-export type GameEventsMap = {
+export type EventsMap = {
     'game:savehistory': {
         matchId: string;
         player1: string;

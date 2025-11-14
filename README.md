@@ -3,41 +3,57 @@ code 42 project
 
 # Endpoint Document
 
-# route: '/block-user'
+# BLOCK USER ROUTES
+
+route: '/add-block'
 type: 'POST'
 schema: {
-    type: 'object',
-    properties: {
-        userId: { type: 'number' },
-        blockedUserId: { type: 'number' },
-    },
-    required: ['userId', 'blockedUserId']
+    body: { id: { type: 'string' } }
 }
-status: 200 / 400
+response : [
+    {status: 200, message: 'success'}
+]
 
-# route: '/unblock-user'
+route: '/remove-block'
 type: 'DELETE'
 schema: {
-    type: 'object',
-    properties: {
-        userId: { type: 'number' },
-        blockedUserId: { type: 'number' },
-    },
-    required: ['userId', 'blockedUserId']
+    body: { id: { type: 'string' } }
 }
-status: 200 / 400
+response : [
+    {status: 200, message: 'success'}
+]
 
-# route: '/blocked-users/:userId'
+route: '/block-list'
 type: 'GET'
 schema: {
-    type: 'object',
-    properties: {
-        userId: { type: 'number' },
-    },
-    required: ['userId']
+    body: { id: { type: 'string' } }
 }
-status: 200 / 400
-data: {
-    payload: number[]
-} 
+response : [
+    {status: 200, payload: number[]}
+]
+
+# FRIEND ROUTES
+route: '/add-friend'
+type: 'POST'
+schema: {
+    body: { id: { type: 'string' } }
+}
+response : [
+    {status: 200, message: 'success'}
+]
+
+route: '/remove-friend'
+type: 'DELETE'
+schema: {
+    body: { id: { type: 'string' } }
+}
+response : [
+    {status: 200, message: 'success'}
+]
+
+route: '/friends-list
+type: 'GET'
+response : [
+    {status: 200, payload: number[]}
+]
 

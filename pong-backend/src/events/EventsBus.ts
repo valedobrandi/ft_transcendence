@@ -1,12 +1,12 @@
 import { EventEmitter } from 'events';
 import MatchesModel from '../models/matchesModel';
-import { GameEventsMap } from '../types/GameEvents';
+import { EventsMap } from '../types/GameEvents';
 
-export const gameEvents = new EventEmitter();
+export const events = new EventEmitter();
 
-gameEvents.setMaxListeners(10);
+events.setMaxListeners(10);
 
-class GameEventBus<Events extends Record<string, any>> {
+class EventBus<Events extends Record<string, any>> {
     private listeners = new Map<keyof Events, Function[]>();
 
     on<K extends keyof Events>(event: K, handler: (payload: Events[K]) => void): void {
@@ -28,7 +28,12 @@ class GameEventBus<Events extends Record<string, any>> {
             const { matchId, player1, player2, score1, score2 } = data;
             matchesModel.saveMatch(matchId, player1, player2, score1, score2);
         });
+
+        this.on('friend:add', (data) => {
+            const { userId, friendId } = data;
+            console.log(`User ${userId} added friend ${friendId}`);
+        });
     }
 }
 
-export const GameEvents = new GameEventBus<GameEventsMap>();
+export const eventsBus = new EventBus<EventsMap>();

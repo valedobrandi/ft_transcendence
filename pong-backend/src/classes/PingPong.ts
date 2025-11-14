@@ -1,4 +1,4 @@
-import { GameEvents, gameEvents } from "../events/gameEvents.js";
+import { eventsBus, events } from "../events/EventsBus.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { gameRoom } from "../state/gameRoom.js";
 import { userGameStateType } from "../types/GameStateType.js";
@@ -39,7 +39,7 @@ class PingPong {
     }
 
     getPlayer(id: string): PlayerType | undefined {
-        return connectedRoomInstance.getByName(id) || undefined;
+        return connectedRoomInstance.getById(id) || undefined;
     }
 
     resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
@@ -126,7 +126,7 @@ class PingPong {
     endMatch() {
         if (this.matchState === 'ENDED') return;
         this.matchState = 'ENDED';
-        
+
         const [playerXScore, playerYScore] = [this.gameState.userX.score, this.gameState.userY.score];
         // Compare de score and set winner and loser
         if (playerXScore > playerYScore) {
@@ -140,7 +140,7 @@ class PingPong {
             this.winnerId = this.side.LEFT;
             this.drawMatch = true;
         }
-        
+
         this.saveMatchHistory(playerXScore, playerYScore);
 
         console.log(`Winner: ${this.winnerId}`);
@@ -161,7 +161,7 @@ class PingPong {
                     }
                 }
             }
-            gameEvents.emit('tournament_match_end', {
+            events.emit('tournament_match_end', {
                 matchId: this.machId,
                 winnerId: this.winnerId,
                 loserId: this.loserId,
@@ -288,7 +288,7 @@ class PingPong {
     }
 
     saveMatchHistory(score1: number, score2: number) {
-        GameEvents.emit('game:savehistory', {
+        eventsBus.emit('game:savehistory', {
             matchId: this.machId,
             player1: this.side.LEFT,
             player2: this.side.RIGHT,

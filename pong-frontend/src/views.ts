@@ -7,7 +7,7 @@ import { FormLogin } from "./components/FormLogin";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { ProfilePage } from "./components/FormProfile";
 import { websocketConnect } from "./websocket/websocketConnect";
-import { messageState } from "./states/messageState";
+import { stateProxyHandler } from "./states/stateProxyHandler";
 import { FormGuest } from "./components/FormGuest";
 import { endpoint } from "./endPoints";
 import { initSocket } from "./websocket";
@@ -21,7 +21,7 @@ export function intraView(root: HTMLElement) {
 	const menuUI = Menu();
 	root.appendChild(menuUI);
 	root.appendChild(intraUI);
-	messageState.selectChat = { id: 1, name: 'INTRA' };
+	stateProxyHandler.selectChat = { id: -1, name: 'Bienvenue dans le chat !' };
 }
 
 export function matchView(root: HTMLElement) {
