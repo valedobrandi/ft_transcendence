@@ -7,14 +7,12 @@ import { playerStatus } from '../enum_status/enum_userStatus.js';
 import { ProfileControler } from '../controllers/profileController.js';
 
 
-export default function profilRoute(fastify: FastifyInstance)
-{
-    const profileController = new ProfileControler();
+export default async function profilRoute(fastify: FastifyInstance) {
 
     fastify.get('/profile', {
         preHandler: [fastify.authenticate],
         handler: (async (request: FastifyRequest, res) => {
-            return res.status(200).send({user: request.user});
+            return res.status(200).send({user: request.userId});
         })
     });
 

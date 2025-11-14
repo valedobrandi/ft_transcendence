@@ -50,23 +50,23 @@ export default async function loginRoutes(fastify: FastifyInstance) {
         {
             const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username};
 
-            // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
-            // if(!refreshToken)
-            //     return res.status(404).send({error: "RefreshToken not found"});
+            // // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
+            // // if(!refreshToken)
+            // //     return res.status(404).send({error: "RefreshToken not found"});
 
-            // db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
+            // // db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
 
             const accessToken = fastify.jwt.sign(payload, { expiresIn: '10h' });
             if(!accessToken)
                 return res.status(404).send({error: "AccessToken not found"});
 
-            res.setCookie('refreshToken', refreshToken,
-            {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: "strict",
-                path: '/'
-            });
+            // res.setCookie('refreshToken', refreshToken,
+            // {
+            //     httpOnly: true,
+            //     secure: process.env.NODE_ENV === 'production',
+            //     sameSite: "strict",
+            //     path: '/'
+            // });
 
             return res.status(201).send({ message: 'success', payload: {accessToken, username}});
         }
