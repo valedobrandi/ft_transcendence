@@ -2,6 +2,13 @@ import { PingPong } from "../classes/PingPong.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";
 import { connectedRoomInstance } from "./ConnectedRoom.js";
 
+export type NewMatch = {
+    players: number[]
+    settings: {}
+}
+
+export const newMatchesQueue = new Map<string, NewMatch>();
+
 export const matchQueue: Set<string> = new Set();
 
 export const gameRoom = new Map<string, PingPong>();
