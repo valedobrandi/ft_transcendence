@@ -1,5 +1,5 @@
 import { stateProxyHandler, onMessageChange, type FriendListType, type ServerUsersList } from "../states/stateProxyHandler";
-import { id as userId } from "../app";
+import { profile } from "../app";
 
 
 export type ListType = "FRIENDS" | "SERVER";
@@ -29,7 +29,7 @@ export function List(
     }
 
     users.forEach((user) => {
-        if (Number(userId.id) === Number(user.id)) return;
+        if (Number(profile.id) === Number(user.id)) return;
         // Get name form serverUsers
         const serverUSer = stateProxyHandler.serverUsers.find((u) => u.id === user.id);
         const name = serverUSer ? serverUSer.name : "Unknown";

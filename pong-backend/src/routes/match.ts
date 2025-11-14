@@ -6,13 +6,13 @@ const matchesRoute = (fastify: FastifyInstance) => {
     //create match
     fastify.post('/match', (request: FastifyRequest<{Body: MatchBody}>, reply) =>
     {
-        
+
     });
 
-    fastify.post('/create-match', {
-        preHandler:[fastify.authenticate],
-        schema:{},
-    })
+    // fastify.post('/create-match', {
+    //     preHandler:[fastify.authenticate],
+    //     schema:() => {},
+    // })
 }
 
 class MatchesService {
@@ -22,5 +22,7 @@ class MatchesService {
             settings: {}
         }
         newMatchesQueue.set(crypto.randomUUID(), newMatch);
-    }   
+    }
 }
+
+export { matchesRoute };

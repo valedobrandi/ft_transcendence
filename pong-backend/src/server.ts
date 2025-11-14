@@ -1,7 +1,6 @@
 import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
 import fastifyCors from '@fastify/cors';
 import authRoutes from './routes/auth.js';
-import matchRoute from './routes/match.js';
 import loginRoute from './routes/login.js';
 import { friendsRoute } from './routes/friend.js';
 import websocketRoute from './routes/websocket.js';
@@ -10,6 +9,7 @@ import profilRoute from './routes/profil.js';
 import chatBlockRoute from './routes/chatBlock.js';
 import { eventsRoutes } from './routes/events.js';
 import cookie from '@fastify/cookie';
+import { matchesRoute } from './routes/match.js';
 
 const fastify = Fastify({
 	logger: {
@@ -33,11 +33,6 @@ declare module 'fastify' {
 
 fastify.decorateRequest("userId", null);
 
-
-fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
-	try
-	{
-		const decoded = await request.jwtVerify();
 
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
 	try
@@ -83,41 +78,6 @@ fastify.decorate('authenticate', async function (request: FastifyRequest, reply:
 	}
 });
 
-fastify.register(cookie, {
-  secret: process.env.COOKIE_SECRET,   // optionnel, pour cookies signés
-  hook: 'onRequest',                   // parse les cookies tôt
-
-	}
-	catch (AcessTokenErr)
-	{
-		const refreshToken = request.cookies?.refreshCookie;
-
-		if (!refreshToken) {
-			return reply.status(401).send({ message: 'Non autorisé, pas de refresh token' });
-		}
-		try
-		{
-			const refreshPayload = fastify.jwt.verify(refreshToken);
-			const newAccessToken = fastify.jwt.sign({ user: request.user}, { expiresIn: '4h' });
-            if(!newAccessToken)
-                return reply.status(404).send({error: "AccessToken not found"});
-
-            reply.setCookie('accessToken', newAccessToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "strict",
-            path: '/'
-            });
-
-			const decoded = fastify.jwt.verify(newAccessToken);
-        	request.user = decoded;
-		}
-		catch (refreshTokenErr)
-		{
-			reply.status(401).send({err: "refresh Token in cookie expire"});
-		}
-	}
-});
 
 fastify.register(cookie, {
   secret: process.env.COOKIE_SECRET,   // optionnel, pour cookies signés
@@ -133,7 +93,7 @@ fastify.register(loginRoute);
 fastify.register(authRoutes);
 fastify.register(profilRoute);
 fastify.register(eventsRoutes);
-fastify.register(matchRoute);
+fastify.register(matchesRoute);
 fastify.register(friendsRoute);
 fastify.register(chatBlockRoute);
 await fastify.register(websocketRoute);

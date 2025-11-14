@@ -1,4 +1,4 @@
-import { id } from "../app";
+import { profile } from "../app";
 import { playerSideState } from "../context";
 import type { ChatDataHistory } from "../interface/ChatHistory";
 import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
@@ -40,7 +40,7 @@ export async function websocketReceiver(socket: WebSocket) {
 			case 'CHAT_MESSAGE':
 				if ('sender' in data && 'history' in data) {
 					// Get the sender id by filter out my own id
-					const sender = data.sender.find((sid: number) => sid !== id.id);
+					const sender = data.sender.find((sid: number) => sid !== profile.id);
 					if (!sender) return;
 					stateProxyHandler.messages.set(sender, data.history);
 					stateProxyHandler.state = data.message;
@@ -49,7 +49,7 @@ export async function websocketReceiver(socket: WebSocket) {
 			case 'CHAT_HISTORY':
 				if ('history' in data) {
 					data.history.forEach(({ sender, history }: ChatDataHistory) => {
-						const filteredSender = sender.find((sid: number) => sid !== id.id);
+						const filteredSender = sender.find((sid: number) => sid !== profile.id);
 						if (filteredSender) {
 							stateProxyHandler.messages.set(filteredSender, history);
 						}

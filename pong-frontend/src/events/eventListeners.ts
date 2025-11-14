@@ -1,4 +1,4 @@
-import { id } from "../app";
+import { profile } from "../app";
 import { setButtonToBlockState, setButtonToUnblockState } from "../components/ChatHeader";
 import { addIntraMessage, deleteIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { fetchRequest, renderRoute } from "../utils";
@@ -14,7 +14,7 @@ export function eventListeners() {
       socket.send(
         JSON.stringify({
           type: "MOVE_PADDLE",
-          id: id,
+          id: profile.id,
           payload: { up, down },
         })
       );
@@ -41,7 +41,7 @@ export function eventListeners() {
               }),
             }
           );
- 
+
           if (response.message === "success") {
             addIntraMessage(
               `User ${stateProxyHandler.selectChat.name} has been blocked.`
@@ -118,7 +118,7 @@ export function eventListeners() {
             {
               body: JSON.stringify({
                 to_id: stateProxyHandler.selectChat.id,
-                from_id: Number(id.id),
+                from_id: Number(profile.id),
                 type: "friend:add",
                 message: "",
               }),
