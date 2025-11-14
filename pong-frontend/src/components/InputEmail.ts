@@ -1,20 +1,24 @@
 export function InputEmail() {
-	const fieldset = document.createElement("fieldset");
-	fieldset.className = "border p-4 rounded max-w-xs w-full";
+	const container = document.createElement("div");
+	container.className = "flex flex-col gap-1";
 
-	const legend = document.createElement("legend");
-	legend.className = "text-sm font-semibold text-gray-700";
-	legend.textContent = "Email";
+	const label = document.createElement("label");
+	label.htmlFor = "register_email"
+	label.className = "text-sm font-semibold text-gray-300 tracking-wide";
+	label.textContent = "Email";
 
-	const nameInput = document.createElement("input");
-	nameInput.type = "email";
-	nameInput.id = "register_email";
-	nameInput.placeholder = "Enter your email";
-	nameInput.className = `px-4 py-2 border rounded w-full
-		focus:outline-none focus:ring-2 focus:ring-blue-500`;
+	const input = document.createElement("input");
+	input.id = "register_email";
+	input.type = "email";
+	input.placeholder = "Enter your email";
+	input.className = `
+		bg-gray-800 text-gray-100 px-4 py-3 rounded-lg border border-gray-700
+		focus:outline-none focus:ring-2 focus:ring-[hsl(345,100%,47%)] focus:border-transparent
+		placeholder-gray-500 transition-all duration-200
+	`;
 
-	fieldset.appendChild(legend);
-	fieldset.appendChild(nameInput);
+	container.appendChild(label);
+	container.appendChild(input);
 
-	return fieldset;
+	return container;
 }

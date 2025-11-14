@@ -9,7 +9,7 @@ export async function websocketReceiver(socket: WebSocket) {
 	socket.addEventListener('message', async (event) => {
 		const data = JSON.parse(event.data);
 		if (data.message != 'STATE') {
-			console.log('Message from server ', data);
+			console.log('[WEBSOCKET RECEIVER] ', data);
 		}
 		switch (data.message) {
 			case 'CONNECT_ROOM':

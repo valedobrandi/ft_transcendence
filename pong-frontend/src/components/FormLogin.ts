@@ -27,8 +27,20 @@ export function FormLogin(): HTMLElement {
 		console.log("2FA code submitted");
 	};
 
-	const inputPasswordUI = InputPassword();
+    // Add a title to the form
+    const title = document.createElement("h1");
+    title.className = "game-font text-5xl text-[hsl(345,100%,47%)] text-shadow-lg/30 mb-8 text-center";
+    title.textContent = "WELCOME BACK";
+    formElement.appendChild(title);
+
+    // Add inputs Name + Password to the form
+    const inputContainer = document.createElement("div");
+    inputContainer.className = "flex flex-col gap-10 w-full";
+
 	const inputNameUI = InputName();
+	inputContainer.appendChild(inputNameUI);
+	const inputPasswordUI = InputPassword();
+	inputContainer.appendChild(inputPasswordUI);
 
 	const sendBtn = FancyButton("login", "scale-100 h-14 w-60 game-font tracking-widest text-lg", () => { });
 

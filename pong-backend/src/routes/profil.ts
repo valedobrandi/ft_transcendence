@@ -12,7 +12,7 @@ export default async function profilRoute(fastify: FastifyInstance) {
     fastify.get('/profile', {
         preHandler: [fastify.authenticate],
         handler: (async (request: FastifyRequest, res) => {
-            return res.status(200).send({user: request.userId});
+            return res.status(200).send({message: 'success', user: request.userId});
         })
     });
 
@@ -35,7 +35,7 @@ export default async function profilRoute(fastify: FastifyInstance) {
 
         try {
             updatedUserInDB(player);
-            return res.status(200).send({ message: 'Profile updated successfully', user: player });
+            return res.status(200).send({ message: 'success', user: player});
         }
         catch (error) {
             const err = error as Error;
