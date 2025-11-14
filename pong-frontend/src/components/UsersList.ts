@@ -1,5 +1,5 @@
-import { messagerState, onMessagerChange } from "../states/messagerState";
-import { profile as userId }  from "../app";
+import { messageState, onMessageChange } from "../states/messageState";
+import { id as userId }  from "../app";
 
 export function UsersList(): HTMLDivElement {
     const usersDiv = document.createElement("div");
@@ -7,25 +7,37 @@ export function UsersList(): HTMLDivElement {
 
     function render() {
         usersDiv.innerHTML = "";
-        messagerState.connected.forEach(({ name, id }) => {
+        messageState.friendList.forEach(({ name, id }) => {
 
             if (userId.username === name) return;
 
-             const btn = document.createElement("button");
+            const btn = document.createElement("button");
             // Show the first 10 characters of the name
             btn.textContent = `${name.substring(0, 10)}`;
             btn.className = `${name} flex justify-center items-center border-b
-                border-gray-300 p-2 w-full text-center hover:bg-green-100`;
-            btn.id = `chat-select`;
+                border-gray-300 p-2 w-full text-center hover:bg-gray-100`;
+            btn.id = `chat-select-${name}`;
             console.log("Rendering user button for:", name, id);
             btn.value = `${name}`;
             btn.name = `${id}`;
             usersDiv.appendChild(btn);
 
         });
+        // Add bg-gray-100 to the selected chat button
+        Array.from(document.getElementsByClassName(messageState.selectChat.name)).forEach((elem) => {
+            elem.classList.add("bg-gray-100");
+        });
     }
 
     render();
-    onMessagerChange(render);
+    onMessageChange(render);
     return usersDiv;
+}
+
+export function selectChatByButton(button: HTMLButtonElement) {
+    const chatName = button.value;
+    const chatId = button.name;
+    console.log("Selected chat:", chatName, chatId);
+
+    messageState.selectChat = { name: chatName, id: Number(chatId) };
 }

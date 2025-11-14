@@ -41,7 +41,7 @@ const users = [
 ];
 
 
-export function seedUsers() {
+export async function seedUsers() {
 	const insertUser = db.prepare(`
     INSERT INTO users (username, email, password, status, twoFA_enabled)
     VALUES (@username, @email, @password, @status, @twoFA_enabled)

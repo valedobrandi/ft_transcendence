@@ -9,8 +9,7 @@
         "test": "vitest --run --reporter verbose",
         "database": "tsx /app/database/init.ts",
         "print": "tsx /app/database/table_print.ts",
-        "dev": "nodemon",
-        "backend": "docker exec -it pong-backend"
+        "dev": "nodemon"
     },
     "dependencies": {
         "@fastify/cookie": "^11.0.2",

@@ -1,6 +1,6 @@
 import db from "./db.js";
 
-export function createSchema() {
+export async function createSchema() {
 
 	db.exec('BEGIN');
 	db.exec(`DROP TABLE IF EXISTS messages`);
@@ -42,7 +42,6 @@ export function createSchema() {
 			UNIQUE(user_id, friend_id)
 			)`);
 
-	// chatblockusers Table
 	db.exec(` CREATE TABLE IF NOT EXISTS chatblock (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER NOT NULL,
@@ -59,6 +58,7 @@ export function createSchema() {
 			receiver_id INTEGER NOT NULL,
 			content TEXT NOT NULL,
 			sender INTEGER NOT NULL,
+			delivered BOOLEAN DEFAULT 1,
 			timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE,
 			FOREIGN KEY(receiver_id) REFERENCES users(id) ON DELETE CASCADE)

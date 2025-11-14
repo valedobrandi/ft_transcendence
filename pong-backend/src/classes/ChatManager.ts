@@ -1,24 +1,54 @@
-import { chatHandler } from "../sockets/handles/CHAT.js";
-import { connectedRoomInstance } from "../state/connectedRoom.js";
-import { ChatHistory } from "../types/ChatHistory.js";
+import { chatHandler } from "../websockets/handles/ChatHandler.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
+import { ChatMessage } from "../types/ChatMessage.js";
+import { chatStore } from "./ChatStore.js";
 
 class ChatManager {
+    private id: number;
+    private username: string;
+    private blockedSet: Set<number | bigint>;
 
-    constructor(public userId: string) { }
+    constructor(id: number, username: string) {
+        this.id = id;
+        this.username = username;
+        this.blockedSet = new Set();
+    }
+
+    addToBlockedUsers(blockedUsers: number[]) {
+        this.blockedSet = new Set(blockedUsers);
+    }
+
+    removeFromBlockedUsers(blockedUserId: number) {
+        this.blockedSet.delete(blockedUserId);
+    }
+
+    isUserBlocked(userId: number): boolean {
+        return this.blockedSet.has(userId);
+    }
 
     getConversationId(userA: string, userB: string): string {
         return [userA, userB].sort().join('-');
     }
 
-    sendMessage(receiver: string, message: string, sender: string, history: ChatHistory[] = []) {
-        const send = connectedRoomInstance.getById(this.userId);
+    sendMessage(receiver: string, message: string, sender: number[], history: ChatMessage[] = []) {
+        const send = connectedRoomInstance.getByName(this.username);
 
         if (send && send.socket) {
             send.socket.send(JSON.stringify(
-                chatHandler.sendSocket().CHAT_MESSAGE(receiver, message, sender, history)
+                chatHandler.controller().CHAT_MESSAGE(sender, history)
             ));
         };
 
+    }
+
+    sendHistory() {
+        const user = connectedRoomInstance.getByName(this.username);
+        if (!user || !user.socket) return;
+
+        const getChatHistory = chatStore.getChatHistories(this.id);
+        user.socket.send(JSON.stringify(
+            chatHandler.controller().CHAT_HISTORY(getChatHistory)
+        ));
     }
 }
 

@@ -1,6 +1,6 @@
 import { PingPong } from "../classes/PingPong.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";
-import { connectedRoomInstance } from "./connectedRoom.js";
+import { connectedRoomInstance } from "./ConnectedRoom.js";
 
 export const matchQueue: Set<string> = new Set();
 
@@ -8,7 +8,7 @@ export const gameRoom = new Map<string, PingPong>();
 
 export function joinMatchRoom(id: string) {
 	matchQueue.add(id);
-    const player = connectedRoomInstance.getById(id);
+    const player = connectedRoomInstance.getByName(id);
     if (player == undefined) return;
 	player.status = 'MATCH_QUEUE';
     if (player.socket) {

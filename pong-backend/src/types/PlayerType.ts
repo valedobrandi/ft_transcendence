@@ -14,6 +14,7 @@ export interface PlayerType {
     matchId: string;
     tournamentId: string | undefined;
     chat: ChatManager;
+    friendSet: Set<number | bigint>;
 }
 
 export interface PlayerStatType {
