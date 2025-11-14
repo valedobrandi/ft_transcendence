@@ -28,7 +28,7 @@ export async function websocketConnect() {
 		}));
 
 		websocketReceiver(socket);
-		addIntraMessage(`${id.username} connected.`);
+		addIntraMessage(`${profile.username} connected.`);
 
 		await websocketNewEvents();
 

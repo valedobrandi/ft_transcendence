@@ -1,6 +1,7 @@
 import db from "../../database/db.js";
 import ChatManager from "../classes/ChatManager.js";
 import { UsersModel } from "../models/usersModel.js";
+import { print } from "../server.js";
 import { PlayerType } from "../types/PlayerType.js";
 import type { WebSocket } from 'ws';
 
@@ -20,6 +21,7 @@ export class ConnectedRoom {
 			friendSet: new Set<number | bigint>(),
 		};
 
+		print(`[ONLINE]: ${name} (${id})`);
 		if (this.room.has(id) === false) {
 			this.room.set(id, user);
 			return true;
@@ -52,11 +54,13 @@ export class ConnectedRoom {
 
 	addWebsocket(id: number, socket: WebSocket) {
 		const player = this.room.get(Number(id));
-		if (player) {
-			player.socket = socket;
-			this.broadCastRegisteredUsers();
-			this.broadcastFriendStatus(Number(player.id));
-		}
+
+		if (player === undefined) throw new Error("disconnected");
+
+		player.socket = socket;
+		this.broadCastRegisteredUsers();
+		this.broadcastFriendStatus(Number(player.id));
+
 	}
 
 	dropWebsocket(id: number) {
@@ -75,7 +79,8 @@ export class ConnectedRoom {
 			id: user.id,
 			name: user.username
 		}));
-		// Sort by id so that INTRA is first
+		print(`[BROADCAST USERS REGISTER]: ${registeredUsers.length}`);
+		// SORT OUT ADMIN INTRA
 		registeredUsers.sort((a, b) => a.id === 1 ? -1 : 1).splice(0, 1);
 		this.room.forEach(({ socket }) => {
 			if (socket) socket.send(JSON.stringify({ status: 200, message: 'SERVER_USERS', users: registeredUsers }));

@@ -13,13 +13,13 @@ import { matchesRoute } from './routes/match.js';
 
 const fastify = Fastify({
 	logger: {
-		level: 'info',
+		level: 'error',
 		transport: {
 			target: 'pino-pretty',
 			options: {
 				colorize: true,
 				translateTime: 'SYS:standard',
-				ignore: 'pid,hostname,time,level,version,remoteAddress,remotePort,host',
+				ignore: 'pid,hostname,time',
 			},
 		},
 	}
