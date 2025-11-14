@@ -1,4 +1,4 @@
-import { id } from "../app";
+import { profile } from "../app";
 import type { ChatMessage } from "../interface/ChatMessage";
 import { navigateTo, setTime } from "../utils";
 import { websocketChatSend } from "../websocket/websocketChatSend";
@@ -45,7 +45,7 @@ export function renderChatMessages(_: string, selectedChatId: number) {
         const p = document.createElement('p');
         p.id = `msg-${msg.timestamp}`;
         p.className = "m-2 text-sm text-black";
-        if (Number(msg.from) === Number(id.id)) {
+        if (Number(msg.from) === Number(profile.id)) {
             p.className += " bg-green-100 p-2 rounded w-fit ml-auto";
         } else {
             p.className += " bg-gray-100 p-2 rounded w-fit";
