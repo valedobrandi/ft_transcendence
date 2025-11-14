@@ -26,18 +26,31 @@ export default async function loginRoutes(fastify: FastifyInstance) {
         }
         else if (!password) {
             return res.status(206).send({ status: 'error', message: 'Password field is mandatory' })
+        if (!username && !password) {
+            return res.status(206).send({ status: 'error', message: 'All fields are mandatory' })
+        }
+
+        if (!username) {
+            return res.status(206).send({ status: 'error', message: 'Username field is mandatory' })
+        }
+        else if (!password) {
+            return res.status(206).send({ status: 'error', message: 'Password field is mandatory' })
         }
 
         const existingUser = usersModel.findUserByUsername(username) as User | undefined;
+        const existingUser = usersModel.findUserByUsername(username) as User | undefined;
         if (existingUser === undefined) {
+            return res.status(206).send({ status: 'error', message: 'This username does not exist', existingUser })
             return res.status(206).send({ status: 'error', message: 'This username does not exist', existingUser })
         }
 
         const passwordMatches = await bcrypt.compare(password, existingUser.password);
         if (!passwordMatches) {
           return res.status(206).send({ status: 'error', message: 'Incorrect password' });
+          return res.status(206).send({ status: 'error', message: 'Incorrect password' });
         }
 
+        if (existingUser.twoFA_enabled)
         if (existingUser.twoFA_enabled)
         {
             const authRoom = authenticationRoomInstance;
@@ -54,6 +67,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
                 return res.status(200).send({ message: data });
             }
         }
+        }
         else
         {
             const payload = {id: existingUser.id, username: existingUser.username};
@@ -61,13 +75,24 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             // // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
             // // if(!refreshToken)
             // //     return res.status(404).send({error: "RefreshToken not found"});
+            // // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
+            // // if(!refreshToken)
+            // //     return res.status(404).send({error: "RefreshToken not found"});
 
             // // db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
+            // // db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
 
+            const accessToken = fastify.jwt.sign(payload, { expiresIn: '10h' });
             const accessToken = fastify.jwt.sign(payload, { expiresIn: '10h' });
             if(!accessToken)
                 return res.status(404).send({error: "AccessToken not found"});
 
+            // res.setCookie('refreshToken', refreshToken,
+            // {
+            //     httpOnly: true,
+            //     secure: process.env.NODE_ENV === 'production',
+            //     sameSite: "strict",
+            //     path: '/'
             // res.setCookie('refreshToken', refreshToken,
             // {
             //     httpOnly: true,

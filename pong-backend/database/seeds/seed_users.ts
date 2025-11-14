@@ -59,10 +59,10 @@ const users = [
 	{
 		username: 'lola',
 		email: 'lola@example.com',
-		password: hashed_password('123'),
+		password: bcrypt.hashSync('pass', 10),
 		status: 'disconnect',
 		twoFA_enabled: 0,
-	}
+	},
 ];
 
 

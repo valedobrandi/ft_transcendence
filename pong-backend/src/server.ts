@@ -38,11 +38,54 @@ fastify.decorate('authenticate', async function (request: FastifyRequest, reply:
 	try
 	{
 		const decoded = await request.jwtVerify();
+
+fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
+	try
+	{
+		const decoded = await request.jwtVerify();
         print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
+		request.userId = decoded.id;
 		request.userId = decoded.id;
         if (!request.userId) {
             reply.code(401).send({ error: 'Unauthorized' });
+            reply.code(401).send({ error: 'Unauthorized' });
         }
+
+	}
+	catch (AcessTokenErr)
+	{
+		const refreshToken = request.cookies?.refreshCookie;
+
+		if (!refreshToken) {
+			return reply.status(401).send({ message: 'Non autorisé, pas de refresh token' });
+		}
+		try
+		{
+			const refreshPayload = fastify.jwt.verify(refreshToken);
+			const newAccessToken = fastify.jwt.sign({ user: request.user}, { expiresIn: '4h' });
+            if(!newAccessToken)
+                return reply.status(404).send({error: "AccessToken not found"});
+
+            reply.setCookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            path: '/'
+            });
+
+			const decoded = fastify.jwt.verify(newAccessToken);
+        	request.user = decoded;
+		}
+		catch (refreshTokenErr)
+		{
+			reply.status(401).send({err: "refresh Token in cookie expire"});
+		}
+	}
+});
+
+fastify.register(cookie, {
+  secret: process.env.COOKIE_SECRET,   // optionnel, pour cookies signés
+  hook: 'onRequest',                   // parse les cookies tôt
 
 	}
 	catch (AcessTokenErr)
@@ -97,7 +140,8 @@ await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {
 	origin: true,
-	methods: ['POST', 'OPTIONS', 'GET', 'DELETE', 'PUT', 'PUT'],
+	methods: ['POST', 'OPTIONS', 'GET', 'DELETE', 'PUT'],
+
 });
 
 export function print(message: string) {
