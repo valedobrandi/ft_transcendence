@@ -3,7 +3,6 @@ import { InputEmail } from "./InputEmail";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
-import { id, jwt } from "../app";
 import { CreateAlert } from "./CreateAlert";
 import { profile, jwt } from "../app";
 
@@ -64,7 +63,7 @@ export function Register(): HTMLElement {
 
 		const response = await fetchRequest(
 			`/register`,'POST',{},
-			{ username, email, password}
+			{body: JSON.stringify({username, email, password})}
 		);
 
 		if (response.message === 'success') {

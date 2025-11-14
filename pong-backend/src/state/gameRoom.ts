@@ -1,5 +1,6 @@
 import { PingPong } from "../classes/PingPong.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";
+import { PlayerType } from "../types/PlayerType.js";
 import { connectedRoomInstance } from "./ConnectedRoom.js";
 
 export type NewMatch = {
@@ -9,11 +10,11 @@ export type NewMatch = {
 
 export const newMatchesQueue = new Map<string, NewMatch>();
 
-export const matchQueue: Set<string> = new Set();
+export const matchQueue: Set<number> = new Set();
 
 export const gameRoom = new Map<string, PingPong>();
 
-export function joinMatchRoom(id: string) {
+export function joinMatchRoom(username: string, id: number) {
 	matchQueue.add(id);
     const player = connectedRoomInstance.getById(id);
     if (player == undefined) return;
@@ -32,8 +33,8 @@ export function getNextPlayers(): [string, string] | undefined {
 
     const iterator = matchQueue.values();
 
-    let playerX: string | undefined;;
-    let playerY: string | undefined;;
+    let playerX: PlayerType | undefined;
+    let playerY: PlayerType | undefined;
 
     while (playerX === undefined || playerY === undefined) {
         const next = iterator.next();
@@ -44,15 +45,15 @@ export function getNextPlayers(): [string, string] | undefined {
             matchQueue.delete(id);
             continue;
         }
-        if (playerX === undefined) playerX = id;
-        else if (playerY === undefined) playerY = id;
+        if (playerX === undefined) playerX = connectedRoomInstance.getById(id);
+        else if (playerY === undefined) playerY = connectedRoomInstance.getById(id);
 
     }
 
     if (playerX && playerY) {
-        matchQueue.delete(playerX);
-        matchQueue.delete(playerY);
-        return [playerX, playerY];
+        matchQueue.delete(Number(playerX.id));
+        matchQueue.delete(Number(playerY.id));
+        return [playerX.username, playerY.username];
     }
 
     return undefined;

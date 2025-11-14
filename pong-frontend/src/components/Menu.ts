@@ -19,7 +19,7 @@ export function Menu():HTMLDivElement {
 
     const matchBtn = Button('MATCH', "h-10 w-18 rounded", () => {
         if (!socket) return;
-        socket.send(JSON.stringify({ type: 'MATCH', username: profile.username }));
+        socket.send(JSON.stringify({ type: 'MATCH', username: profile.username, userId: profile.id }));
     });
     matchBtn.id = "match-btn";
 

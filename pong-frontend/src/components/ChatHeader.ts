@@ -1,5 +1,5 @@
-import { stateProxyHandler, onStateChange } from "../states/stateProxyHandler";
-import { profile, jwt } from "../app";
+import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
+import { profile } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
 
 export function ChatHeader(): HTMLDivElement {
@@ -10,19 +10,38 @@ export function ChatHeader(): HTMLDivElement {
 
 	const options = [
 		{ value: "view-profile", text: "View Profile" },
-		{ value: "friend-list", text: "add to friend list" },
+		{ value: "friend-list", text: "add a friend" },
 		{ value: "block-user", text: "Block User" },
 		{ value: "invite-user", text: "Invite to Game" }
 	]
+
 	function onRender() {
 		chatMenu.innerHTML = "";
 		options.forEach(opt => {
 			const btn = document.createElement("button");
 			btn.className = `px-4 py-2 bg-gray-200 hover:bg-gray-300
-		text-xs min-w-32 rounded cursor-pointer focus:outline-none`;
+			 uppercase w-full text-xs min-w-32 rounded cursor-pointer focus:outline-none`;
 			btn.id = `btn-${opt.value}`;
 			btn.value = opt.value;
 			btn.textContent = opt.text;
+
+			if (opt.value === "block-user") {
+				const isBlocked = stateProxyHandler.chatBlockList?.includes(stateProxyHandler.selectChat?.id || -1);
+				setButtonToUnblockState(btn);
+				if (isBlocked) {
+					setButtonToBlockState(btn);
+				}
+			}
+
+			if (opt.value === "friend-list") {
+				btn.classList.remove("opacity-50", "cursor-not-allowed");
+				btn.setAttribute("disable", "false");
+				const isFriend = stateProxyHandler.friendList?.some(friend => friend.id === stateProxyHandler.selectChat?.id);
+				if (isFriend) {
+					btn.classList.add("opacity-50", "cursor-not-allowed");
+					btn.setAttribute("disabled", "true");
+				}
+			}
 
 			if (opt.value === "view-profile") {
 				btn.onclick = profileOnclick;
@@ -31,6 +50,7 @@ export function ChatHeader(): HTMLDivElement {
 			chatMenu.appendChild(btn);
 		})
 	}
+
 	onRender();
 	onStateChange("chatBlockList", onRender);
 	onStateChange("selectChat", onRender);

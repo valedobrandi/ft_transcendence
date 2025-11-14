@@ -1,18 +1,32 @@
-import { FastifyRequest, FastifyInstance } from "fastify";
+import { FastifyRequest, FastifyInstance, FastifyReply } from "fastify";
 import {MatchBody, Match} from "../types/MatchType.js";
 import { NewMatch, newMatchesQueue } from "../state/gameRoom.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
-    //create match
-    fastify.post('/match', (request: FastifyRequest<{Body: MatchBody}>, reply) =>
+
+	const matcherController = new MAtcherController();
+
+	fastify.post('/match', (request: FastifyRequest<{Body: MatchBody}>, responser: FastifyReply) =>
     {
 
     });
 
-    // fastify.post('/create-match', {
-    //     preHandler:[fastify.authenticate],
-    //     schema:() => {},
-    // })
+    fastify.post('/create-match', {
+        preHandler:[fastify.authenticate],
+        schema:matcherController.createMatch.bind(matcherController),
+    })
+}
+
+class MAtcherController {
+	private matchesService: MatchesService;
+
+	constructor() {
+		this.matchesService = new MatchesService();
+	}
+
+	createMatch(id: number, settings: {}) {
+		return this.matchesService.createMatch(id, settings);
+	}
 }
 
 class MatchesService {

@@ -111,7 +111,15 @@ export class ConnectedRoom {
 
 	getById(id: number | bigint) {
 		return this.room.get(Number(id));
+	}
 
+	getByUsername(username: string) {
+		for (const player of this.room.values()) {
+			if (player.username === username) {
+				return player;
+			}
+		}
+		return undefined;
 	}
 
 	getBySocket(socket: WebSocket) {
