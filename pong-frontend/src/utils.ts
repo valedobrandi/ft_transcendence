@@ -125,7 +125,6 @@ export async function fetchRequest
     if (method === 'POST' || method === 'PUT') {
         defaultHeaders['Content-Type'] = 'application/json';
     }
-    console.log(`[REQUEST] ${method} ${url} with options:`, options);
     try {
         const response = await fetch(url, {
             method: method,
