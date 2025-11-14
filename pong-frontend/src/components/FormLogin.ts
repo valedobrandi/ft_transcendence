@@ -2,7 +2,8 @@ import { FancyButton } from "./Button";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
-import { id, jwt } from "../app";
+import { profile, jwt } from "../app";
+import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
 
 export function FormLogin(): HTMLElement {
@@ -11,18 +12,20 @@ export function FormLogin(): HTMLElement {
 	viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
 	viewDiv.style.backgroundSize = "cover";
 
-    // Create a card to store Form
-    const card = document.createElement("div");
-    card.className = "flex flex-col items-center bg-gray-950 border-4 border-gray-700 rounded-2xl shadow-lg px-20 py-12 w-[520px]";
+	const card = document.createElement("div");
+	card.className = "flex flex-col items-center bg-gray-950 border-4 border-gray-700 rounded-2xl shadow-lg px-20 py-12 w-[520px]";
 
-    // Create a form to store Title + Inputs + Button
-    const formElement = document.createElement("form");
-    formElement.className = "flex flex-col justify-center items-center flex-grow gap-20";
+	const title = document.createElement("h1");
+	title.className = "game-font text-5xl text-[hsl(345,100%,47%)] text-shadow-lg/30 mb-8 text-center";
+	title.textContent = "WELCOME BACK";
 
-    formElement.onsubmit = (event) => {
-        event.preventDefault();
-        console.log("2FA code submitted");
-    };
+	const formElement = document.createElement("form");
+	formElement.className = "flex flex-col justify-center items-center flex-grow gap-8";
+
+	formElement.onsubmit = (event) => {
+		event.preventDefault();
+		console.log("2FA code submitted");
+	};
 
     // Add a title to the form
     const title = document.createElement("h1");
@@ -39,47 +42,64 @@ export function FormLogin(): HTMLElement {
 	const inputPasswordUI = InputPassword();
 	inputContainer.appendChild(inputPasswordUI);
 
-    formElement.appendChild(inputContainer);
+	const sendBtn = FancyButton("login", "scale-100 h-14 w-60 game-font tracking-widest text-lg", () => { });
 
-    // Add button to the form
-    const loginButton = FancyButton("login", "scale-100 h-14 w-60 game-font tracking-widest text-lg", () => {});
-    formElement.appendChild(loginButton);
+	viewDiv.appendChild(title);
+	viewDiv.appendChild(formElement);
+	formElement.appendChild(inputNameUI);
+	formElement.appendChild(inputPasswordUI);
+	formElement.appendChild(sendBtn);
 
-    // Check inputs information
-    formElement.onsubmit = async (e) => 
-    {
-        e.preventDefault();
+	formElement.onsubmit = async (e) => {
+		e.preventDefault();
 
-        const username_input = document.getElementById('register_username') as HTMLInputElement;
-        const password_input = document.getElementById('register_password') as HTMLInputElement;
-        if (username_input === null || password_input === null) return;
+		const username_input = document.getElementById('register_username') as HTMLInputElement;
+		const password_input = document.getElementById('register_password') as HTMLInputElement;
+		if (username_input === null || password_input === null) return;
 
-        const username = username_input.value.trim();
-        const password = password_input.value.trim();
+		const username = username_input.value.trim();
+		const password = password_input.value.trim();
 
-        const response = await fetchRequest(
-            `/login`,
-            'POST',
-            {},
-            { body: JSON.stringify({ username, password}) }
-        );
+		const response = await fetchRequest(
+			`/login`,
+			'POST',
+			{},
+			{ body: JSON.stringify({ username, password }) }
+		);
 
-        if (response.message === 'success') {
-            jwt.token = response.payload.token;
-            id.username = response.payload.username;
-            console.log(jwt.token);
-            navigateTo("/intra");
-        }
-        else if (response.status === 'error') {
-            const existingAlert = document.getElementById("alert-popup");
-            if (existingAlert)
-                existingAlert.remove();
-            document.getElementById('root')?.prepend(CreateAlert(response.message));
-        }
-    };
+		if (response.message === 'success') {
+			jwt.token = response.payload.accessToken;
+			profile.username = response.payload.username;
+			profile.id = response.payload.id;
 
-    card.appendChild(formElement);
-    viewDiv.appendChild(card);
+			const [friendsList, blockedList] = await Promise.all([
+				fetchRequest('/friends-list', 'GET', {}),
+				fetchRequest('/block-list', 'GET', {})
+			]);
 
-    return viewDiv;
+			if (friendsList.message === 'success') {
+				const newFriendList = friendsList.payload.map((friend: any) => ({
+					id: friend.id,
+					isConnected: friend.isConnected,
+				}));
+				stateProxyHandler.friendList = newFriendList;
+				console.log("[FRIEND LIST ON LOGIN]", stateProxyHandler.friendList);
+			}
+			if (blockedList.message === 'success') {
+				stateProxyHandler.chatBlockList = blockedList.payload;
+			}
+			navigateTo("/intra");
+		} else if (response.status === 'error') {
+			const existingAlert = document.getElementById("alert-popup");
+			if (existingAlert)
+				existingAlert.remove();
+			document.getElementById('root')?.prepend(CreateAlert(response.message));
+		}
+	};
+
+	card.appendChild(title);
+	card.appendChild(formElement);
+	viewDiv.appendChild(card);
+
+	return viewDiv;
 }

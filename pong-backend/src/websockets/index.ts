@@ -16,6 +16,6 @@ export function socketHandler(connection: WebSocket, req: FastifyRequest) {
     connection.on('close', () => {
         const user = connectedRoomInstance.getBySocket(connection);
         if (user === undefined) return;
-        connectedRoomInstance.disconnect(user.username);
+        connectedRoomInstance.disconnect(user.id);
     });
 }

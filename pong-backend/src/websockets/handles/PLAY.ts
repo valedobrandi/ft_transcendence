@@ -4,7 +4,7 @@ import { gameRoom } from "../../state/gameRoom.js";
 import { connectedRoomInstance } from '../../state/ConnectedRoom.js';
 
 export function PLAY(data: PlayType, connection: WebSocket) {
-	const player = connectedRoomInstance.getByName(data.username);
+	const player = connectedRoomInstance.getById(data.username);
 	if (player == undefined) return;
 
 	const room = gameRoom.get(player.matchId);

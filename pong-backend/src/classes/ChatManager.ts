@@ -31,7 +31,7 @@ class ChatManager {
     }
 
     sendMessage(receiver: string, message: string, sender: number[], history: ChatMessage[] = []) {
-        const send = connectedRoomInstance.getByName(this.username);
+        const send = connectedRoomInstance.getById(this.id);
 
         if (send && send.socket) {
             send.socket.send(JSON.stringify(
@@ -42,13 +42,13 @@ class ChatManager {
     }
 
     sendHistory() {
-        const user = connectedRoomInstance.getByName(this.username);
-        if (!user || !user.socket) return;
-
-        const getChatHistory = chatStore.getChatHistories(this.id);
-        user.socket.send(JSON.stringify(
-            chatHandler.controller().CHAT_HISTORY(getChatHistory)
-        ));
+        const user = connectedRoomInstance.getById(this.id);
+        if (user && user.socket) {
+            const getChatHistory = chatStore.getChatHistories(this.id);
+            user.socket.send(JSON.stringify(
+                chatHandler.controller().CHAT_HISTORY(getChatHistory)
+            ));
+        }
     }
 }
 

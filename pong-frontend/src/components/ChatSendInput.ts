@@ -1,9 +1,10 @@
-import { messageState } from "../states/messageState";
+import { stateProxyHandler } from "../states/stateProxyHandler";
 import { websocketChatSend } from "../websocket/websocketChatSend";
 
 export function ChatSendInput(): HTMLDivElement {
     const inputDiv = document.createElement("div");
     inputDiv.className = "border border w-full min-h-20 flex";
+    inputDiv.id = "chat-send-container";
 
     const form = document.createElement("form");
     form.className = "border w-full flex";
@@ -29,8 +30,7 @@ export function ChatSendInput(): HTMLDivElement {
         event.preventDefault();
         const message = input.value.trim();
         if (message) {
-            const {name, id} = messageState.selectChat;
-
+            const {name, id} = stateProxyHandler.selectChat;
             websocketChatSend(message, name, id);
             input.value = "";
         }

@@ -13,7 +13,7 @@ export type DeleteUserFromBlockList = {
 
 export type GetBlockedUsers = {
     status: "error" | "success",
-    data: ChatModelTable[] | []
+    data: number[]
 }
 
 
@@ -26,12 +26,13 @@ class ChatBlockModel {
     constructor(db: Database.Database) {
         this.db = db;
         this.stmAddToBlockList = db.prepare(
-            `INSERT INTO chatblock (user_id, blocked_user_id) VALUES (?, ?)`);
+            `INSERT INTO chatblock (user_id, blockedId) VALUES (?, ?)`
+        );
         this.stmDeleteFromBlockList = db.prepare(
-            `DELETE FROM chatblock WHERE user_id = ? AND blocked_user_id = ?`
+            `DELETE FROM chatblock WHERE user_id = ? AND blockedId = ?`
         );
         this.stmGetBlockList = db.prepare(
-            `SELECT blocked_user_id FROM chatblock WHERE user_id = ?`
+            `SELECT blockedId FROM chatblock WHERE user_id = ?`
         );
     }
 
@@ -49,10 +50,10 @@ class ChatBlockModel {
 
     getBlockedUsers(userId: number): GetBlockedUsers {
         const rows = this.stmGetBlockList.all(userId) as ChatModelTable[] | [];
-        if (rows.length === 0) {
-            return { status: "error", data: rows };
+        if (rows === undefined) {
+            return { status: "error", data: []};
         }
-        return { status: "success", data: rows };
+        return { status: "success", data: rows.map((user) => user.blockedId) };
     }
 }
 export { ChatBlockModel };

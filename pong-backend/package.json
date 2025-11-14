@@ -7,14 +7,15 @@
         "prestart": "npm run build",
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "test": "vitest --run --reporter verbose",
-        "database": "tsx /app/database/init.ts",
-        "print": "tsx /app/database/table_print.ts",
+        "database": "npx tsx /app/database/init.ts",
+        "print": "npx tsx /app/database/table_print.ts",
         "dev": "nodemon"
     },
     "dependencies": {
         "@fastify/cookie": "^11.0.2",
         "@fastify/cors": "^11.1.0",
         "@fastify/jwt": "^10.0.0",
+        "@fastify/multipart": "^9.3.0",
         "@fastify/websocket": "^11.2.0",
         "bcrypt": "^6.0.0",
         "better-sqlite3": "^12.4.1",

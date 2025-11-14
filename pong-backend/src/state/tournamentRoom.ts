@@ -8,7 +8,7 @@ export const tournamentRoom = new Map<string, Tournament>();
 
 export function joinTournamentRoom(id: string) {
     tournamentQueue.add(id);
-    const player = connectedRoomInstance.getByName(id);
+    const player = connectedRoomInstance.getById(id);
     if (player == undefined) return;
     player.status = 'TOURNAMENT_ROOM';
 
@@ -54,7 +54,7 @@ tournamentEvent.on('ready', () => {
     const newTournament = new Tournament(tournamentId);
 
     for (const id of tournamentPlayers) {
-        const player = connectedRoomInstance.getByName(id);
+        const player = connectedRoomInstance.getById(id);
         if (player == undefined) continue;
         player.tournamentId = tournamentId;
         newTournament.add(id);

@@ -1,7 +1,11 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
+import db from '../../database/db.js'
+import { playerStatus } from '../enum_status/enum_userStatus.js';
+import { ProfileControler } from '../controllers/profileController.js';
+
 
 export default async function profilRoute(fastify: FastifyInstance) {
 
@@ -11,7 +15,7 @@ export default async function profilRoute(fastify: FastifyInstance) {
             return res.status(200).send({user: request.userId});
         })
     });
-    
+
     fastify.put('/profil/update/:id', async (request: FastifyRequest<{ Params: { id: number }, Body: RegisterBody }>, res) => {
         const { email, username, password } = request.body;
         const { id } = request.params;

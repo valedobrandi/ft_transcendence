@@ -1,7 +1,7 @@
 import { serverState } from "../states/serverState";
 
 import { Button } from "./Button";
-import { id } from "../app";
+import { profile } from "../app";
 import { getSocket } from "../websocket";
 
 export function Menu():HTMLDivElement {
@@ -19,13 +19,13 @@ export function Menu():HTMLDivElement {
 
     const matchBtn = Button('MATCH', "h-10 w-18 rounded", () => {
         if (!socket) return;
-        socket.send(JSON.stringify({ type: 'MATCH', username: id.username }));
+        socket.send(JSON.stringify({ type: 'MATCH', username: profile.username }));
     });
     matchBtn.id = "match-btn";
 
     const tourBtn = Button("TOURNAMENT", "h-10 w-30 rounded", () => {
         if (!socket) return;
-        socket.send(JSON.stringify({ type: 'TOURNAMENT', username: id.username }));
+        socket.send(JSON.stringify({ type: 'TOURNAMENT', username: profile.username }));
     });
     tourBtn.id = "tournament-btn";
 

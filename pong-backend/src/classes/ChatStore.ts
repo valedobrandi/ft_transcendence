@@ -1,5 +1,6 @@
 import db from "../../database/db.js";
 import { MessagesModel } from "../models/messagesModel.js";
+import { print } from "../server.js";
 import { ChatHistory } from "../types/ChatHistory.js";
 import { ChatMessage } from "../types/ChatMessage.js";
 import { MessageModelTable } from "../types/Tables.js";
@@ -33,11 +34,12 @@ class ChatStore {
     }
 
     getChatHistories(userId: number): ChatHistory[] {
-        const histories = this.messageModelInstance.getChatHistory(userId) as MessageModelTable[] | [];
+        const histories = this.messageModelInstance.getChatHistory(Number(userId)) as MessageModelTable[] | [];
+        print(`[CHAT STORE] Fetched ${histories.length} messages for user ID ${userId}`);
         const chatMap: { [key: number]: { sender: [number, number], history: ChatMessage[] } } = {};
 
         histories.forEach(msg => {
-            const otherUserId = msg.sender_id === userId ? msg.receiver_id : msg.sender_id;
+            const otherUserId = msg.sender_id === Number(userId) ? msg.receiver_id : msg.sender_id;
             if (!chatMap[otherUserId]) {
                 chatMap[otherUserId] = { sender: [Number(msg.sender_id), Number(msg.receiver_id)], history: [] };
             }

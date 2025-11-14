@@ -1,7 +1,7 @@
 export type ChatModelTable = {
     id: number,
     user_id: number,
-    blocked_user_id: number,
+    blockedId: number,
 }
 
 export type MessageModelTable = {

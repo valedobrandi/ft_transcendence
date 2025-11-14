@@ -1,7 +1,8 @@
-import { id } from "../app";
+import { profile } from "../app";
 import { setupPaddleListeners } from "../events/paddleListeners";
-import { addIntraMessage } from "../states/messageState";
+import { addIntraMessage } from "../states/stateProxyHandler";
 import { getSocket } from "../websocket";
+import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketReceiver } from "./websocketReceiver";
 
 export function waitForSocketOpen(socket: WebSocket): Promise<void> {
@@ -15,27 +16,32 @@ export function waitForSocketOpen(socket: WebSocket): Promise<void> {
   });
 }
 
-export function websocketConnect() {
+export async function websocketConnect() {
 	const socket = getSocket();
 	if (socket === null) return;
 
-	socket.onopen = () => {
+	socket.onopen = async () => {
 		socket.send(JSON.stringify({
 			type: "CONNECT",
-			username: id.username,
-            userId: id.id,
+			username: profile.username,
+            userId: profile.id,
 		}));
 
 		websocketReceiver(socket);
 		addIntraMessage(`${id.username} connected.`);
 
+		await websocketNewEvents();
+
+
 		setupPaddleListeners((up, down) => {
 			socket.send(JSON.stringify({
 				type: "MOVE_PADDLE",
-				username: id.username,
-                userId: id.id,
+				username: profile.username,
+                userId: profile.id,
 				payload: { up, down }
 			}))
 		});
+
 	}
 };
+

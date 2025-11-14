@@ -1,4 +1,4 @@
-import { gameEvents } from "../events/gameEvents.js";
+import { events } from "../events/EventsBus.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { tournamentRoom } from "../state/tournamentRoom.js";
 import { EndMatchEventType } from "../types/EndMatchEventType.js";
@@ -23,8 +23,8 @@ class Tournament {
             this.reportMatchResult(report);
         }
 
-        gameEvents.on('tournament_match_end', matchEndedListener);
-        this.cleanup = () => gameEvents.off('tournament_match_end', matchEndedListener);
+        events.on('tournament_match_end', matchEndedListener);
+        this.cleanup = () => events.off('tournament_match_end', matchEndedListener);
     }
 
 
@@ -73,7 +73,7 @@ class Tournament {
             this.currentRoundWinners.add(winnerId);
             this.currentBracket.delete(loserId);
 
-            const loserPlayer = connectedRoomInstance.getByName(loserId);
+            const loserPlayer = connectedRoomInstance.getById(loserId);
             if (loserPlayer) {
                 loserPlayer.chat.sendMessage('INTRA', `you have been eliminated from the tournament.`, loserPlayer.username);
             };
@@ -83,7 +83,7 @@ class Tournament {
 
             if (this.rounds > 1) {
                 for (const winnerId of this.nextBracket) {
-                    const player = connectedRoomInstance.getByName(winnerId);
+                    const player = connectedRoomInstance.getById(winnerId);
                     if (player) {
                         player.chat.sendMessage("INTRA", "You have advanced to the next phase!", player.username);
                     }
@@ -109,7 +109,7 @@ class Tournament {
     }
 
     async endTournament(id: string) {
-        const player = connectedRoomInstance.getByName(id);;
+        const player = connectedRoomInstance.getById(id);;
         if (player) {
             player.chat.sendMessage('INTRA', "Congratulations! You are the champion of the tournament!", player.username);
             player.status = 'CONNECT_ROOM';

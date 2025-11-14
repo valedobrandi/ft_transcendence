@@ -5,6 +5,7 @@ import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { id, jwt } from "../app";
 import { CreateAlert } from "./CreateAlert";
+import { profile, jwt } from "../app";
 
 export function Register(): HTMLElement {
 	const viewDiv = document.createElement("div");
@@ -63,13 +64,13 @@ export function Register(): HTMLElement {
 
 		const response = await fetchRequest(
 			`/register`,'POST',{},
-			{ body: JSON.stringify({ username, email, password}) }
+			{ username, email, password}
 		);
 
 		if (response.message === 'success') {
-			id.username = response.payload.username;
-			id.id = response.payload.id;
-			navigateTo("/intra");
+			profile.username = response.payload.username;
+			profile.id = response.payload.id;
+			navigateTo("/login");
 		}
 		else if (response.status === 'error') {
 			const existingAlert = document.getElementById("alert-popup");

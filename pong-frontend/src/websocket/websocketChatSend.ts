@@ -1,4 +1,4 @@
-import { id } from "../app";
+import { profile } from "../app";
 import { getSocket } from "../websocket";
 
 /* type: 'CHAT';
@@ -13,8 +13,8 @@ export function websocketChatSend(message: string, to: string, toId: number) {
     if (socket === null) return;
     socket.send(JSON.stringify({
         type: "CHAT",
-        sender: id.username,
-        senderId: id.id,
+        sender: profile.username,
+        senderId: profile.id,
         receiverId: toId,
         receiver: to,
         message
