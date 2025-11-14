@@ -1,3 +1,4 @@
+import { profile } from "../app";
 import { ChatHeader } from "./ChatHeader";
 import { SystemMessageChat } from "./ChatIntra";
 import { ChatSendInput } from "./ChatSendInput";
@@ -22,6 +23,10 @@ export function Intra(): HTMLElement {
     chatTabs.className = "flex border-b bg-gray-100 h-10 min-w-lg";
 
     const chatMenu = ChatHeader();
+
+
+    const p = document.createElement("p");
+    p.textContent = `Bienvenue dans le chat ${profile.username} !`;
 
     const messages = document.createElement("div");
     messages.id = "messages";

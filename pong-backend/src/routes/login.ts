@@ -6,6 +6,7 @@ import db from '../../database/db.js'
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { UsersModel } from '../models/usersModel.js';
+import cookie from '@fastify/cookie';
 import { connectedRoomInstance } from '../state/ConnectedRoom.js';
 
 export default async function loginRoutes(fastify: FastifyInstance) {
@@ -20,7 +21,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             return res.status(400).send({ error: 'All fields are mandatory' })
         }
 
-        const existingUser = usersModel.findUserByEmailOrUsername(username) as User | undefined;
+        const existingUser = usersModel.findUserByUsername(username) as User | undefined;
         if (existingUser === undefined) {
             return res.status(400).send({ error: 'Invalid credentials', existingUser })
         }
@@ -30,7 +31,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
           return res.status(401).send({ error: 'Invalid credentials' });
         }
 
-        if (existingUser.twoFA_enabled) 
+        if (existingUser.twoFA_enabled)
         {
             const authRoom = authenticationRoomInstance;
             authRoom.add(existingUser.username, AuthService.generate2FACode());
@@ -45,26 +46,27 @@ export default async function loginRoutes(fastify: FastifyInstance) {
             } else {
                 return res.status(200).send({ message: data });
             }
-        } 
+        }
         else
         {
             const payload = {id: existingUser.id, username: existingUser.username};
 
-            // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
-            // if(!refreshToken)
-            //     return res.status(404).send({error: "RefreshToken not found"});
+            // // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
+            // // if(!refreshToken)
+            // //     return res.status(404).send({error: "RefreshToken not found"});
 
-            // db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
+            // // db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
 
-            const accessToken = fastify.jwt.sign(payload, { expiresIn: '15m' });
+            const accessToken = fastify.jwt.sign(payload, { expiresIn: '10h' });
             if(!accessToken)
                 return res.status(404).send({error: "AccessToken not found"});
 
-            // res.setCookie('refreshToken', refreshToken, {
-            // httpOnly: true,
-            // secure: true,
-            // sameSite: "strict",
-            // path: '/refresh-token'
+            // res.setCookie('refreshToken', refreshToken,
+            // {
+            //     httpOnly: true,
+            //     secure: process.env.NODE_ENV === 'production',
+            //     sameSite: "strict",
+            //     path: '/'
             // });
 
             // Add user to connectedRoomInstance

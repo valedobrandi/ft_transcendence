@@ -3,7 +3,7 @@ import { HeaderBar } from "./HeaderBar";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
-import { id, jwt } from "../app";
+import { profile, jwt } from "../app";
 import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 
 export function FormLogin(): HTMLElement {
@@ -45,8 +45,8 @@ export function FormLogin(): HTMLElement {
 
         if (response.message === 'success') {
             jwt.token = response.payload.accessToken;
-            id.username = response.payload.username;
-            id.id = response.payload.id;
+            profile.username = response.payload.username;
+            profile.id = response.payload.id;
 
             const [friendsList, blockedList] = await Promise.all([
                 fetchRequest('/friends-list', 'GET', {}),

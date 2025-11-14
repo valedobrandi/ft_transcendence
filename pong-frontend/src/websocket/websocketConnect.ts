@@ -1,4 +1,4 @@
-import { id } from "../app";
+import { profile } from "../app";
 import { setupPaddleListeners } from "../events/paddleListeners";
 import { addIntraMessage } from "../states/stateProxyHandler";
 import { getSocket } from "../websocket";
@@ -23,8 +23,8 @@ export async function websocketConnect() {
 	socket.onopen = async () => {
 		socket.send(JSON.stringify({
 			type: "CONNECT",
-			username: id.username,
-            user_id: id.id,
+			username: profile.username,
+            userId: profile.id,
 		}));
 
 		websocketReceiver(socket);
@@ -36,8 +36,8 @@ export async function websocketConnect() {
 		setupPaddleListeners((up, down) => {
 			socket.send(JSON.stringify({
 				type: "MOVE_PADDLE",
-				username: id.username,
-                userId: id.id,
+				username: profile.username,
+                userId: profile.id,
 				payload: { up, down }
 			}))
 		});
