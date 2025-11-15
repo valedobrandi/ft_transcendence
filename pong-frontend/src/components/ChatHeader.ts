@@ -1,4 +1,4 @@
-import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
+import { newIntraMessage, onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
 
@@ -47,6 +47,10 @@ export function ChatHeader(): HTMLDivElement {
 				btn.onclick = profileOnclick;
 			}
 
+			if (opt.value === "invite-user") {
+				btn.onclick = inviteUserOnclick;
+			}
+
 			chatMenu.appendChild(btn);
 		})
 	}
@@ -67,6 +71,24 @@ export function setButtonToUnblockState(button: HTMLButtonElement) {
 	button.setAttribute("id", "btn-block-user");
 	button.classList.remove("text-red-500");
 	button.textContent = "BLOCK USER";
+}
+
+const inviteUserOnclick = async () => {
+	console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
+	const response = await fetchRequest('/match-invite', 'POST', {},{
+		body: JSON.stringify({
+			invitedId: stateProxyHandler.selectChat.id,
+			settings: {
+				mode: "NORMAL",
+				ballSpeed: "MEDIUM",
+				paddleSize: "MEDIUM"
+			}
+		})
+	});	
+	if (response.message === 'success') {
+		newIntraMessage(response.data);
+		stateProxyHandler.state = "MATCH_INVITE";
+	}
 }
 
 

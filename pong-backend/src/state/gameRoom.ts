@@ -10,6 +10,8 @@ export type NewMatch = {
 
 export const newMatchesQueue = new Map<string, NewMatch>();
 
+export const inviteMatchesQueue = new Map<string, NewMatch>();
+
 export const matchQueue: Set<number> = new Set();
 
 export const gameRoom = new Map<string, PingPong>();

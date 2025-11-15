@@ -29,11 +29,6 @@ export function Menu():HTMLDivElement {
     });
     tourBtn.id = "tournament-btn";
 
-    const elementP = document.createElement("p");
-    elementP.id = "server-state";
-    elementP.className = "text-xs font-bold italic underline";
-    elementP.textContent = serverState.state;
-
     shouldDisable && matchBtn.setAttribute("disabled", "true");
     shouldDisable && tourBtn.setAttribute("disabled", "true");
 
@@ -42,7 +37,6 @@ export function Menu():HTMLDivElement {
 
     divElement.appendChild(matchBtn);
     divElement.appendChild(tourBtn);
-    divElement.appendChild(elementP);
 
     return divElement;
 }

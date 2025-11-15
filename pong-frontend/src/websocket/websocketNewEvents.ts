@@ -1,20 +1,7 @@
-import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
+import { EmbedButton } from "../components/EmbebedButton";
+import { newIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { fetchRequest } from "../utils";
 
-function btnLink(friendId: number, text: string, eventId: number): string {
-	const btnBg = text === "YES" ? "bg-green-500" : "bg-red-500";
-	return (
-		`<button
-			id="accept-friend-request"
-			name="${friendId}"
-			eventid="${eventId}"
-			action="${text === "YES" ? "accept" : "decline"}"
-			class="${btnBg} text-white ml-4 p-1 rounded text-xs"
-		>
-			${text}
-		</button>`
-	)
-}
 
 async function websocketNewEvents() {
 	const { status, data } = await fetchRequest('/to-events', 'GET');
@@ -29,10 +16,10 @@ async function websocketNewEvents() {
 					const getSender = stateProxyHandler.serverUsers
 						.find(({ id }) => Number(id) === Number(from_id));
 					if (getSender === undefined) break;
-					addIntraMessage(
+					newIntraMessage(
 						`${getSender.name} has send a friend request
-							 	${btnLink(getSender.id, "YES", eventId)}
-							 		${btnLink(getSender.id, "NO", eventId)}`
+							 	${EmbedButton(getSender.id, "YES", eventId, "accept-friend-request")}
+							 		${EmbedButton(getSender.id, "NO", eventId, "accept-friend-request")}`
 					);
 					break;
 			}

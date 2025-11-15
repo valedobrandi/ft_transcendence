@@ -15,8 +15,8 @@ export class ConnectedRoom {
 			username: name,
 			socket: undefined,
 			status: 'CONNECT_ROOM',
-			matchId: "",
-			tournamentId: "",
+			matchId: undefined,
+			tournamentId: undefined,
 			chat: new ChatManager(Number(id), name),
 			friendSet: new Set<number | bigint>(),
 		};

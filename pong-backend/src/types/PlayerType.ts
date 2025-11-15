@@ -9,9 +9,10 @@ export interface PlayerType {
     "TOURNAMENT_QUEUE" |
     "TOURNAMENT_ROOM" |
     "GAME_ROOM" |
-    "GAME_START";
+    "GAME_START" |
+    "SEND_INVITE";
     socket: WebSocket | undefined;
-    matchId: string;
+    matchId: string | undefined;
     tournamentId: string | undefined;
     chat: ChatManager;
     friendSet: Set<number | bigint>;

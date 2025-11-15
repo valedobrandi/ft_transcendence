@@ -1,9 +1,11 @@
 import { profile } from "../app";
 import { playerSideState } from "../context";
 import type { ChatDataHistory } from "../interface/ChatHistory";
-import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
+import { newIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
+import { navigateTo, setTime } from "../utils";
+import { EmbedButton } from "../components/EmbebedButton";
 
 export async function websocketReceiver(socket: WebSocket) {
 	socket.addEventListener('message', async (event) => {
@@ -14,24 +16,26 @@ export async function websocketReceiver(socket: WebSocket) {
 		switch (data.message) {
 			case 'CONNECT_ROOM':
 				serverState.state = data.message;
+				stateProxyHandler.state = data.message;
 				break;
 			case 'MATCH_ROOM':
 				serverState.state = data.message;
-				stateProxyHandler.state = data.message;
+				newIntraMessage(`You have joined the match room.`);
 				break;
 			case 'GAME_ROOM': {
-				addIntraMessage(data.payload.message);
+				newIntraMessage(data.payload.message);
 				playerSideState.side = data.side;
-				stateProxyHandler.state = data.message;
-
+				setTime(5000, () => {
+					navigateTo("/match");
+				});
 			}
 				break;
 			case 'TOURNAMENT_ROOM':
 				serverState.state = data.message;
-				stateProxyHandler.state = data.message;
+				newIntraMessage(`You have joined the tournament room.`);
 				break;
 			case 'GAME_OVER':
-				addIntraMessage(data.payload.message);
+				newIntraMessage(data.payload.message);
 				stateProxyHandler.state = data.message;
 				break;
 			case 'CONNECTED_USERS':
@@ -54,7 +58,6 @@ export async function websocketReceiver(socket: WebSocket) {
 							stateProxyHandler.messages.set(filteredSender, history);
 						}
 					});
-					stateProxyHandler.state = data.message;
 				}
 				break;
 			case 'SERVER_USERS':
@@ -78,6 +81,15 @@ export async function websocketReceiver(socket: WebSocket) {
 			case 'event:new':
 				await websocketNewEvents();
 				break;
+			case 'MATCH_INVITE':
+				let getName = stateProxyHandler.serverUsers.find(user => user.id === data.payload.from)?.name;
+				newIntraMessage(`You have received a game invite from ${getName}.
+				${EmbedButton(0, "YES", data.payload.matchId, "accept-match-invite")} 
+				${EmbedButton(0, "NO", data.payload.matchId, "decline-match-invite")}`);
+				break;
+			case 'MATCH_DECLINED':
+				getName = stateProxyHandler.serverUsers.find(user => user.id === data.payload.from)?.name;
+				newIntraMessage(`invitation refused by ${getName}`)
 		}
 	});
 }

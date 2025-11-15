@@ -1,19 +1,24 @@
 import { profile } from "../app";
 import type { ChatMessage } from "../interface/ChatMessage";
 import { navigateTo, setTime } from "../utils";
-import { websocketChatSend } from "../websocket/websocketChatSend";
 
-export function addIntraMessage(message: string) {
+export function newIntraMessage(message: string) {
     stateProxyHandler.systemMessages = [...stateProxyHandler.systemMessages, {
         message: message,
         index: (stateProxyHandler.systemMessages.length),
     }];
-    stateProxyHandler.state = "SYSTEM_MESSAGE";
+    //stateProxyHandler.state = "SYSTEM_MESSAGE";
 }
 
-export function deleteIntraMessage(index: number) {
-    stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.filter(msg => msg.index !== index);
-    stateProxyHandler.state = "SYSTEM_MESSAGE";
+export function deleteIntraMessage(button: HTMLButtonElement) {
+    const parentMsg = button.closest("p");
+    if (parentMsg) {
+        const tagId = parentMsg.id.replace("msg-index-", "");
+        parentMsg.remove();
+        stateProxyHandler.systemMessages = stateProxyHandler
+            .systemMessages.filter(msg => msg.index !== Number(tagId));
+    }
+    //stateProxyHandler.state = "SYSTEM_MESSAGE";
 }
 
 export function renderSystemMessages() {
@@ -134,14 +139,6 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
 
         if (prop === 'state') {
             switch (value) {
-                case "TOURNAMENT_ROOM":
-                    //addMessage("INTRA", `you have joined the tournament queue.`);
-                    websocketChatSend(`you have joined the tournament queue.`, 'INTRA', 1);
-                    break;
-                case "MATCH_ROOM":
-                    //addMessage("INTRA", `you have joined the match queue.`);
-                    websocketChatSend(`you have joined the match queue.`, 'INTRA', 1);
-                    break;
                 case "GAME_ROOM":
                     setTime(5000, () => {
                         navigateTo("/match");
