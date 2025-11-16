@@ -1,6 +1,5 @@
 import { profile } from "../app";
-import { setButtonToBlockState, setButtonToUnblockState } from "../components/ChatHeader";
-import { newIntraMessage, deleteIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
+import { newIntraMessage, removeIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { fetchRequest, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
@@ -33,6 +32,14 @@ export function eventListeners() {
     console.log("Button clicked:", button.id);
 
     switch (button.id) {
+      case "accept-match-invite": {
+        const eventId = button.dataset.eventid;
+        const response = await fetchRequest(`/match-invite-accept?matchId=${eventId}`, 'GET', {});
+        if (response.message === 'success') {
+          removeIntraMessage(Number(eventId));
+        }
+      }
+      break;
       case "decline-match-invite": {
         const eventId = button.dataset.eventid;
         const response = await fetchRequest(
@@ -46,7 +53,7 @@ export function eventListeners() {
             if (parentMsg) {
               const tagId = parentMsg.id.replace("msg-index-", "");
               parentMsg.remove();
-              deleteIntraMessage(Number(tagId));
+              removeIntraMessage(Number(tagId));
             }
             stateProxyHandler.state = "CONNECT_ROOM"
           }
@@ -124,7 +131,13 @@ export function eventListeners() {
             await fetchRequest(`/delete-event?eventId=${eventId}`, 'DELETE');
           }
 
-          deleteIntraMessage(button);
+          const parentMsg = button.closest("p");
+            if (parentMsg) {
+              const tagId = parentMsg.id.replace("msg-index-", "");
+              parentMsg.remove();
+              removeIntraMessage(Number(tagId));
+            }
+
         }
         break;
       case "btn-friend-list":

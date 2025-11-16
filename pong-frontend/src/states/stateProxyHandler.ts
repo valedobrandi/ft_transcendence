@@ -7,12 +7,18 @@ export function newIntraMessage(message: string) {
         message: message,
         index: (stateProxyHandler.systemMessages.length),
     }];
-    //stateProxyHandler.state = "SYSTEM_MESSAGE";
 }
 
-export function deleteIntraMessage(tagId: number) {
+export function removeIntraMessage(tagId: number) {
     stateProxyHandler.systemMessages = stateProxyHandler
         .systemMessages.filter(msg => msg.index !== Number(tagId));
+}
+
+export function findIntraMessage(tagId: string) {
+    const idx = stateProxyHandler.systemMessages.findIndex(
+        msg => msg.message.includes(tagId)
+    );
+    return idx;
 }
 
 export function renderSystemMessages() {
@@ -120,7 +126,7 @@ export interface StateProxyHandler {
     "TOURNAMENT_ROOM" |
     "GAME_ROOM" |
     "GAME_START" |
-    "SEND_INVITE"|
+    "SEND_INVITE" |
     "MATCH_INVITE",
     systemMessages: { index: number; message: string }[];
 }
