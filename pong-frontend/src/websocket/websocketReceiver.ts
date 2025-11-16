@@ -1,7 +1,7 @@
 import { profile } from "../app";
 import { playerSideState } from "../context";
 import type { ChatDataHistory } from "../interface/ChatHistory";
-import { newIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
+import { deleteIntraMessage, newIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { navigateTo, setTime } from "../utils";
@@ -82,14 +82,22 @@ export async function websocketReceiver(socket: WebSocket) {
 				await websocketNewEvents();
 				break;
 			case 'MATCH_INVITE':
-				let getName = stateProxyHandler.serverUsers.find(user => user.id === data.payload.from)?.name;
+				var getName = stateProxyHandler.serverUsers.find(user => user.id === data.payload.from)?.name;
 				newIntraMessage(`You have received a game invite from ${getName}.
 				${EmbedButton(0, "YES", data.payload.matchId, "accept-match-invite")} 
 				${EmbedButton(0, "NO", data.payload.matchId, "decline-match-invite")}`);
+				stateProxyHandler.state = "MATCH_INVITE";
 				break;
 			case 'MATCH_DECLINED':
 				getName = stateProxyHandler.serverUsers.find(user => user.id === data.payload.from)?.name;
-				newIntraMessage(`invitation refused by ${getName}`)
+				newIntraMessage(`invitation canceled by ${getName}`)
+				const idx = stateProxyHandler.systemMessages.findIndex(
+					msg => msg.message.includes(`${data.payload.matchId}"`)
+				);
+				if (idx !== -1) {
+					deleteIntraMessage(idx);
+				}
+				stateProxyHandler.state = "CONNECT_ROOM";
 		}
 	});
 }

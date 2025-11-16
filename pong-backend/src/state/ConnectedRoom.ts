@@ -1,6 +1,7 @@
 import db from "../../database/db.js";
 import ChatManager from "../classes/ChatManager.js";
 import { UsersModel } from "../models/usersModel.js";
+import { matchServiceInstance } from "../routes/match.js";
 import { print } from "../server.js";
 import { PlayerType } from "../types/PlayerType.js";
 import type { WebSocket } from 'ws';
@@ -71,6 +72,12 @@ export class ConnectedRoom {
 	disconnect(id: number | bigint) {
 		this.dropWebsocket(Number(id));
 		this.broadcastFriendStatus(Number(id), true);
+		const getUser = this.getById(id);
+		if (getUser && getUser.matchId) {
+			print('[MATCH_DENY]')
+			const matchId = getUser.matchId;
+			matchServiceInstance.denyMatch(matchId, Number(id));
+		}
 		this.room.delete(Number(id));
 	}
 

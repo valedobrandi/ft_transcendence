@@ -10,15 +10,9 @@ export function newIntraMessage(message: string) {
     //stateProxyHandler.state = "SYSTEM_MESSAGE";
 }
 
-export function deleteIntraMessage(button: HTMLButtonElement) {
-    const parentMsg = button.closest("p");
-    if (parentMsg) {
-        const tagId = parentMsg.id.replace("msg-index-", "");
-        parentMsg.remove();
-        stateProxyHandler.systemMessages = stateProxyHandler
-            .systemMessages.filter(msg => msg.index !== Number(tagId));
-    }
-    //stateProxyHandler.state = "SYSTEM_MESSAGE";
+export function deleteIntraMessage(tagId: number) {
+    stateProxyHandler.systemMessages = stateProxyHandler
+        .systemMessages.filter(msg => msg.index !== Number(tagId));
 }
 
 export function renderSystemMessages() {
@@ -120,7 +114,14 @@ export interface StateProxyHandler {
     chatBlockList: number[];
     connectedUsers: { id: number; name: string }[];
     selectChat: { id: number; name: string };
-    state: string;
+    state: "CONNECT_ROOM" |
+    "MATCH_QUEUE" |
+    "TOURNAMENT_QUEUE" |
+    "TOURNAMENT_ROOM" |
+    "GAME_ROOM" |
+    "GAME_START" |
+    "SEND_INVITE"|
+    "MATCH_INVITE",
     systemMessages: { index: number; message: string }[];
 }
 
@@ -131,7 +132,7 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
     chatBlockList: [],
     connectedUsers: [],
     selectChat: { id: -1, name: '' },
-    state: "",
+    state: "CONNECT_ROOM",
     systemMessages: [],
 }, {
     set(target, prop, value) {

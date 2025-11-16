@@ -1,6 +1,7 @@
 import { newIntraMessage, onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
+import { EmbedButton } from "./EmbebedButton";
 
 export function ChatHeader(): HTMLDivElement {
 
@@ -75,7 +76,7 @@ export function setButtonToUnblockState(button: HTMLButtonElement) {
 
 const inviteUserOnclick = async () => {
 	console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
-	const response = await fetchRequest('/match-invite', 'POST', {},{
+	const response = await fetchRequest('/match-invite', 'POST', {}, {
 		body: JSON.stringify({
 			invitedId: stateProxyHandler.selectChat.id,
 			settings: {
@@ -84,10 +85,17 @@ const inviteUserOnclick = async () => {
 				paddleSize: "MEDIUM"
 			}
 		})
-	});	
+	});
 	if (response.message === 'success') {
+		const getMatch = await fetchRequest(`/match-invite?matchId=${response.data.matchId}`, 'GET', {});
+		if (getMatch.message === "success") {
+			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
+			newIntraMessage(`Invite sento to ${getTo?.name} 
+				${EmbedButton(0, 'CANCEL', getMatch.data.matchId, 'decline-match-invite')}`);
+			stateProxyHandler.state = "SEND_INVITE"
+		}
+	} else if (response.message = 'error') {
 		newIntraMessage(response.data);
-		stateProxyHandler.state = "MATCH_INVITE";
 	}
 }
 

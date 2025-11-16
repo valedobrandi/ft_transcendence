@@ -31,15 +31,25 @@ export function eventListeners() {
     const button = target.closest("button");
     if (!button) return;
     console.log("Button clicked:", button.id);
+
     switch (button.id) {
       case "decline-match-invite": {
-        const eventId = button.getAttribute("eventid");
-        console.log(eventId)
+        const eventId = button.dataset.eventid;
         const response = await fetchRequest(
           `/match-invite?matchId=${eventId}`,
           'DELETE')
         if (response.message === 'success') {
-          deleteIntraMessage(button);
+          const getMatch = await fetchRequest(`/match-invite?matchId=${eventId}`, 'GET', {});
+          if (getMatch.message === 'error') {
+            console.log("[DELETE MESSAGE]", button);
+            const parentMsg = button.closest("p");
+            if (parentMsg) {
+              const tagId = parentMsg.id.replace("msg-index-", "");
+              parentMsg.remove();
+              deleteIntraMessage(Number(tagId));
+            }
+            stateProxyHandler.state = "CONNECT_ROOM"
+          }
         }
       }
         break;

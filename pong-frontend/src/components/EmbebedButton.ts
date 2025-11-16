@@ -4,7 +4,7 @@ function EmbedButton(friendId: number, text: string, eventId: number, id: string
         `<button
 			id="${id}"
 			name="${friendId}"
-			eventid="${eventId}"
+			data-eventid="${eventId}"
 			action="${text === "YES" ? "accept" : "decline"}"
 			class="${btnBg} text-white ml-4 p-1 rounded text-xs"
 		>

@@ -5,6 +5,8 @@ import { connectedRoomInstance } from "./ConnectedRoom.js";
 
 export type NewMatch = {
     players: number[]
+    from: number;
+    to: number;
     settings: {}
 }
 

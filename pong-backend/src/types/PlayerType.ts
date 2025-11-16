@@ -10,7 +10,8 @@ export interface PlayerType {
     "TOURNAMENT_ROOM" |
     "GAME_ROOM" |
     "GAME_START" |
-    "SEND_INVITE";
+    "SEND_INVITE" |
+    "MATCH_INVITE";
     socket: WebSocket | undefined;
     matchId: string | undefined;
     tournamentId: string | undefined;
