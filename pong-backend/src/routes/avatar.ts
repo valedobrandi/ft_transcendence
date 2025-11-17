@@ -9,9 +9,12 @@ export default function avatarRoute(fastify: FastifyInstance)
 
   fastify.register(fastifyMultipart);
 
-  fastify.post('/profil/avatar/:id', async (request: FastifyRequest<{ Params: { id: string } }>, res) => {
+  fastify.post('/profil/avatar', {
+    preHandler: [fastify.authenticate],
+  },  
+  async (request: any, res) => {
     try {
-      const idUser = Number(request.params.id);
+      const idUser  = res.user as {id: number};
       if (!idUser) 
         return res.status(404).send({ error: "ID unknown" });
 
