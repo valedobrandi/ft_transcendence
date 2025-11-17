@@ -10,6 +10,7 @@ import { AuthController } from '../controllers/authController.js';
 import { UsersModel } from '../models/usersModel.js';
 import cookie from '@fastify/cookie';
 
+
 export default async function loginRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
     const usersModel = new UsersModel(db);
@@ -50,7 +51,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
         } 
         else
         {
-            const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username};
+            const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username, avatar_url: existingUser.avatar};
 
             const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
             if(!refreshToken)
@@ -69,8 +70,10 @@ export default async function loginRoutes(fastify: FastifyInstance) {
                 sameSite: "strict",
                 path: '/'
             });
-
-            return res.status(201).send({ message: 'success', payload: {accessToken, username}});
+            
+            // console.log("OOOOOOOOOOOOO", existingUser.avatar);
+            // console.log("OOOOOOOOOOO11", existingUser.username);
+            return res.status(201).send({ message: 'success', payload: {accessToken, username, existingUser}});
         }
     });
 }

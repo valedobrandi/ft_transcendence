@@ -4,6 +4,7 @@ import { HeaderBar } from "./HeaderBar";
 // import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { profile } from "../app";
+// import { profile, jwt } from "../app";
 
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default.jpg"
@@ -75,7 +76,7 @@ export function ProfilePage(): HTMLElement {
 	const avatarPreview = document.createElement("img");
 	avatarPreview.id = "avatarPreview";
 	avatarPreview.className = "w-24 h-24 rounded-full object-cover";
-	avatarPreview.src = (AVATAR_DEFAUT as string);
+	avatarPreview.src = `${profile.url_avatar}`;
 	avatarPreview.alt = "avatar";
 	avatarSection.appendChild(avatarPreview);
 
@@ -131,11 +132,11 @@ export function ProfilePage(): HTMLElement {
 
 	card.appendChild(avatarSection);
 
-	// Message avatar
-	const avatarMsg = document.createElement("p");
-	avatarMsg.id = "avatarMsg";
-	avatarMsg.className = "text-sm text-indigo-200";
-	card.appendChild(avatarMsg);
+	// // Message avatar
+	// const avatarMsg = document.createElement("p");
+	// avatarMsg.id = "avatarMsg";
+	// avatarMsg.className = "text-sm text-indigo-200";
+	// card.appendChild(avatarMsg);
 
 	// ---------- Email ----------
 
@@ -407,7 +408,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }): vo
 		fd.append("avatar", f);
 		try{
 			const res = await fetchRequest(
-					`avatar`,
+					`profile/avatar`,
 					'POST',
 					{},
 					{fd}
@@ -423,6 +424,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }): vo
 			console.log("avatar upload success:");
 			preview.src = avatar_url;
 			user.avatar_url = avatar_url;
+			window.location.reload();
 		}
 		catch
 		{
@@ -441,6 +443,8 @@ export function upload_avatar(user: { avatar_url: string | null }): void {
 	const preview = document.getElementById("avatarPreview") as HTMLImageElement | null;
 	const grid = document.getElementById("avatarGrid") as HTMLDivElement | null;
 
+	console.log('dans update_avatar')
+
 	if (!preview || !grid) {
 		console.warn("upload_avatar: avatarPreview ou avatarGrid introuvable dans le DOM");
 		return;
@@ -453,7 +457,8 @@ export function upload_avatar(user: { avatar_url: string | null }): void {
 	};
 
 	// Image initiale
-	preview.src = user.avatar_url || AVATAR_DEFAUT;
+	
+	preview.src = `${profile.url_avatar}` || AVATAR_DEFAUT;
 
 	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 
@@ -462,7 +467,7 @@ export function upload_avatar(user: { avatar_url: string | null }): void {
 			button.classList.remove("ring-4", "ring-indigo-400");
 		});
 		if (btn) {
-			button.classList.add("ring-4", "ring-indigo-400");
+			btn.classList.add("ring-4", "ring-indigo-400");
 		}
 	}
 
@@ -495,23 +500,17 @@ export function upload_avatar(user: { avatar_url: string | null }): void {
 				);
 
 				// Si ton fetchRequest THROW sur !res.ok, le code suivant ne sera pas exécuté
-				if (!res.ok) {
+				if (res.error) {
 					console.error("Server error:", res.status, await res.text());
-					// On NE remet PAS l'ancienne image ici,
-					// on laisse l'UI changer même si le backend est pas prêt
 					return;
 				}
-
-				console.log("change avatar update");
-				user.avatar_url = url;
+				user.avatar_url = res.payload.avatar_url;
+				profile.url_avatar = res.payload.avatar_url;
+				
+				highlight(btn);
 				selected = btn;
 			} catch (err) {
 				console.error("change avatar update failed:", err);
-				// AVANT tu remettais l’ancienne image ici → visuellement “ça ne bougeait pas”
-				// on ne revert plus pour que le clic soit visible.
-				// Si tu veux vraiment revert uniquement en cas de problème réseau critique :
-				// preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-				// highlight(selected);
 			}
 		});
 	});
