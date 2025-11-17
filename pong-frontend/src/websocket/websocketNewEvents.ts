@@ -1,4 +1,4 @@
-import { EmbedButton } from "../components/EmbebedButton";
+import { EmbeddedButton } from "../components/EmbeddedButton";
 import { newIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { fetchRequest } from "../utils";
 
@@ -18,8 +18,8 @@ async function websocketNewEvents() {
 					if (getSender === undefined) break;
 					newIntraMessage(
 						`${getSender.name} has send a friend request
-							 	${EmbedButton(getSender.id, "YES", eventId, "accept-friend-request")}
-							 		${EmbedButton(getSender.id, "NO", eventId, "accept-friend-request")}`
+							 	${EmbeddedButton(getSender.id, "YES", eventId, "accept-friend-request")}
+							 		${EmbeddedButton(getSender.id, "NO", eventId, "accept-friend-request")}`
 					);
 					break;
 			}

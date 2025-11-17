@@ -7,7 +7,6 @@ import {
 } from "../state/gameRoom.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
-import { print } from "../server.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
     const matcherController = new MatcherController();
@@ -138,10 +137,17 @@ class MatchesService {
     const getUser = connectedRoomInstance.getById(userId);
     if (getUser === undefined) throw new Error("disconnected");
 
+    if (newMatchesQueue.has(getUser.matchId || "")) {
+      return {
+        message: "error",
+        data: { message: "you have a match created" },
+      };
+    }
+
     if (getUser.status !== "CONNECT_ROOM") {
       return {
-        message: "success",
-        data: { message: "you need to be in CONNECT_ROOM status" },
+        message: "error",
+        data: { message: "you already have a match created" },
       };
     }
 
@@ -149,7 +155,9 @@ class MatchesService {
     getUser.matchId = matchId;
     getUser.status = "MATCH_QUEUE";
 
-    newMatchesQueue.set(matchId, { players: [userId], matchId, settings });
+    connectedRoomInstance.notifyUser(userId, "MATCH_QUEUE");
+
+    newMatchesQueue.set(matchId, {createId: userId, players: [userId], matchId, settings });
     connectedRoomInstance.broadcastNewMatchesList();
 
     return { message: "success", data: "new game created" };
@@ -242,7 +250,7 @@ class MatchesService {
         if (userInstance.status !== "CONNECT_ROOM") {
           return {
             message: "error",
-            data: "you need to be in CONNECT_ROOM status",
+            data: "cannot send invite in current status",
           };
         }
         userInstance.status = "SEND_INVITE";
@@ -253,7 +261,7 @@ class MatchesService {
         if (userInstance.status !== "CONNECT_ROOM") {
           return {
             message: "error",
-            data: "user is not in CONNECT_ROOM status",
+            data: "cannot receive invite in current status",
           };
         }
         userInstance.status = "MATCH_INVITE";

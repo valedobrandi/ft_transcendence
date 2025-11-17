@@ -1,7 +1,7 @@
 import { newIntraMessage, onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
-import { EmbedButton } from "./EmbebedButton";
+import { EmbeddedButton } from "./EmbeddedButton";
 
 export function ChatHeader(): HTMLDivElement {
 
@@ -91,7 +91,7 @@ const inviteUserOnclick = async () => {
 		if (getMatch.message === "success") {
 			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
 			newIntraMessage(`Invite sento to ${getTo?.name} 
-				${EmbedButton(0, 'CANCEL', getMatch.data.matchId, 'decline-match-invite')}`);
+				${EmbeddedButton(0, 'CANCEL', getMatch.data.matchId, 'decline-match-invite')}`);
 			stateProxyHandler.state = "SEND_INVITE"
 		}
 	} else if (response.message = 'error') {

@@ -112,7 +112,7 @@ export class ConnectedRoom {
 			JSON.stringify({
 				status: 200,
 				message: "match:list",
-				matches: matchesArray
+				payload: {matches: matchesArray}
 			})
 		)
       }
@@ -168,6 +168,18 @@ export class ConnectedRoom {
       }
     }
     return undefined;
+  }
+
+  notifyUser(id: number | bigint, message: string) {
+    const player = this.getById(id);
+    if (player && player.socket) {
+      player.socket.send(
+        JSON.stringify({
+          status: 200,
+          message,
+        })
+      );
+    }
   }
 
   has(id: number | bigint) {

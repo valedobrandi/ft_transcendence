@@ -13,6 +13,7 @@ export type NewInviteMatch = {
 
 export type NewMatch = {
     players: number[];
+    createId: number;
     matchId: number;
     settings: {};
 }

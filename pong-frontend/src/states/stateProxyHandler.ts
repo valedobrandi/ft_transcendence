@@ -94,6 +94,14 @@ export type FriendListType = {
     isConnected: boolean;
 };
 
+export type NewMatch = {
+    createId: number;
+    players: number[];
+    matchId: number;
+    settings: {};
+}
+
+
 type StateKey = keyof StateProxyHandler;
 
 const listeners: Record<StateKey, (() => void)[]> = {
@@ -105,6 +113,7 @@ const listeners: Record<StateKey, (() => void)[]> = {
     selectChat: [],
     state: [],
     systemMessages: [],
+    availableMatches: []
 };
 
 
@@ -129,6 +138,7 @@ export interface StateProxyHandler {
     "SEND_INVITE" |
     "MATCH_INVITE",
     systemMessages: { index: number; message: string }[];
+    availableMatches: NewMatch[];
 }
 
 export const stateProxyHandler: StateProxyHandler = new Proxy({
@@ -140,6 +150,7 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
     selectChat: { id: -1, name: '' },
     state: "CONNECT_ROOM",
     systemMessages: [],
+    availableMatches: []
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;

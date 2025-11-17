@@ -10,7 +10,7 @@ import {
 import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { navigateTo, setTime } from "../utils";
-import { EmbedButton } from "../components/EmbebedButton";
+import { EmbeddedButton } from "../components/EmbeddedButton";
 
 export async function websocketReceiver(socket: WebSocket) {
   socket.addEventListener("message", async (event) => {
@@ -104,13 +104,17 @@ export async function websocketReceiver(socket: WebSocket) {
           }
         }
         break;
+      case "match:list": {
+        stateProxyHandler.availableMatches = data.payload.matches;
+        break;
+      }
       case "MATCH_INVITE":
         let getName = stateProxyHandler.serverUsers.find(
           (user) => user.id === data.payload.from
         )?.name;
         newIntraMessage(`You have received a game invite from ${getName}.
-				${EmbedButton(0, "YES", data.payload.matchId, "accept-match-invite")} 
-				${EmbedButton(0, "NO", data.payload.matchId, "decline-match-invite")}`);
+				${EmbeddedButton(0, "YES", data.payload.matchId, "accept-match-invite")} 
+				${EmbeddedButton(0, "NO", data.payload.matchId, "decline-match-invite")}`);
         stateProxyHandler.state = "MATCH_INVITE";
         break;
       case "MATCH_DECLINED":

@@ -1,4 +1,4 @@
-function EmbedButton(friendId: number, text: string, eventId: number, id: string): string {
+function EmbeddedButton(friendId: number, text: string, eventId: number, id: string): string {
     const btnBg = text === "YES" ? "bg-green-500" : "bg-red-500";
     return (
         `<button
@@ -13,4 +13,4 @@ function EmbedButton(friendId: number, text: string, eventId: number, id: string
     )
 }
 
-export { EmbedButton };
+export { EmbeddedButton };
