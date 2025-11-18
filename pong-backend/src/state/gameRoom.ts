@@ -5,20 +5,22 @@ import { PlayerType } from "../types/PlayerType.js";
 import { connectedRoomInstance } from "./ConnectedRoom.js";
 
 export type NewInviteMatch = {
-    players: number[];
+    players: { id: number; username: string }[];
     from: number;
     to: number;
+    matchId: string;
     settings: {}
 }
 
 export type NewMatch = {
-    players: number[];
-    createId: number;
-    matchId: number;
-    settings: {};
-}
+  players: { id: number; username: string }[];
+  createId: number;
+  matchId: string;
+  settings: {};
+  status: "WAITING" | "PLAYING";
+};
 
-export type SettingsMatch = {}
+export type SettingsMatch = {};
 
 export const newMatchesQueue = new Map<string, NewMatch>();
 
@@ -28,32 +30,19 @@ export const matchQueue: Set<number> = new Set();
 
 export const gameRoom = new Map<string, PingPong>();
 
-export function jointInviteMatch(matchId: string) {
-    const newMatch = inviteMatchesQueue.get(matchId);
-    if (newMatch === undefined) {
-        return { message: 'success', data: 'match not found' };
-    }
-
-    inviteMatchesQueue.delete(matchId);
-
-    const oponentes = [connectedRoomInstance.getById(newMatch.from),
-    connectedRoomInstance.getById(newMatch.to)];
-
-
-    if (oponentes[0] === undefined || oponentes[1] === undefined) {
-        return { message: 'success', data: 'disconnected' }
-    }
-
-
-    eventsBus.emit('game:start', {
-        matchId: matchId,
-        oponentes: [oponentes[0].username, oponentes[1].username],
-        settings: newMatch.settings
+export function startNewMatch(nextMatch: NewMatch | NewInviteMatch) {
+  const [a, b] = nextMatch.players;
+  
+  eventsBus.emit('game:start', {
+        matchId: nextMatch.matchId,
+        oponentes: [a.username, b.username],
+        settings: nextMatch.settings
     })
 
-    return {message: 'success', data: `New match: ${oponentes[0].username} X oponentes[1].username`}
-
+    return {message: 'success', data: `New match starting: ${a.username} X ${b.username}`}
+ 
 }
+
 
 export function joinMatchRoom(username: string, id: number) {
     matchQueue.add(id);

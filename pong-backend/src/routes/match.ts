@@ -3,26 +3,28 @@ import {
   inviteMatchesQueue,
   jointInviteMatch,
   NewInviteMatch,
+  NewMatch,
   newMatchesQueue,
+  startNewMatch,
 } from "../state/gameRoom.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
-    const matcherController = new MatcherController();
+  const matcherController = new MatcherController();
 
-    fastify.get("/match-invite-accept", {
-      preHandler: [fastify.authenticate],
-      schema: {
-        querystring: {
-          type: "object",
-          properties: {
-            matchId: { type: "string" },
-          },
+  fastify.get("/match-invite-accept", {
+    preHandler: [fastify.authenticate],
+    schema: {
+      querystring: {
+        type: "object",
+        properties: {
+          matchId: { type: "string" },
         },
       },
-      handler: matcherController.acceptMatchInvite.bind(matcherController),
-    });
+    },
+    handler: matcherController.acceptMatchInvite.bind(matcherController),
+  });
 
   fastify.get("/match-invite", {
     preHandler: [fastify.authenticate],
@@ -63,7 +65,6 @@ const matchesRoute = (fastify: FastifyInstance) => {
     },
     handler: matcherController.denyMatchInvite.bind(matcherController),
   });
-
 
   fastify.post("/match-create", {
     preHandler: [fastify.authenticate],
@@ -133,40 +134,49 @@ class MatcherController {
 }
 
 class MatchesService {
-  createMatch(userId: number, settings: {}) {
+  joinMatch(userId: number, matchId: string) {
     const getUser = connectedRoomInstance.getById(userId);
     if (getUser === undefined) throw new Error("disconnected");
 
-    if (newMatchesQueue.has(getUser.matchId || "")) {
-      return {
-        message: "error",
-        data: { message: "you have a match created" },
-      };
-    }
-
     if (getUser.status !== "CONNECT_ROOM") {
-      return {
-        message: "error",
-        data: { message: "you already have a match created" },
-      };
+      return { message: "error", data: "subscribed to a match/tournament" };
     }
 
-    const matchId = crypto.randomUUID();
-    getUser.matchId = matchId;
-    getUser.status = "MATCH_QUEUE";
+    const nextMatch = newMatchesQueue.get(matchId);
 
-    connectedRoomInstance.notifyUser(userId, "MATCH_QUEUE");
+    if (nextMatch === undefined) {
+      return { message: "error", data: "match not find" };
+    }
 
-    newMatchesQueue.set(matchId, {createId: userId, players: [userId], matchId, settings });
-    connectedRoomInstance.broadcastNewMatchesList();
+    if (nextMatch.players.length > 1) {
+      return { message: "error", data: "match already start" };
+    }
 
-    return { message: "success", data: "new game created" };
+    nextMatch.players.push({id: Number(getUser.id), username: getUser.username});
+
+    const {data, message} = startNewMatch(nextMatch);
+
+    return {message, data};
   }
 
   acceptMatchInvite(userId: number, matchId: string) {
+
+    const getUser = connectedRoomInstance.getById(userId);
+    if (getUser === undefined) throw new Error("disconnected");
+
+    if (getUser.status !== "CONNECT_ROOM") {
+      return { message: "error", data: "subscribed to a match/tournament" };
+    }
+
     const nexMatch = inviteMatchesQueue.get(matchId);
 
-    const { data, message } = jointInviteMatch(matchId);
+    if (nexMatch === undefined) {
+      return { message: "error", data: "match not find" };
+    }
+
+    nexMatch.players.push({id: Number(getUser.id), username: getUser.username});
+
+    const { data, message } = startNewMatch(nexMatch);
     // Notify the two players
     if (nexMatch !== undefined && message === "success") {
       for (const ids of [nexMatch.from, nexMatch.to]) {
@@ -187,6 +197,45 @@ class MatchesService {
 
     return { data, message };
   }
+
+  createMatch(userId: number, settings: {}) {
+    const getUser = connectedRoomInstance.getById(userId);
+    if (getUser === undefined) throw new Error("disconnected");
+
+    if (newMatchesQueue.has(getUser.matchId || "")) {
+      return {
+        message: "error",
+        data:  "you have a match created" ,
+      };
+    }
+
+    if (getUser.status !== "CONNECT_ROOM") {
+      return {
+        message: "error",
+        data: "has a subscribed to match/tournament" ,
+      };
+    }
+
+    const matchId = crypto.randomUUID();
+    getUser.matchId = matchId;
+    getUser.status = "MATCH_QUEUE";
+
+    connectedRoomInstance.notifyUser(userId, "MATCH_QUEUE");
+
+    const newMatch: NewMatch = {
+      createId: userId,
+      players: [{ id: Number(getUser.id), username: getUser.username }],
+      matchId,
+      settings,
+      status: "WAITING",
+    };
+
+    newMatchesQueue.set(matchId, newMatch);
+    connectedRoomInstance.broadcastNewMatchesList();
+
+    return { message: "success", data: "new game created" };
+  }
+
 
   getMatch(matchId: string) {
     const match = inviteMatchesQueue.get(matchId);
