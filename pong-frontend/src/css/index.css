@@ -66,9 +66,9 @@ body {
 }
 
 .button-fancy-front {
-    display: block;
-    position: relative;
-    padding: 12px 27px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-radius: 12px;
     font-size: 1.1rem;
     color: white;
@@ -76,6 +76,8 @@ body {
     transform: translateY(-4px);
     transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
     will-change: transform;
+    padding: 100px 0;
+    width: 100%;
 }
 
 @media (min-width: 768px) {
