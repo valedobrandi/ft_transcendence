@@ -1,6 +1,7 @@
 import { fetchRequest, navigateTo } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
+import { HeaderBar } from "./HeaderBar";
 
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default.jpg"
@@ -9,37 +10,54 @@ const AVATAR2 = "/default/avatar2.jpg"
 const AVATAR3 = "/default/avatar3.jpg"
 const BACKEND_URL = "http://localhost:3000";
 
-export function ProfilePage(): HTMLElement {
+export function ProfilePage(): HTMLElement 
+{
 	const root = document.createElement("div");
 	root.className = "relative min-h-screen flex flex-col";
 
-	// Background image
-	 const bg = document.createElement("div");
-  bg.className = `
-    absolute inset-0
-    bg-[url('/default/.jpg')]
-    bg-[length:100%_auto]
-    bg-center
-    bg-no-repeat
-    z-0
-`;
-    root.appendChild(bg);
+	const bg = document.createElement("div");
+	bg.className = `
+	absolute inset-0
+	bg-[url('/default/ecran4.jpg')]
+	bg-cover
+	bg-center
+	bg-no-repeat
+	z-0
+	`;
+	root.appendChild(bg);
 
 	// ---------- HEADER ----------
 	const header = document.createElement("header");
-	header.className = "relative z-10 px-6 pt-8";
+	header.className = "relative z-10 px-6 pt-2";
 
 	const headerInner = document.createElement("div");
-	headerInner.className = "flex justify-between items-center";
+	headerInner.className = "flex items-center justify-between relative";
 
-	const homeLink = document.createElement("a");
-	homeLink.href = "#/";
+	// ===== Zone gauche : Home =====
+	const homeLink = document.createElement("button");
 	homeLink.className =
-		"rounded-md bg-dark-blue px-6 py-2 font-bagel text-smoky-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/60";
-	homeLink.textContent = "Home";
+	"flex items-center gap-2 rounded-md bg-dark-blue px-4 py-1 font-bagel text-smoky-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/60";
+	homeLink.onclick = () => navigateTo("/intra");
+	homeLink.innerHTML = `
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+	<path stroke-linecap="round" stroke-linejoin="round" d="m3 9 9-6 9 6v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+	<path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10" />
+	</svg>
+	<span>Home</span>
+	`;
 
-	// headerInner.appendChild(title);
+	// ===== Zone centre : Profil =====
+	
+	 const headerBar = HeaderBar("UPDATE PROFIL");
+
+	// ===== Zone droite =====
+	const rightSpace = document.createElement("div");
+	rightSpace.className = "w-20";
+
 	headerInner.appendChild(homeLink);
+	headerInner.appendChild(headerBar);
+	headerInner.appendChild(rightSpace);
+
 	header.appendChild(headerInner);
 	root.appendChild(header);
 
@@ -49,13 +67,7 @@ export function ProfilePage(): HTMLElement {
 		"relative z-10 px-6 pt-8 flex-1 flex flex-col items-center justify-center mb-8";
 
 	const card = document.createElement("div");
-	card.className = "place-self-center w-fit px-16 py-8 rounded-xl bg-mblue-500 opacity-80 ";
-
-	// Welcome
-	const h3 = document.createElement("h3");
-	h3.className = "text-3xl font-bagel text-smoky-white text-center";
-	h3.innerHTML = `Welcome ${profile.username} !`
-	card.appendChild(h3);
+	card.className = "place-self-center w-fit px-16 py-1 rounded-xl bg-mblue-500 opacity-80 ";
 
 	// ---------- Avatar section ----------
 	const avatarSection = document.createElement("section");
@@ -80,7 +92,8 @@ export function ProfilePage(): HTMLElement {
 	avatarGrid.id = "avatarGrid";
 	avatarGrid.className = "grid grid-cols-4 gap-3";
 
-	function makePreset(src: string, label: string): HTMLButtonElement {
+	function makePreset(src: string, label: string): HTMLButtonElement 
+	{
 		const btn = document.createElement("button");
 		btn.type = "button";
 		btn.className = "preset-btn flex justify-center rounded-full";
@@ -165,10 +178,9 @@ export function ProfilePage(): HTMLElement {
 	nameInput.placeholder = "change username";
 	nameInput.className =
 		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
+
 	nameSection.appendChild(nameInput);
-
 	card.appendChild(nameSection);
-
 
 	// ---------- Change passeword ----------
 	
@@ -252,7 +264,6 @@ export function ProfilePage(): HTMLElement {
 	}
 
 	try {
-	//sendBtn.setAttribute('disabled','true');
 	const data = await fetchRequest("/update", "PUT", {}, payload);
 	
 	if (data.message === 'success')
@@ -269,10 +280,11 @@ export function ProfilePage(): HTMLElement {
 		alert("Error loading profile: " + (data.error || "Erreur inconnue"));
 	}
 
-	if (payload.username) profile.username = String(payload.username);
-	if (payload.email)    profile.email    = String(payload.email);
+	if (payload.username) 
+		profile.username = String(payload.username);
+	if (payload.email)    
+		profile.email = String(payload.email);
 
-	
 	if (nameEl) nameEl.value = profile.username ?? "";
 	if (mailEl) mailEl.value = profile.email ?? "";
 
@@ -280,36 +292,15 @@ export function ProfilePage(): HTMLElement {
 	console.error("Erreur réseau :", e);
 	alert("Erreur lors de la mise à jour : " + (e || "Erreur inconnue"));
 	} finally {
-	//endBtn.setAttribute('disabled','false');;
+
 	}
 	});
 	main.appendChild(card);
 	root.appendChild(main);
 
 	// ---------- FOOTER ----------
-	const footer = document.createElement("footer");
-	footer.className = "relative z-10 px-6 pb-6";
+	// ---------- --- ----------
 
-	const footerInner = document.createElement("div");
-	footerInner.className = "relative";
-
-	const langLink = document.createElement("a");
-	langLink.href = "#lang";
-	langLink.className =
-		"pointer-events-auto absolute left-0 -bottom-2 grid h-10 w-10 place-items-center rounded-md bg-dark-blue text-smoky-white hover:brightness-110";
-
-	const langImg = document.createElement("img");
-	langImg.className = "w-[1.5em] h-[1.5em]";
-	langImg.alt = "language icon";
-
-	langLink.appendChild(langImg);
-	footerInner.appendChild(langLink);
-
-	footer.appendChild(footerInner);
-	// root.appendChild(footer);
-
-	// Lance la logique de récupération des infos utilisateur
-	//void handleProfilePage();
 	 setTimeout(() => {
         void handleProfilePage(avatarPreview, pickFileBtn, avatarFile, avatarGrid);
     }, 50);
@@ -343,13 +334,13 @@ export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFil
 	upload_avatar(user, avatarPreview, avatarGrid);
 	bind_user_avatar_upload(user, avatarPreview, pickFileBtn, avatarFile);
 	
-	const logoutBtn = document.getElementById("logout");
-	if (logoutBtn) {
-		logoutBtn.addEventListener("click", () => {
-			localStorage.removeItem("accessToken");
-			window.location.hash = "/login";
-		});
-	}
+	// const logoutBtn = document.getElementById("logout");
+	// if (logoutBtn) {
+	// 	logoutBtn.addEventListener("click", () => {
+	// 		localStorage.removeItem("accessToken");
+	// 		window.location.hash = "/login";
+	// 	});
+	// }
 }
 
 export function bind_user_avatar_upload(user: { avatar_url: string | null }, avatarPreview: HTMLImageElement,
@@ -413,13 +404,11 @@ export function upload_avatar(user: { avatar_url: string | null},  avatarPreview
 		return;
 	}
 
-	// Fallback si l'image échoue (évite une image cassée)
+	
 	avatarPreview.onerror = () => {
 		avatarPreview.onerror = null;
 		avatarPreview.src = AVATAR_DEFAUT;
 	};
-
-	// Image initiale
 
 	 if (user.avatar_url && user.avatar_url.startsWith("/images/")) {
         avatarPreview.src = `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`;
@@ -449,7 +438,7 @@ export function upload_avatar(user: { avatar_url: string | null},  avatarPreview
 
 	highlight(selected);
 
-	// IMPORTANT : on clique sur les boutons d'avatar
+	// clique sur les boutons d'avatar
 	presetButtons.forEach((btn) => {
 		btn.addEventListener("click", async () => {
 			const url = btn.dataset.src || AVATAR_DEFAUT;
@@ -460,13 +449,11 @@ export function upload_avatar(user: { avatar_url: string | null},  avatarPreview
 
 			try {
 				const res = await fetchRequest(
-					`/avatar`,          // <-- note le "/" au début
+					`/avatar`, 
 					"PUT",
 					{},
 					{ avatar_url: url }
 				);
-
-				// Si ton fetchRequest THROW sur !res.ok, le code suivant ne sera pas exécuté
 				if (res.error) {
 					console.error("Server error:", res.status, await res.text());
 					return;
@@ -474,7 +461,6 @@ export function upload_avatar(user: { avatar_url: string | null},  avatarPreview
 				user.avatar_url = res.payload.avatar_url;
 				profile.url_avatar = res.payload.avatar_url;
 				avatarPreview.src = profile.url_avatar
-				//avatarPreview.src = `${BACKEND_URL}${profile.url_avatar}?t=${Date.now()}`;
 				
 				highlight(btn);
 				selected = btn;

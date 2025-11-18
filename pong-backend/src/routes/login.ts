@@ -1,15 +1,11 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
-import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
-import { playerStatus } from '../enum_status/enum_userStatus.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import db from '../../database/db.js'
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { UsersModel } from '../models/usersModel.js';
-import cookie from '@fastify/cookie';
-
 
 export default async function loginRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
@@ -51,7 +47,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
         } 
         else
         {
-            const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username, avatar_url: existingUser.avatar_url};
+            const payload = {id: existingUser.id, email: existingUser.email, username: existingUser.username, avatar_url: existingUser.avatar_url};
 
             const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
             if(!refreshToken)
@@ -71,8 +67,6 @@ export default async function loginRoutes(fastify: FastifyInstance) {
                 path: '/'
             });
             
-            console.log("OOOOOOOOOOOOO", existingUser.avatar);
-            // console.log("OOOOOOOOOOO11", existingUser.username);
             return res.status(201).send({ message: 'success', payload: {accessToken, username, existingUser}});
         }
     });
