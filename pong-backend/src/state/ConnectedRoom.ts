@@ -170,16 +170,18 @@ export class ConnectedRoom {
     return undefined;
   }
 
-  notifyUser(id: number | bigint, message: string) {
-    const player = this.getById(id);
-    if (player && player.socket) {
-      player.socket.send(
+  sendWebsocketMessage(id: number | bigint, message: string): boolean {
+    const connected = this.getById(id);
+    if (connected && connected.socket) {
+      connected.socket.send(
         JSON.stringify({
           status: 200,
           message,
         })
       );
+	  return true;
     }
+	return false;
   }
 
   has(id: number | bigint) {

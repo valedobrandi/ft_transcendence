@@ -18,8 +18,8 @@ async function websocketNewEvents() {
 					if (getSender === undefined) break;
 					newIntraMessage(
 						`${getSender.name} has send a friend request
-							 	${EmbeddedButton(getSender.id, "YES", eventId, "accept-friend-request")}
-							 		${EmbeddedButton(getSender.id, "NO", eventId, "accept-friend-request")}`
+							 	${EmbeddedButton(getSender.id, "YES", `friend-request-${eventId}`, "friend-request")}
+							 		${EmbeddedButton(getSender.id, "NO", `friend-request-${eventId}`, "friend-request")}`
 					);
 					break;
 			}

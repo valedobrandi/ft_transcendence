@@ -1,14 +1,15 @@
 import type { WebSocket } from 'ws';
 import { Tournamentype } from "../types.js";
-import { joinTournamentRoom } from "../../state/tournamentRoom.js";
+import { joinTournamentQueue } from "../../state/tournamentRoom.js";
 import { connectedRoomInstance } from '../../state/ConnectedRoom.js';
+import { print } from '../../server.js';
 
 export function TOURNAMENT(data: Tournamentype, connection: WebSocket) {
-	const player = connectedRoomInstance.getById(data.username);
+	const player = connectedRoomInstance.getById(data.id);
 
-	if (player == undefined || player.status != 'CONNECT_ROOM') return;
+	if (player === undefined || player.status != 'CONNECT_ROOM') return;
 
-	console.log(`Tournament Player: ${data.username}`);
+	print(`Tournament Player: ${data.username}`);
 
-	joinTournamentRoom(player.username);
+	joinTournamentQueue(Number(player.id), player.username);
 }

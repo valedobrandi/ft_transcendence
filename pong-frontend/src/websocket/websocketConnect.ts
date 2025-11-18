@@ -28,6 +28,7 @@ export async function websocketConnect() {
 		}));
 
 		websocketReceiver(socket);
+		
 		newIntraMessage(`${profile.username} connected.`);
 
 		await websocketNewEvents();

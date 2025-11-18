@@ -113,10 +113,10 @@ export function eventListeners() {
           });
         }
         break;
-      case "accept-friend-request":
+      case "friend-request":
         {
-          const tagName = button.name;
-          const eventId = button.getAttribute("eventid");
+		  const tagName = button.dataset.tagname;
+          const eventId = button.dataset.eventid;
           const action = button.getAttribute("action");
 
           if (action === "accept") {
@@ -133,7 +133,7 @@ export function eventListeners() {
 
           const parentMsg = button.closest("p");
             if (parentMsg) {
-              const tagId = parentMsg.id.replace("msg-index-", "");
+              const tagId = parentMsg.id.replace("friend-request-", "");
               parentMsg.remove();
               removeIntraMessage(Number(tagId));
             }

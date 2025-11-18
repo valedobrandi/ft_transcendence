@@ -52,6 +52,7 @@ export async function websocketReceiver(socket: WebSocket) {
           // Get the sender id by filter out my own id
           const sender = data.sender.find((sid: number) => sid !== profile.id);
           if (!sender) return;
+		  console.log("[WEBSOCKET RECEIVER] CHAT_MESSAGE from ", data.history);
           stateProxyHandler.messages.set(sender, data.history);
           stateProxyHandler.state = data.message;
         }
@@ -113,7 +114,7 @@ export async function websocketReceiver(socket: WebSocket) {
           (user) => user.id === data.payload.from
         )?.name;
         newIntraMessage(`You have received a game invite from ${getName}.
-				${EmbeddedButton(0, "YES", data.payload.matchId, "accept-match-invite")} 
+				${EmbeddedButton(0, "YES", data.payload.matchId, "accept-match-invite")}
 				${EmbeddedButton(0, "NO", data.payload.matchId, "decline-match-invite")}`);
         stateProxyHandler.state = "MATCH_INVITE";
         break;
