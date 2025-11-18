@@ -2,14 +2,10 @@ export const serverState = new Proxy({ state: "" }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
 
-        const serverStateElement = document.getElementById("server-state");
 		
         const matchBtn = document.getElementById("match-btn");
         const tourBtn = document.getElementById("tournament-btn");
 
-        if (serverStateElement) {
-            serverStateElement.textContent = value as string;
-        }
         if (!matchBtn || !tourBtn) return true;
         if (value === "MATCH_ROOM" || value === "TOURNAMENT_ROOM") {
             matchBtn.setAttribute("disabled", "true");

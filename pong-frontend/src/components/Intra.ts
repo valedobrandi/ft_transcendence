@@ -2,17 +2,17 @@ import { profile } from "../app";
 import { ChatHeader } from "./ChatHeader";
 import { SystemMessageChat } from "./ChatIntra";
 import { ChatSendInput } from "./ChatSendInput";
-import { Settings } from "./Settings";
+import { MatchList } from "./MatchList";
 import { UsersList } from "./UsersList";
 
 export function Intra(): HTMLElement {
     const mainDiv = document.createElement("div");
     mainDiv.id = "main-chat-container";
-    mainDiv.className = "flex h-screen p-1";
+    mainDiv.className = "flex justify-start align-stretch h-screen p-1";
 
     const chatDiv = document.createElement("div");
     chatDiv.id = "chat-container";
-    chatDiv.className = "w-full flex flex-col";
+    chatDiv.className = "flex flex-col";
 
     const chatWidget = document.createElement("div");
     chatWidget.id = "chatWidget";
@@ -59,9 +59,20 @@ export function Intra(): HTMLElement {
     chatDiv.appendChild(contentDiv);
 	chatDiv.appendChild(intraContainer);
 
+    const matchDiv = document.createElement("div");
+    matchDiv.id = "match-list-container";
+    matchDiv.className = "border w-fit border-2";
 
-    const settingsUI = Settings();
-    mainDiv.appendChild(settingsUI!);
+    const matchTitle = document.createElement("h2");
+    matchTitle.innerText = "Available Matches";
+    matchTitle.className = "text-center font-bold p-2 border uppercase bg-gray-200";
+
+    matchDiv.appendChild(matchTitle);
+
+    mainDiv.appendChild(matchDiv);
+
+    const matchListUI = MatchList();
+    matchDiv.appendChild(matchListUI!);
 
     return mainDiv;
 }

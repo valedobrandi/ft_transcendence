@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import MatchesModel from '../models/matchesModel';
 import { EventsMap } from '../types/GameEvents';
+import { PingPong } from '../classes/PingPong';
 
 export const events = new EventEmitter();
 
@@ -33,6 +34,12 @@ class EventBus<Events extends Record<string, any>> {
             const { userId, friendId } = data;
             console.log(`User ${userId} added friend ${friendId}`);
         });
+
+        this.on('game:start', (data) => {
+
+            const newMatch = new PingPong(data.matchId);
+            newMatch.createMatch(data.oponentes[0], data.oponentes[1]);
+        })
     }
 }
 

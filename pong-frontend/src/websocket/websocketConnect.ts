@@ -1,6 +1,6 @@
 import { profile } from "../app";
 import { setupPaddleListeners } from "../events/paddleListeners";
-import { addIntraMessage } from "../states/stateProxyHandler";
+import { newIntraMessage } from "../states/stateProxyHandler";
 import { getSocket } from "../websocket";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketReceiver } from "./websocketReceiver";
@@ -28,7 +28,7 @@ export async function websocketConnect() {
 		}));
 
 		websocketReceiver(socket);
-		addIntraMessage(`${id.username} connected.`);
+		newIntraMessage(`${profile.username} connected.`);
 
 		await websocketNewEvents();
 

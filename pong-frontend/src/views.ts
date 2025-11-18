@@ -17,6 +17,7 @@ export function intraView(root: HTMLElement) {
 	initSocket(endpoint.pong_backend_websocket, profile.username);
 	websocketConnect();
 	root.innerHTML = "";
+
 	const intraUI = Intra();
 	const menuUI = Menu();
 	root.appendChild(menuUI);

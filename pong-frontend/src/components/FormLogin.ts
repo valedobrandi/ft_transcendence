@@ -3,7 +3,7 @@ import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { profile, jwt } from "../app";
-import { addIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
+import { stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
 
 export function FormLogin(): HTMLElement {
@@ -26,12 +26,6 @@ export function FormLogin(): HTMLElement {
 		event.preventDefault();
 		console.log("2FA code submitted");
 	};
-
-    // Add a title to the form
-    const title = document.createElement("h1");
-    title.className = "game-font text-5xl text-[hsl(345,100%,47%)] text-shadow-lg/30 mb-8 text-center";
-    title.textContent = "WELCOME BACK";
-    formElement.appendChild(title);
 
     // Add inputs Name + Password to the form
     const inputContainer = document.createElement("div");

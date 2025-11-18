@@ -1,6 +1,5 @@
 import { profile } from "../app";
-import { setButtonToBlockState, setButtonToUnblockState } from "../components/ChatHeader";
-import { addIntraMessage, deleteIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
+import { newIntraMessage, removeIntraMessage, stateProxyHandler } from "../states/stateProxyHandler";
 import { fetchRequest, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
@@ -31,35 +30,63 @@ export function eventListeners() {
     const button = target.closest("button");
     if (!button) return;
     console.log("Button clicked:", button.id);
-    switch (button.id) {
-      case "btn-block-user":
-        {
-          const response = await fetchRequest(`/add-block`, "POST", {},
-            {
-              body: JSON.stringify({
-                id: stateProxyHandler.selectChat.id,
-              }),
-            }
-          );
 
-          if (response.message === "success") {
-            addIntraMessage(
-              `User ${stateProxyHandler.selectChat.name} has been blocked.`
-            );
-            await fetchRequest('/block-list', 'GET', {}).then((data) => {
-              if (data.message === 'success') {
-                stateProxyHandler.chatBlockList = data.payload;
-              }
-            });
+    switch (button.id) {
+      case "accept-match-invite": {
+        const eventId = button.dataset.eventid;
+        const response = await fetchRequest(`/match-invite-accept?matchId=${eventId}`, 'GET', {});
+        if (response.message === 'success') {
+          removeIntraMessage(Number(eventId));
+        }
+      }
+      break;
+      case "decline-match-invite": {
+        const eventId = button.dataset.eventid;
+        const response = await fetchRequest(
+          `/match-invite?matchId=${eventId}`,
+          'DELETE')
+        if (response.message === 'success') {
+          const getMatch = await fetchRequest(`/match-invite?matchId=${eventId}`, 'GET', {});
+          if (getMatch.message === 'error') {
+            console.log("[DELETE MESSAGE]", button);
+            const parentMsg = button.closest("p");
+            if (parentMsg) {
+              const tagId = parentMsg.id.replace("msg-index-", "");
+              parentMsg.remove();
+              removeIntraMessage(Number(tagId));
+            }
+            stateProxyHandler.state = "CONNECT_ROOM"
           }
         }
+      }
+        break;
+      case "btn-block-user": {
+        const response = await fetchRequest(`/add-block`, "POST", {},
+          {
+            body: JSON.stringify({
+              id: stateProxyHandler.selectChat.id,
+            }),
+          }
+        );
+
+        if (response.message === "success") {
+          newIntraMessage(
+            `User ${stateProxyHandler.selectChat.name} has been blocked.`
+          );
+          await fetchRequest('/block-list', 'GET', {}).then((data) => {
+            if (data.message === 'success') {
+              stateProxyHandler.chatBlockList = data.payload;
+            }
+          });
+        }
+      }
         break
       case "btn-unblock-user":
         {
           const response = await fetchRequest(`/remove-block?id=${stateProxyHandler.selectChat.id}`, "DELETE", {});
 
           if (response.message === "success") {
-            addIntraMessage(
+            newIntraMessage(
               `User ${stateProxyHandler.selectChat.name} has been unblocked.`
             );
             await fetchRequest('/block-list', 'GET', {}).then((data) => {
@@ -105,11 +132,12 @@ export function eventListeners() {
           }
 
           const parentMsg = button.closest("p");
-          if (parentMsg) {
-            parentMsg.remove();
-            const tagId = parentMsg.id.replace("msg-index-", "");
-            deleteIntraMessage(Number(tagId));
-          }
+            if (parentMsg) {
+              const tagId = parentMsg.id.replace("msg-index-", "");
+              parentMsg.remove();
+              removeIntraMessage(Number(tagId));
+            }
+
         }
         break;
       case "btn-friend-list":
@@ -126,7 +154,7 @@ export function eventListeners() {
           );
 
           if (response.status === "success") {
-            addIntraMessage(
+            newIntraMessage(
               `Friend request sent to ${stateProxyHandler.selectChat.name}`
             );
           }
