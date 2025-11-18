@@ -1,13 +1,13 @@
 export type ConnectType = {
     type: 'CONNECT';
     username: string;
-	user_id: number;
+	userId: number;
 };
 
 export type MatchType = {
     type: 'MATCH';
     username: string;
-    id: string;
+    userId: Number;
 };
 
 export type MovePaddleType = {

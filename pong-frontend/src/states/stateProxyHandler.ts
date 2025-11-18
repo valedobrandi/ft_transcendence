@@ -1,19 +1,24 @@
 import { profile } from "../app";
 import type { ChatMessage } from "../interface/ChatMessage";
 import { navigateTo, setTime } from "../utils";
-import { websocketChatSend } from "../websocket/websocketChatSend";
 
-export function addIntraMessage(message: string) {
+export function newIntraMessage(message: string) {
     stateProxyHandler.systemMessages = [...stateProxyHandler.systemMessages, {
         message: message,
         index: (stateProxyHandler.systemMessages.length),
     }];
-    stateProxyHandler.state = "SYSTEM_MESSAGE";
 }
 
-export function deleteIntraMessage(index: number) {
-    stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.filter(msg => msg.index !== index);
-    stateProxyHandler.state = "SYSTEM_MESSAGE";
+export function removeIntraMessage(tagId: number) {
+    stateProxyHandler.systemMessages = stateProxyHandler
+        .systemMessages.filter(msg => msg.index !== Number(tagId));
+}
+
+export function findIntraMessage(tagId: string) {
+    const idx = stateProxyHandler.systemMessages.findIndex(
+        msg => msg.message.includes(tagId)
+    );
+    return idx;
 }
 
 export function renderSystemMessages() {
@@ -89,6 +94,14 @@ export type FriendListType = {
     isConnected: boolean;
 };
 
+export type NewMatch = {
+    createId: number;
+    players: number[];
+    matchId: number;
+    settings: {};
+}
+
+
 type StateKey = keyof StateProxyHandler;
 
 const listeners: Record<StateKey, (() => void)[]> = {
@@ -100,6 +113,7 @@ const listeners: Record<StateKey, (() => void)[]> = {
     selectChat: [],
     state: [],
     systemMessages: [],
+    availableMatches: []
 };
 
 
@@ -115,8 +129,16 @@ export interface StateProxyHandler {
     chatBlockList: number[];
     connectedUsers: { id: number; name: string }[];
     selectChat: { id: number; name: string };
-    state: string;
+    state: "CONNECT_ROOM" |
+    "MATCH_QUEUE" |
+    "TOURNAMENT_QUEUE" |
+    "TOURNAMENT_ROOM" |
+    "GAME_ROOM" |
+    "GAME_START" |
+    "SEND_INVITE" |
+    "MATCH_INVITE",
     systemMessages: { index: number; message: string }[];
+    availableMatches: NewMatch[];
 }
 
 export const stateProxyHandler: StateProxyHandler = new Proxy({
@@ -126,22 +148,15 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
     chatBlockList: [],
     connectedUsers: [],
     selectChat: { id: -1, name: '' },
-    state: "",
+    state: "CONNECT_ROOM",
     systemMessages: [],
+    availableMatches: []
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
 
         if (prop === 'state') {
             switch (value) {
-                case "TOURNAMENT_ROOM":
-                    //addMessage("INTRA", `you have joined the tournament queue.`);
-                    websocketChatSend(`you have joined the tournament queue.`, 'INTRA', 1);
-                    break;
-                case "MATCH_ROOM":
-                    //addMessage("INTRA", `you have joined the match queue.`);
-                    websocketChatSend(`you have joined the match queue.`, 'INTRA', 1);
-                    break;
                 case "GAME_ROOM":
                     setTime(5000, () => {
                         navigateTo("/match");

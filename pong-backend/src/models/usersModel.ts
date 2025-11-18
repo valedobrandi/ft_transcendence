@@ -46,7 +46,7 @@ class UsersModel {
             const guestEmail = `${username}@guest.com`;
             const guestPassword = crypto.randomUUID();
             const response: RunResult = this.stmSaveGuestUsername.run(username, guestEmail, guestPassword, 'DISCONNECT', 0);
-            connectedRoomInstance.broadCastRegisteredUsers();
+            connectedRoomInstance.broadcastRegisteredUsers();
             return { message: 'success', id: response.lastInsertRowid, username };
         } catch (error) {
             print('error saving guest username');

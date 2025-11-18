@@ -3,8 +3,9 @@ import { serverState } from "../states/serverState";
 import { Button } from "./Button";
 import { profile } from "../app";
 import { getSocket } from "../websocket";
+import { fetchRequest } from "../utils";
 
-export function Menu():HTMLDivElement {
+export function Menu(): HTMLDivElement {
 
     const socket = getSocket();
 
@@ -19,7 +20,7 @@ export function Menu():HTMLDivElement {
 
     const matchBtn = Button('MATCH', "h-10 w-18 rounded", () => {
         if (!socket) return;
-        socket.send(JSON.stringify({ type: 'MATCH', username: profile.username }));
+        socket.send(JSON.stringify({ type: 'MATCH', username: profile.username, userId: profile.id }));
     });
     matchBtn.id = "match-btn";
 
@@ -29,10 +30,13 @@ export function Menu():HTMLDivElement {
     });
     tourBtn.id = "tournament-btn";
 
-    const elementP = document.createElement("p");
-    elementP.id = "server-state";
-    elementP.className = "text-xs font-bold italic underline";
-    elementP.textContent = serverState.state;
+    const CreateMatchBtn = Button("CREATE MATCH", "h-10 w-30 rounded", async () => {
+        if (!socket) return;
+        const response = await fetchRequest("/match-create", "POST", {}, {
+            body: JSON.stringify({ settings: {username: profile.username} })
+        });
+    });
+    CreateMatchBtn.id = "create-match-btn";
 
     shouldDisable && matchBtn.setAttribute("disabled", "true");
     shouldDisable && tourBtn.setAttribute("disabled", "true");
@@ -42,7 +46,7 @@ export function Menu():HTMLDivElement {
 
     divElement.appendChild(matchBtn);
     divElement.appendChild(tourBtn);
-    divElement.appendChild(elementP);
+    divElement.appendChild(CreateMatchBtn);
 
     return divElement;
 }

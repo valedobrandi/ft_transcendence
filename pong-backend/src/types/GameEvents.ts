@@ -5,6 +5,11 @@ export type EventsMap = {
         player2: string;
         score1: number;
         score2: number;
+    },
+    'game:start': {
+        matchId: string;
+        oponentes: [string, string];
+        settings: {};
     }
 }
 

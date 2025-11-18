@@ -1,4 +1,5 @@
 import { eventsBus, events } from "../events/EventsBus.js";
+import { print } from "../server.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { gameRoom } from "../state/gameRoom.js";
 import { userGameStateType } from "../types/GameStateType.js";
@@ -39,7 +40,7 @@ class PingPong {
     }
 
     getPlayer(id: string): PlayerType | undefined {
-        return connectedRoomInstance.getById(id) || undefined;
+        return connectedRoomInstance.getByUsername(id) || undefined;
     }
 
     resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
@@ -188,9 +189,9 @@ class PingPong {
         }
     }
 
-    add(id: string) {
-        this.playersIds.set(id, { disconnect: false });
-        this.inputs.set(id, { up: false, down: false });
+    add(username: string) {
+        this.playersIds.set(username, { disconnect: false });
+        this.inputs.set(username, { up: false, down: false });
     }
 
     send() {
@@ -240,7 +241,7 @@ class PingPong {
         this.messages("MATCH_CREATED");
         this.messages("COUNTDOWN");
 
-        console.log(`match_created: ${this.machId} between ${playerXId} and ${playerYId}`);
+        print(`[MATCH CREATED]: ${this.machId} between ${playerXId} and ${playerYId}`);
     }
 
     disconnect(playerId: string) {
@@ -309,7 +310,6 @@ class PingPong {
                     player.matchId = this.machId;
 
                     const side = id === leftId ? 'LEFT' : 'RIGHT';
-                    console.log(`Sending GAME_ROOM to ${leftId} as ${rightId}`);
                     if (!player.socket) return;
                     player.socket.send(JSON.stringify({
                         status: 200,
