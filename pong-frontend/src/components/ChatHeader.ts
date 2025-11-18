@@ -107,10 +107,14 @@ const profileOnclick = async () => {
 		const data = await fetchRequest('/profile', 'GET', {});
 		console.log("DATA PROFILE = ", data);
 		if (data.message === 'success') {
-			profile.username = data.user.username;
-			profile.id = data.user.id;
-			profile.email = data.user.email;
+			profile.username = data.existUser.username;
+			profile.id = data.existUser.id;
+			profile.email = data.existUser.email;
+			profile.avatar_url = data.existUser.avatar_url;
+
 			console.log("PROFIL = ", profile.username);
+			console.log("EMAIL IIII = ", profile.email);
+			console.log("AVATAR IIII = ", profile.avatar_url);
 
 			navigateTo("/profile");
 		}
