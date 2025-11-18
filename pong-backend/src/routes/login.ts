@@ -51,7 +51,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
         } 
         else
         {
-            const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username, avatar_url: existingUser.avatar};
+            const payload = {id: existingUser.id ,email: existingUser.email, username: existingUser.username, avatar_url: existingUser.avatar_url};
 
             const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
             if(!refreshToken)
@@ -71,7 +71,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
                 path: '/'
             });
             
-            // console.log("OOOOOOOOOOOOO", existingUser.avatar);
+            console.log("OOOOOOOOOOOOO", existingUser.avatar);
             // console.log("OOOOOOOOOOO11", existingUser.username);
             return res.status(201).send({ message: 'success', payload: {accessToken, username, existingUser}});
         }

@@ -17,21 +17,30 @@ export default function avatarRoute(fastify: FastifyInstance)
 {
   fastify.register(fastifyMultipart);
 
-  fastify.post('/profile/avatar', {
+  fastify.post('/avatar', {
     preHandler: [fastify.authenticate],
   }, async (request: any, reply) => {
     try {
       const idUser = request.user?.id;
-      if (!idUser) 
+      if (!idUser)
+      {
+        console.log("PAD DE  ID");
         return reply.status(401).send({ error: "Unauthorized" });
+      }
 
       const existUser = db.prepare('SELECT * FROM users WHERE id = ?').get(idUser);
       if (!existUser) 
+      {
+        console.log("PAD DE  USER");
         return reply.status(404).send({ error: "User not found" });
+      }
 
       const data = await request.file();
-      if (!data) 
+      if (!data)
+      {
+        console.log("PAD DE  FILE");
         return reply.status(400).send({ error: "File not found" });
+      }
 
       const allowedTypes: { [key: string]: string } = {
         "image/png": "png",
@@ -54,7 +63,7 @@ export default function avatarRoute(fastify: FastifyInstance)
       const publicPath = `/images/${fileName}`;
       db.prepare('UPDATE users SET avatar_url = ? WHERE id = ?').run(publicPath, idUser);
 
-      return reply.send({ message: "Avatar uploaded successfully!", avatar_url: publicPath });
+      return reply.send({ message: "Avatar uploaded successfully!", payload: {avatar_url: publicPath}});
 
     } catch (err) {
       console.error("Upload error:", err);

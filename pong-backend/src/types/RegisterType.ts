@@ -6,7 +6,7 @@ export type User =
   email: string;
   username: string;
   password: string;
-  avatar: string;
+  avatar_url: string;
   status: playerStatus;
   wins: number;
   losses: number;

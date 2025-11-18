@@ -51,7 +51,9 @@ export function FormLogin(): HTMLElement {
         if (response.message === 'success') {
             jwt.token = response.payload.accessToken;
             profile.username = response.payload.username;
-			profile.url_avatar = response.payload.existingUser.avatar_url;
+			profile.url_avatar = response.payload.existingUser.avatar_url
+			//profile.url_avatar = user.avatar ? `${BACKEND_URL}${user.avatar}` : AVATAR_DEFAUT;
+			console.log("OUHHHHHHHH, ", profile.url_avatar)
             navigateTo("/intra");
         }
         if (response.status == 404)

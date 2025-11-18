@@ -1,20 +1,13 @@
-// import { Button } from "./Button";
-import { HeaderBar } from "./HeaderBar";
-// import { InputName } from "./InputName";
-// import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { profile } from "../app";
-// import { profile, jwt } from "../app";
+import { jwt } from "../app";
 
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default.jpg"
 const AVATAR1 = "/default/avatar1.jpg"
 const AVATAR2 = "/default/avatar2.jpg"
 const AVATAR3 = "/default/avatar3.jpg"
-// À adapter selon ton projet
-// import { API_URL, fetchWithAuth } from "./api";
-// import { AVATAR_DEFAUT, AVATAR1, AVATAR2, AVATAR3, languageSvg } from "./assets";
-// import { upload_avatar, bind_user_avatar_upload, update_name } from "./profileHelpers";
+const BACKEND_URL = "http://localhost:3000";
 
 export function ProfilePage(): HTMLElement {
 	const root = document.createElement("div");
@@ -74,11 +67,14 @@ export function ProfilePage(): HTMLElement {
 	avatarSection.appendChild(avatarLabel);
 
 	const avatarPreview = document.createElement("img");
-	avatarPreview.id = "avatarPreview";
-	avatarPreview.className = "w-24 h-24 rounded-full object-cover";
-	avatarPreview.src = `${profile.url_avatar}`;
-	avatarPreview.alt = "avatar";
-	avatarSection.appendChild(avatarPreview);
+    avatarPreview.id = "avatarPreview";
+    avatarPreview.className = "w-24 h-24 rounded-full object-cover";
+    avatarPreview.src = profile.url_avatar ?
+    `${BACKEND_URL}${profile.url_avatar}?t=${Date.now()}`
+    : AVATAR_DEFAUT;
+	console.log('AVAATARRR=', avatarPreview.src);
+    avatarPreview.alt = "avatar";
+    avatarSection.appendChild(avatarPreview);
 
 	const avatarGrid = document.createElement("div");
 	avatarGrid.id = "avatarGrid";
@@ -132,12 +128,6 @@ export function ProfilePage(): HTMLElement {
 
 	card.appendChild(avatarSection);
 
-	// // Message avatar
-	// const avatarMsg = document.createElement("p");
-	// avatarMsg.id = "avatarMsg";
-	// avatarMsg.className = "text-sm text-indigo-200";
-	// card.appendChild(avatarMsg);
-
 	// ---------- Email ----------
 
 	const emailSection1 = document.createElement("section");
@@ -150,6 +140,7 @@ export function ProfilePage(): HTMLElement {
 
 	const emailInput = document.createElement("input");
 	emailInput.id = "change_email_input";
+	emailInput.setAttribute("autocomplete", 'off');
 	emailInput.type = "email";
 	emailInput.placeholder = "change Email";
 	emailInput.className =
@@ -308,7 +299,6 @@ export function ProfilePage(): HTMLElement {
 		"pointer-events-auto absolute left-0 -bottom-2 grid h-10 w-10 place-items-center rounded-md bg-dark-blue text-smoky-white hover:brightness-110";
 
 	const langImg = document.createElement("img");
-	// langImg.src = languageSvg as string;
 	langImg.className = "w-[1.5em] h-[1.5em]";
 	langImg.alt = "language icon";
 
@@ -319,18 +309,18 @@ export function ProfilePage(): HTMLElement {
 	// root.appendChild(footer);
 
 	// Lance la logique de récupération des infos utilisateur
-	void handleProfilePage();
+	//void handleProfilePage();
+	 setTimeout(() => {
+        void handleProfilePage(avatarPreview, pickFileBtn, avatarFile, avatarGrid);
+    }, 50);
 
 	return root;
 }
 
-export async function handleProfilePage(): Promise<void> {
+export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFileBtn: HTMLButtonElement,
+    avatarFile: HTMLInputElement,  avatarGrid: HTMLDivElement): Promise<void> {
 			console.log("handleProfilePage called");
 		console.log("DOM check:", {
-		preview: document.getElementById("avatarPreview"),
-		grid: document.getElementById("avatarGrid"),
-		plus: document.getElementById("pickFileAvatar"),
-		file: document.getElementById("avatarFile"),
 	});
 
 	let data;
@@ -350,117 +340,94 @@ export async function handleProfilePage(): Promise<void> {
 
 	const user = data.user;
 
-	const usernameSpan = document.getElementById("username");
-	const emailSpan = document.getElementById("useremail");
-	const nameInput = document.getElementById("change_name_input") as HTMLInputElement | null;
-
-	if (usernameSpan) usernameSpan.textContent = user.name;
-	if (emailSpan) emailSpan.textContent = user.email;
-	if (nameInput) nameInput.value = user.name ?? "";
-
-	upload_avatar(user);
-	bind_user_avatar_upload(user);
-	update_name();
-
+	upload_avatar(user, avatarPreview, avatarGrid);
+	bind_user_avatar_upload(user, avatarPreview, pickFileBtn, avatarFile);
+	
 	const logoutBtn = document.getElementById("logout");
 	if (logoutBtn) {
 		logoutBtn.addEventListener("click", () => {
-			localStorage.removeItem("accessToken"); // au cas où tu l’utilises plus tard
+			localStorage.removeItem("accessToken");
 			window.location.hash = "/login";
 		});
 	}
 }
 
-export function bind_user_avatar_upload(user: { avatar_url: string | null }): void 
-{
-	//recuperer les bouttons
-	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
-	const plusBtn = document.getElementById("pickFileAvatar") as HTMLButtonElement;
-	const fileInput = document.getElementById("avatarFile") as HTMLInputElement;
+export function bind_user_avatar_upload(user: { avatar_url: string | null }, avatarPreview: HTMLImageElement,
+    pickFileBtn: HTMLButtonElement,
+    avatarFile: HTMLInputElement): void {
 
-	// si on charge une image invalide → fallback
-  	preview.onerror = () => {
-    	preview.onerror = null;
-    	preview.src = AVATAR_DEFAUT;
-	};
-	// ouvre le file picker, fileInput.click() pour ouvrir le sélecteur de fichiers.
-	plusBtn.addEventListener("click", () => fileInput.click());
+	avatarPreview.onerror = () => {
+        avatarPreview.onerror = null;
+        avatarPreview.src = AVATAR1;
+    };
 
-	fileInput.addEventListener("change", async() => {
-		const f = fileInput.files?.[0]
-		if (!f)
-			return ;
+    pickFileBtn.addEventListener("click", () => avatarFile.click());
 
-		const allow = ["image/png", "image/jpeg"];
-		const size_photo = 5 * 1024 * 1024;
+    avatarFile.addEventListener("change", async () => {
+        const f = avatarFile.files?.[0];
+        if (!f) return;
 
-		if (!allow.includes(f.type) || f.size > size_photo)
-		{
-			fileInput.value = "";
-			console.log("image format error");
-			return ;
-		}
+        const allow = ["image/png", "image/jpeg", "image/jpg"];
+        if (!allow.includes(f.type) || f.size > 5 * 1024 * 1024) {
+            avatarFile.value = "";
+            console.log("image format error");
+            return;
+        }
 
-		const url = URL.createObjectURL(f);
-		preview.src = url;
+        const tempUrl = URL.createObjectURL(f);
+        avatarPreview.src = tempUrl;
 
-		const fd = new FormData();
-		fd.append("avatar", f);
-		try{
-			const res = await fetchRequest(
-					`profile/avatar`,
-					'POST',
-					{},
-					{fd}
+        const fd = new FormData();
+        fd.append("avatar", f);
 
-			);
-			if (!res.ok) {
-				console.error("Server error:", res.status, await res.text());
-				
-				return;
-			}
-			const data = await res.json() as {avatar_url:string};
-			const { avatar_url } = data; 
-			console.log("avatar upload success:");
-			preview.src = avatar_url;
-			user.avatar_url = avatar_url;
-			window.location.reload();
-		}
-		catch
-		{
-			console.error("Upload failed:");
-	    	preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-		}
-		finally
-		{
-			URL.revokeObjectURL(url);
-			fileInput.value = "";
-		}
+        try {
+            const res = await fetch(`${BACKEND_URL}/avatar`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${jwt.token}` },
+                body: fd
+            });
+            const data = await res.json();
+            if (!data.payload?.avatar_url) throw new Error("Avatar non reçu");
+
+            
+            user.avatar_url = data.payload.avatar_url;
+            profile.url_avatar = data.payload.avatar_url;
+
+            avatarPreview.src = `${BACKEND_URL}${profile.url_avatar}?t=${Date.now()}`;
+            console.log("Avatar mis à jour:", profile.url_avatar);
+        } catch (err) {
+            console.error("Upload failed:", err);
+            avatarPreview.src = user.avatar_url ? `${BACKEND_URL}${user.avatar_url}` : AVATAR_DEFAUT;
+        } finally {
+            URL.revokeObjectURL(tempUrl);
+            avatarFile.value = "";
+        }
 	});
-};
+}
 
-export function upload_avatar(user: { avatar_url: string | null }): void {
-	const preview = document.getElementById("avatarPreview") as HTMLImageElement | null;
-	const grid = document.getElementById("avatarGrid") as HTMLDivElement | null;
-
-	console.log('dans update_avatar')
-
-	if (!preview || !grid) {
+export function upload_avatar(user: { avatar_url: string | null},  avatarPreview: HTMLImageElement,
+    avatarGrid: HTMLDivElement): void {
+	
+	if (!avatarPreview || !avatarGrid) {
 		console.warn("upload_avatar: avatarPreview ou avatarGrid introuvable dans le DOM");
 		return;
 	}
 
 	// Fallback si l'image échoue (évite une image cassée)
-	preview.onerror = () => {
-		preview.onerror = null;
-		preview.src = AVATAR_DEFAUT;
+	avatarPreview.onerror = () => {
+		avatarPreview.onerror = null;
+		avatarPreview.src = AVATAR_DEFAUT;
 	};
 
 	// Image initiale
-	
-	preview.src = `${profile.url_avatar}` || AVATAR_DEFAUT;
 
-	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn");
+	 if (user.avatar_url && user.avatar_url.startsWith("/images/")) {
+        avatarPreview.src = `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`;
+    } else {
+        avatarPreview.src = user.avatar_url || AVATAR_DEFAUT;
+    }
+
+	const presetButtons = avatarGrid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 
 	function highlight(btn: HTMLButtonElement | null) {
 		presetButtons.forEach((button) => {
@@ -488,7 +455,7 @@ export function upload_avatar(user: { avatar_url: string | null }): void {
 			const url = btn.dataset.src || AVATAR_DEFAUT;
 
 			// On met à jour tout de suite côté UI
-			preview.src = url;
+			const oldSrc = avatarPreview.src;
 			highlight(btn);
 
 			try {
@@ -506,53 +473,19 @@ export function upload_avatar(user: { avatar_url: string | null }): void {
 				}
 				user.avatar_url = res.payload.avatar_url;
 				profile.url_avatar = res.payload.avatar_url;
+				avatarPreview.src = profile.url_avatar
+				//avatarPreview.src = `${BACKEND_URL}${profile.url_avatar}?t=${Date.now()}`;
 				
 				highlight(btn);
 				selected = btn;
 			} catch (err) {
 				console.error("change avatar update failed:", err);
+                avatarPreview.src = user.avatar_url
+                    ? `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`
+                    : AVATAR_DEFAUT;
+				avatarPreview.src = oldSrc;
+				highlight(selected);
 			}
 		});
 	});
-}
-
-
-
-
-export function update_name(): void
-{
-	const button = document.getElementById("ChangeName") as HTMLButtonElement | null;
-	if (!button) return;
-	
-	button.addEventListener("click", async(event) =>{
-		event.preventDefault();
-		const changename = ((document.getElementById("change_name_input") as HTMLInputElement).value.trim());
-		try{
-			const res = await fetchRequest(
-					`submit`,
-					'POST',
-					{},
-					{ name: changename}
-
-			);
-			if (res.status === 409) {
-				//wait the message error
-				const err = await res.json().catch(() => ({}));
-				console.warn("change name conflict:", err);
-				return;
-			}
-			if (!res.ok) {
-				console.error("Server error:", res.status, await res.text());
-				return;
-			}
-			const data = await res.json();
-			console.log("✅ change name update:", data);
-			window.location.reload();
-		}
-		catch (err)
-		{
-			console.error("❌ change name update failed:", err);
-		}
-	})
-
 }
