@@ -49,15 +49,15 @@ export function renderChatMessages(_: string, selectedChatId: number) {
     messages.forEach(msg => {
         const p = document.createElement('p');
         p.id = `msg-${msg.timestamp}`;
-        p.className = "m-2 text-sm text-black";
+        p.className = "m-2 text-sm text-white max-w-xs break-words";
         if (Number(msg.from) === Number(profile.id)) {
-            p.className += " bg-green-100 p-2 rounded w-fit ml-auto";
+            p.className += " p-2 rounded-lg w-fit ml-auto bg-[hsl(345,100%,47%)] text-white shadow-sm";
         } else {
-            p.className += " bg-gray-100 p-2 rounded w-fit";
+            p.className += " p-2 rounded-lg w-fit bg-[#36393e] text-white shadow-sm";
         }
         p.innerHTML = `${msg.message}`;
         messageBox.appendChild(p);
-    })
+    });
 }
 
 export const messageListeners: (() => void)[] = [];
@@ -208,4 +208,3 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
         return true;
     }
 });
-
