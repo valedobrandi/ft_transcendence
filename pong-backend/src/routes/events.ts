@@ -6,7 +6,7 @@ import { connectedRoomInstance } from "../state/ConnectedRoom";
 import { print } from "../server";
 
 type EventOnChangeDB = {
-    status: 'error' | 'success';
+    message: 'error' | 'success';
     data: { message: string };
 };
 
@@ -20,7 +20,7 @@ type NewEventsDB = {
 }
 
 type GetEvents = {
-    status: 'error' | 'success';
+    message: 'error' | 'success';
     data: NewEventsDB[];
 }
 
@@ -80,29 +80,29 @@ class EventsController {
     private eventsServiceInstance = new EventsService();
 
     insertEvent(req: FastifyRequest<{ Body: InsertEventBody }>, res: FastifyReply) {
-        const { to_id, from_id, type, message } = req.body;
-        const { status, data } = this.eventsServiceInstance.insertEvent(to_id, from_id, type, message);
+        const { to_id, from_id, type, message: msg } = req.body;
+        const { message, data } = this.eventsServiceInstance.insertEvent(to_id, from_id, type, msg);
         // Try to send notification
 
-        return res.status(statusCode('OK')).send({ status, message: data.message, })
+        return res.status(statusCode('OK')).send({ message, data })
     }
 
     getToEvents(req: FastifyRequest, res: FastifyReply) {
         const id = Number(req.userId);
-        const { status, data } = this.eventsServiceInstance.getToEvents(id);
-        return res.status(statusCode('OK')).send({ status, data });
+        const { message, data } = this.eventsServiceInstance.getToEvents(id);
+        return res.status(statusCode('OK')).send({ message, data });
     }
 
     getFromEvents(req: FastifyRequest, res: FastifyReply) {
         const id = Number(req.userId);
-        const { status, data } = this.eventsServiceInstance.getFromEvents(id);
-        return res.status(statusCode('OK')).send({ status, data });
+        const { message, data } = this.eventsServiceInstance.getFromEvents(id);
+        return res.status(statusCode('OK')).send({ message, data });
     }
 
     deleteEvent(req: FastifyRequest<{ querystring: { eventId: number } }>, res: FastifyReply) {
         const eventId = Number(req.query.eventId);
-        const { status, data } = this.eventsServiceInstance.deleteEvent(eventId);
-        return res.status(statusCode('OK')).send({ status, message: data.message });
+        const { message, data } = this.eventsServiceInstance.deleteEvent(eventId);
+        return res.status(statusCode('OK')).send({ message, data });
     }
 
 }
@@ -110,16 +110,16 @@ class EventsController {
 class EventsService {
     private eventsModelInstance = new EventsModel(db);
 
-    insertEvent(to_id: number, from_id: number, type: string, message: string) {
+    insertEvent(to_id: number, from_id: number, type: string, msg: string) {
 
         const duplicates = this.eventsModelInstance.getDuplicateEvent(type, from_id, to_id);
         if (duplicates.data.length > 0) {
-            return { status: 'error', data: { message: 'event registered' } };
+            return { message: 'error', data: { message: 'event registered' } };
         }
 
-        const { status, data } = this.eventsModelInstance.insertEvent(type, from_id, to_id, message);
+        const { message, data } = this.eventsModelInstance.insertEvent(type, from_id, to_id, msg);
 
-        if (status === 'success') {
+        if (message === 'success') {
             const user = connectedRoomInstance.getById(to_id);
             if (user && user.socket) {
                 const newEvent = {
@@ -137,22 +137,22 @@ class EventsService {
             }
         }
 
-        return { status, data };
+        return { message, data };
     }
 
     getToEvents(to_id: number) {
-        const { status, data } = this.eventsModelInstance.getToEvents(to_id);
-        return { status, data };
+        const { message, data } = this.eventsModelInstance.getToEvents(to_id);
+        return { message, data };
     }
 
     getFromEvents(from_id: number) {
-        const { status, data } = this.eventsModelInstance.getFromEvents(from_id);
-        return { status, data };
+        const { message, data } = this.eventsModelInstance.getFromEvents(from_id);
+        return { message, data };
     }
 
     deleteEvent(eventId: number) {
-        const { status, data } = this.eventsModelInstance.deleteEvent(eventId);
-        return { status, data };
+        const { message, data } = this.eventsModelInstance.deleteEvent(eventId);
+        return { message, data };
     }
 }
 
@@ -181,34 +181,34 @@ class EventsModel {
 
     getDuplicateEvent(type: string, fromId: number, toId: number): GetEvents {
         const response = this.stmGetDuplicateEvent.all({ type, fromId, toId });
-        return { status: 'success', data: response };
+        return { message: 'success', data: response };
     }
 
     insertEvent(type: string, fromId: number, toId: number, payload: string): EventOnChangeDB {
         const { lastInsertRowid, changes } = this.stmInsertEvent.run({ type, fromId, toId, payload });
         if (changes === 1) {
-            return { status: 'success', data: { message: lastInsertRowid } };
+            return { message: 'success', data: { message: lastInsertRowid } };
         }
-        return { status: 'error', data: { message: 'event not inserted' } };
+        return { message: 'error', data: { message: 'event not inserted' } };
     }
 
     getToEvents(toId: number): GetEvents {
         const response = this.stmGetToEvents.all({ toId });
-        return { status: 'success', data: response };
+        return { message: 'success', data: response };
     }
 
     getFromEvents(fromId: number): GetEvents {
         const response = this.stmGetFromEvents.all({ fromId });
-        return { status: 'success', data: response };
+        return { message: 'success', data: response };
     }
 
     deleteEvent(eventId: number): EventOnChangeDB {
         const { changes } = this.stmDeleteEvent.run({ eventId: Number(eventId) });
         print(`[DELETE] Event ID ${eventId}, changes: ${changes}`);
         if (changes === 1) {
-            return { status: 'success', data: { message: 'event removed' } };
+            return { message: 'success', data: { message: 'event removed' } };
         }
-        return { status: 'error', data: { message: 'event not removed' } };
+        return { message: 'error', data: { message: 'event not removed' } };
     }
 }
 
