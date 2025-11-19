@@ -1,5 +1,8 @@
 import { profile } from "../app";
-import { acceptFriendOnClick, denyFriendOnClick } from "../components/EmbeddedButton";
+import {
+  acceptFriendOnClick,
+  denyFriendOnClick,
+} from "../components/EmbeddedButton";
 import {
   newIntraMessage,
   removeIntraMessage,
@@ -43,8 +46,6 @@ export function eventListeners() {
     if (action === "decline") {
       await denyFriendOnClick(btn);
     }
-
-
   });
 
   // Add event to btn #chat-select-chat
@@ -78,7 +79,9 @@ export function eventListeners() {
           );
           if (response.message === "success") {
             const getMatch = await fetchRequest(
-              `/match-invite?matchId=${userId}`, "GET", {}
+              `/match-invite?matchId=${userId}`,
+              "GET",
+              {}
             );
             if (getMatch.message === "error") {
               removeIntraMessage(Number(eventId));
@@ -150,7 +153,9 @@ export function eventListeners() {
           );
         }
         break;
-      case "cancel-match-invite":
+      case "cancel-match-invite": 
+        await onClickCancelMatchInviteHandler(button);
+        break;
       case "btn-friend-list":
         {
           var response = await fetchRequest(
@@ -176,4 +181,17 @@ export function eventListeners() {
         break;
     }
   });
+}
+
+async function onClickCancelMatchInviteHandler(button: HTMLButtonElement) {
+  const eventId = button.dataset.eventid;
+  const userId = button.dataset.userid;
+
+  const response = await fetchRequest(
+    `/match-invite?matchId=${userId}`,
+    "DELETE"
+  );
+  if (response.message === "success") {
+    removeIntraMessage(Number(eventId));
+  }
 }

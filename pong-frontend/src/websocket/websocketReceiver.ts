@@ -6,6 +6,7 @@ import {
   newIntraMessage,
   stateProxyHandler,
   findIntraMessage,
+  updateIntraMessage,
 } from "../states/stateProxyHandler";
 import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
@@ -113,10 +114,10 @@ export async function websocketReceiver(socket: WebSocket) {
         const getName = stateProxyHandler.serverUsers.find(
           (user) => user.id === data.payload.from
         )?.name;
-        newIntraMessage(`You have received a game invite from ${getName}.
-          ${EmbeddedButton(0, "YES", data.payload.matchId, "accept-match-invite")}
-          ${EmbeddedButton(0, "NO", data.payload.matchId, "decline-match-invite")}`);
-        stateProxyHandler.state = "MATCH_INVITE";
+        const idx = newIntraMessage("");
+        updateIntraMessage(idx, `You have received a game invite from ${getName}.
+          ${EmbeddedButton(data.payload.matchId, "YES", `${idx}`, "accept-match-invite")}
+          ${EmbeddedButton(data.payload.matchId, "NO", `${idx}`, "cancel-match-invite")}`);
         break;
       }
       case "MATCH_DECLINED": {

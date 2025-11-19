@@ -76,7 +76,7 @@ export class ConnectedRoom {
     if (getUser && getUser.matchId) {
       print("[MATCH_DENY]");
       const matchId = getUser.matchId;
-      matchServiceInstance.denyMatchInvite(matchId, Number(id));
+      matchServiceInstance.matchRemove(matchId, Number(id));
     }
     this.room.delete(Number(id));
   }

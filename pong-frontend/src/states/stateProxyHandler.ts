@@ -20,8 +20,13 @@ export function updateIntraMessage(idx: number, newMessage: string) {
 }
 
 export function removeIntraMessage(tagId: number) {
-    stateProxyHandler.systemMessages = stateProxyHandler
-        .systemMessages.filter(msg => msg.index !== Number(tagId));
+    // Update message to "" by index
+    stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.map(msg => {
+        if (msg.index === tagId) {
+            return { ...msg, message: "" };
+        }
+        return msg;
+    });
 }
 
 export function findIntraMessage(tagId: string) {

@@ -62,7 +62,7 @@ const matchesRoute = (fastify: FastifyInstance) => {
 				},
 			},
 		},
-		handler: matcherController.denyMatchInvite.bind(matcherController),
+		handler: matcherController.matchRemove.bind(matcherController),
 	});
 
 	fastify.post("/match-create", {
@@ -104,11 +104,11 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	denyMatchInvite(req: FastifyRequest, res: FastifyReply) {
+	matchRemove(req: FastifyRequest, res: FastifyReply) {
 		const { id } = req.user;
 		const { matchId } = req.query;
 
-		const { message, data } = this.matchesService.denyMatchInvite(matchId, id);
+		const { message, data } = this.matchesService.matchRemove(matchId, id);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
@@ -252,10 +252,10 @@ class MatchesService {
 		};
 	}
 
-	denyMatchInvite(matchId: string, userId: number) {
+	matchRemove(matchId: string, userId: number) {
 		const match = inviteMatchesQueue.get(matchId);
 		if (match === undefined) {
-			return { message: "success", data: "match not found" };
+			return { message: "error", data: "match not found" };
 		}
 
 		for (const matchUser of [match.from, match.to]) {
@@ -275,18 +275,28 @@ class MatchesService {
 				);
 			}
 		}
-		inviteMatchesQueue.delete(matchId);
-		return { message: "success", data: "invitation canceled" };
+		if (inviteMatchesQueue.delete(matchId)) {
+			return { message: "success", data: "invitation canceled" };
+		}
+
+		return { message: "error", data: "unable to cancel invitation" };
 	}
 
 	sendMatchInvite(id: number, invitedId: number, settings: {}) {
+		const connected = connectedRoomInstance.getById(id);
+		if (connected === undefined) {
+			return { message: "error", data: "user disconnected" };
+		}
+
+		const matchId = crypto.randomUUID();
+
 		const newMatch: NewInviteMatch = {
-			players: [id],
+			players: [{ id: id, username: connected.username }],
+			matchId,
 			from: id,
 			to: invitedId,
 			settings: settings,
 		};
-		const matchId = crypto.randomUUID();
 
 		for (const playerId of [invitedId, id]) {
 			let userInstance = connectedRoomInstance.getById(playerId);
