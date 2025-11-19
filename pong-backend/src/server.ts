@@ -15,6 +15,7 @@ import fastifyStatic from "@fastify/static";
 import path from "path";
 import fs from "fs";
 import avatarRoute from './routes/avatar.js';
+import twoFARoutes from './routes/2faRoutes.js'
 
 const fastify = Fastify({
 	logger: {
@@ -107,6 +108,7 @@ fastify.register(matchesRoute);
 fastify.register(friendsRoute);
 fastify.register(chatBlockRoute);
 fastify.register(avatarRoute);
+fastify.register(twoFARoutes);
 await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {
