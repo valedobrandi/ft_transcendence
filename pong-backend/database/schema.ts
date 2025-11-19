@@ -16,7 +16,7 @@ export async function createSchema() {
 			username TEXT UNIQUE NOT NULL,
 			email TEXT UNIQUE NOT NULL,
 			password TEXT NOT NULL,
-			avatar_url TEXT DEFAULT '../images/default_avatar.png',
+			avatar_url TEXT DEFAULT '/images/default_avatar.png',
 			status TEXT DEFAULT 'disconnect',
 			wins INT DEFAULT 0,
 			losses INT DEFAULT 0,

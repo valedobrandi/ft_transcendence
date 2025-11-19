@@ -1,6 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { getIdUser, updatedUserInDB } from '../user_service/user_service';
-import { RegisterBody } from '../types/RegisterType';
 import bcrypt from 'bcrypt';
 import {UpdateBody} from '../types/ProfilType';
 import { UsersModel } from '../models/usersModel.js';
@@ -8,10 +7,6 @@ import db from '../../database/db.js'
 import { print } from '../server';
 
 class ProfileControler {
-
-    getProfile() {
-        
-    }
 
     async updateUser(req: FastifyRequest<{ Params: { id: number }, Body: UpdateBody }>, res: FastifyReply) {
     const usersModel = new UsersModel(db);
@@ -23,7 +18,6 @@ class ProfileControler {
         if (!player)
             return res.status(404).send({ error: 'user not found' });
         
-        print(`DANS SERVEUR  ==== ${username}`);
         const checkUsernameAlready = usersModel.findUserByUsername(username);
         if(checkUsernameAlready)
                 return res.status(408).send({ error: 'user already use' })
@@ -53,8 +47,6 @@ class ProfileControler {
             return res.status(500).send({ error: 'Internal server error' });
         }
     }
-
-    
 }
 
 export { ProfileControler }

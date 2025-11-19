@@ -6,7 +6,6 @@ import db from '../../database/db.js'
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { UsersModel } from '../models/usersModel.js';
-import cookie from '@fastify/cookie';
 import { connectedRoomInstance } from '../state/ConnectedRoom.js';
 
 export default async function loginRoutes(fastify: FastifyInstance) {
@@ -49,7 +48,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 				return res.status(200).send({ message: data });
 			}
 		} else {
-			const payload = { id: existingUser.id, username: existingUser.username };
+			const payload = { id: existingUser.id, username: existingUser.username, email: existingUser.email, avatar_url: existingUser.avatar_url};
 
 			// // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
 			// // if(!refreshToken)

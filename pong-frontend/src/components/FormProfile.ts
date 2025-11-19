@@ -1,44 +1,63 @@
-// import { Button } from "./Button";
-import { HeaderBar } from "./HeaderBar";
-// import { InputName } from "./InputName";
-// import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { profile } from "../app";
+import { jwt } from "../app";
+import { HeaderBar } from "./HeaderBar";
 
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default.jpg"
 const AVATAR1 = "/default/avatar1.jpg"
 const AVATAR2 = "/default/avatar2.jpg"
 const AVATAR3 = "/default/avatar3.jpg"
-// À adapter selon ton projet
-// import { API_URL, fetchWithAuth } from "./api";
-// import { AVATAR_DEFAUT, AVATAR1, AVATAR2, AVATAR3, languageSvg } from "./assets";
-// import { upload_avatar, bind_user_avatar_upload, update_name } from "./profileHelpers";
+const BACKEND_URL = "http://localhost:3000";
 
-export function ProfilePage(): HTMLElement {
+export function ProfilePage(): HTMLElement 
+{
 	const root = document.createElement("div");
-	root.className = "relative min-h-screen flex flex-col bg-gradient-to-r from-mblue-500 to-mblue-100";
+	root.className = "relative min-h-screen flex flex-col";
 
-	// Background image
 	const bg = document.createElement("div");
-	bg.className = "absolute inset-0 bg-[url('/paw.png')] bg-no-repeat bg-[position:150%_center]";
+	bg.className = `
+	absolute inset-0
+	bg-[url('/default/.jpg')]
+	bg-cover
+	bg-center
+	bg-no-repeat
+	z-0
+	`;
 	root.appendChild(bg);
 
 	// ---------- HEADER ----------
 	const header = document.createElement("header");
-	header.className = "relative z-10 px-6 pt-8";
+	header.className = "relative z-10 px-6 pt-2";
 
 	const headerInner = document.createElement("div");
-	headerInner.className = "flex justify-between items-center";
+	headerInner.className = "flex items-center justify-between relative";
 
-	const homeLink = document.createElement("a");
-	homeLink.href = "#/";
+	// ===== Zone gauche : Home =====
+	const homeLink = document.createElement("button");
 	homeLink.className =
-		"rounded-md bg-dark-blue px-6 py-2 font-bagel text-smoky-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/60";
-	homeLink.textContent = "Home";
+	"flex items-center gap-2 rounded-md bg-dark-blue px-4 py-1 font-bagel text-smoky-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/60";
+	homeLink.onclick = () => navigateTo("/intra");
+	homeLink.innerHTML = `
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
+	<path stroke-linecap="round" stroke-linejoin="round" d="m3 9 9-6 9 6v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+	<path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10" />
+	</svg>
+	<span>Home</span>
+	`;
 
-	// headerInner.appendChild(title);
+	// ===== Zone centre : Profil =====
+	
+	 const headerBar = HeaderBar("UPDATE PROFIL");
+
+	// ===== Zone droite =====
+	const rightSpace = document.createElement("div");
+	rightSpace.className = "w-20";
+
 	headerInner.appendChild(homeLink);
+	headerInner.appendChild(headerBar);
+	headerInner.appendChild(rightSpace);
+
 	header.appendChild(headerInner);
 	root.appendChild(header);
 
@@ -48,13 +67,7 @@ export function ProfilePage(): HTMLElement {
 		"relative z-10 px-6 pt-8 flex-1 flex flex-col items-center justify-center mb-8";
 
 	const card = document.createElement("div");
-	card.className = "place-self-center w-fit px-16 py-8 rounded-xl bg-mblue-500 opacity-80 ";
-
-	// Welcome
-	const h3 = document.createElement("h3");
-	h3.className = "text-3xl font-bagel text-smoky-white text-center";
-	h3.innerHTML = `Welcome ${profile.username} !`
-	card.appendChild(h3);
+	card.className = "place-self-center w-fit px-16 py-1 rounded-xl bg-mblue-500 opacity-80 ";
 
 	// ---------- Avatar section ----------
 	const avatarSection = document.createElement("section");
@@ -66,17 +79,21 @@ export function ProfilePage(): HTMLElement {
 	avatarSection.appendChild(avatarLabel);
 
 	const avatarPreview = document.createElement("img");
-	avatarPreview.id = "avatarPreview";
-	avatarPreview.className = "w-24 h-24 rounded-full object-cover";
-	avatarPreview.src = (AVATAR_DEFAUT as string);
-	avatarPreview.alt = "avatar";
-	avatarSection.appendChild(avatarPreview);
+    avatarPreview.id = "avatarPreview";
+    avatarPreview.className = "w-24 h-24 rounded-full object-cover";
+    avatarPreview.src = profile.avatar_url ?
+    `${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}`
+    : AVATAR_DEFAUT;
+	console.log('AVAATARRR=', avatarPreview.src);
+    avatarPreview.alt = "avatar";
+    avatarSection.appendChild(avatarPreview);
 
 	const avatarGrid = document.createElement("div");
 	avatarGrid.id = "avatarGrid";
 	avatarGrid.className = "grid grid-cols-4 gap-3";
 
-	function makePreset(src: string, label: string): HTMLButtonElement {
+	function makePreset(src: string, label: string): HTMLButtonElement 
+	{
 		const btn = document.createElement("button");
 		btn.type = "button";
 		btn.className = "preset-btn flex justify-center rounded-full";
@@ -124,12 +141,6 @@ export function ProfilePage(): HTMLElement {
 
 	card.appendChild(avatarSection);
 
-	// Message avatar
-	const avatarMsg = document.createElement("p");
-	avatarMsg.id = "avatarMsg";
-	avatarMsg.className = "text-sm text-indigo-200";
-	card.appendChild(avatarMsg);
-
 	// ---------- Email ----------
 
 	const emailSection1 = document.createElement("section");
@@ -142,7 +153,8 @@ export function ProfilePage(): HTMLElement {
 
 	const emailInput = document.createElement("input");
 	emailInput.id = "change_email_input";
-	emailInput.type = "text";
+	emailInput.setAttribute("autocomplete", 'off');
+	emailInput.type = "email";
 	emailInput.placeholder = "change Email";
 	emailInput.className =
 		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
@@ -151,6 +163,7 @@ export function ProfilePage(): HTMLElement {
 	card.appendChild(emailSection1);
 
 	// ---------- Change name ----------
+
 	const nameSection = document.createElement("section");
 	nameSection.className = "flex flex-col gap-2 mt-4";
 
@@ -165,12 +178,12 @@ export function ProfilePage(): HTMLElement {
 	nameInput.placeholder = "change username";
 	nameInput.className =
 		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
-	nameSection.appendChild(nameInput);
 
+	nameSection.appendChild(nameInput);
 	card.appendChild(nameSection);
 
-
 	// ---------- Change passeword ----------
+	
 	const passewordSection = document.createElement("section");
 	passewordSection.className = "flex flex-col gap-2 mt-4";
 
@@ -178,10 +191,11 @@ export function ProfilePage(): HTMLElement {
 	passewordLabel.className = "font-abee text-smoky-white";
 	passewordLabel.textContent = `Password: `;
 	passewordSection.appendChild(passewordLabel);
-	
+
 	const passewordInput = document.createElement("input");
-	passewordInput.id = "change_name_input";
-	passewordInput.type = " actual password";
+	passewordInput.id = "current_password_input";
+	passewordInput.type = "password";
+	passewordInput.autocomplete = "off";
 	passewordInput.placeholder = "current Password";
 	passewordInput.className =
 	"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
@@ -224,13 +238,11 @@ export function ProfilePage(): HTMLElement {
 	if (nextName && nextName !== profile.username)
 	{
 		payload.username = nextName;
-		console.log("PROFIL = ", payload.username);
 	}
 	if (nextMail && nextMail !== profile.email)
 	{
 		payload.email = nextMail;
 	}
-
 
 	if (curPwd && newPwd)
 	{
@@ -239,85 +251,67 @@ export function ProfilePage(): HTMLElement {
 	} 
 	else if (curPwd || newPwd) 
 	{
-		console.warn("Pour changer le mot de passe, remplis les deux champs.");
+		console.warn("To change the password, fill in both fields.");
+		alert("To change the password, fill in both fields.");
 		return;
 	}
 
 	if (Object.keys(payload).length === 0)
 	{
-		console.info("Aucune modification à envoyer.");
+		console.info("No changes to send.");
+		alert("No changes to send.");
 		return;
 	}
 
 	try {
-	sendBtn.setAttribute('disabled','true');
-	const data = await fetchRequest("/update", "PUT", {}, payload);
+	const data = await fetchRequest("/update", "PUT", {},  {body: JSON.stringify(payload)});
 	
 	if (data.message === 'success')
 	{
-		profile.username = data.username;
-		profile.email = data.email;
-		console.log("PROFIL = ", profile.username);
-		console.log("PROFIL = ", profile.username);
+		profile.username = data.payload.username;
+		profile.email = data.payload.email;
+
+		console.log("Profile updated", data);
 		window.location.reload();	
 	}
-	else 
-		console.error("Erreur lors du chargement du profil :", data);
+	else
+	{
+		console.error("Error loading profile: ", data);
+		alert("Error loading profile: " + (data.error || "Erreur inconnue"));
+	}
 
-	if (payload.username) profile.username = String(payload.username);
-	if (payload.email)    profile.email    = String(payload.email);
+	if (payload.username) 
+		profile.username = String(payload.username);
+	if (payload.email)    
+		profile.email = String(payload.email);
 
-	
 	if (nameEl) nameEl.value = profile.username ?? "";
 	if (mailEl) mailEl.value = profile.email ?? "";
 
-	console.log("Profil mis à jour", data);
 	} catch (e) {
 	console.error("Erreur réseau :", e);
+	alert("Erreur lors de la mise à jour : " + (e || "Erreur inconnue"));
 	} finally {
-	sendBtn.setAttribute('disabled','false');;
+
 	}
 	});
-
 	main.appendChild(card);
 	root.appendChild(main);
 
 	// ---------- FOOTER ----------
-	const footer = document.createElement("footer");
-	footer.className = "relative z-10 px-6 pb-6";
+	// ---------- --- ----------
 
-	const footerInner = document.createElement("div");
-	footerInner.className = "relative";
-
-	const langLink = document.createElement("a");
-	langLink.href = "#lang";
-	langLink.className =
-		"pointer-events-auto absolute left-0 -bottom-2 grid h-10 w-10 place-items-center rounded-md bg-dark-blue text-smoky-white hover:brightness-110";
-
-	const langImg = document.createElement("img");
-	// langImg.src = languageSvg as string;
-	langImg.className = "w-[1.5em] h-[1.5em]";
-	langImg.alt = "language icon";
-
-	langLink.appendChild(langImg);
-	footerInner.appendChild(langLink);
-
-	footer.appendChild(footerInner);
-	// root.appendChild(footer);
-
-	// Lance la logique de récupération des infos utilisateur
-	void handleProfilePage();
+	 setTimeout(() => {
+        void handleProfilePage(avatarPreview, pickFileBtn, avatarFile, avatarGrid);
+    }, 50);
 
 	return root;
 }
 
-export async function handleProfilePage(): Promise<void> {
+export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFileBtn: HTMLButtonElement,
+    avatarFile: HTMLInputElement,  avatarGrid: HTMLDivElement): Promise<void> {
 			console.log("handleProfilePage called");
 		console.log("DOM check:", {
-		preview: document.getElementById("avatarPreview"),
-		grid: document.getElementById("avatarGrid"),
-		plus: document.getElementById("pickFileAvatar"),
-		file: document.getElementById("avatarFile"),
 	});
 
 	let data;
@@ -335,122 +329,101 @@ export async function handleProfilePage(): Promise<void> {
 		return;
 	}
 
-	const user = data.user;
+	const user = data.existUser;
 
-	const usernameSpan = document.getElementById("username");
-	const emailSpan = document.getElementById("useremail");
-	const nameInput = document.getElementById("change_name_input") as HTMLInputElement | null;
-
-	if (usernameSpan) usernameSpan.textContent = user.name;
-	if (emailSpan) emailSpan.textContent = user.email;
-	if (nameInput) nameInput.value = user.name ?? "";
-
-	upload_avatar(user);
-	bind_user_avatar_upload(user);
-	update_name();
-
-	const logoutBtn = document.getElementById("logout");
-	if (logoutBtn) {
-		logoutBtn.addEventListener("click", () => {
-			localStorage.removeItem("accessToken"); // au cas où tu l’utilises plus tard
-			window.location.hash = "/login";
-		});
-	}
+	upload_avatar(user, avatarPreview, avatarGrid);
+	bind_user_avatar_upload(user, avatarPreview, pickFileBtn, avatarFile);
+	
+	// const logoutBtn = document.getElementById("logout");
+	// if (logoutBtn) {
+	// 	logoutBtn.addEventListener("click", () => {
+	// 		localStorage.removeItem("accessToken");
+	// 		window.location.hash = "/login";
+	// 	});
+	// }
 }
 
-export function bind_user_avatar_upload(user: { avatar_url: string | null }): void 
-{
-	//recuperer les bouttons
-	const preview = document.getElementById("avatarPreview") as HTMLImageElement;
-	const plusBtn = document.getElementById("pickFileAvatar") as HTMLButtonElement;
-	const fileInput = document.getElementById("avatarFile") as HTMLInputElement;
+export function bind_user_avatar_upload(user: { avatar_url: string | null }, avatarPreview: HTMLImageElement,
+    pickFileBtn: HTMLButtonElement,
+    avatarFile: HTMLInputElement): void {
 
-	// si on charge une image invalide → fallback
-  	preview.onerror = () => {
-    	preview.onerror = null;
-    	preview.src = AVATAR_DEFAUT;
-	};
-	// ouvre le file picker, fileInput.click() pour ouvrir le sélecteur de fichiers.
-	plusBtn.addEventListener("click", () => fileInput.click());
+	avatarPreview.onerror = () => {
+        avatarPreview.onerror = null;
+        avatarPreview.src = AVATAR1;
+    };
 
-	fileInput.addEventListener("change", async() => {
-		const f = fileInput.files?.[0]
-		if (!f)
-			return ;
+    pickFileBtn.addEventListener("click", () => avatarFile.click());
 
-		const allow = ["image/png", "image/jpeg"];
-		const size_photo = 5 * 1024 * 1024;
+    avatarFile.addEventListener("change", async () => {
+        const f = avatarFile.files?.[0];
+        if (!f) return;
 
-		if (!allow.includes(f.type) || f.size > size_photo)
-		{
-			fileInput.value = "";
-			console.log("image format error");
-			return ;
-		}
+        const allow = ["image/png", "image/jpeg", "image/jpg"];
+        if (!allow.includes(f.type) || f.size > 5 * 1024 * 1024) {
+            avatarFile.value = "";
+            console.log("image format error");
+            return;
+        }
 
-		const url = URL.createObjectURL(f);
-		preview.src = url;
+        const tempUrl = URL.createObjectURL(f);
+        avatarPreview.src = tempUrl;
 
-		const fd = new FormData();
-		fd.append("avatar", f);
-		try{
-			const res = await fetchRequest(
-					`avatar`,
-					'POST',
-					{},
-					{fd}
+        const fd = new FormData();
+        fd.append("avatar", f);
 
-			);
-			if (!res.ok) {
-				console.error("Server error:", res.status, await res.text());
-				
-				return;
-			}
-			const data = await res.json() as {avatar_url:string};
-			const { avatar_url } = data; 
-			console.log("✅ avatar upload success:");
-			preview.src = avatar_url;
-			user.avatar_url = avatar_url;
-		}
-		catch
-		{
-			console.error("Upload failed:");
-	    	preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-		}
-		finally
-		{
-			URL.revokeObjectURL(url);
-			fileInput.value = "";
-		}
+        try {
+            const res = await fetch(`${BACKEND_URL}/avatar`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${jwt.token}` },
+                body: fd
+            });
+            const data = await res.json();
+            if (!data.payload?.avatar_url) throw new Error("Avatar non reçu");
+
+            
+            user.avatar_url = data.payload.avatar_url;
+            profile.avatar_url = data.payload.avatar_url;
+
+            avatarPreview.src = `${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}`;
+            console.log("Avatar mis à jour:", profile.avatar_url);
+        } catch (err) {
+            console.error("Upload failed:", err);
+            avatarPreview.src = user.avatar_url ? `${BACKEND_URL}${user.avatar_url}` : AVATAR_DEFAUT;
+        } finally {
+            URL.revokeObjectURL(tempUrl);
+            avatarFile.value = "";
+        }
 	});
-};
+}
 
-export function upload_avatar(user: { avatar_url: string | null }): void {
-	const preview = document.getElementById("avatarPreview") as HTMLImageElement | null;
-	const grid = document.getElementById("avatarGrid") as HTMLDivElement | null;
-
-	if (!preview || !grid) {
+export function upload_avatar(user: { avatar_url: string | null},  avatarPreview: HTMLImageElement,
+    avatarGrid: HTMLDivElement): void {
+	
+	if (!avatarPreview || !avatarGrid) {
 		console.warn("upload_avatar: avatarPreview ou avatarGrid introuvable dans le DOM");
 		return;
 	}
 
-	// Fallback si l'image échoue (évite une image cassée)
-	preview.onerror = () => {
-		preview.onerror = null;
-		preview.src = AVATAR_DEFAUT;
+	
+	avatarPreview.onerror = () => {
+		avatarPreview.onerror = null;
+		avatarPreview.src = AVATAR_DEFAUT;
 	};
+console.log(user.avatar_url);
+	 if (user.avatar_url && user.avatar_url.startsWith("/images/")) {
+        avatarPreview.src = `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`;
+    } else {
+        avatarPreview.src = user.avatar_url || AVATAR_DEFAUT;
+    }
 
-	// Image initiale
-	preview.src = user.avatar_url || AVATAR_DEFAUT;
-
-	const presetButtons = grid.querySelectorAll<HTMLButtonElement>(".preset-btn");
+	const presetButtons = avatarGrid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 
 	function highlight(btn: HTMLButtonElement | null) {
 		presetButtons.forEach((button) => {
 			button.classList.remove("ring-4", "ring-indigo-400");
 		});
 		if (btn) {
-			button.classList.add("ring-4", "ring-indigo-400");
+			btn.classList.add("ring-4", "ring-indigo-400");
 		}
 	}
 
@@ -465,83 +438,40 @@ export function upload_avatar(user: { avatar_url: string | null }): void {
 
 	highlight(selected);
 
-	// IMPORTANT : on clique sur les boutons d'avatar
+	// clique sur les boutons d'avatar
 	presetButtons.forEach((btn) => {
 		btn.addEventListener("click", async () => {
 			const url = btn.dataset.src || AVATAR_DEFAUT;
 
 			// On met à jour tout de suite côté UI
-			preview.src = url;
+			const oldSrc = avatarPreview.src;
 			highlight(btn);
 
 			try {
 				const res = await fetchRequest(
-					`/avatar`,          // <-- note le "/" au début
+					`/avatar`, 
 					"PUT",
 					{},
-					{ avatar_url: url }
+					{body: JSON.stringify({avatar_url: url })}
 				);
-
-				// Si ton fetchRequest THROW sur !res.ok, le code suivant ne sera pas exécuté
-				if (!res.ok) {
+				if (res.error) {
 					console.error("Server error:", res.status, await res.text());
-					// ⚠️ On NE remet PAS l'ancienne image ici,
-					// on laisse l'UI changer même si le backend est pas prêt
 					return;
 				}
-
-				console.log("✅ change avatar update");
-				user.avatar_url = url;
+				user.avatar_url = res.payload.avatar_url;
+				profile.avatar_url = res.payload.avatar_url;
+				avatarPreview.src = profile.avatar_url;
+				
+				highlight(btn);
 				selected = btn;
 			} catch (err) {
-				console.error("❌ change avatar update failed:", err);
-				// ⚠️ AVANT tu remettais l’ancienne image ici → visuellement “ça ne bougeait pas”
-				// on ne revert plus pour que le clic soit visible.
-				// Si tu veux vraiment revert uniquement en cas de problème réseau critique :
-				// preview.src = user.avatar_url ?? AVATAR_DEFAUT;
-				// highlight(selected);
+				console.error("change avatar update failed:", err);
+                avatarPreview.src = user.avatar_url
+                    ? `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`
+                    : AVATAR_DEFAUT;
+				avatarPreview.src = oldSrc;
+				highlight(selected);
 			}
 		});
 	});
-}
-
-
-
-
-export function update_name(): void
-{
-	const button = document.getElementById("ChangeName") as HTMLButtonElement | null;
-	if (!button) return;
-	
-	button.addEventListener("click", async(event) =>{
-		event.preventDefault();
-		const changename = ((document.getElementById("change_name_input") as HTMLInputElement).value.trim());
-		try{
-			const res = await fetchRequest(
-					`submit`,
-					'POST',
-					{},
-					{ name: changename}
-
-			);
-			if (res.status === 409) {
-				//wait the message error
-				const err = await res.json().catch(() => ({}));
-				console.warn("change name conflict:", err);
-				return;
-			}
-			if (!res.ok) {
-				console.error("Server error:", res.status, await res.text());
-				return;
-			}
-			const data = await res.json();
-			console.log("✅ change name update:", data);
-			window.location.reload();
-		}
-		catch (err)
-		{
-			console.error("❌ change name update failed:", err);
-		}
-	})
-
 }

@@ -64,6 +64,7 @@ export function FormLogin(): HTMLElement {
 		if (response.message === 'success') {
 			jwt.token = response.payload.accessToken;
 			profile.username = response.payload.username;
+			//profile.url_avatar = response.payload.existingUser.avatar_url
 			profile.id = response.payload.id;
 
 			const [friendsList, blockedList] = await Promise.all([
