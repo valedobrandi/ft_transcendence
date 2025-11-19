@@ -10,7 +10,7 @@ const WIN_SCORE = 2
 class PingPong {
     machId: string;
     tournamentId: string | undefined;
-    playersIds = new Map<string, { disconnect: boolean }>();
+    playerConnectionInfo = new Map<string, { disconnect: boolean }>();
     inputs: Map<string, { up: boolean; down: boolean }>;
     initialBallSpeed: number = 0.003;
     gameState: userGameStateType;
@@ -39,8 +39,9 @@ class PingPong {
         };
     }
 
-    getPlayer(id: string): PlayerType | undefined {
-        return connectedRoomInstance.getByUsername(id) || undefined;
+    getPlayerFromConnectedRoom(username: string): PlayerType | undefined {
+        print(`[GAME GET PLAYER]: ${username}`);
+        return connectedRoomInstance.getByUsername(username) || undefined;
     }
 
     resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
@@ -66,7 +67,7 @@ class PingPong {
         ball.y += ball.velocityY;
 
         for (const [id, input] of this.inputs.entries()) {
-            const player = this.getPlayer(id);
+            const player = this.getPlayerFromConnectedRoom(id);
             if (!player) continue;
             if (id === this.side.LEFT) {
                 if (input.up && this.gameState.userX.y > 0 + (paddleHeight / 2)) this.gameState.userX.y -= paddleSpeed;
@@ -144,17 +145,17 @@ class PingPong {
 
         this.saveMatchHistory(playerXScore, playerYScore);
 
-        console.log(`Winner: ${this.winnerId}`);
+        print(`[GAME OVER] Winner: ${this.winnerId}`);
 
         this.messages("GAME_OVER");
 
         if (this.tournamentId) {
             if (this.winnerId) {
-                const playerWinner = this.getPlayer(this.winnerId);
+                const playerWinner = this.getPlayerFromConnectedRoom(this.winnerId);
                 if (playerWinner) playerWinner.status = 'TOURNAMENT_ROOM';
             }
             if (this.loserId) {
-                const playerLoser = this.getPlayer(this.loserId);
+                const playerLoser = this.getPlayerFromConnectedRoom(this.loserId);
                 if (playerLoser) {
                     playerLoser.status = 'CONNECT_ROOM';
                     if (playerLoser.socket) {
@@ -170,8 +171,8 @@ class PingPong {
                 timeout: this.drawMatch
             })
         } else {
-            for (const [id, { disconnect }] of this.playersIds) {
-                const player = this.getPlayer(id);
+            for (const [id, { disconnect }] of this.playerConnectionInfo) {
+                const player = this.getPlayerFromConnectedRoom(id);
                 if (!player) return;
                 player.status = 'CONNECT_ROOM';
                 if (player.socket) {
@@ -190,7 +191,7 @@ class PingPong {
     }
 
     add(username: string) {
-        this.playersIds.set(username, { disconnect: false });
+        this.playerConnectionInfo.set(username, { disconnect: false });
         this.inputs.set(username, { up: false, down: false });
     }
 
@@ -207,11 +208,11 @@ class PingPong {
         };
 
         const message = JSON.stringify(payload);
-        for (const [id, { disconnect }] of this.playersIds) {
-            const player = this.getPlayer(id);
-            if (!player) continue;
-            if (player && player.socket && player.socket.readyState === 1) {
-                player.socket.send(message);
+        for (const [id, { disconnect }] of this.playerConnectionInfo) {
+            const connected = this.getPlayerFromConnectedRoom(id);
+            if (!connected) continue;
+            if (connected && connected.socket && connected.socket.readyState === 1) {
+                connected.socket.send(message);
             }
         }
 
@@ -228,8 +229,8 @@ class PingPong {
 
         gameRoom.set(this.machId, this);
 
-        for (const [id, { disconnect }] of this.playersIds) {
-            const isConnect = this.getPlayer(id);
+        for (const [id, { disconnect }] of this.playerConnectionInfo) {
+            const isConnect = this.getPlayerFromConnectedRoom(id);
             if (isConnect) {
                 isConnect.status = 'GAME_ROOM';
             }
@@ -246,12 +247,12 @@ class PingPong {
 
     disconnect(playerId: string) {
         if (this.matchState === 'ENDED') return;
-        const player = this.playersIds.get(playerId);
+        const player = this.playerConnectionInfo.get(playerId);
         if (player) player.disconnect = true;
     }
 
     handleMatch() {
-        const isDisconnected = [...this.playersIds.values()]
+        const isDisconnected = [...this.playerConnectionInfo.values()]
             .every(({ disconnect }) => disconnect)
 
         if (isDisconnected ||
@@ -300,39 +301,40 @@ class PingPong {
 
 
     messages(type: string) {
-        const [leftId, rightId] = Array.from(this.playersIds.keys());
+        const [leftId, rightId] = Array.from(this.playerConnectionInfo.keys());
         switch (type) {
             case "MATCH_CREATED":
-                for (const [id, { disconnect }] of this.playersIds) {
-                    const player = this.getPlayer(id);
-                    if (!player) return;
-                    player.status = 'GAME_ROOM';
-                    player.matchId = this.machId;
+                for (const [id, { disconnect }] of this.playerConnectionInfo) {
+                    const connected = this.getPlayerFromConnectedRoom(id);
+                    if (!connected) continue;
+                    connected.status = 'GAME_ROOM';
+                    connected.matchId = this.machId;
 
                     const side = id === leftId ? 'LEFT' : 'RIGHT';
-                    if (!player.socket) return;
-                    player.socket.send(JSON.stringify({
+                    if (!connected.socket) continue;
+                    connected.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_ROOM',
                         payload: { message: `${leftId} vs ${rightId}` },
                         side: side,
-                        id: player.id
+                        id: connected.id
                     }));
                 };
                 break;
             case "GAME_OVER":
 
-                for (const [id, { disconnect }] of this.playersIds) {
-                    const player = this.getPlayer(id);
-                    if (!player || !player.socket) return;
-                    player.socket.send(JSON.stringify({
+                for (const [id, { disconnect }] of this.playerConnectionInfo) {
+                    const connected = this.getPlayerFromConnectedRoom(id);
+                    print(`[GAME OVER] Sending GAME_OVER to ${id}`);
+                    if (!connected || !connected.socket) continue;
+                    connected.socket.send(JSON.stringify({
                         status: 200,
                         message: 'GAME_OVER',
                         payload: {
                             winner: this.winnerId,
                             drawMatch: this.drawMatch,
                             message: this.drawMatch ? 'DRAW MATCH!' :
-                                this.winnerId === player.username ? 'YOU WIN!' : 'YOU LOSE!'
+                                this.winnerId === connected.username ? 'YOU WIN!' : 'YOU LOSE!'
                         },
                         finalScore: {
                             userX: this.gameState.userX.score,
@@ -344,12 +346,12 @@ class PingPong {
             case "COUNTDOWN":
                 const conter = { time: 10 };
                 const countdownInterval = setInterval(() => {
-                    for (const [id, { disconnect }] of this.playersIds) {
-                        const player = this.getPlayer(id);
-                        if (!player) return;
+                    for (const [id, { disconnect }] of this.playerConnectionInfo) {
+                        const connected = this.getPlayerFromConnectedRoom(id);
+                        if (!connected) continue;
+                        if (!connected.socket) continue;
                         this.send();
-                        if (!player.socket) return;
-                        player.socket.send(JSON.stringify({
+                        connected.socket.send(JSON.stringify({
                             status: 200,
                             message: 'COUNTDOWN',
                             payload: { seconds: conter.time }

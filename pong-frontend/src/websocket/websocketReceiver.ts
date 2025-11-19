@@ -118,6 +118,7 @@ export async function websocketReceiver(socket: WebSocket) {
         updateIntraMessage(idx, `You have received a game invite from ${getName}.
           ${EmbeddedButton(data.payload.matchId, "YES", `${idx}`, "accept-match-invite")}
           ${EmbeddedButton(data.payload.matchId, "NO", `${idx}`, "cancel-match-invite")}`);
+        stateProxyHandler.state = "MATCH_INVITE";
         break;
       }
       case "MATCH_DECLINED": {

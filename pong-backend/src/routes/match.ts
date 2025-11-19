@@ -163,11 +163,13 @@ class MatchesService {
 		const getUser = connectedRoomInstance.getById(userId);
 		if (getUser === undefined) throw new Error("disconnected");
 
-		if (getUser.status !== "CONNECT_ROOM") {
-			return { message: "error", data: "subscribed to a match/tournament" };
+		if (getUser.status !== "MATCH_INVITE") {
+			return { message: "error", data: `subscribed to ${getUser.status}` };
 		}
 
 		const nexMatch = inviteMatchesQueue.get(matchId);
+		
+		inviteMatchesQueue.delete(matchId);
 
 		if (nexMatch === undefined) {
 			return { message: "error", data: "match not find" };

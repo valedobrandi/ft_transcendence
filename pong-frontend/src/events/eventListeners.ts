@@ -37,6 +37,8 @@ export function eventListeners() {
     const btn = target.closest("button[data-action]");
     if (!btn || !(btn instanceof HTMLButtonElement)) return;
 
+    if (btn.id !== "") return;
+
     const action = btn.dataset.action;
 
     if (action === "accept") {
@@ -56,38 +58,8 @@ export function eventListeners() {
     console.log("Button clicked:", button.id);
 
     switch (button.id) {
-      case "accept-match-invite":
-        {
-          const eventId = button.dataset.eventid;
-          const response = await fetchRequest(
-            `/match-invite-accept?matchId=${eventId}`,
-            "GET",
-            {}
-          );
-          if (response.message === "success") {
-            removeIntraMessage(Number(eventId));
-          }
-        }
-        break;
-      case "decline-match-invite":
-        {
-          const eventId = button.dataset.eventid;
-          const userId = button.dataset.userid;
-          const response = await fetchRequest(
-            `/match-invite?matchId=${userId}`,
-            "DELETE"
-          );
-          if (response.message === "success") {
-            const getMatch = await fetchRequest(
-              `/match-invite?matchId=${userId}`,
-              "GET",
-              {}
-            );
-            if (getMatch.message === "error") {
-              removeIntraMessage(Number(eventId));
-              stateProxyHandler.state = "CONNECT_ROOM";
-            }
-          }
+      case "accept-match-invite": {
+          await onClickAcceptMatchInvite(button);
         }
         break;
       case "btn-block-user":
@@ -153,8 +125,9 @@ export function eventListeners() {
           );
         }
         break;
-      case "cancel-match-invite": 
-        await onClickCancelMatchInviteHandler(button);
+      case "cancel-match-invite": {
+        await onClickCancelMatchInvite(button);
+      }
         break;
       case "btn-friend-list":
         {
@@ -183,7 +156,20 @@ export function eventListeners() {
   });
 }
 
-async function onClickCancelMatchInviteHandler(button: HTMLButtonElement) {
+async function onClickAcceptMatchInvite(button: HTMLButtonElement) {
+  const eventId = button.dataset.eventid;
+  const userId = button.dataset.userid;
+
+  const response = await fetchRequest(
+    `/match-invite-accept?matchId=${userId}`,
+    "GET"
+  );
+  if (response.message === "success") {
+    removeIntraMessage(Number(eventId));
+  }
+}
+
+async function onClickCancelMatchInvite(button: HTMLButtonElement) {
   const eventId = button.dataset.eventid;
   const userId = button.dataset.userid;
 
