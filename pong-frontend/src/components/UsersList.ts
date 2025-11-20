@@ -71,13 +71,17 @@ export function UsersList(): HTMLDivElement {
     function render() {
         usersDiv.innerHTML = "";
 
+        const userListTitle = document.createElement("h2");
+        userListTitle.textContent = "USERS LIST";
+        userListTitle.className = "text-center text-blue-900 border-blue-900 border";
+        usersDiv.appendChild(userListTitle);
+
         const usersListUI = List(stateProxyHandler.serverUsers, "SERVER");
         usersDiv.appendChild(usersListUI);
 
         const friendListTitle = document.createElement("h2");
         friendListTitle.textContent = "FRIENDS LIST";
-        friendListTitle.className =
-            "text-center text-blue-900 border-blue-900 border";
+        friendListTitle.className = "text-center text-blue-900 border-blue-900 border";
 
         const friendListUI = List(
             stateProxyHandler.friendList,
