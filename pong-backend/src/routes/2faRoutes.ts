@@ -71,7 +71,7 @@ fastify.put(
 
         return res.send({
             message: "success",
-            payload: { accessToken, ...payload }
+            payload: { accessToken, ...payload, username }
         });
     });
 }

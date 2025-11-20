@@ -47,6 +47,7 @@ export function FormLogin(): HTMLElement {
 	// -------------------------
 	// POPUP 2FA
 	// -------------------------
+
 	function create2FAPopup(username: string) {
 		const overlay = document.createElement("div");
 		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
@@ -60,23 +61,23 @@ export function FormLogin(): HTMLElement {
 
 		const subtitle = document.createElement("p");
 		subtitle.className = "text-gray-300 text-center";
-		subtitle.textContent = "Un code vous a été envoyé par email.";
+		subtitle.textContent = "A code has been sent to you by email.";
 
 		const input = document.createElement("input");
 		input.type = "text";
 		input.maxLength = 6;
-		input.className = "text-black px-4 py-2 rounded w-full";
+		input.className = "text-gray-900 bg-gray-400 px-4 py-2 rounded w-full";
 		input.placeholder = "123456";
 
 		const error = document.createElement("p");
 		error.className = "text-red-500 text-sm hidden";
 
-		const confirmBtn = FancyButton("confirm", "h-12 w-40 text-lg game-font tracking-widest", async () => {
+		const confirmBtn = FancyButton("confirm",  "h-12 w-40 text-lg game-font tracking-widest flex items-center justify-center", async () => {
 
 			const code = input.value.trim();
 
 			if (code.length !== 6) {
-				error.textContent = "Le code doit contenir 6 chiffres.";
+				error.textContent = "The code must contain 6 digits.";
 				error.classList.remove("hidden");
 				return;
 			}
@@ -88,30 +89,29 @@ export function FormLogin(): HTMLElement {
 				{ body: JSON.stringify({ username, code }) }
 			);
 
-			
 			if (verifyResponse.message === "invalid_code") {
-				error.textContent = "Code incorrect.";
+				error.textContent = "Incorrect code.";
 				error.classList.remove("hidden");
 				return;
 			}
 
 			if (verifyResponse.message === "code_expired") {
-				error.textContent = "Code expiré. Reconnectez-vous.";
+				error.textContent = "Code expired. Please log in again.";
 				error.classList.remove("hidden");
 				return;
 			}
 
-			
 			if (verifyResponse.message === "success") {
 				jwt.token = verifyResponse.payload.accessToken;
 				profile.id = verifyResponse.payload.id;
+				profile.username = verifyResponse.username;
 
 				document.body.removeChild(overlay);
 				navigateTo("/intra");
 			}
 		});
 
-		const cancelBtn = FancyButton("cancel", "h-12 w-40 text-lg game-font tracking-widest", () => {
+		const cancelBtn = FancyButton("cancel", "h-12 w-40 text-lg game-font tracking-widest flex items-center justify-center", () => {
 			document.body.removeChild(overlay);
 		});
 
@@ -126,6 +126,9 @@ export function FormLogin(): HTMLElement {
 		document.body.appendChild(overlay);
 	}
 
+	// -------------------------
+	// FETCH LOGIN
+	// -------------------------
 	
 	formElement.onsubmit = async (e) => {
 		e.preventDefault();
@@ -145,7 +148,6 @@ export function FormLogin(): HTMLElement {
 		);
 
 		if (response.message === "2FA_REQUIRED") {
-			console.log("OUOUOUOUOU");
 			create2FAPopup(response.username);
 			return;
 		}

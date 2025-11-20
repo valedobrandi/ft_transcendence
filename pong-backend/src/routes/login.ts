@@ -33,29 +33,27 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			return res.status(206).send({ status: 'error', message: 'Incorrect password' });
 		}
 
-		// if (existingUser.twoFA_enabled) {
-		// 	console.log("JJJJJJJJJ= ",existingUser.twoFA_enabled);
-		// 	const authRoom = authenticationRoomInstance;
-		// 	authRoom.add(existingUser.username, AuthService.generate2FACode());
-
-		// 	const { data, error } = await authService.sendEmail(
-		// 		existingUser.email,
-		// 		'ft_transcendence Ping-Pong 2FA Code',
-		// 		`<p>Your 2FA code is: <strong>${authRoom.getCode(existingUser.username)}</strong></p>`
-		// 	);
-		// 	if (error) {
-		// 		console.log("OUOUOUOUOU");
-		// 		return res.status(400).send({ error });
-		// 	} else 
-		// 	{
-		// 		//return res.status(200).send({ message: data });
-		// 		return res.status(200).send({
-    	// 			message: "2FA_REQUIRED",
-   		// 			username: existingUser.username });
-		// 	}
-		// } 
-		// else 
-		// {
+		if (existingUser.twoFA_enabled) {
+			
+			const authRoom = authenticationRoomInstance;
+			authRoom.add(existingUser.username, AuthService.generate2FACode());
+			const { data, error } = await authService.sendEmail(
+				existingUser.email,
+				'ft_transcendence Ping-Pong 2FA Code',
+				`<p>Your 2FA code is: <strong>${authRoom.getCode(existingUser.username)}</strong></p>`
+			);
+			if (error) {
+				return res.status(400).send({ error });
+			} else 
+			{
+				//return res.status(200).send({ message: data });
+				return res.status(200).send({
+    				message: "2FA_REQUIRED",
+   					username: existingUser.username });
+			}
+		 } 
+		else 
+		{
 			const payload = { id: existingUser.id };
 
 			// // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
@@ -89,6 +87,6 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			// Add user to connectedRoomInstance
 			connectedRoomInstance.addUser(existingUser.username, existingUser.id);
 			return res.status(201).send({ message: 'success', payload: { accessToken, ...payload } });
-		//}
+		}
 	});
 }
