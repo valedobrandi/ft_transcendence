@@ -72,11 +72,12 @@ export class ConnectedRoom {
   disconnect(id: number | bigint) {
     this.dropWebsocket(Number(id));
     this.broadcastFriendStatus(Number(id), true);
-    const getUser = this.getById(id);
-    if (getUser && getUser.matchId) {
-      print("[MATCH_DENY]");
-      const matchId = getUser.matchId;
-      matchServiceInstance.denyMatchInvite(matchId, Number(id));
+    const connected = this.getById(id);
+    if (connected && connected.matchId) {
+      if (connected.status === "SEND_INVITE" || connected.status === "MATCH_INVITE") {
+        const matchId = connected.matchId;
+        matchServiceInstance.matchRemove(matchId, Number(id));
+      }
     }
     this.room.delete(Number(id));
   }
@@ -170,16 +171,18 @@ export class ConnectedRoom {
     return undefined;
   }
 
-  notifyUser(id: number | bigint, message: string) {
-    const player = this.getById(id);
-    if (player && player.socket) {
-      player.socket.send(
+  sendWebsocketMessage(id: number | bigint, message: string): boolean {
+    const connected = this.getById(id);
+    if (connected && connected.socket) {
+      connected.socket.send(
         JSON.stringify({
           status: 200,
           message,
         })
       );
+	  return true;
     }
+	return false;
   }
 
   has(id: number | bigint) {

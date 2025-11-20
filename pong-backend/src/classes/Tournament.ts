@@ -1,4 +1,5 @@
 import { events } from "../events/EventsBus.js";
+import { print } from "../server.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { tournamentRoom } from "../state/tournamentRoom.js";
 import { EndMatchEventType } from "../types/EndMatchEventType.js";
@@ -73,19 +74,20 @@ class Tournament {
             this.currentRoundWinners.add(winnerId);
             this.currentBracket.delete(loserId);
 
-            const loserPlayer = connectedRoomInstance.getById(loserId);
+            const loserPlayer = connectedRoomInstance.getByUsername(loserId);
             if (loserPlayer) {
-                loserPlayer.chat.sendMessage('INTRA', `you have been eliminated from the tournament.`, loserPlayer.username);
+                loserPlayer.chat.sendMessage('INTRA', `you have been eliminated from the tournament.`, [Number(loserPlayer.id)]);
             };
         }
+
         if (this.matchs === this.rounds) {
             this.nextBracket = new Set(this.currentRoundWinners);
 
             if (this.rounds > 1) {
                 for (const winnerId of this.nextBracket) {
-                    const player = connectedRoomInstance.getById(winnerId);
+                    const player = connectedRoomInstance.getByUsername(winnerId);
                     if (player) {
-                        player.chat.sendMessage("INTRA", "You have advanced to the next phase!", player.username);
+                        player.chat.sendMessage("INTRA", "You have advanced to the next phase!", [Number(player.id)]);
                     }
                 }
             }
@@ -103,15 +105,15 @@ class Tournament {
             await this.startRound();
         } else {
             const winnerId = Array.from(this.currentBracket)[0];
-            console.log(`Tournament ${this.tournamentId} winner is ${winnerId}`);
+            print(`Tournament ${this.tournamentId} winner is ${winnerId}`);
             await this.endTournament(winnerId);
         }
     }
 
     async endTournament(id: string) {
-        const player = connectedRoomInstance.getById(id);;
+        const player = connectedRoomInstance.getByUsername(id);;
         if (player) {
-            player.chat.sendMessage('INTRA', "Congratulations! You are the champion of the tournament!", player.username);
+            player.chat.sendMessage('INTRA', "Congratulations! You are the champion of the tournament!", [Number(player.id)]);
             player.status = 'CONNECT_ROOM';
             if (player.socket) {
                 player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));

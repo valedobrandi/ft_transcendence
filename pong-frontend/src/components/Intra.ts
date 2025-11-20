@@ -30,7 +30,7 @@ export function Intra(): HTMLElement {
 
     const messages = document.createElement("div");
     messages.id = "messages";
-    messages.className = "flex-1 overflow-y-auto p-2 min-w-[528px]";
+    messages.className = "overflow-y-auto p-2 min-w-[528px]";
 
     const inputDiv = ChatSendInput();
     chatWidget.appendChild(chatTabs);

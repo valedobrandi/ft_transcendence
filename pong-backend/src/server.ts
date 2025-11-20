@@ -11,7 +11,7 @@ import { eventsRoutes } from './routes/events.js';
 import cookie from '@fastify/cookie';
 import { matchesRoute } from './routes/match.js';
 import fastifyMultipart from "@fastify/multipart";
-import fastifyStatic from "@fastify/static";
+//import fastifyStatic from "@fastify/static";
 import path from "path";
 import fs from "fs";
 import avatarRoute from './routes/avatar.js';
@@ -94,10 +94,10 @@ fastify.register(jwt, {
 	secret: process.env.JWT_SECRET || 'supersecret'
 });
 
-fastify.register(fastifyStatic, {
-    root: path.join(process.cwd(), "src/images"),
-    prefix: "/images/",
-});
+// fastify.register(fastifyStatic, {
+//     root: path.join(process.cwd(), "src/images"),
+//     prefix: "/images/",
+// });
 
 
 fastify.register(loginRoute);

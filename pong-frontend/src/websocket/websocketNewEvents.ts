@@ -4,9 +4,9 @@ import { fetchRequest } from "../utils";
 
 
 async function websocketNewEvents() {
-	const { status, data } = await fetchRequest('/to-events', 'GET');
+	const { message, data } = await fetchRequest('/to-events', 'GET');
 	console.log('Fetch New-Events: ', data);
-	if (status === 'success') {
+	if (message === 'success') {
 		for (const event of data) {
 
 			const { type, from_id, id: eventId } = event;
@@ -16,17 +16,29 @@ async function websocketNewEvents() {
 					const getSender = stateProxyHandler.serverUsers
 						.find(({ id }) => Number(id) === Number(from_id));
 					if (getSender === undefined) break;
-					newIntraMessage(
-						`${getSender.name} has send a friend request
-							 	${EmbeddedButton(getSender.id, "YES", eventId, "accept-friend-request")}
-							 		${EmbeddedButton(getSender.id, "NO", eventId, "accept-friend-request")}`
+
+					
+					const idx = newIntraMessage(
+						`${getSender.name} has send a friend request`
 					);
+					
+					const acceptBtn = EmbeddedButton(getSender.id, "YES", `${idx}`, "");
+					const denyBtn = EmbeddedButton(getSender.id, "NO", `${idx}`, "");
+
+					stateProxyHandler.systemMessages = [...stateProxyHandler.systemMessages.slice(0, -1), {
+						message: `${stateProxyHandler.systemMessages[stateProxyHandler.systemMessages.length - 1].message}
+						${acceptBtn} ${denyBtn}`,
+						index: idx,
+					}];
+					break;
+				default:
+
 					break;
 			}
 		}
-		return { status: 'success', data: data.id };
+		return { message: 'success', data: data.id };
 	}
-	return { status: 'error', data: -1 };
+	return { message: 'error', data: -1 };
 }
 
 export { websocketNewEvents };

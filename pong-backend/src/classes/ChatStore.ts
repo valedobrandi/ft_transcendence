@@ -14,6 +14,7 @@ class ChatStore {
 
     getHistory(senderId: number, receiverId: number) {
         const {status, data} = this.messageModelInstance.getMessages(senderId, receiverId);
+		print(`[CHAT STORE] Fetched ${data.length} messages between ${senderId} and ${receiverId}`);
         if (status === 'error') return [];
 
         return data.map(msg => this.formatHistory(msg));

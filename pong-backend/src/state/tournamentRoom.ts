@@ -1,64 +1,65 @@
 import { Tournament } from "../classes/Tournament.js";
 import { tournamentEvent } from "../events/tournamentQueueEvent.js";
+import { print } from "../server.js";
 import { connectedRoomInstance } from "./ConnectedRoom.js";
 
-export const tournamentQueue: Set<string> = new Set();
+export const tournamentQueue: Set<number> = new Set();
 
 export const tournamentRoom = new Map<string, Tournament>();
 
-export function joinTournamentRoom(id: string) {
-    tournamentQueue.add(id);
-    const player = connectedRoomInstance.getById(id);
-    if (player == undefined) return;
-    player.status = 'TOURNAMENT_ROOM';
+export function joinTournamentQueue(id: number) {
 
-    if (player.socket) {
-        player.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT_ROOM' }))
-    }
+	tournamentQueue.add(id);
 
-    if (tournamentQueue.size >= 4) {
-        console.log('Tournament ready is starting;');
-        tournamentEvent.emit('ready');
-    }
+	if (tournamentQueue.size >= 4) {
+		print('Tournament ready is starting;');
+		tournamentEvent.emit('ready');
+	}
 }
 
-export function getTournamentPlayers(): string[] | undefined {
-    if (tournamentQueue.size === 0) return undefined;
-    const iterator = tournamentQueue.values();
-    const tournament: string[] = [];
-    while (tournament.length < 4) {
-        const next = iterator.next();
-        if (next.done) break;
+export function getConnecteds(): { id: number, username: string }[] | undefined {
+	if (tournamentQueue.size === 0) return undefined;
 
-        const id = next.value;
-        if (!connectedRoomInstance.has(id)) {
-            tournamentQueue.delete(id);
-            continue;
-        }
-        tournament.push(id);
-    }
-    if (tournament.length === 4) {
-        for (const id of tournament) {
-            tournamentQueue.delete(id);
-        }
-        return tournament;
-    }
-    return undefined;
+	const iterator = tournamentQueue.values();
+
+	const tournament: { id: number, username: string }[] = [];
+
+
+	while (tournament.length < 4) {
+		const next = iterator.next();
+		if (next.done) break;
+
+		const id = next.value;
+		const connected = connectedRoomInstance.getById(id);
+		if (!connected) {
+			tournamentQueue.delete(id);
+			continue;
+		}
+		tournament.push({ id: Number(connected.id), username: connected.username });
+	}
+	if (tournament.length === 4) {
+		for (const p of tournament) {
+			tournamentQueue.delete(p.id);
+		}
+		return tournament;
+	}
+	return undefined;
 }
 
 tournamentEvent.on('ready', () => {
-    const tournamentPlayers = getTournamentPlayers();
-    if (tournamentPlayers == undefined) return;
+	const tournamentPlayers = getConnecteds();
+	if (tournamentPlayers === undefined) return;
 
-    const tournamentId = crypto.randomUUID();
-    const newTournament = new Tournament(tournamentId);
+	const tournamentId = crypto.randomUUID();
+	const newTournament = new Tournament(tournamentId);
 
-    for (const id of tournamentPlayers) {
-        const player = connectedRoomInstance.getById(id);
-        if (player == undefined) continue;
-        player.tournamentId = tournamentId;
-        newTournament.add(id);
-    }
+	for (const {id, username} of tournamentPlayers) {
+		const connected = connectedRoomInstance.getById(id);
+		if (connected) {
+			connected.tournamentId = tournamentId;
+		}
+		newTournament.add(username);
+	}
 
-    tournamentRoom.set(tournamentId, newTournament);
+	tournamentRoom.set(tournamentId, newTournament);
 })
