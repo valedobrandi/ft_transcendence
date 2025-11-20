@@ -1,4 +1,6 @@
 import { profile } from "../app";
+import { Alert } from "../components/Alert";
+import { CreateAlert } from "../components/CreateAlert";
 import {
   acceptFriendOnClick,
   denyFriendOnClick,
@@ -30,6 +32,36 @@ export function eventListeners() {
 
   window.addEventListener("popstate", () => {
     renderRoute(window.location.pathname);
+  });
+
+  document.addEventListener("click", async (event) => {
+    const target = event.target as HTMLElement;
+    const btn = target.closest("button[data-context='match-list']");
+    if (!btn || !(btn instanceof HTMLButtonElement)) return;
+
+    const action = btn.dataset.action;
+    const matchId = btn.dataset.id;
+
+    if (action === "true") {
+      // Join match
+      const response = await fetchRequest(
+        `/match/join?matchId=${matchId}`,
+        "POST"
+      );
+      if (response.message === "error") {
+        CreateAlert(`${response.data}`, "error");
+      }
+    } else {
+      // Cancel match
+      const response = await fetchRequest(
+        `/match-cancel?matchId=${matchId}`,
+        "DELETE"
+      );
+      if (response.message === "error") {
+        const alert = new Alert(`${response.data}`);
+        alert.show();
+      }
+    }
   });
 
   document.addEventListener("click", async (event) => {
@@ -181,3 +213,4 @@ async function onClickCancelMatchInvite(button: HTMLButtonElement) {
     removeIntraMessage(Number(eventId));
   }
 }
+

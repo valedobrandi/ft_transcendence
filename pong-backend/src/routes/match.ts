@@ -78,6 +78,18 @@ const matchesRoute = (fastify: FastifyInstance) => {
 		},
 		handler: matcherController.createMatch.bind(matcherController),
 	});
+	fastify.delete("/match-cancel", {
+		preHandler: [fastify.authenticate],
+		schema: {
+			querystring: {
+				type: "object",
+				properties: {
+					matchId: { type: "string" },
+				},
+			},
+		},
+		handler: matcherController.cancelMatch.bind(matcherController),
+	});
 };
 
 class MatcherController {
@@ -130,9 +142,41 @@ class MatcherController {
 		const { message, data } = this.matchesService.createMatch(id, settings);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
+
+	cancelMatch(req: FastifyRequest, res: FastifyReply) {
+		const { id } = req.user;
+		const { matchId } = req.query;
+		const { message, data } = this.matchesService.cancelMatch(id, matchId);
+		return res.code(statusCode("OK")).send({ message, data });
+	}
 }
 
 class MatchesService {
+
+	cancelMatch(userId: number, matchId: string) {
+		const connected = connectedRoomInstance.getById(userId);
+		if (connected === undefined) throw new Error("disconnected");
+
+		const nextMatch = newMatchesQueue.get(matchId);
+
+		if (nextMatch?.createId !== userId) {
+			return { message: "error", data: "FORBIDDEN" };
+		}
+
+		if (nextMatch === undefined) {
+			return { message: "error", data: "match not find" };
+		}
+
+		newMatchesQueue.delete(matchId);
+		connected.matchId = undefined;
+		connected.status = "CONNECT_ROOM";
+
+		connectedRoomInstance.sendWebsocketMessage(userId, "CONNECT_ROOM");
+		connectedRoomInstance.broadcastNewMatchesList();
+
+		return { message: "success", data: "match canceled" };
+	}
+	
 	joinMatch(userId: number, matchId: string) {
 		const getUser = connectedRoomInstance.getById(userId);
 		if (getUser === undefined) throw new Error("disconnected");

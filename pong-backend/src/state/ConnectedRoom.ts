@@ -78,6 +78,8 @@ export class ConnectedRoom {
         const matchId = connected.matchId;
         matchServiceInstance.matchRemove(matchId, Number(id));
       }
+      matchServiceInstance.cancelMatch(Number(id), connected.matchId);
+
     }
     this.room.delete(Number(id));
   }
