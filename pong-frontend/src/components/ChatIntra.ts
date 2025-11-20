@@ -3,16 +3,15 @@ import { stateProxyHandler, onStateChange } from "../states/stateProxyHandler";
 export function SystemMessageChat() {
 	const intraContainer = document.createElement("div");
 	intraContainer.id = "";
-	intraContainer.className = "flex flex-col flex-grow border border-black w-[850px]";
+	intraContainer.className = "flex flex-col flex-0 border border-black";
 
 	const chatTabs = document.createElement("div");
 	chatTabs.id = "chat-tabs";
-	chatTabs.className = "flex justify-start items-center border-b bg-gray-100 h-10 min-w-lg";
-
+	chatTabs.className = "flex justify-start items-center border-b border-[#424549] bg-[#36393e] h-10 min-w-lg";
 
 	const messages = document.createElement("div");
 	messages.id = "system-messages";
-	messages.className = "overflow-y p-2 min-w-[528px]";
+	messages.className = "flex-1 overflow-y-auto p-2 w-full min-h-0 bg-[#282b30]";
 
 	const title = ServerStatus();
 	const status = document.createElement("p");

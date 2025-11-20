@@ -19,3 +19,10 @@
 
 	#Minor module: Use a framework or toolkit to build the front-end
 	#Minor module: Use a database for the backend -and more.
+
+#Color Palette:
+
+#424549 (very light gray)
+#36393e (light gray)
+#282b30 (dark gray)
+#1e2124 (very dark gray)
