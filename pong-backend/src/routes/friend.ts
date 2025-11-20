@@ -3,7 +3,6 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { fastify, print } from '../server.js';
 import { statusCode } from "../types/statusCode";
 import db from "../../database/db";
-import { EventsService } from "./events";
 import { connectedRoomInstance } from "../state/ConnectedRoom";
 
 export interface FriendListDTO {
@@ -15,18 +14,18 @@ export type FriendsTableModel = {
 }
 
 export type GetFriendsList = {
-	status: 'success' | 'error';
+	message: 'success' | 'error';
 	data: number[] | [];
 }
 
 export type AddFriend = {
-	status: 'success' | 'error';
-	data: {};
+	message: 'success' | 'error';
+	data: string;
 }
 
 export type RemoveFriend = {
-	status: 'success' | 'error';
-	data: {};
+	message: 'success' | 'error';
+	data: string;
 }
 
 function friendsRoute(fastify: FastifyInstance) {
@@ -67,26 +66,26 @@ class FriendsController {
 
 	getFriendsList(req: FastifyRequest, res: FastifyReply) {
 		const id = Number(req.userId);
-		const { status, data } = this.friendsService.getFriendsList(id);
-		return res.status(statusCode('OK')).send({ message: status, payload: data });
+		const { message, data } = this.friendsService.getFriendsList(id);
+		return res.status(statusCode('OK')).send({ message, payload: data });
 	}
 
 	addFriend(req: FastifyRequest<{ Body: FriendListDTO }>, res: FastifyReply) {
 		const id = Number(req.userId);
 		const friendId = Number(req.body.id);
 
-		const { status, data } = this.friendsService.addFriend(id, friendId);
+		const { message, data } = this.friendsService.addFriend(id, friendId);
 
-		return res.status(statusCode('OK')).send({ message: status, data });
+		return res.status(statusCode('OK')).send({ message, data });
 	}
 
 	removeFriend(req: FastifyRequest<{ Body: FriendListDTO }>, res: FastifyReply) {
 		const id = Number(req.userId);
 		const friendId = Number(req.body.id);
 
-		const { status, data } = this.friendsService.removeFriend(id, friendId);
+		const { message, data } = this.friendsService.removeFriend(id, friendId);
 
-		return res.status(statusCode('OK')).send({ message: status, data });
+		return res.status(statusCode('OK')).send({ message, data });
 	}
 }
 
@@ -94,20 +93,20 @@ class FriendService {
 	private friendModelInstance = new FriendsModel(db);
 
 	getFriendsList(userId: number) {
-		const { status, data } = this.friendModelInstance.getFriendsList(userId);
+		const { message, data } = this.friendModelInstance.getFriendsList(userId);
 		connectedRoomInstance.friendListSet(userId).save(data.filter(id => id !== Number(userId)));
 		const createFriendList = connectedRoomInstance.friendListSet(userId)
 			.get().map((friendId: number | bigint) => ({
 			id: friendId,
 			isConnected: connectedRoomInstance.has(friendId) ? true : false
 		}));
-		return { status, data: createFriendList };
+		return { message, data: createFriendList };
 	}
 
 	addFriend(requestId: number, friendId: number) {
-		const response = this.friendModelInstance.checkFriendsStatus(requestId, friendId);
-		if (response === false) {
-			this.friendModelInstance.addFriend(requestId, friendId);
+		const hasFriend = this.friendModelInstance.checkFriendsStatus(requestId, friendId);
+		if (hasFriend === false) {
+			const { message, data } = this.friendModelInstance.addFriend(requestId, friendId);
 			try {
 				connectedRoomInstance.friendListSet(requestId).add(friendId);
 			} catch (error) {
@@ -118,15 +117,16 @@ class FriendService {
 			} catch (error) {
 				fastify.log.error(error);
 			}
+			return { message, data };
 		}
 
-		return { status: 'success', data: {} };
+		return { message: 'error', data: "unable to add friend" };
 	}
 
 	removeFriend(userId: number, friendId: number) {
-		const { status, data } = this.friendModelInstance.removeFriend(userId, friendId);
+		const { message, data } = this.friendModelInstance.removeFriend(userId, friendId);
 		connectedRoomInstance.friendListSet(userId).delete(friendId);
-		return { status, data };
+		return { message, data };
 	}
 }
 
@@ -154,7 +154,7 @@ class FriendsModel {
 
 	getFriendsList(userId: number): GetFriendsList {
 		const response = this.stmGetFriendsList.all(userId, userId);
-		return { status: 'success', data: response.map(row => row.friendId) };
+		return { message: 'success', data: response.map(row => row.friendId) };
 	}
 
 	checkFriendsStatus(userId: number, friendId: number): boolean {
@@ -165,16 +165,16 @@ class FriendsModel {
 	addFriend(userId: number, friendId: number): AddFriend {
 		try {
 			this.stmAddFriend.run(userId, friendId);
-			return { status: 'success', data: {} };
+			return { message: 'success', data: "friend added" };
 		} catch (error) {
 			print(`[ERROR] Unable to add friend: ${error}`);
-			return { status: 'error', data: {} };
+			return { message: 'error', data: "unable to add friend" };
 		}
 	}
 
 	removeFriend(userId: number, friendId: number): RemoveFriend {
 		const response = this.stmRemoveFriend.run(userId, friendId);
-		return { status: 'success', data: {} };
+		return { message: 'success', data: "friend removed" };
 	}
 }
 

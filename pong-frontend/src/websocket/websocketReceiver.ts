@@ -6,6 +6,7 @@ import {
   newIntraMessage,
   stateProxyHandler,
   findIntraMessage,
+  updateIntraMessage,
 } from "../states/stateProxyHandler";
 import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
@@ -52,6 +53,7 @@ export async function websocketReceiver(socket: WebSocket) {
           // Get the sender id by filter out my own id
           const sender = data.sender.find((sid: number) => sid !== profile.id);
           if (!sender) return;
+          console.log("[WEBSOCKET RECEIVER] CHAT_MESSAGE from ", data.history);
           stateProxyHandler.messages.set(sender, data.history);
           stateProxyHandler.state = data.message;
         }
@@ -108,17 +110,19 @@ export async function websocketReceiver(socket: WebSocket) {
         stateProxyHandler.availableMatches = data.payload.matches;
         break;
       }
-      case "MATCH_INVITE":
-        let getName = stateProxyHandler.serverUsers.find(
+      case "MATCH_INVITE": {
+        const getName = stateProxyHandler.serverUsers.find(
           (user) => user.id === data.payload.from
         )?.name;
-        newIntraMessage(`You have received a game invite from ${getName}.
-				${EmbeddedButton(0, "YES", data.payload.matchId, "accept-match-invite")} 
-				${EmbeddedButton(0, "NO", data.payload.matchId, "decline-match-invite")}`);
+        const idx = newIntraMessage("");
+        updateIntraMessage(idx, `You have received a game invite from ${getName}.
+          ${EmbeddedButton(data.payload.matchId, "YES", `${idx}`, "accept-match-invite")}
+          ${EmbeddedButton(data.payload.matchId, "NO", `${idx}`, "cancel-match-invite")}`);
         stateProxyHandler.state = "MATCH_INVITE";
         break;
-      case "MATCH_DECLINED":
-        getName = stateProxyHandler.serverUsers.find(
+      }
+      case "MATCH_DECLINED": {
+        const getName = stateProxyHandler.serverUsers.find(
           (user) => user.id === data.payload.from
         )?.name;
         newIntraMessage(`invitation canceled by ${getName}`);
@@ -129,6 +133,7 @@ export async function websocketReceiver(socket: WebSocket) {
           removeIntraMessage(idx);
         }
         stateProxyHandler.state = "CONNECT_ROOM";
+      }
     }
   });
 }

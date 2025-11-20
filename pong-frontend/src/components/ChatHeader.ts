@@ -1,4 +1,4 @@
-import { newIntraMessage, onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
+import { newIntraMessage, onStateChange, stateProxyHandler, updateIntraMessage } from "../states/stateProxyHandler";
 import { profile } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
 import { EmbeddedButton } from "./EmbeddedButton";
@@ -90,8 +90,9 @@ const inviteUserOnclick = async () => {
 		const getMatch = await fetchRequest(`/match-invite?matchId=${response.data.matchId}`, 'GET', {});
 		if (getMatch.message === "success") {
 			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
-			newIntraMessage(`Invite sento to ${getTo?.name} 
-				${EmbeddedButton(0, 'CANCEL', getMatch.data.matchId, 'decline-match-invite')}`);
+			const idx = newIntraMessage(""); 
+			updateIntraMessage(idx, `Invite sent to ${getTo?.name} 
+				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite')}`);
 			stateProxyHandler.state = "SEND_INVITE"
 		}
 	} else if (response.message = 'error') {
@@ -107,10 +108,17 @@ const profileOnclick = async () => {
 		const data = await fetchRequest('/profile', 'GET', {});
 		console.log("DATA PROFILE = ", data);
 		if (data.message === 'success') {
-			profile.username = data.user.username;
-			profile.id = data.user.id;
-			profile.email = data.user.email;
+			profile.username = data.existUser.username;
+			profile.id = data.existUser.id;
+			profile.email = data.existUser.email;
+			profile.avatar_url = data.existUser.avatar_url;
+			profile.twoFA_enabled = data.existUser.twoFA_enabled ? 1 : 0
+			
+
 			console.log("PROFIL = ", profile.username);
+			console.log("EMAIL IIII = ", profile.email);
+			console.log("AVATAR IIII = ", profile.avatar_url);
+			console.log("AVATAR IIII = ", profile.twoFA_enabled);
 
 			navigateTo("/profile");
 		}

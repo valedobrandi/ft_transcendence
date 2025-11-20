@@ -24,6 +24,7 @@ export type PlayType = {
 export type Tournamentype = {
     type: 'TOURNAMENT';
     username: string;
+	id: number;
 };
 
 export type InputType = {

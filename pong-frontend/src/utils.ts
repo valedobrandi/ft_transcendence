@@ -135,6 +135,7 @@ export async function fetchRequest
             const error = await response.json();
             throw new Error(error.message || 'API error');
         }
+
         if ('accessToken' in response) jwt.token = response.accessToken as string;
         const data = await response.json();
         console.log(`[RESPONSE] ${method} ${url} response:`, data);
@@ -144,5 +145,38 @@ export async function fetchRequest
     {
         console.error(`Fetch error on ${url}:`, err);
         throw err;
+    }
+}
+
+
+export async function toggle2FA(): Promise<void> 
+{
+    try {
+        
+        
+        const new2FAValue = profile.twoFA_enabled === 1 ? 0 : 1;
+        console.log('NEWVALEUR= ', new2FAValue);
+
+        const response = await fetchRequest("/updata/2FA", "PUT", {}, {
+            body: JSON.stringify({twoFA_enabled: profile.twoFA_enabled ? 0 : 1 })
+        });
+        
+        
+        if (response.message === "success") {
+            profile.twoFA_enabled = response.payload.twoFA_enabled;
+
+            const twoFABtn = document.getElementById("toggle_2fa") as HTMLButtonElement;
+            if (twoFABtn) {
+                twoFABtn.textContent = new2FAValue === 1 ? "Disable 2FA" : "Enable 2FA";
+            }
+
+            alert(`2FA has been ${new2FAValue === 1 ? "enabled" : "disabled"} successfully`);
+        } else {
+            alert("Failed to update 2FA: " + (response.error || "Unknown error"));
+        }
+    } catch (err) {
+        
+        console.error("Error toggling 2FA:", err);
+        alert("Error toggling 2FA");
     }
 }

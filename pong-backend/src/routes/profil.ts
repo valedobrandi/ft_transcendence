@@ -1,46 +1,45 @@
-import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import bcrypt from 'bcrypt';
-import { RegisterBody, User } from '../types/RegisterType.js';
-import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
-import db from '../../database/db.js'
-import { playerStatus } from '../enum_status/enum_userStatus.js';
+import { FastifyInstance, FastifyRequest } from 'fastify';
 import { ProfileControler } from '../controllers/profileController.js';
+import { getIdUser, updatedUserInDB } from '../user_service/user_service';
 
+export default function profilRoute(fastify: FastifyInstance)
+{
+    const profileController = new ProfileControler();
 
-export default async function profilRoute(fastify: FastifyInstance) {
+        fastify.get('/profile', {
+            preHandler: [fastify.authenticate],
+            handler: (async (request: FastifyRequest, res) => 
+            {
+                try 
+                {
+                    
+                    const id = request.user.id
+                    const existUser = getIdUser(id);
+                    if(!existUser)
+                        return res.status(400).send({error: "error user not found"})
+                    return res.status(200).send({ message: 'success', existUser });
+                }
+                catch (error) 
+                {
+                    const err = error as Error;
+                    return res.status(404).send({ error: err.message });
+                }
+            })
+        });
 
-    fastify.get('/profile', {
+        fastify.put('/update', {
         preHandler: [fastify.authenticate],
-        handler: (async (request: FastifyRequest, res) => {
-            return res.status(200).send({message: 'success', user: request.userId});
-        })
-    });
-
-    fastify.put('/profil/update/:id', async (request: FastifyRequest<{ Params: { id: number }, Body: RegisterBody }>, res) => {
-        const { email, username, password } = request.body;
-        const { id } = request.params;
-
-        const player = getIdUser(id);
-        if (!player)
-            return res.status(404).send({ error: 'user not found' });
-
-        player.email = email ?? player.email;
-        player.username = username ?? player.username;
-
-        if (password) {
-            const hash = await bcrypt.hash(password, 10);
-            player.password = hash;
-            console.log("change mot de pass");
+        schema: {
+            body: {
+            type: 'object',
+            properties: {
+                username: { type: 'string', minLength: 3 },
+                email: { type: 'string', format: 'email' },
+                password: { type: 'string' },
+                current_password: { type: 'string', minLength: 2 },
+            },
+            additionalProperties: false
+            }
         }
-
-        try {
-            updatedUserInDB(player);
-            return res.status(200).send({ message: 'success', user: player});
-        }
-        catch (error) {
-            const err = error as Error;
-            return res.status(404).send({ error: err.message });
-        }
-    });
-
+        }, profileController.updateUser.bind(profileController));
 }

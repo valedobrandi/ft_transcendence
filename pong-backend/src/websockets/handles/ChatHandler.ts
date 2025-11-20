@@ -21,21 +21,24 @@ class ChatHandler {
         // Check the chatBlock database to see if the receiver has blocked the sender
         const chatBlockDB = this.chatBlockModel.getBlockedUsers(Number(receiverId))
             .data.includes(Number(senderId))
-        
+
         const isBlocked = chatBlockDB ? 1 : 0;
 
         chatStore.addMessageToDataBase(Number(senderId), Number(receiverId), message, isBlocked);
+
         const history = chatStore.getHistory(Number(senderId), Number(receiverId));
+		const senderHistory = chatStore.getHistory(senderId, receiverId);
+		const receiverHistory = chatStore.getHistory(receiverId, senderId);
 
         // Extract [senderId, receiverId] from history
         const participants = chatStore.getSenders(history);
 
         if (to !== undefined && !isBlocked) {
-            to.chat.sendMessage(receiver, message, participants, history);
+            to.chat.sendMessage(receiver, message, participants, receiverHistory);
         }
 
         if (from !== undefined) {
-            from.chat.sendMessage(sender, message, participants, history);
+            from.chat.sendMessage(sender, message, participants, senderHistory);
         }
     }
 

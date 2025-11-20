@@ -10,6 +10,12 @@ import chatBlockRoute from './routes/chatBlock.js';
 import { eventsRoutes } from './routes/events.js';
 import cookie from '@fastify/cookie';
 import { matchesRoute } from './routes/match.js';
+import fastifyMultipart from "@fastify/multipart";
+//import fastifyStatic from "@fastify/static";
+import path from "path";
+import fs from "fs";
+import avatarRoute from './routes/avatar.js';
+import twoFARoutes from './routes/2faRoutes.js'
 
 const fastify = Fastify({
 	logger: {
@@ -88,6 +94,11 @@ fastify.register(jwt, {
 	secret: process.env.JWT_SECRET || 'supersecret'
 });
 
+// fastify.register(fastifyStatic, {
+//     root: path.join(process.cwd(), "src/images"),
+//     prefix: "/images/",
+// });
+
 
 fastify.register(loginRoute);
 fastify.register(authRoutes);
@@ -96,6 +107,8 @@ fastify.register(eventsRoutes);
 fastify.register(matchesRoute);
 fastify.register(friendsRoute);
 fastify.register(chatBlockRoute);
+fastify.register(avatarRoute);
+fastify.register(twoFARoutes);
 await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {
