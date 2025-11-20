@@ -2,16 +2,31 @@ import { profile } from "../app";
 import type { ChatMessage } from "../interface/ChatMessage";
 import { navigateTo, setTime } from "../utils";
 
-export function newIntraMessage(message: string) {
+export function newIntraMessage(message: string): number {
     stateProxyHandler.systemMessages = [...stateProxyHandler.systemMessages, {
         message: message,
         index: (stateProxyHandler.systemMessages.length),
     }];
+    return stateProxyHandler.systemMessages.length - 1;
+}
+
+export function updateIntraMessage(idx: number, newMessage: string) {
+    stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.map(msg => {
+        if (msg.index === idx) {
+            return { ...msg, message: newMessage };
+        }
+        return msg;
+    });
 }
 
 export function removeIntraMessage(tagId: number) {
-    stateProxyHandler.systemMessages = stateProxyHandler
-        .systemMessages.filter(msg => msg.index !== Number(tagId));
+    // Update message to "" by index
+    stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.map(msg => {
+        if (msg.index === tagId) {
+            return { ...msg, message: "" };
+        }
+        return msg;
+    });
 }
 
 export function findIntraMessage(tagId: string) {

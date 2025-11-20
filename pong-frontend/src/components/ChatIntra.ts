@@ -27,6 +27,7 @@ export function SystemMessageChat() {
 		messages.innerHTML = '';
 
 		stateProxyHandler.systemMessages.forEach(msg => {
+			if (msg.message === "") return;
 			const p = document.createElement('p');
 			p.id = `msg-index-${msg.index}`;
 			p.className = "m-2 text-base text-black bg-yellow-100 p-2 rounded w-fit";

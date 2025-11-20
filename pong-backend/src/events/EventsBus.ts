@@ -30,11 +30,6 @@ class EventBus<Events extends Record<string, any>> {
             matchesModel.saveMatch(matchId, player1, player2, score1, score2);
         });
 
-        this.on('friend:add', (data) => {
-            const { userId, friendId } = data;
-            console.log(`User ${userId} added friend ${friendId}`);
-        });
-
         this.on('game:start', (data) => {
 
             const newMatch = new PingPong(data.matchId);

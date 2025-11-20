@@ -2,11 +2,11 @@ import { FastifyInstance } from 'fastify';
 import db from '../../database/db.js'
 import fs from "fs";
 import path from "path";
-import fastifyMultipart from "@fastify/multipart";
+//import fastifyMultipart from "@fastify/multipart";
 
 export default function avatarRoute(fastify: FastifyInstance) 
 {
-  fastify.register(fastifyMultipart);
+  //fastify.register(fastifyMultipart);
 
   fastify.post('/avatar', {
     preHandler: [fastify.authenticate],
