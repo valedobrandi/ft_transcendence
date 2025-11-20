@@ -5,7 +5,7 @@ import { FancyButton } from "./Button";
 export function ChatSendInput(): HTMLDivElement {
     const inputDiv = document.createElement("div");
     inputDiv.id = "chat-send-container";
-    inputDiv.className = "flex items-center p-2 bg-[rgb(54,57,62)] border-t border-[rgb(66,69,73)]";
+    inputDiv.className = "flex items-center p-2 bg-[#36393e] border-t border-[rgb(66,69,73)]";
 
     const form = document.createElement("form");
     form.className = "flex w-full gap-2";
@@ -16,9 +16,9 @@ export function ChatSendInput(): HTMLDivElement {
     input.placeholder = "Type a message...";
     input.className = `
         flex-grow px-3 py-2 rounded-md
-        bg-[rgb(66,69,73)]
+        bg-[#424549]
         text-white placeholder:text-gray-400
-        border border-[rgb(66,69,73)]
+        border border-[#424549]
         focus:outline-none focus:ring-2 focus:ring-[rgb(255,80,80)] focus:border-[rgb(255,80,80)]
     `;
 

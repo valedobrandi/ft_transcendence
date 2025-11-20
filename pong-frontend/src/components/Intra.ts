@@ -17,24 +17,24 @@ export function Intra(): HTMLElement {
 
     const leftParent = document.createElement("div");
     leftParent.id = "left-parent";
-    leftParent.className = "flex flex-col basis-1/2 shrink-0 h-full";
+    leftParent.className = "border-10 border-r-5 border-[#1e2124] flex flex-col basis-1/2 shrink-0 h-full";
 
     //     Upper Section (Chat + Users) - 66% height                          //
     // ====================================================================== //
 
     const contentDiv = document.createElement("div");
 	contentDiv.id = "content-div";
-    contentDiv.className = "flex h-2/3 min-h-0";
+    contentDiv.className = "border-b-10 border-[#1e2124] flex h-2/3 min-h-0";
 
     // Chat
     const chatWidget = document.createElement("div");
     chatWidget.id = "chatWidget";
-    chatWidget.className = "flex flex-col flex-1 border";
+    chatWidget.className = "flex flex-col flex-1 border-r-10 border-[#1e2124]";
 
     // Chat Header Text
     const chatTabs = document.createElement("div");
     chatTabs.id = "chat-tabs";
-    chatTabs.className = "flex border-b bg-gray-100 h-10";
+    chatTabs.className = "flex border-b-1 border-[#424549] bg-[#36393e] h-10 text-white";
 
     // Chat Header Buttons
     const chatMenu = ChatHeader();
@@ -42,14 +42,7 @@ export function Intra(): HTMLElement {
     // Chat Message Box
     const messages = document.createElement("div");
     messages.id = "messages";
-    messages.className = `
-        flex-1
-        overflow-y-auto
-        p-3
-        bg-[rgb(40,43,48)]
-        border border-[rgb(54,57,62)]
-        text-white
-    `;
+    messages.className = "border-0 flex-1 overflow-y-auto p-3 bg-[#282b30] text-white";
 
     // Chat Input
     const inputDiv = ChatSendInput();
@@ -63,7 +56,7 @@ export function Intra(): HTMLElement {
     // User/Friend
     const usersDiv = document.createElement("div");
     usersDiv.id = "users-list";
-    usersDiv.className = "border w-xs";
+    usersDiv.className = "border-0 w-xs";
     usersDiv.appendChild(UsersList()!);
 
     contentDiv.appendChild(chatWidget);
@@ -73,7 +66,7 @@ export function Intra(): HTMLElement {
     // ====================================================================== //
 
     const intraContainer = SystemMessageChat();
-    intraContainer.className = "flex flex-col flex-1 border border-black w-full min-h-0 overflow-y-auto";
+    intraContainer.className = "flex flex-col flex-1 border-0 w-full min-h-0 overflow-y-auto";
 
     leftParent.appendChild(contentDiv);
     leftParent.appendChild(intraContainer);
@@ -84,29 +77,29 @@ export function Intra(): HTMLElement {
     //                                                                        //
     // ====================================================================== //
 
-    const rightParent = document.createElement("div");
-    rightParent.id = "right-parent";
-    rightParent.className = "flex flex-col basis-1/2 shrink-0 h-full";
+    // const rightParent = document.createElement("div");
+    // rightParent.id = "right-parent";
+    // rightParent.className = "flex flex-col basis-1/2 shrink-0 h-full";
 
-    const matchDiv = document.createElement("div");
-    matchDiv.id = "match-list-container";
-    matchDiv.className = "border w-fit border-2";
+    // const matchDiv = document.createElement("div");
+    // matchDiv.id = "match-list-container";
+    // matchDiv.className = "border w-fit border-2";
 
-    const matchTitle = document.createElement("h2");
-    matchTitle.innerText = "Available Matches";
-    matchTitle.className = "text-center font-bold p-2 border uppercase bg-gray-200";
+    // const matchTitle = document.createElement("h2");
+    // matchTitle.innerText = "Available Matches";
+    // matchTitle.className = "text-center font-bold p-2 border uppercase bg-gray-200";
 
-    matchDiv.appendChild(matchTitle);
-    rightParent.appendChild(matchDiv);
+    // matchDiv.appendChild(matchTitle);
+    // rightParent.appendChild(matchDiv);
 
-    const matchListUI = MatchList();
-    matchDiv.appendChild(matchListUI!);
+    // const matchListUI = MatchList();
+    // matchDiv.appendChild(matchListUI!);
 
     //     Final Assembly                                                     //
     // ====================================================================== //
 
     mainDiv.appendChild(leftParent);
-    mainDiv.appendChild(rightParent);
+    // mainDiv.appendChild(rightParent);
 
     return mainDiv;
 }

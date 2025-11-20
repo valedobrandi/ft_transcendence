@@ -7,12 +7,11 @@ export function SystemMessageChat() {
 
 	const chatTabs = document.createElement("div");
 	chatTabs.id = "chat-tabs";
-	chatTabs.className = "flex justify-start items-center border-b bg-gray-100 h-10 min-w-lg";
-
+	chatTabs.className = "flex justify-start items-center border-b border-[#424549] bg-[#36393e] h-10 min-w-lg";
 
 	const messages = document.createElement("div");
 	messages.id = "system-messages";
-	messages.className = "flex-1 overflow-y-auto p-2 w-full min-h-0";
+	messages.className = "flex-1 overflow-y-auto p-2 w-full min-h-0 bg-[#282b30]";
 
 	const title = ServerStatus();
 	const status = document.createElement("p");
