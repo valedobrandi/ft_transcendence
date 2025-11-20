@@ -44,6 +44,92 @@ export function FormLogin(): HTMLElement {
 	formElement.appendChild(inputPasswordUI);
 	formElement.appendChild(sendBtn);
 
+	// -------------------------
+	// POPUP 2FA
+	// -------------------------
+
+	function create2FAPopup(username: string) {
+		const overlay = document.createElement("div");
+		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
+
+		const modal = document.createElement("div");
+		modal.className = "bg-gray-900 p-8 rounded-xl border border-gray-700 flex flex-col gap-6 items-center w-[380px] shadow-xl";
+
+		const title = document.createElement("h2");
+		title.className = "text-3xl game-font text-[hsl(345,100%,47%)]";
+		title.textContent = "2FA Code";
+
+		const subtitle = document.createElement("p");
+		subtitle.className = "text-gray-300 text-center";
+		subtitle.textContent = "A code has been sent to you by email.";
+
+		const input = document.createElement("input");
+		input.type = "text";
+		input.maxLength = 6;
+		input.className = "text-gray-900 bg-gray-400 px-4 py-2 rounded w-full";
+		input.placeholder = "123456";
+
+		const error = document.createElement("p");
+		error.className = "text-red-500 text-sm hidden";
+
+		const confirmBtn = FancyButton("confirm",  "h-12 w-40 text-lg game-font tracking-widest flex items-center justify-center", async () => {
+
+			const code = input.value.trim();
+
+			if (code.length !== 6) {
+				error.textContent = "The code must contain 6 digits.";
+				error.classList.remove("hidden");
+				return;
+			}
+
+			const verifyResponse = await fetchRequest(
+				"/2fa/verify",
+				"POST",
+				{},
+				{ body: JSON.stringify({ username, code }) }
+			);
+
+			if (verifyResponse.message === "invalid_code") {
+				error.textContent = "Incorrect code.";
+				error.classList.remove("hidden");
+				return;
+			}
+
+			if (verifyResponse.message === "code_expired") {
+				error.textContent = "Code expired. Please log in again.";
+				error.classList.remove("hidden");
+				return;
+			}
+
+			if (verifyResponse.message === "success") {
+				jwt.token = verifyResponse.payload.accessToken;
+				profile.id = verifyResponse.payload.id;
+				profile.username = verifyResponse.username;
+
+				document.body.removeChild(overlay);
+				navigateTo("/intra");
+			}
+		});
+
+		const cancelBtn = FancyButton("cancel", "h-12 w-40 text-lg game-font tracking-widest flex items-center justify-center", () => {
+			document.body.removeChild(overlay);
+		});
+
+		modal.appendChild(title);
+		modal.appendChild(subtitle);
+		modal.appendChild(input);
+		modal.appendChild(error);
+		modal.appendChild(confirmBtn);
+		modal.appendChild(cancelBtn);
+
+		overlay.appendChild(modal);
+		document.body.appendChild(overlay);
+	}
+
+	// -------------------------
+	// FETCH LOGIN
+	// -------------------------
+	
 	formElement.onsubmit = async (e) => {
 		e.preventDefault();
 
@@ -60,6 +146,11 @@ export function FormLogin(): HTMLElement {
 			{},
 			{ body: JSON.stringify({ username, password }) }
 		);
+
+		if (response.message === "2FA_REQUIRED") {
+			create2FAPopup(response.username);
+			return;
+		}
 
 		if (response.message === 'success') {
 			jwt.token = response.payload.accessToken;

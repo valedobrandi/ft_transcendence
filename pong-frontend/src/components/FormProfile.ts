@@ -1,7 +1,7 @@
-import { fetchRequest, navigateTo } from "../utils";
+import { fetchRequest, navigateTo, toggle2FA } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
-import { HeaderBar } from "./HeaderBar";
+//import { HeaderBar } from "./HeaderBar";
 
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default.jpg"
@@ -48,14 +48,14 @@ export function ProfilePage(): HTMLElement
 
 	// ===== Zone centre : Profil =====
 	
-	 const headerBar = HeaderBar("UPDATE PROFIL");
+	 //const headerBar = HeaderBar("UPDATE PROFIL");
 
 	// ===== Zone droite =====
 	const rightSpace = document.createElement("div");
 	rightSpace.className = "w-20";
 
 	headerInner.appendChild(homeLink);
-	headerInner.appendChild(headerBar);
+	//headerInner.appendChild(headerBar);
 	headerInner.appendChild(rightSpace);
 
 	header.appendChild(headerInner);
@@ -217,6 +217,67 @@ export function ProfilePage(): HTMLElement
 
 	card.appendChild(passewordSection);
 
+	// ---------- Two-Factor Authentication  ----------
+	
+	// Popup confirmation
+
+		function open2FAPopup() 
+		{
+		const overlay = document.createElement("div");
+		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
+	
+		const modal = document.createElement("div");
+		modal.className = "bg-white p-8 rounded-xl border border-gray-700 flex flex-col gap-6 items-center w-[340px] shadow-xl";
+	
+		const text = document.createElement("p");
+		text.className = "text-smoky-white text-center font-abee";
+		text.textContent = profile.twoFA_enabled
+			? "Do you really want to disable 2FA?"
+			: "Enable 2FA on your account?";
+	
+		const yesBtn = document.createElement("button");
+		yesBtn.className = "w-28 h-10 rounded-md bg-indigo-600 text-white hover:bg-indigo-700";
+		yesBtn.textContent = "Yes";
+		yesBtn.onclick = async () => {
+			await toggle2FA();
+			document.body.removeChild(overlay);
+		};
+	
+		const cancelBtn = document.createElement("button");
+		cancelBtn.className = "w-28 h-10 rounded-md bg-gray-500 text-white hover:bg-gray-600";
+		cancelBtn.textContent = "Cancel";
+		cancelBtn.onclick = () => document.body.removeChild(overlay);
+	
+		modal.appendChild(text);
+		modal.appendChild(yesBtn);
+		modal.appendChild(cancelBtn);
+	
+		overlay.appendChild(modal);
+		document.body.appendChild(overlay);
+	}
+
+	// Two-Factor Authentication section 
+
+	const twoFASection = document.createElement("section");
+	twoFASection.className = "flex flex-col gap-2 mt-4";
+
+	const twoFALabel = document.createElement("label");
+	twoFALabel.className = "font-abee text-smoky-white";
+	twoFALabel.textContent = "Two-Factor Authentication (2FA)";
+	twoFASection.appendChild(twoFALabel);
+
+	const twoFABtn = document.createElement("button");
+	twoFABtn.id = "toggle_2fa";
+	twoFABtn.className =
+		"w-full h-10 rounded-md px-3 bg-indigo-500 text-white hover:bg-indigo-600 transition";
+	twoFABtn.textContent = profile.twoFA_enabled ? "Disable 2FA" : "Enable 2FA";
+
+	twoFABtn.onclick = () => open2FAPopup();
+
+	twoFASection.appendChild(twoFABtn);
+	card.appendChild(twoFASection);
+
+
 	// ----------change profil ----------
 	
 	const sendBtn = Button("Change profil", "w-full", () => {});
@@ -272,7 +333,8 @@ export function ProfilePage(): HTMLElement
 		profile.email = data.payload.email;
 
 		console.log("Profile updated", data);
-		window.location.reload();	
+		alert(("your profil has changed "));
+		//window.location.reload();	
 	}
 	else
 	{
@@ -334,13 +396,6 @@ export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFil
 	upload_avatar(user, avatarPreview, avatarGrid);
 	bind_user_avatar_upload(user, avatarPreview, pickFileBtn, avatarFile);
 	
-	// const logoutBtn = document.getElementById("logout");
-	// if (logoutBtn) {
-	// 	logoutBtn.addEventListener("click", () => {
-	// 		localStorage.removeItem("accessToken");
-	// 		window.location.hash = "/login";
-	// 	});
-	// }
 }
 
 export function bind_user_avatar_upload(user: { avatar_url: string | null }, avatarPreview: HTMLImageElement,
@@ -427,7 +482,7 @@ console.log(user.avatar_url);
 		}
 	}
 
-	// On détermine le bouton sélectionné au chargement
+	// détermine le bouton sélectionné au chargement
 	let selected: HTMLButtonElement | null = null;
 
 	presetButtons.forEach((b) => {
