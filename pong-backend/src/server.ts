@@ -36,6 +36,10 @@ declare module 'fastify' {
 	interface FastifyRequest {
 		userId: number | null;
 	}
+
+	interface FastifyInstance {
+		authenticate(request: FastifyRequest, reply: FastifyReply): Promise<void>;
+	}
 }
 
 fastify.decorateRequest("userId", null);
