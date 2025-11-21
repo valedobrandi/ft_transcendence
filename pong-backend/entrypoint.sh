@@ -10,5 +10,8 @@ fi
 # Run migrations or schema setup if you have them
 # e.g. node dist/src/migrate.js
 
+echo "Running database initialization..."
+npx tsx /app/database/init.ts
+
 # Finally start the app
 exec "$@"
