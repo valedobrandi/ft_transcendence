@@ -137,6 +137,10 @@ export async function websocketReceiver(socket: WebSocket) {
         }
         stateProxyHandler.state = "CONNECT_ROOM";
       }
+	  		break;
+		case 'intra:message': {
+			newIntraMessage(data.payload.message);
+		}
     }
   });
 }

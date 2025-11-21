@@ -44,7 +44,7 @@ export function List(
         btn.appendChild(btnText);
 
         btn.className = `${name} flex items-center border-b
-                border-[#424549] p-2 w-full text-center text-white hover:bg-[#36393e]`;
+                border-[#424549] p-2 w-full text-center text-white hover:bg-green-100`;
         btn.id = `select-chat-btn`;
 
         btn.value = `${name}`;
