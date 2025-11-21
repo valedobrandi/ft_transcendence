@@ -19,14 +19,20 @@ WORKDIR /app
 
 # Install only production dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci --omit=dev
 
 # Copy compiled output and any runtime assets
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/database ./database
+COPY --from=builder /app/node_modules ./node_modules
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 RUN useradd -m nodeuser \
-    && chown -R nodeuser:nodeuser /app
+    && chown -R nodeuser:nodeuser /app \
+    && mkdir -p /app/data \
+    && chown -R nodeuser:nodeuser /app/data
 
 USER nodeuser
 
