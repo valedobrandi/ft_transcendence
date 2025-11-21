@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import MatchesModel from '../models/matchesModel';
-import { EventsMap } from '../types/GameEvents';
-import { PingPong } from '../classes/PingPong';
+import MatchesModel from '../models/matchesModel.js';
+import { EventsMap } from '../types/GameEvents.js';
+import { PingPong } from '../classes/PingPong.js';
 
 export const events = new EventEmitter();
 

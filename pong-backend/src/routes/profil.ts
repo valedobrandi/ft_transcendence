@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ProfileControler } from '../controllers/profileController.js';
-import { getIdUser } from '../user_service/user_service';
+import { getIdUser } from '../user_service/user_service.js';
 
 type UserProfile = {
 	id: number;

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { connectedRoomInstance } from "../state/ConnectedRoom";
-import { joinTournamentQueue } from "../state/tournamentRoom";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
+import { joinTournamentQueue } from "../state/tournamentRoom.js";
 
 const tournamentsRoute = (fastify: FastifyInstance) => {
 	const  tournamentController = new TournamentController();

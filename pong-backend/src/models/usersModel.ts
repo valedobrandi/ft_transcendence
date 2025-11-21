@@ -1,8 +1,7 @@
 import Database from 'better-sqlite3'
 import type { RunResult } from 'better-sqlite3'
-import { SaveUser } from '../types/RouteGuest';
-import { print } from '../server';
-import { connectedRoomInstance } from '../state/ConnectedRoom';
+import { SaveUser } from '../types/RouteGuest.js';
+import { print } from '../server.js';
 
 class UsersModel {
 	private db: Database.Database;
