@@ -35,9 +35,9 @@ services:
       - NODE_ENV=production
       - ADDRESS=192.0.7
       - RESEND_API_KEY=${RESEND_API_KEY}
-      - DATABASE_PATH={DATABASE_PATH}
+      - DATABASE_PATH=${DATABASE_PATH}
     volumes:
-      - ./pong-backend/database.db:/app/database.db
+      - ./pong-backend:/app
     env_file:
       - .env
     networks:
