@@ -39,7 +39,7 @@ class PingPong {
         };
     }
 
-    getPlayerFromConnectedRoom(username: string): PlayerType | undefined {
+    getFromConnectedRoom(username: string): PlayerType | undefined {
         print(`[GAME GET PLAYER]: ${username}`);
         return connectedRoomInstance.getByUsername(username) || undefined;
     }
@@ -67,8 +67,8 @@ class PingPong {
         ball.y += ball.velocityY;
 
         for (const [id, input] of this.inputs.entries()) {
-            const player = this.getPlayerFromConnectedRoom(id);
-            if (!player) continue;
+            const connected = this.getFromConnectedRoom(id);
+            if (!connected) continue;
             if (id === this.side.LEFT) {
                 if (input.up && this.gameState.userX.y > 0 + (paddleHeight / 2)) this.gameState.userX.y -= paddleSpeed;
                 if (input.down && this.gameState.userX.y < 1 - (paddleHeight / 2)) this.gameState.userX.y += paddleSpeed;
@@ -151,11 +151,11 @@ class PingPong {
 
         if (this.tournamentId) {
             if (this.winnerId) {
-                const playerWinner = this.getPlayerFromConnectedRoom(this.winnerId);
+                const playerWinner = this.getFromConnectedRoom(this.winnerId);
                 if (playerWinner) playerWinner.status = 'TOURNAMENT_ROOM';
             }
             if (this.loserId) {
-                const playerLoser = this.getPlayerFromConnectedRoom(this.loserId);
+                const playerLoser = this.getFromConnectedRoom(this.loserId);
                 if (playerLoser) {
                     playerLoser.status = 'CONNECT_ROOM';
                     if (playerLoser.socket) {
@@ -172,11 +172,11 @@ class PingPong {
             })
         } else {
             for (const [id, { disconnect }] of this.playerConnectionInfo) {
-                const player = this.getPlayerFromConnectedRoom(id);
-                if (!player) return;
-                player.status = 'CONNECT_ROOM';
-                if (player.socket) {
-                    player.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+                const connected = this.getFromConnectedRoom(id);
+                if (!connected) continue;
+                connected.status = 'CONNECT_ROOM';
+                if (connected.socket) {
+                    connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
                 }
             };
         }
@@ -209,7 +209,7 @@ class PingPong {
 
         const message = JSON.stringify(payload);
         for (const [id, { disconnect }] of this.playerConnectionInfo) {
-            const connected = this.getPlayerFromConnectedRoom(id);
+            const connected = this.getFromConnectedRoom(id);
             if (!connected) continue;
             if (connected && connected.socket && connected.socket.readyState === 1) {
                 connected.socket.send(message);
@@ -230,7 +230,7 @@ class PingPong {
         gameRoom.set(this.machId, this);
 
         for (const [id, { disconnect }] of this.playerConnectionInfo) {
-            const isConnect = this.getPlayerFromConnectedRoom(id);
+            const isConnect = this.getFromConnectedRoom(id);
             if (isConnect) {
                 isConnect.status = 'GAME_ROOM';
             }
@@ -305,7 +305,7 @@ class PingPong {
         switch (type) {
             case "MATCH_CREATED":
                 for (const [id, { disconnect }] of this.playerConnectionInfo) {
-                    const connected = this.getPlayerFromConnectedRoom(id);
+                    const connected = this.getFromConnectedRoom(id);
                     if (!connected) continue;
                     connected.status = 'GAME_ROOM';
                     connected.matchId = this.machId;
@@ -324,7 +324,7 @@ class PingPong {
             case "GAME_OVER":
 
                 for (const [id, { disconnect }] of this.playerConnectionInfo) {
-                    const connected = this.getPlayerFromConnectedRoom(id);
+                    const connected = this.getFromConnectedRoom(id);
                     print(`[GAME OVER] Sending GAME_OVER to ${id}`);
                     if (!connected || !connected.socket) continue;
                     connected.socket.send(JSON.stringify({
@@ -347,7 +347,7 @@ class PingPong {
                 const conter = { time: 10 };
                 const countdownInterval = setInterval(() => {
                     for (const [id, { disconnect }] of this.playerConnectionInfo) {
-                        const connected = this.getPlayerFromConnectedRoom(id);
+                        const connected = this.getFromConnectedRoom(id);
                         if (!connected) continue;
                         if (!connected.socket) continue;
                         this.send();

@@ -4,9 +4,9 @@ import { joinTournamentQueue } from "../state/tournamentRoom";
 
 const tournamentsRoute = (fastify: FastifyInstance) => {
 	const  tournamentController = new TournamentController();
-	fastify.post("/tournament-join", {
+	fastify.get("/tournament/join", {
 		preHandler: [fastify.authenticate],
-		handler: 
+		handler: tournamentController.joinTournament.bind(tournamentController)
 	})
 }
 
@@ -14,7 +14,7 @@ class TournamentController {
 	private tournamentService = new TournamentService();
 
 	joinTournament(req: FastifyRequest, res: FastifyReply) {
-		const userId = req.user;
+		const userId = req.userId;
 
 		const { message, data } = this.tournamentService.joinTournament(Number(userId));
 

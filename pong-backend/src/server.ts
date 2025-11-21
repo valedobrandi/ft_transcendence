@@ -16,6 +16,7 @@ import path from "path";
 import fs from "fs";
 import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
+import { tournamentsRoute } from './routes/tournament.js';
 
 const fastify = Fastify({
 	logger: {
@@ -46,9 +47,7 @@ fastify.decorate('authenticate', async function (request: FastifyRequest, reply:
 		const decoded = await request.jwtVerify();
         print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
 		request.userId = decoded.id;
-		request.userId = decoded.id;
         if (!request.userId) {
-            reply.code(401).send({ error: 'Unauthorized' });
             reply.code(401).send({ error: 'Unauthorized' });
         }
 
@@ -109,6 +108,7 @@ fastify.register(friendsRoute);
 fastify.register(chatBlockRoute);
 fastify.register(avatarRoute);
 fastify.register(twoFARoutes);
+fastify.register(tournamentsRoute);
 await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {

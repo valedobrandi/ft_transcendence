@@ -34,7 +34,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 		}
 
 		if (existingUser.twoFA_enabled) {
-			
+
 			const authRoom = authenticationRoomInstance;
 			authRoom.add(existingUser.username, AuthService.generate2FACode());
 			const { data, error } = await authService.sendEmail(
@@ -44,17 +44,18 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			);
 			if (error) {
 				return res.status(400).send({ error });
-			} else 
+			} else
 			{
 				//return res.status(200).send({ message: data });
 				return res.status(200).send({
     				message: "2FA_REQUIRED",
    					username: existingUser.username });
 			}
-		 } 
-		else 
+		 }
+		else
 		{
-			const payload = { id: existingUser.id };
+			// Let's usernamer and id in payload
+			const payload = { id: existingUser.id, username: existingUser.username };
 
 			// // const refreshToken = fastify.jwt.sign(payload, { expiresIn: '7d' });
 			// // if(!refreshToken)
