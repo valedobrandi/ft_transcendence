@@ -119,7 +119,7 @@ class MatcherController {
 	}
 
 	sendMatchInvite(req: FastifyRequest, res: FastifyReply) {
-		const { id } = req.user;
+		const { id } = req.userId;
 		const { invitedId, settings } = req.body;
 		const { message, data } = this.matchesService.sendMatchInvite(
 			id,
@@ -130,7 +130,7 @@ class MatcherController {
 	}
 
 	matchRemove(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
-		const { id } = req.user;
+		const { id } = req.userId;
 		const { matchId } = req.query;
 
 		const { message, data } = this.matchesService.matchRemove(matchId, id);
@@ -138,7 +138,7 @@ class MatcherController {
 	}
 
 	acceptMatchInvite(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
-		const { id } = req.user;
+		const { id } = req.userId;
 		const { matchId } = req.query;
 
 		const { message, data } = this.matchesService.acceptMatchInvite(
@@ -150,21 +150,21 @@ class MatcherController {
 	}
 
 	createMatch(req: FastifyRequest<{ Body: { settings: object } }>, res: FastifyReply) {
-		const { id } = req.user;
+		const { id } = req.userId;
 		const { settings } = req.body;
 		const { message, data } = this.matchesService.createMatch(id, settings);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
 	removeMatch(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
-		const { id } = req.user;
+		const { id } = req.userId;
 		const { matchId } = req.query;
 		const { message, data } = this.matchesService.removeMatch(id, matchId);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
 	joinMatch(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
-		const { id } = req.user;
+		const { id } = req.userId;
 		const { matchId } = req.query;
 		const { message, data } = this.matchesService.joinMatch(id, matchId);
 		return res.code(statusCode("OK")).send({ message, data });

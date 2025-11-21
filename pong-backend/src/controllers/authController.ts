@@ -7,7 +7,7 @@ import { connectedRoomInstance } from '../state/ConnectedRoom.js';
 class AuthController {
 
     private authServiceInstance = new AuthService();
-	
+
     async veryify2FA(req: FastifyRequest<{ Body: GuestPostDTO }>, res: FastifyReply): Promise<FastifyReply> {
         const { username, id, code } = req.body;
 
@@ -22,19 +22,19 @@ class AuthController {
         return res.status(400).send({ error: 'Invalid 2FA code' });
     }
 
-    guestLogin(req: FastifyRequest<{ Body: GuestPostDTO }>, res: FastifyReply): FastifyReply {
+    // guestLogin(req: FastifyRequest<{ Body: GuestPostDTO }>, res: FastifyReply): FastifyReply {
 
-        const { username } = req.body;
-        const response = this.authServiceInstance.guestLoginValidation(username);
+    //     const { username } = req.body;
+    //     const response = this.authServiceInstance.guestLoginValidation(username);
 
-        if ('message' in response) {
-            return res.status(200).send({
-                message: response.message, payload: { username: response.username, id: response.id }
-            });
-        }
+    //     if ('message' in response) {
+    //         return res.status(200).send({
+    //             message: response.message, payload: { username: response.username, id: response.id }
+    //         });
+    //     }
 
-        return res.status(400).send({ error: response.error });
-    }
+    //     return res.status(400).send({ error: response.error });
+    // }
 }
 
 export { AuthController };

@@ -3,17 +3,14 @@ import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import db from '../../database/db.js'
 import { AuthController } from '../controllers/authController.js';
-import { guestPostSchema } from '../types/RouteGuest.js';
-import { UsersModel } from '../models/usersModel.js';
-
 
 export default async function authRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
 
-    fastify.post('/guest', {
-        schema: { body: guestPostSchema },
-        handler: authController.guestLogin.bind(authController)
-    });
+    // fastify.post('/guest', {
+    //     schema: { body: guestPostSchema },
+    //     handler: authController.guestLogin.bind(authController)
+    // });
 
     fastify.post('/verify-2fa', authController.veryify2FA.bind(authController));
 

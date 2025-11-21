@@ -4,16 +4,16 @@ import authRoutes from './routes/auth.js';
 import loginRoute from './routes/login.js';
 import { friendsRoute } from './routes/friend.js';
 import websocketRoute from './routes/websocket.js';
-import * as jwt from '@fastify/jwt';
+import fastifyJwt from '@fastify/jwt';
 import profilRoute from './routes/profil.js';
 import chatBlockRoute from './routes/chatBlock.js';
 import { eventsRoutes } from './routes/events.js';
 import cookie from '@fastify/cookie';
 import { matchesRoute } from './routes/match.js';
-import fastifyMultipart from "@fastify/multipart";
+// import fastifyMultipart from "@fastify/multipart";
 //import fastifyStatic from "@fastify/static";
-import path from "path";
-import fs from "fs";
+// import path from "path";
+// import fs from "fs";
 import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
 import { tournamentsRoute } from './routes/tournament.js';
@@ -48,7 +48,7 @@ fastify.decorateRequest("userId", null);
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
 	try
 	{
-		const decoded = await request.jwtVerify();
+		const decoded: { id: number } = await request.jwtVerify();
         print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
 		request.userId = decoded.id;
         if (!request.userId) {
@@ -93,7 +93,7 @@ fastify.register(cookie, {
   hook: 'onRequest',                   // parse les cookies tôt
 });
 
-fastify.register(jwt, {
+fastify.register(fastifyJwt, {
 	secret: process.env.JWT_SECRET || 'supersecret'
 });
 
