@@ -11,5 +11,5 @@ export function TOURNAMENT(data: Tournamentype, connection: WebSocket) {
 
 	print(`Tournament Player: ${data.username}`);
 
-	joinTournamentQueue(Number(player.id), player.username);
+	joinTournamentQueue(Number(player.id));
 }

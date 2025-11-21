@@ -8,7 +8,7 @@ export default function profilRoute(fastify: FastifyInstance)
 
         fastify.get('/profile', {
             preHandler: [fastify.authenticate],
-            handler: (async (request: FastifyRequest, res: FastifyReply) =>
+            handler: async (request: FastifyRequest, res: FastifyReply) =>
             {
                 try
                 {
@@ -24,7 +24,7 @@ export default function profilRoute(fastify: FastifyInstance)
                     const err = error as Error;
                     return res.status(404).send({ error: err.message });
                 }
-            })
+            }
         });
 
         fastify.put('/update', {
