@@ -112,7 +112,7 @@ class MatcherController {
 		this.matchesService = new MatchesService();
 	}
 
-	getMatch(req: FastifyRequest, res: FastifyReply) {
+	getMatch(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { matchId } = req.query;
 		const { message, data } = this.matchesService.getMatch(matchId);
 		return res.code(statusCode("OK")).send({ message, data });
@@ -129,7 +129,7 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	matchRemove(req: FastifyRequest, res: FastifyReply) {
+	matchRemove(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { id } = req.user;
 		const { matchId } = req.query;
 
@@ -137,7 +137,7 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	acceptMatchInvite(req: FastifyRequest, res: FastifyReply) {
+	acceptMatchInvite(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { id } = req.user;
 		const { matchId } = req.query;
 
@@ -149,21 +149,21 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	createMatch(req: FastifyRequest, res: FastifyReply) {
+	createMatch(req: FastifyRequest<{ Body: { settings: object } }>, res: FastifyReply) {
 		const { id } = req.user;
 		const { settings } = req.body;
 		const { message, data } = this.matchesService.createMatch(id, settings);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	removeMatch(req: FastifyRequest, res: FastifyReply) {
+	removeMatch(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { id } = req.user;
 		const { matchId } = req.query;
 		const { message, data } = this.matchesService.removeMatch(id, matchId);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	joinMatch(req: FastifyRequest, res: FastifyReply) {
+	joinMatch(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { id } = req.user;
 		const { matchId } = req.query;
 		const { message, data } = this.matchesService.joinMatch(id, matchId);
@@ -196,7 +196,7 @@ class MatchesService {
 
 		return { message: "success", data: "match canceled" };
 	}
-	
+
 	joinMatch(userId: number, matchId: string) {
 		const connected = connectedRoomInstance.getById(userId);
 		if (connected === undefined) throw new Error("disconnected");
@@ -234,7 +234,7 @@ class MatchesService {
 		}
 
 		const nexMatch = inviteMatchesQueue.get(matchId);
-		
+
 		inviteMatchesQueue.delete(matchId);
 
 		if (nexMatch === undefined) {
