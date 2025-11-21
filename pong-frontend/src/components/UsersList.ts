@@ -34,7 +34,7 @@ export function List(
         const name = serverUSer ? serverUSer.name : "Unknown";
         const btn = document.createElement("button");
         var userLiveStatus: HTMLSpanElement = document.createElement("span");
-        if (type === "FRIENDS") {
+        if (type === "FRIENDS" && 'isConnected' in user) {
             userLiveStatus = LiveStatusIndicator(user.isConnected);
             btn.appendChild(userLiveStatus);
         }

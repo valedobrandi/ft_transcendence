@@ -1,4 +1,4 @@
-import { profile, jwt } from "../app";
+import { profile } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
 import { Button } from "./Button";
 import { HeaderBar } from "./HeaderBar";

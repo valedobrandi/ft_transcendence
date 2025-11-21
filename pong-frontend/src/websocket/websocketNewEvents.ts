@@ -9,7 +9,7 @@ async function websocketNewEvents() {
 	if (message === 'success') {
 		for (const event of data) {
 
-			const { type, from_id, id: eventId } = event;
+			const { type, from_id } = event;
 
 			switch (type) {
 				case 'friend:add':
@@ -17,11 +17,11 @@ async function websocketNewEvents() {
 						.find(({ id }) => Number(id) === Number(from_id));
 					if (getSender === undefined) break;
 
-					
+
 					const idx = newIntraMessage(
 						`${getSender.name} has send a friend request`
 					);
-					
+
 					const acceptBtn = EmbeddedButton(getSender.id, "YES", `${idx}`, "");
 					const denyBtn = EmbeddedButton(getSender.id, "NO", `${idx}`, "");
 
