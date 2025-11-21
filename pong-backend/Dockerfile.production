@@ -25,9 +25,6 @@ RUN npm install
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/database ./database
 
-COPY entrypoint.sh /app/entrypoint.sh
-COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
-
 RUN useradd -m nodeuser \
     && chown -R nodeuser:nodeuser /app
 
@@ -38,5 +35,5 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
 CMD ["node", "--trace-uncaught", "--trace-warnings", "dist/src/start.js"]

@@ -1,5 +1,5 @@
 import db from '../db.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // Sample users
 function hashed_password(password: string) {

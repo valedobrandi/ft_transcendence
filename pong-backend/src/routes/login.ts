@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
 import db from '../../database/db.js'

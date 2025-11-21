@@ -8,7 +8,10 @@
         "test:backend": "docker-compose exec -it pong-backend npm run test",
         "build": "docker compose up --build pong-backend pong-frontend",
         "up": "docker compose up pong-backend pong-frontend",
-		"production": "docker compose -f docker-compose.production.yml up",
+        "production": "docker compose -f docker-compose.production.yml up",
         "update:test": "git submodule update --init --recursive"
+    },
+    "devDependencies": {
+        "@types/bcryptjs": "^2.4.6"
     }
 }
