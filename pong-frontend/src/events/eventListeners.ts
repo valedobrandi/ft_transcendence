@@ -1,6 +1,5 @@
 import { profile } from "../app";
 import { Alert } from "../components/Alert";
-import { CreateAlert } from "../components/CreateAlert";
 import {
   acceptFriendOnClick,
   denyFriendOnClick,
@@ -46,10 +45,11 @@ export function eventListeners() {
       // Join match
       const response = await fetchRequest(
         `/match/join?matchId=${matchId}`,
-        "POST"
+        "GET"
       );
       if (response.message === "error") {
-        CreateAlert(`${response.data}`, "error");
+        const alert = new Alert(`${response.data}`);
+        alert.show();
       }
     } else {
       // Cancel match

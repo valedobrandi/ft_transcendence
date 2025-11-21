@@ -6,7 +6,7 @@ export function ButtonMatchList(context: string, text: string, id: string, actio
                     data-context="${context}"
                     data-id="${id}"
                     data-action="${action ? "true" : "false"}"
-                    class="${btnBg} text-white ml-4 p-1 rounded text-xs"
+                    class="${btnBg} text-white ml-4 p-1 rounded text-xs uppercase"
                 >
                     ${text}
                 </button>`

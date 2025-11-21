@@ -62,6 +62,7 @@ export class ConnectedRoom {
     player.socket = socket;
     this.broadcastRegisteredUsers();
     this.broadcastFriendStatus(Number(player.id));
+    this.broadcastNewMatchesList();
   }
 
   dropWebsocket(id: number) {
@@ -78,7 +79,7 @@ export class ConnectedRoom {
         const matchId = connected.matchId;
         matchServiceInstance.matchRemove(matchId, Number(id));
       }
-      matchServiceInstance.cancelMatch(Number(id), connected.matchId);
+      matchServiceInstance.removeMatch(Number(id), connected.matchId);
 
     }
     this.room.delete(Number(id));

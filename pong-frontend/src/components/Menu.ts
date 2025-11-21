@@ -24,14 +24,10 @@ export function Menu(): HTMLDivElement {
     });
     matchBtn.id = "match-btn";
 
-    const tourBtn = Button("TOURNAMENT", "h-10 w-30 rounded", () => {
-        if (!socket) return;
-        socket.send(JSON.stringify({ type: 'TOURNAMENT', username: profile.username }));
-    });
-    tourBtn.id = "tournament-btn";
+    const joinTournament = Button("TOURNAMENT", "h-10 w-30 rounded", () => {});
+    joinTournament.id = "tournament-btn";
 
     const CreateMatchBtn = Button("CREATE MATCH", "h-10 w-30 rounded", async () => {
-        if (!socket) return;
         const response = await fetchRequest("/match-create", "POST", {}, {
             body: JSON.stringify({ settings: {username: profile.username} })
         });
@@ -39,13 +35,13 @@ export function Menu(): HTMLDivElement {
     CreateMatchBtn.id = "create-match-btn";
 
     shouldDisable && matchBtn.setAttribute("disabled", "true");
-    shouldDisable && tourBtn.setAttribute("disabled", "true");
+    shouldDisable && joinTournament.setAttribute("disabled", "true");
 
     matchBtn.className += ` ${shouldDisable ? "cursor-not-allowed opacity-50" : ""} ${isMatch ? "bg-green-500" : ""}`;
-    tourBtn.className += ` ${shouldDisable ? "cursor-not-allowed opacity-50" : ""} ${isTournament ? "bg-green-500" : ""}`;
+    joinTournament.className += ` ${shouldDisable ? "cursor-not-allowed opacity-50" : ""} ${isTournament ? "bg-green-500" : ""}`;
 
     divElement.appendChild(matchBtn);
-    divElement.appendChild(tourBtn);
+    divElement.appendChild(joinTournament);
     divElement.appendChild(CreateMatchBtn);
 
     return divElement;

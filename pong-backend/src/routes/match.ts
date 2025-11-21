@@ -88,7 +88,20 @@ const matchesRoute = (fastify: FastifyInstance) => {
 				},
 			},
 		},
-		handler: matcherController.cancelMatch.bind(matcherController),
+		handler: matcherController.removeMatch.bind(matcherController),
+	});
+
+	fastify.get("/match/join", {
+		preHandler: [fastify.authenticate],
+		schema: {
+			querystring: {
+				type: "object",
+				properties: {
+					matchId: { type: "string" },
+				},
+			},
+		},
+		handler: matcherController.joinMatch.bind(matcherController),
 	});
 };
 
@@ -143,17 +156,24 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	cancelMatch(req: FastifyRequest, res: FastifyReply) {
+	removeMatch(req: FastifyRequest, res: FastifyReply) {
 		const { id } = req.user;
 		const { matchId } = req.query;
-		const { message, data } = this.matchesService.cancelMatch(id, matchId);
+		const { message, data } = this.matchesService.removeMatch(id, matchId);
+		return res.code(statusCode("OK")).send({ message, data });
+	}
+
+	joinMatch(req: FastifyRequest, res: FastifyReply) {
+		const { id } = req.user;
+		const { matchId } = req.query;
+		const { message, data } = this.matchesService.joinMatch(id, matchId);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 }
 
 class MatchesService {
 
-	cancelMatch(userId: number, matchId: string) {
+	removeMatch(userId: number, matchId: string) {
 		const connected = connectedRoomInstance.getById(userId);
 		if (connected === undefined) throw new Error("disconnected");
 
@@ -178,10 +198,10 @@ class MatchesService {
 	}
 	
 	joinMatch(userId: number, matchId: string) {
-		const getUser = connectedRoomInstance.getById(userId);
-		if (getUser === undefined) throw new Error("disconnected");
+		const connected = connectedRoomInstance.getById(userId);
+		if (connected === undefined) throw new Error("disconnected");
 
-		if (getUser.status !== "CONNECT_ROOM") {
+		if (connected.status !== "CONNECT_ROOM") {
 			return { message: "error", data: "already subscribed to a match/tournament" };
 		}
 
@@ -195,8 +215,10 @@ class MatchesService {
 			return { message: "error", data: "match already start" };
 		}
 
-		nextMatch.players.push({ id: Number(getUser.id), username: getUser.username });
+		nextMatch.players.push({ id: Number(connected.id), username: connected.username });
 
+		newMatchesQueue.delete(matchId);
+		connectedRoomInstance.broadcastNewMatchesList();
 		const { data, message } = startNewMatch(nextMatch);
 
 		return { message, data };
@@ -244,17 +266,17 @@ class MatchesService {
 	}
 
 	createMatch(userId: number, settings: {}) {
-		const getUser = connectedRoomInstance.getById(userId);
-		if (getUser === undefined) throw new Error("disconnected");
+		const connected = connectedRoomInstance.getById(userId);
+		if (connected === undefined) throw new Error("disconnected");
 
-		if (newMatchesQueue.has(getUser.matchId || "")) {
+		if (newMatchesQueue.has(connected.matchId || "")) {
 			return {
 				message: "error",
 				data: "you have a match created",
 			};
 		}
 
-		if (getUser.status !== "CONNECT_ROOM") {
+		if (connected.status !== "CONNECT_ROOM") {
 			return {
 				message: "error",
 				data: "has a subscribed to match/tournament",
@@ -262,17 +284,17 @@ class MatchesService {
 		}
 
 		const matchId = crypto.randomUUID();
-		getUser.matchId = matchId;
-		getUser.status = "MATCH_QUEUE";
+		connected.matchId = matchId;
+		connected.status = "MATCH_QUEUE";
 
 		connectedRoomInstance.sendWebsocketMessage(userId, "MATCH_QUEUE");
 
 		const newMatch: NewMatch = {
 			createId: userId,
-			players: [{ id: Number(getUser.id), username: getUser.username }],
+			players: [{ id: Number(connected.id), username: connected.username }],
 			matchId,
 			settings,
-			status: "WAITING",
+			status: "OPEN",
 		};
 
 		newMatchesQueue.set(matchId, newMatch);

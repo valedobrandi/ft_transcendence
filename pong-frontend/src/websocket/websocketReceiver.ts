@@ -12,6 +12,7 @@ import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { navigateTo, setTime } from "../utils";
 import { EmbeddedButton } from "../components/EmbeddedButton";
+import { Alert } from "../components/Alert";
 
 export async function websocketReceiver(socket: WebSocket) {
   socket.addEventListener("message", async (event) => {
@@ -30,6 +31,8 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       case "GAME_ROOM":
         {
+          const alert = new Alert(`Starting game`);
+          alert.show();
           newIntraMessage(data.payload.message);
           playerSideState.side = data.side;
           setTime(5000, () => {
