@@ -1,5 +1,8 @@
 import { profile } from "../app";
 import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
+import { fetchRequest } from "../utils";
+import { ButtonMatchList } from "./ButtonMatchList";
+import { CreateAlert } from "./CreateAlert";
 import { EmbeddedButton } from "./EmbeddedButton";
 
 export function MatchList(): HTMLDivElement {
@@ -18,6 +21,12 @@ export function MatchList(): HTMLDivElement {
       const matchInfo = document.createElement("span");
       matchInfo.innerText = `${match.matchId}`;
       matchInfo.classList = "p-2";
+
+      const matchStatus = document.createElement("span");
+      matchStatus.innerText = `${match.status}`;
+      matchStatus.classList = "p-2";
+      matchDiv.appendChild(matchStatus);
+
       const createMatch = document.createElement("span");
       const createUsername = stateProxyHandler.serverUsers.find(
         (user) => user.id === match.createId
@@ -26,21 +35,14 @@ export function MatchList(): HTMLDivElement {
       createMatch.classList = "p-2";
 
       const actionBtn = document.createElement("span");
-      const userInMatch = match.createId === profile.id;
-      actionBtn.innerHTML = EmbeddedButton(
-        0,
-        userInMatch ? "PLAY" : "CANCEL",
-        match.matchId,
-        ""
+      const isMatchCreatedByUser = match.createId === profile.id;
+      
+      actionBtn.innerHTML = ButtonMatchList(
+        "match-list",
+        isMatchCreatedByUser ? "cancel" : "join",
+        `${match.matchId}`,
+        !isMatchCreatedByUser
       );
-
-      const btn = actionBtn.querySelector("button");
-      if (btn) {
-        btn.addEventListener(
-          "click",
-          userInMatch ? onClickJoinMatch : onClickCancelMatch
-        );
-      }
 
       matchDiv.appendChild(matchInfo);
       matchDiv.appendChild(createMatch);
@@ -52,20 +54,4 @@ export function MatchList(): HTMLDivElement {
   onRenderMatchList();
   onStateChange("availableMatches", onRenderMatchList);
   return matchListDiv;
-}
-
-function onClickJoinMatch(event: Event) {
-  const target = event.target as HTMLElement;
-  if (target && target.id === "join-match-btn") {
-    const matchId = Number(target.getAttribute("data-eventid"));
-    // Implement join match logic here
-  }
-}
-
-function onClickCancelMatch(event: Event) {
-  const target = event.target as HTMLElement;
-  if (target && target.id === "cancel-match-btn") {
-    const matchId = Number(target.getAttribute("data-eventid"));
-    // Implement cancel match logic here
-  }
 }

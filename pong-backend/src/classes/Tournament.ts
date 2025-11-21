@@ -10,7 +10,7 @@ class Tournament {
     currentBracket: Set<string>;
     currentRoundWinners: Set<string>;
     nextBracket: Set<string> = new Set<string>();
-    private matchs = 0;
+    private matches = 0;
     private rounds = 0;
     cleanup: () => void = () => { };
 
@@ -42,12 +42,14 @@ class Tournament {
         this.rounds = Math.floor(this.currentBracket.size / 2);
         this.currentRoundWinners = new Set<string>();
 
-        this.matchs = 0;
+        this.matches = 0;
 
-        const players = Array.from(this.currentBracket.values());
-        for (let i = 0; i < players.length; i += 2) {
-            const playerX = players[i];
-            const playerY = players[i + 1];
+        const connecters = Array.from(this.currentBracket.values());
+        const pairings: string[] = [];
+
+        for (let i = 0; i < connecters.length; i += 2) {
+            const playerX = connecters[i];
+            const playerY = connecters[i + 1];
 
             if (!playerX || !playerY) continue;
 
@@ -56,15 +58,30 @@ class Tournament {
 
             newMatch.setTournamentId(this.tournamentId);
 
+            pairings.push(`${playerX} vs ${playerY}`);
+
             await new Promise(resolve => setTimeout(resolve, 5000));
             newMatch.createMatch(playerX, playerY);
+        }
+
+        const tournamentVisualizationBracket = pairings.join(' | ');
+        for (const player in connecters) {
+            const connected = connectedRoomInstance.getByUsername(connecters[player]);
+            if (!connected || !connected.socket) continue;
+            connected.socket.send(JSON.stringify({
+                status: 200,
+                message: 'tournament:bracket_update',
+                data: {
+                    payload: tournamentVisualizationBracket
+                }
+            }));
         }
     }
 
     async reportMatchResult(report: EndMatchEventType) {
         const { winnerId, loserId, drawMatch } = report;
 
-        this.matchs++;
+        this.matches++;
 
         // Take the two player out of the current bracket
         if (drawMatch) {
@@ -80,7 +97,7 @@ class Tournament {
             };
         }
 
-        if (this.matchs === this.rounds) {
+        if (this.matches === this.rounds) {
             this.nextBracket = new Set(this.currentRoundWinners);
 
             if (this.rounds > 1) {

@@ -2,15 +2,17 @@ services:
 
   cypress:
     image: cypress/included:12.17.4
-    working_dir: /e2e
+    working_dir: /app
     volumes:
-      - ./cypress:/e2e
+      - .:/app
     environment:
-      - CYPRESS_baseUrl=http://frontend:3000
+      - CYPRESS_baseUrl=http://pong-frontend:5173
     depends_on:
       - pong-frontend
       - pong-backend
     command: npx cypress run
+    networks:
+      - transcedence-network
 
   pong-frontend:
     build:
@@ -27,7 +29,7 @@ services:
       - VITE_PONG_BACKEND_API=http://localhost:3000
       - VITE_PONG_BACKEND_WEBSOCKET=ws://localhost:3000/ws
       - NODE_ENV=development
-    command: npm run dev -- --host
+    command: npm run dev
     networks:
       - transcedence-network
 

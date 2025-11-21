@@ -113,6 +113,7 @@ export type NewMatch = {
     createId: number;
     players: number[];
     matchId: number;
+    status: string;
     settings: {};
 }
 

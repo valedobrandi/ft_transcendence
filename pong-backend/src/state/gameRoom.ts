@@ -17,7 +17,7 @@ export type NewMatch = {
   createId: number;
   matchId: string;
   settings: {};
-  status: "WAITING" | "PLAYING";
+  status: "OPEN" | "PLAYING";
 };
 
 export type SettingsMatch = {};

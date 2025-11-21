@@ -3,9 +3,10 @@ import { connectedRoomInstance } from "../state/ConnectedRoom";
 import { joinTournamentQueue } from "../state/tournamentRoom";
 
 const tournamentsRoute = (fastify: FastifyInstance) => {
+	const  tournamentController = new TournamentController();
 	fastify.post("/tournament-join", {
 		preHandler: [fastify.authenticate],
-		handler: () => { }
+		handler: 
 	})
 }
 

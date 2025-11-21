@@ -6,9 +6,7 @@ describe('My First Test', () => {
     cy.visit('/');
 
     // Assert that the page contains expected text
-    cy.contains('Welcome').should('be.visible');
+    cy.contains('Ft_transcendence Ping-Pong').should('be.visible');
 
-    // Example: check the document title
-    cy.title().should('include', 'My App');
   });
 });
