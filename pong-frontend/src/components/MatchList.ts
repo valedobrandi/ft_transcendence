@@ -1,9 +1,6 @@
 import { profile } from "../app";
 import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
-import { fetchRequest } from "../utils";
 import { ButtonMatchList } from "./ButtonMatchList";
-import { CreateAlert } from "./CreateAlert";
-import { EmbeddedButton } from "./EmbeddedButton";
 
 export function MatchList(): HTMLDivElement {
   const matchListDiv = document.createElement("div");
@@ -36,7 +33,7 @@ export function MatchList(): HTMLDivElement {
 
       const actionBtn = document.createElement("span");
       const isMatchCreatedByUser = match.createId === profile.id;
-      
+
       actionBtn.innerHTML = ButtonMatchList(
         "match-list",
         isMatchCreatedByUser ? "cancel" : "join",

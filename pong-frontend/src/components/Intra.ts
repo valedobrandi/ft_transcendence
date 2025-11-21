@@ -1,7 +1,6 @@
 import { ChatHeader } from "./ChatHeader";
 import { SystemMessageChat } from "./ChatIntra";
 import { ChatSendInput } from "./ChatSendInput";
-import { MatchList } from "./MatchList";
 import { UsersList } from "./UsersList";
 
 export function Intra(): HTMLElement {
