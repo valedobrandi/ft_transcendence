@@ -10,12 +10,12 @@ export interface FriendListDTO {
 }
 
 export type FriendsTableModel = {
-	friend_id: number;
+	friendId: number;
 }
 
 export type GetFriendsList = {
 	message: 'success' | 'error';
-	data: number[] | [];
+	data: FriendsTableModel[] | [];
 }
 
 export type AddFriend = {
@@ -30,7 +30,7 @@ export type RemoveFriend = {
 
 function friendsRoute(fastify: FastifyInstance) {
 
-	fastify.post('/add-friend', {
+	fastify.post<{ Body: FriendListDTO }>('/add-friend', {
 		preHandler: fastify.authenticate,
 		schema: {
 			body: {
@@ -42,7 +42,7 @@ function friendsRoute(fastify: FastifyInstance) {
 		handler: friendsControllerInstance.addFriend.bind(friendsControllerInstance)
 	});
 
-	fastify.delete('/remove-friend', {
+	fastify.delete<{ Body: FriendListDTO }>('/remove-friend', {
 		preHandler: fastify.authenticate,
 		schema: {
 			body: {
@@ -94,7 +94,8 @@ class FriendService {
 
 	getFriendsList(userId: number) {
 		const { message, data } = this.friendModelInstance.getFriendsList(userId);
-		connectedRoomInstance.friendListSet(userId).save(data.filter(id => id !== Number(userId)));
+		const friendList = data.map(row => row.friendId);
+		connectedRoomInstance.friendListSet(userId).save(friendList.filter(id => id !== Number(userId)));
 		const createFriendList = connectedRoomInstance.friendListSet(userId)
 			.get().map((friendId: number | bigint) => ({
 			id: friendId,
@@ -130,7 +131,6 @@ class FriendService {
 	}
 }
 
-
 class FriendsModel {
 	private db: Database.Database;
 	private stmGetFriendsList: Database.Statement;
@@ -147,14 +147,14 @@ class FriendsModel {
 		this.stmAddFriend = db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)');
 		this.stmRemoveFriend = db.prepare('DELETE FROM friends WHERE user_id = ? AND friend_id = ?');
 		this.stmGetFriendStatus = db.prepare(
-			`SELECT * FROM friends 
-				WHERE user_id = ? AND friend_id = ? 
+			`SELECT * FROM friends
+				WHERE user_id = ? AND friend_id = ?
 					OR user_id = ? AND friend_id = ?`);
 	}
 
 	getFriendsList(userId: number): GetFriendsList {
-		const response = this.stmGetFriendsList.all(userId, userId);
-		return { message: 'success', data: response.map(row => row.friendId) };
+		const response = this.stmGetFriendsList.all(userId, userId) as FriendsTableModel[];
+		return { message: 'success', data: response };
 	}
 
 	checkFriendsStatus(userId: number, friendId: number): boolean {

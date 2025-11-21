@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import db from '../../database/db.js'
 import { AuthController } from '../controllers/authController.js';
+import { connectedRoomInstance } from '../state/ConnectedRoom.js';
 
 export default async function authRoutes(fastify: FastifyInstance) {
     const authController = new AuthController();
@@ -43,6 +44,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         const insertNewUserInDB = db.prepare('INSERT INTO users (email, username, password) VALUES (?,?,?)');
         insertNewUserInDB.run(email, username, hash);
 
+		connectedRoomInstance.broadcastRegisteredUsers();
         return res.status(201).send({ message: 'success', payload: { code: undefined } });
     });
 }

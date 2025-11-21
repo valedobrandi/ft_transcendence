@@ -7,7 +7,7 @@ import { getIdUser, updatedUserInDB } from '../user_service/user_service';
 
 export default async function twoFARoutes(fastify: FastifyInstance) {
 
-fastify.put(
+fastify.put<{ Body: { twoFA_enabled: 0 | 1 } }>(
     "/updata/2FA",
     { preHandler: [fastify.authenticate] },
     async (
@@ -15,8 +15,8 @@ fastify.put(
         reply: FastifyReply
     ) => {
         try {
-            const { twoFA_enabled } = req.body; 
-            const userId = req.user.id;
+            const { twoFA_enabled } = req.body;
+            const userId = Number(req.userId);
 
             console.log("2FA received =", twoFA_enabled);
 
@@ -28,10 +28,10 @@ fastify.put(
             if (!existingUser) {
                 return reply.status(400).send({ error: "User not found" });
             }
-            
+
             db.prepare("UPDATE users SET twoFA_enabled = ? WHERE id = ?")
               .run(twoFA_enabled, userId);
-        
+
             return reply.send({
                 message: "success",
                 payload: { twoFA_enabled }
@@ -61,17 +61,19 @@ fastify.put(
         // Code valid → remove it so it can't be reused
         authenticationRoomInstance.delete(username);
 
-       
-        const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username);
 
-        const payload = { id: user.id };
+        const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username) as { id: number, username: string };
+
+
+
+        const payload = { id: user.id, username: user.username };
         const accessToken = fastify.jwt.sign(payload, { expiresIn: "10h" });
 
         connectedRoomInstance.addUser(user.username, user.id);
 
         return res.send({
             message: "success",
-            payload: { accessToken, ...payload, username }
+            payload: { accessToken, ...payload }
         });
     });
 }

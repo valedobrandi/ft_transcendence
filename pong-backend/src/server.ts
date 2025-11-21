@@ -34,7 +34,7 @@ const fastify = Fastify({
 
 declare module 'fastify' {
 	interface FastifyRequest {
-		userId: number | null;
+		userId: number;
 	}
 
 	interface FastifyInstance {
@@ -42,7 +42,7 @@ declare module 'fastify' {
 	}
 }
 
-fastify.decorateRequest("userId", null);
+fastify.decorateRequest("userId", -1);
 
 
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
@@ -52,7 +52,7 @@ fastify.decorate('authenticate', async function (request: FastifyRequest, reply:
         print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
 		request.userId = decoded.id;
         if (!request.userId) {
-            reply.code(401).send({ error: 'Unauthorized' });
+			reply.code(401).send({ error: 'Unauthorized' });
         }
 
 	}

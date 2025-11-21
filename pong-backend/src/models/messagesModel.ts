@@ -4,15 +4,17 @@ import { fastify, print } from "../server";
 export type GetMessages = {
 	status: 'success' | 'error';
 	data: [] |
-	{
-		id: number;
-		sender_id: number;
-		receiver_id: number;
-		content: string;
-		timestamp: string;
-		isBlocked: number;
-		sender: number;
-	}[];
+	MessageTableDB[];
+}
+
+type MessageTableDB = {
+	id: number;
+	sender_id: number;
+	receiver_id: number;
+	content: string;
+	timestamp: string;
+	isBlocked: number;
+	sender: number;
 }
 
 class MessagesModel {
@@ -57,7 +59,7 @@ class MessagesModel {
 				Number(receiverId),
 				Number(senderId),
 				Number(senderId)
-			);
+			) as MessageTableDB[];
 			if (response.length === 0) {
 				return { status: 'error', data: [] };
 			}
@@ -68,9 +70,9 @@ class MessagesModel {
 			})
 			return { status: 'success', data: data };
 		} catch (error) {
-			fastify.log.error(`[MESSAGES MODEL]`, error);
+			fastify.log.error(error,`[MESSAGES MODEL]`);
+			return { status: 'error', data: [] };
 		}
-		return { status: 'error', data: [] };
 	}
 
 	saveMessage(senderId: number, receiverId: number, content: string, isBlocked = 0): void {

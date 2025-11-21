@@ -2,6 +2,13 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ProfileControler } from '../controllers/profileController.js';
 import { getIdUser } from '../user_service/user_service';
 
+type UserProfile = {
+	id: number;
+	username: string;
+	email: string;
+	twoFA_enabled: number;
+};
+
 export default function profilRoute(fastify: FastifyInstance)
 {
     const profileController = new ProfileControler();
@@ -12,8 +19,7 @@ export default function profilRoute(fastify: FastifyInstance)
             {
                 try
                 {
-
-                    const id = request.user.id
+                    const id = request.userId;
                     const existUser = getIdUser(id);
                     if(!existUser)
                         return res.status(400).send({error: "error user not found"})
@@ -27,7 +33,7 @@ export default function profilRoute(fastify: FastifyInstance)
             }
         });
 
-        fastify.put('/update', {
+        fastify.put<{ Body: UserProfile }>('/update', {
         preHandler: [fastify.authenticate],
         schema: {
             body: {

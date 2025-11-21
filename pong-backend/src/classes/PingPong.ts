@@ -53,6 +53,10 @@ class PingPong {
 		this.gameState.ball.velocityY = 0;
 	}
 
+	bot() {
+		
+	}
+
 	updateGame() {
 		if (this.matchState === 'COUNTDOWN') {
 			this.matchState = 'PLAYING'
