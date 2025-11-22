@@ -13,7 +13,7 @@ import { endpoint } from "./endPoints";
 import { initSocket } from "./websocket";
 import { profile } from "./app";
 import { ProfileContainer } from "./components/ProfileContainer";
-import { GameContainer } from "./components/GameContainer";
+import { GameContainerUI } from "./components/GameContainer";
 import { IntraContainer } from "./components/IntraContainer";
 
 // <!-- OLD INTRA VIEW -->
@@ -47,7 +47,7 @@ export function intraView(root: HTMLElement) {
   // Profile View
   intraContainerUI.appendChild(ProfileContainer());
   // Game View
-  intraContainerUI.appendChild(GameContainer());
+  intraContainerUI.appendChild(GameContainerUI());
 
   stateProxyHandler.selectChat = { id: -1, name: "Bienvenue dans le chat !" };
 }
