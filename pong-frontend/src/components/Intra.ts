@@ -7,6 +7,7 @@ export function Intra(): HTMLElement {
     const mainDiv = document.createElement("div");
     mainDiv.id = "main-chat-container";
     mainDiv.className = "flex h-screen p-1 min-h-0 min-w-0";
+    mainDiv.className = "flex items-center justify-center rounded";
 
     // ====================================================================== //
     //                                                                        //
