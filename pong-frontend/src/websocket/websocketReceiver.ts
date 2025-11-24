@@ -22,11 +22,9 @@ export async function websocketReceiver(socket: WebSocket) {
     }
     switch (data.message) {
       case "CONNECT_ROOM":
-        serverState.state = data.message;
         stateProxyHandler.state = data.message;
         break;
       case "MATCH_ROOM":
-        serverState.state = data.message;
         stateProxyHandler.state = data.message;
         newIntraMessage(`You have joined the match room.`);
         break;
@@ -42,7 +40,6 @@ export async function websocketReceiver(socket: WebSocket) {
         }
         break;
       case "TOURNAMENT_ROOM":
-        serverState.state = data.message;
         stateProxyHandler.state = data.message;
         newIntraMessage(`You have joined the tournament room.`);
         break;
@@ -146,10 +143,10 @@ export async function websocketReceiver(socket: WebSocket) {
         }
         stateProxyHandler.state = "CONNECT_ROOM";
       }
-	  		break;
-		case 'intra:message': {
-			newIntraMessage(data.payload.message);
-		}
+        break;
+      case 'intra:message': {
+        newIntraMessage(data.payload.message);
+      }
     }
   });
 }

@@ -122,6 +122,7 @@ export type MatchesHistory = {
     wins: number;
     loses: number;
     history: {
+        createAt: Date;
         player1: string;
         score1: number;
         player2: string;

@@ -128,6 +128,12 @@ export function eventListeners() {
 				socket.send(JSON.stringify({ type: 'MATCH', username: profile.username, userId: profile.id }));
 			}
 				break;
+			case "create-match-btn": {
+				await fetchRequest("/match-create", "POST", {}, {
+					body: JSON.stringify({ settings: { username: profile.username } })
+				});
+			}
+				break;
 		}
 	});
 }
@@ -167,6 +173,11 @@ async function blockUser() {
 		newIntraMessage(
 			`User ${stateProxyHandler.selectChat.name} has been blocked.`
 		);
+		await fetchRequest("/block-list", "GET", {}).then((data) => {
+			if (data.message === "success") {
+				stateProxyHandler.chatBlockList = data.payload;
+			}
+		});
 	}
 };
 
