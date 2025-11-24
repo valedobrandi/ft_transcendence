@@ -1,13 +1,14 @@
 import { fetchRequest, navigateTo, toggle2FA } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
-//import { HeaderBar } from "./HeaderBar";
+import { HeaderBar } from "./HeaderBar";
+import { FancyButton } from "./Button";
 
 import { Button } from "./Button";
-const AVATAR_DEFAUT = "/default/avatar_default.jpg"
-const AVATAR1 = "/default/avatar1.jpg"
-const AVATAR2 = "/default/avatar2.jpg"
-const AVATAR3 = "/default/avatar3.jpg"
+const AVATAR_DEFAUT = "/default/avatar_default1.jpg"
+const AVATAR1 = "/default/avatar_default1.jpg"
+const AVATAR2 = "/default/avatar5.jpg"
+const AVATAR3 = "/default/avatar4.jpg"
 const BACKEND_URL = "http://localhost:3000";
 
 export function ProfilePage(): HTMLElement 
@@ -18,7 +19,7 @@ export function ProfilePage(): HTMLElement
 	const bg = document.createElement("div");
 	bg.className = `
 	absolute inset-0
-	bg-[url('/default/.jpg')]
+	bg-[url('/default/profil.jpg')]
 	bg-cover
 	bg-center
 	bg-no-repeat
@@ -33,64 +34,50 @@ export function ProfilePage(): HTMLElement
 	const headerInner = document.createElement("div");
 	headerInner.className = "flex items-center justify-between relative";
 
-	// ===== Zone gauche : Home =====
-	const homeLink = document.createElement("button");
-	homeLink.className =
-	"flex items-center gap-2 rounded-md bg-dark-blue px-4 py-1 font-bagel text-smoky-white hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/60";
-	homeLink.onclick = () => navigateTo("/intra");
-	homeLink.innerHTML = `
-	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-6 h-6">
-	<path stroke-linecap="round" stroke-linejoin="round" d="m3 9 9-6 9 6v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-	<path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10" />
-	</svg>
-	<span>Home</span>
-	`;
-
 	// ===== Zone centre : Profil =====
+
+	const titleContainer = document.createElement("div");
+	titleContainer.className = "flex flex-1 justify-center px-20 py-3 w-[520px]";
+
+	const title = document.createElement("h1");
+	title.className = "game-font text-5xl text-[hsl(345,100%,47%)] text-shadow-lg/30 mb-1 text-center";
+	title.textContent = "UPDATE PROFIL"
+	titleContainer.appendChild(title);
+
 	
-	 //const headerBar = HeaderBar("UPDATE PROFIL");
 
-	// ===== Zone droite =====
-	const rightSpace = document.createElement("div");
-	rightSpace.className = "w-20";
-
-	headerInner.appendChild(homeLink);
-	//headerInner.appendChild(headerBar);
-	headerInner.appendChild(rightSpace);
-
+	headerInner.appendChild(titleContainer);
 	header.appendChild(headerInner);
 	root.appendChild(header);
 
 	// ---------- MAIN ----------
 	const main = document.createElement("main");
 	main.className =
-		"relative z-10 px-6 pt-8 flex-1 flex flex-col items-center justify-center mb-8";
+		"relative z-10 px-6 pt-3 flex-1 flex flex-col items-center justify-center mb-9";
 
 	const card = document.createElement("div");
-	card.className = "place-self-center w-fit px-16 py-1 rounded-xl bg-mblue-500 opacity-80 ";
+	card.className = "flex flex-col items-center bg-[#1e2124] border-4 border-gray-700 rounded-2xl shadow-lg px-20 py-3 w-[520px]";
 
 	// ---------- Avatar section ----------
 	const avatarSection = document.createElement("section");
-	avatarSection.className = "flex flex-col gap-3 mt-4";
+	avatarSection.className = "flex flex-col gap-4 mb-5";
 
 	const avatarLabel = document.createElement("label");
-	avatarLabel.className = "font-abee text-smoky-white";
+	avatarLabel.className = "font-abee text-white";
 	avatarLabel.textContent = "Avatar";
 	avatarSection.appendChild(avatarLabel);
 
 	const avatarPreview = document.createElement("img");
-    avatarPreview.id = "avatarPreview";
-    avatarPreview.className = "w-24 h-24 rounded-full object-cover";
-    avatarPreview.src = profile.avatar_url ?
-    `${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}`
-    : AVATAR_DEFAUT;
-	console.log('AVAATARRR=', avatarPreview.src);
-    avatarPreview.alt = "avatar";
-    avatarSection.appendChild(avatarPreview);
+	avatarPreview.id = "avatarPreview";
+	avatarPreview.className = "w-24 h-24 rounded-full object-cover";
+	avatarPreview.src = profile.avatar_url ?
+	`${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}` : AVATAR_DEFAUT;
+	avatarPreview.alt = "avatar";
+	avatarSection.appendChild(avatarPreview);
 
 	const avatarGrid = document.createElement("div");
 	avatarGrid.id = "avatarGrid";
-	avatarGrid.className = "grid grid-cols-4 gap-3";
+	avatarGrid.className = "grid grid-cols-4 gap-4 mt-1";
 
 	function makePreset(src: string, label: string): HTMLButtonElement 
 	{
@@ -109,16 +96,16 @@ export function ProfilePage(): HTMLElement
 		return btn;
 	}
 
-	avatarGrid.appendChild(makePreset(AVATAR1 as string, "Avatar 1"));
-	avatarGrid.appendChild(makePreset(AVATAR2 as string, "Avatar 2"));
-	avatarGrid.appendChild(makePreset(AVATAR3 as string, "Avatar 3"));
+	avatarGrid.appendChild(makePreset(`${AVATAR1}?t=${Date.now()}` as string, "Avatar 1"));
+	avatarGrid.appendChild(makePreset(`${AVATAR2}?t=${Date.now()}` as string, "Avatar 2"));
+	avatarGrid.appendChild(makePreset(`${AVATAR3}?t=${Date.now()}` as string, "Avatar 3"));
 
 	// Bouton "+"
 	const pickFileBtn = document.createElement("button");
 	pickFileBtn.type = "button";
 	pickFileBtn.id = "pickFileAvatar";
 	pickFileBtn.className =
-		"w-16 h-16 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/40 transition ring-0 focus:outline-none";
+		"w-16 h-16 rounded-full bg-[#36393e] flex items-center justify-center hover:bg-black/40 transition ring-0 focus:outline-none";
 	pickFileBtn.setAttribute("aria-label", "Ajouter un avatar personnalisé");
 
 	pickFileBtn.innerHTML = `
@@ -135,7 +122,7 @@ export function ProfilePage(): HTMLElement
 	const avatarFile = document.createElement("input");
 	avatarFile.id = "avatarFile";
 	avatarFile.type = "file";
-	avatarFile.accept = "image/png,image/jpeg";
+	avatarFile.accept = "image/png,image/jpeg, image/jpg";
 	avatarFile.className = "hidden";
 	avatarSection.appendChild(avatarFile);
 
@@ -147,7 +134,7 @@ export function ProfilePage(): HTMLElement
 	emailSection1.className = "flex flex-col gap-2 mt-4";
 
 	const emailLabel = document.createElement("label");
-	emailLabel.className = "font-abee text-smoky-white";
+	emailLabel.className = "font-abee text-white";
 	emailLabel.textContent = `Email : ${profile.email}`;
 	emailSection1.appendChild(emailLabel);
 
@@ -157,7 +144,7 @@ export function ProfilePage(): HTMLElement
 	emailInput.type = "email";
 	emailInput.placeholder = "change Email";
 	emailInput.className =
-		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
+		"w-full h-10 rounded-md px-3 bg-black text-indigo-100 focus:border-[hsl(345,100%,47%)] focus:ring-2 focus:ring-[hsl(345,100%,47%)] outline-none";
 	emailSection1.appendChild(emailInput);
 
 	card.appendChild(emailSection1);
@@ -168,7 +155,7 @@ export function ProfilePage(): HTMLElement
 	nameSection.className = "flex flex-col gap-2 mt-4";
 
 	const nameLabel = document.createElement("label");
-	nameLabel.className = "font-abee text-smoky-white";
+	nameLabel.className = "font-abee text-white";
 	nameLabel.textContent = `Name : ${profile.username} `;
 	nameSection.appendChild(nameLabel);
 
@@ -177,7 +164,7 @@ export function ProfilePage(): HTMLElement
 	nameInput.type = "text";
 	nameInput.placeholder = "change username";
 	nameInput.className =
-		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
+		"w-full h-10 rounded-md px-3 bg-black text-indigo-100 focus:border-[hsl(345,100%,47%)] focus:ring-2 focus:ring-[hsl(345,100%,47%)] outline-none";
 
 	nameSection.appendChild(nameInput);
 	card.appendChild(nameSection);
@@ -185,10 +172,10 @@ export function ProfilePage(): HTMLElement
 	// ---------- Change passeword ----------
 	
 	const passewordSection = document.createElement("section");
-	passewordSection.className = "flex flex-col gap-2 mt-4";
+	passewordSection.className = "flex flex-col gap-4 mt-4";
 
 	const passewordLabel = document.createElement("label");
-	passewordLabel.className = "font-abee text-smoky-white";
+	passewordLabel.className = "font-abee text-white";
 	passewordLabel.textContent = `Password: `;
 	passewordSection.appendChild(passewordLabel);
 
@@ -198,11 +185,11 @@ export function ProfilePage(): HTMLElement
 	passewordInput.autocomplete = "off";
 	passewordInput.placeholder = "current Password";
 	passewordInput.className =
-	"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
+	"w-full h-10 rounded-md px-3 bg-black text-indigo-100 focus:border-[hsl(345,100%,47%)] focus:ring-2 focus:ring-[hsl(345,100%,47%)] outline-none";
 	passewordSection.appendChild(passewordInput);
 	
 	const passewordLabels = document.createElement("label");
-	passewordLabels.className = "font-abee text-smoky-white";
+	passewordLabels.className = "font-abee text-white";
 	passewordLabels.textContent = `New password: `;
 	passewordSection.appendChild(passewordLabels);
 
@@ -212,12 +199,30 @@ export function ProfilePage(): HTMLElement
 	newpassewordInput.type = "password";
 	newpassewordInput.placeholder = "**********";
 	newpassewordInput.className =
-		"w-full h-10 rounded-md px-3 bg-black/30 text-indigo-100 outline-none";
+		"w-full h-10 rounded-md px-3 bg-black contour-gray text-indigo-100 border-2 border-[#1e2124] focus:border-[hsl(345,100%,47%)] focus:ring-0,1 focus:[hsl(345,100%,47%)] outline-none";
 	passewordSection.appendChild(newpassewordInput);
 
 	card.appendChild(passewordSection);
 
 	// ---------- Two-Factor Authentication  ----------
+
+	function updateTwoFAButton() 
+	{
+		twoFABtn.innerHTML = `
+			<div class="flex items-center justify-center gap-2">
+				<svg xmlns="http://www.w3.org/2000/svg" 
+					viewBox="0 0 24 24" width="20" height="20"
+					fill="${profile.twoFA_enabled ? "hsl(345,100%,47%)" : "none"}"
+					stroke="currentColor" stroke-width="1.8" 
+					class="transition-all duration-300">
+					<path stroke-linecap="round" stroke-linejoin="round"
+						d="M16 10V7a4 4 0 10-8 0v3m-2 0h12a2 2 0 012 2v7a2 2 0 
+						01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2z"/>
+				</svg>
+				<span>${profile.twoFA_enabled ? "Disable 2FA" : "Enable 2FA"}</span>
+			</div>
+		`;
+	}
 	
 	// Popup confirmation
 
@@ -227,19 +232,20 @@ export function ProfilePage(): HTMLElement
 		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
 	
 		const modal = document.createElement("div");
-		modal.className = "bg-white p-8 rounded-xl border border-gray-700 flex flex-col gap-6 items-center w-[340px] shadow-xl";
+		modal.className = "bg-[#1e2124] p-8 rounded-xl border border-gray-700 flex flex-col gap-6 items-center w-[340px] shadow-xl";
 	
 		const text = document.createElement("p");
-		text.className = "text-smoky-white text-center font-abee";
+		text.className = "text-white text-center font-abee";
 		text.textContent = profile.twoFA_enabled
 			? "Do you really want to disable 2FA?"
 			: "Enable 2FA on your account?";
 	
 		const yesBtn = document.createElement("button");
-		yesBtn.className = "w-28 h-10 rounded-md bg-indigo-600 text-white hover:bg-indigo-700";
+		yesBtn.className = "w-28 h-10 rounded-md bg-[hsl(345,100%,47%)] text-white hover:[hsl(345,100%,47%)]/20";
 		yesBtn.textContent = "Yes";
 		yesBtn.onclick = async () => {
 			await toggle2FA();
+			updateTwoFAButton(); 
 			document.body.removeChild(overlay);
 		};
 	
@@ -262,15 +268,31 @@ export function ProfilePage(): HTMLElement
 	twoFASection.className = "flex flex-col gap-2 mt-4";
 
 	const twoFALabel = document.createElement("label");
-	twoFALabel.className = "font-abee text-smoky-white";
+	twoFALabel.className = "font-abee text-white";
 	twoFALabel.textContent = "Two-Factor Authentication (2FA)";
 	twoFASection.appendChild(twoFALabel);
 
 	const twoFABtn = document.createElement("button");
 	twoFABtn.id = "toggle_2fa";
 	twoFABtn.className =
-		"w-full h-10 rounded-md px-3 bg-indigo-500 text-white hover:bg-indigo-600 transition";
-	twoFABtn.textContent = profile.twoFA_enabled ? "Disable 2FA" : "Enable 2FA";
+		"w-full h-10 rounded-md px-3 bg-[#424549] text-white hover:bg-[#36393e]  transition border-2 border-[#282b30]";
+	twoFABtn.innerHTML = `
+    <div class="flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 24 24" width="20" height="20"
+            fill="${profile.twoFA_enabled ? "hsl(345,100%,47%)" : "none"}"
+            stroke="currentColor" stroke-width="1.8" 
+            class="transition-all duration-300">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16 10V7a4 4 0 10-8 0v3m-2 0h12a2 2 0 012 2v7a2 2 0 
+                01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2z"/>
+        </svg>
+
+        <span>
+            ${profile.twoFA_enabled ? "Disable 2FA" : "Enable 2FA"}
+        </span>
+    </div>
+`;
 
 	twoFABtn.onclick = () => open2FAPopup();
 
@@ -281,7 +303,8 @@ export function ProfilePage(): HTMLElement
 	// ----------change profil ----------
 	
 	const sendBtn = Button("Change profil", "w-full", () => {});
-	sendBtn.className =	"mt-4 w-full h-10 rounded-md px-3 bg-pink-400 text-white outline-none";
+	sendBtn.className =	"mt-4 w-full h-10 rounded-md px-3 bg-[hsl(345,100%,47%)] text-shadow-lg/30  text-white hover:bg-red-800  transition border-2 border-[#36393e]";
+    //sendBtn.setAttribute("role", "button");
 	card.appendChild(sendBtn);
 
 	sendBtn.addEventListener("click", async () => {
@@ -334,7 +357,7 @@ export function ProfilePage(): HTMLElement
 
 		console.log("Profile updated", data);
 		alert(("your profil has changed "));
-		//window.location.reload();	
+			
 	}
 	else
 	{
@@ -404,7 +427,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 
 	avatarPreview.onerror = () => {
         avatarPreview.onerror = null;
-        avatarPreview.src = AVATAR1;
+        avatarPreview.src = AVATAR_DEFAUT;
     };
 
     pickFileBtn.addEventListener("click", () => avatarFile.click());
@@ -478,7 +501,7 @@ console.log(user.avatar_url);
 			button.classList.remove("ring-4", "ring-indigo-400");
 		});
 		if (btn) {
-			btn.classList.add("ring-4", "ring-indigo-400");
+			btn.classList.add("ring-4", "ring-[hsl(345,100%,47%)]");
 		}
 	}
 

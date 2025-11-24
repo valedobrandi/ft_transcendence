@@ -73,7 +73,7 @@ export function FormLogin(): HTMLElement {
 		const error = document.createElement("p");
 		error.className = "text-red-500 text-sm hidden";
 
-		const confirmBtn = FancyButton("confirm",  "h-12 w-40 text-lg game-font tracking-widest flex items-center justify-center", async () => {
+		const confirmBtn = FancyButton("confirm", "h-12 w-40 text-lg game-font tracking-widest flex items-center justify-center", async () => {
 
 			const code = input.value.trim();
 
