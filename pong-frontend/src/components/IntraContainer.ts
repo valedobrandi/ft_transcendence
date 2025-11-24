@@ -2,7 +2,7 @@ import DOMPurify from "dompurify";
 
 export function IntraContainer() {
 	const html = `
-	<div class="intra-container grid grid-cols-[auto_1fr_1fr] gap-x-1 min-h-screen w-full p-4">
+	<div class="intra-container grid grid-cols-[auto_1fr_1fr] min-h-screen">
 	</div>
 	`;
 	const mainDiv = document.createElement("div");

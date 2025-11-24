@@ -26,15 +26,15 @@ export function renderRoute(path: string) {
     const root = document.getElementById("root")!;
     const view = routes[path] || defaultView;
 
-    // if (protectedRoutes.includes(path) && profile.username === "") {
-    //     navigateTo("/");
-    //     const alertBox = CreateAlert("You must be logged in to access this page.", "error");
-    //     const viewContainer = document.getElementById("view-container");
-    //     if (viewContainer) {
-    //         viewContainer.prepend(alertBox);
-    //     }
-    //     return;
-    // }
+    if (protectedRoutes.includes(path) && profile.username === "") {
+        navigateTo("/");
+        const alertBox = CreateAlert("You must be logged in to access this page.", "error");
+        const viewContainer = document.getElementById("view-container");
+        if (viewContainer) {
+            viewContainer.prepend(alertBox);
+        }
+        return;
+    }
     view(root);
 }
 

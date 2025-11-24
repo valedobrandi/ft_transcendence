@@ -2,11 +2,11 @@ import { profile } from "../app";
 import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { ButtonMatchList } from "./ButtonMatchList";
 
-const mockMatches = [
-  { matchId: "OTHER SETTINGS", status: "PLAYER NAME", createId: 2 },
-  { matchId: "OTHER SETTINGS", status: "PLAYER NAME", createId: 3 },
-  { matchId: "OTHER SETTINGS", status: "PLAYER NAME", createId: 4 },
-];
+
+export const mockMatches = Array.from({ length: 40 }, (_, i) => ({
+   matchId: "OTHER SETTINGS", status: "PLAYER NAME", createId: i,
+}));
+
 
 export function MatchList(): string {
   const matchDiv = document.createElement("div");
@@ -59,6 +59,8 @@ export function MatchList(): string {
 
   onRenderMatchList();
   onStateChange("availableMatches", onRenderMatchList);
+  //onStateChange("state", onRenderMatchList);
+
   if (matchList.length === 0) {
     const noMatchesLi = document.createElement("li");
     noMatchesLi.className = "text-center";

@@ -7,7 +7,6 @@ import { FormLogin } from "./components/FormLogin";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { ProfilePage } from "./components/FormProfile";
 import { websocketConnect } from "./websocket/websocketConnect";
-import { stateProxyHandler } from "./states/stateProxyHandler";
 import { FormGuest } from "./components/FormGuest";
 import { endpoint } from "./endPoints";
 import { initSocket } from "./websocket";
@@ -40,7 +39,7 @@ export function intraView(root: HTMLElement) {
   const intraContainerUI = IntraContainer()
   
   root.appendChild(intraContainerUI);
-  root.appendChild(Menu());
+  //root.appendChild(Menu());
 
   // Chat View
   intraContainerUI.appendChild(Intra());
@@ -48,8 +47,6 @@ export function intraView(root: HTMLElement) {
   intraContainerUI.appendChild(ProfileContainer());
   // Game View
   intraContainerUI.appendChild(GameContainerUI());
-
-  stateProxyHandler.selectChat = { id: -1, name: "Bienvenue dans le chat !" };
 }
 // <!-- BERNARDO END EDIT -->
 

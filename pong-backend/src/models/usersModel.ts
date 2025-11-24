@@ -9,7 +9,8 @@ class UsersModel {
     private stmFindUser: Database.Statement;
     private stmSaveUser: Database.Statement;
     private stmGetAllUsers: Database.Statement;
-	private stmSaveGuestUsername: Database.Statement;
+    private stmSaveGuestUsername: Database.Statement;
+    private stmGetProfileById: Database.Statement;
 
     constructor(db: Database.Database) {
         this.db = db;
@@ -20,6 +21,12 @@ class UsersModel {
             VALUES (?, ?, ?, ?, ?)`
         );
         this.stmGetAllUsers = db.prepare('SELECT id, username FROM users');
+        this.stmGetProfileById = db.prepare('SELECT id, username, avatar_url FROM users WHERE id = ?');
+        this.stmSaveGuestUsername = db.prepare(`
+            INSERT INTO users
+            (username, email, password, status, twoFA_enabled)
+            VALUES (?, ?, ?, ?, ?)`
+        );
     }
 
     findUserByUsername(username: string): any | undefined {
@@ -30,16 +37,13 @@ class UsersModel {
         return this.stmFindUser.get(email, "");
     }
 
-    insertUser() {
-
+    getProfileById(id: number): any | undefined {
+        const returnDB = this.stmGetProfileById.get(id) as { id: number; username: string; avatar: string } | undefined;
+        if (!returnDB) {
+            return { message: 'error', data: 'user not found' };
+        }
+        return { message: 'success', data: returnDB };
     }
-
-    //InsertInfo(email, username, hash)
-    // {
-    //     const insertNewUserInDB = db.prepare('INSERT INTO users (email, username, password) VALUES (?,?,?)');
-    //     insertNewUserInDB.run(email, username, hash);
-    // }
-
 
     saveGuestUsername(username: string): SaveUser {
         try {
@@ -50,7 +54,7 @@ class UsersModel {
             return { message: 'success', id: response.lastInsertRowid, username };
         } catch (error) {
             print('error saving guest username');
-            return { status:'error', error: 'error saving guest username' };
+            return { status: 'error', error: 'error saving guest username' };
         }
     }
 

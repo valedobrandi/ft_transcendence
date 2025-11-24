@@ -6,6 +6,21 @@ export default function profilRoute(fastify: FastifyInstance)
 {
     const profileController = new ProfileControler();
 
+        fastify.get<{Querystring: { id: number }}>('/profile/user', {
+            preHandler: [fastify.authenticate],
+            schema: {
+                querystring: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'number' }
+                    },
+                    required: ['id']
+                }
+            },
+            handler: profileController.getProfileById.bind(profileController)
+        });
+
+
         fastify.get('/profile', {
             preHandler: [fastify.authenticate],
             handler: (async (request: FastifyRequest, res) => 
