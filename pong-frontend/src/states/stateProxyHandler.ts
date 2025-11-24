@@ -1,4 +1,5 @@
 import { profile } from "../app";
+import { onClickGetProfileData } from "../components/UsersList";
 import type { ChatMessage } from "../interface/ChatMessage";
 import { navigateTo, setTime } from "../utils";
 
@@ -117,6 +118,17 @@ export type NewMatch = {
     settings: {};
 }
 
+export type MatchesHistory = {
+    wins: number;
+    loses: number;
+    history: {
+        player1: string;
+        score1: number;
+        player2: string;
+        score2: number;
+    }[]
+}
+
 
 type StateKey = keyof StateProxyHandler;
 
@@ -129,14 +141,14 @@ const listeners: Record<StateKey, (() => void)[]> = {
     selectChat: [],
     state: [],
     systemMessages: [],
-    availableMatches: []
+    availableMatches: [],
+    matchesHistory: [],
+    profile: [],
 };
-
 
 export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
     listeners[key].push(fn);
 }
-
 
 export interface StateProxyHandler {
     messages: Map<number, ChatMessage[]>;
@@ -147,6 +159,7 @@ export interface StateProxyHandler {
     selectChat: { id: number; name: string };
     state: "CONNECT_ROOM" |
     "MATCH_QUEUE" |
+    "MATCH_ROOM" |
     "TOURNAMENT_QUEUE" |
     "TOURNAMENT_ROOM" |
     "GAME_ROOM" |
@@ -155,6 +168,8 @@ export interface StateProxyHandler {
     "MATCH_INVITE",
     systemMessages: { index: number; message: string }[];
     availableMatches: NewMatch[];
+    matchesHistory: MatchesHistory;
+    profile: { username: string, avatar: string };
 }
 
 export const stateProxyHandler: StateProxyHandler = new Proxy({
@@ -166,7 +181,9 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
     selectChat: { id: -1, name: '' },
     state: "CONNECT_ROOM",
     systemMessages: [],
-    availableMatches: []
+    availableMatches: [],
+    matchesHistory: { wins: 0, loses: 0, history: [] },
+    profile: { username: '', avatar: '' },
 }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
@@ -200,7 +217,6 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
             listeners[key].forEach(fn => fn());
         }
 
-
         if (prop === 'selectChat') {
             changeChatHeader(stateProxyHandler.selectChat.name);
             const isIntra = stateProxyHandler.selectChat.id === -1;
@@ -210,6 +226,9 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
                 chatMenu.classList.add("hidden");
             };
             messageListeners.forEach(fn => fn());
+
+            // CHANGE PROFILE DATA
+            queueMicrotask(() => onClickGetProfileData());
         }
 
         if (prop === 'friendList') {
