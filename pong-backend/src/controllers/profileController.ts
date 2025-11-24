@@ -21,7 +21,7 @@ class ProfileControler {
         const checkUsernameAlready = usersModel.findUserByUsername(username);
         if(checkUsernameAlready)
                 return res.status(408).send({ error: 'user already use' })
-        const checkEmailAlready = usersModel.findUserByEmail(username);
+        const checkEmailAlready = usersModel.findUserByEmail(email);
         if(checkEmailAlready)
                 return res.status(407).send({ error: 'Email already use' })
         

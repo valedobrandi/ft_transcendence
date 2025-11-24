@@ -19,7 +19,7 @@ const routes: Record<string, (root: HTMLElement) => void> = {
     "/profile": profileView
 };
 
-export function renderRoute(path: string) {
+ export function renderRoute(path: string) {
     const protectedRoutes = ["/match", "/intra", "/profile"];
 
     console.log(`username: ${profile.username}`);
@@ -170,7 +170,7 @@ export async function toggle2FA(): Promise<void>
                 twoFABtn.textContent = new2FAValue === 1 ? "Disable 2FA" : "Enable 2FA";
             }
 
-            alert(`2FA has been ${new2FAValue === 1 ? "enabled" : "disabled"} successfully`);
+            //alert(`2FA has been ${new2FAValue === 1 ? "enabled" : "disabled"} successfully`);
         } else {
             alert("Failed to update 2FA: " + (response.error || "Unknown error"));
         }
