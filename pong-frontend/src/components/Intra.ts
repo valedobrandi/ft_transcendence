@@ -1,13 +1,13 @@
 import { ChatHeader } from "./ChatHeader";
 import { SystemMessageChat } from "./ChatIntra";
 import { ChatSendInput } from "./ChatSendInput";
-import { MatchList } from "./MatchList";
 import { UsersList } from "./UsersList";
 
 export function Intra(): HTMLElement {
     const mainDiv = document.createElement("div");
     mainDiv.id = "main-chat-container";
     mainDiv.className = "flex h-screen p-1 min-h-0 min-w-0";
+    mainDiv.className = "flex items-center justify-center rounded";
 
     // ====================================================================== //
     //                                                                        //
@@ -37,7 +37,7 @@ export function Intra(): HTMLElement {
     chatTabs.className = "flex border-b-1 border-[#424549] bg-[#36393e] h-10 text-white";
 
     // Chat Header Buttons
-    const chatMenu = ChatHeader();
+    //const chatMenu = ChatHeader();
 
     // Chat Message Box
     const messages = document.createElement("div");
@@ -48,7 +48,7 @@ export function Intra(): HTMLElement {
     const inputDiv = ChatSendInput();
 
     chatWidget.appendChild(chatTabs);
-    chatWidget.appendChild(chatMenu);
+    //chatWidget.appendChild(chatMenu);
     chatWidget.appendChild(messages);
     chatWidget.appendChild(inputDiv);
 

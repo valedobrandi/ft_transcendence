@@ -9,7 +9,7 @@ import {
 	removeIntraMessage,
 	stateProxyHandler,
 } from "../states/stateProxyHandler";
-import { fetchRequest, renderRoute } from "../utils";
+import { fetchRequest, navigateTo, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
 
@@ -90,54 +90,13 @@ export function eventListeners() {
 		console.log("Button clicked:", button.id);
 
 		switch (button.id) {
-			case "accept-match-invite": {
-				await onClickAcceptMatchInvite(button);
-			}
+			case "profile-btn": { await profileOnclick(); }
 				break;
-			case "btn-block-user":
-				{
-					const response = await fetchRequest(
-						`/add-block`,
-						"POST",
-						{},
-						{
-							body: JSON.stringify({
-								id: stateProxyHandler.selectChat.id,
-							}),
-						}
-					);
-
-					if (response.message === "success") {
-						newIntraMessage(
-							`User ${stateProxyHandler.selectChat.name} has been blocked.`
-						);
-						await fetchRequest("/block-list", "GET", {}).then((data) => {
-							if (data.message === "success") {
-								stateProxyHandler.chatBlockList = data.payload;
-							}
-						});
-					}
-				}
+			case "accept-match-invite": { await onClickAcceptMatchInvite(button); }
 				break;
-			case "btn-unblock-user":
-				{
-					const response = await fetchRequest(
-						`/remove-block?id=${stateProxyHandler.selectChat.id}`,
-						"DELETE",
-						{}
-					);
-
-					if (response.message === "success") {
-						newIntraMessage(
-							`User ${stateProxyHandler.selectChat.name} has been unblocked.`
-						);
-						await fetchRequest("/block-list", "GET", {}).then((data) => {
-							if (data.message === "success") {
-								stateProxyHandler.chatBlockList = data.payload;
-							}
-						});
-					}
-				}
+			case "btn-block-user": { await blockUser(); }
+				break;
+			case "btn-unblock-user": { await unblockUser(); }
 				break;
 			case "select-chat-btn":
 				{
@@ -157,40 +116,81 @@ export function eventListeners() {
 					);
 				}
 				break;
-			case "cancel-match-invite": {
-				await onClickCancelMatchInvite(button);
+			case "cancel-match-invite": { await onClickCancelMatchInvite(button); }
+				break;
+			case "btn-friend-list": { await inviteFriendList(); }
+				break;
+			case "tournament-btn": { await joinTournament(); }
+				break;
+			case "match-btn": {
+				const socket = getSocket();
+				if (!socket) return;
+				socket.send(JSON.stringify({ type: 'MATCH', username: profile.username, userId: profile.id }));
 			}
-				break;
-			case "btn-friend-list":
-				{
-					var response = await fetchRequest(
-						`/add-event`,
-						"POST",
-						{},
-						{
-							body: JSON.stringify({
-								to_id: stateProxyHandler.selectChat.id,
-								from_id: Number(profile.id),
-								type: "friend:add",
-								message: "",
-							}),
-						}
-					);
-
-					if (response.message === "success") {
-						newIntraMessage(
-							`Friend request sent to ${stateProxyHandler.selectChat.name}`
-						);
-					}
-				}
-				break;
-			case "tournament-btn": {
-					await joinTournament();
-				}
 				break;
 		}
 	});
 }
+
+async function unblockUser() {
+	const response = await fetchRequest(
+		`/remove-block?id=${stateProxyHandler.selectChat.id}`,
+		"DELETE",
+		{}
+	);
+
+	if (response.message === "success") {
+		newIntraMessage(
+			`User ${stateProxyHandler.selectChat.name} has been unblocked.`
+		);
+		await fetchRequest("/block-list", "GET", {}).then((data) => {
+			if (data.message === "success") {
+				stateProxyHandler.chatBlockList = data.payload;
+			}
+		});
+	}
+}
+
+async function blockUser() {
+	var response = await fetchRequest(
+		`/add-block`,
+		"POST",
+		{},
+		{
+			body: JSON.stringify({
+				id: stateProxyHandler.selectChat.id,
+			}),
+		}
+	);
+
+	if (response.message === "success") {
+		newIntraMessage(
+			`User ${stateProxyHandler.selectChat.name} has been blocked.`
+		);
+	}
+};
+
+async function inviteFriendList() {
+	var response = await fetchRequest(
+		`/add-event`,
+		"POST",
+		{},
+		{
+			body: JSON.stringify({
+				to_id: stateProxyHandler.selectChat.id,
+				from_id: Number(profile.id),
+				type: "friend:add",
+				message: "",
+			}),
+		}
+	);
+
+	if (response.message === "success") {
+		newIntraMessage(
+			`Friend request sent to ${stateProxyHandler.selectChat.name}`
+		);
+	}
+};
 
 async function joinTournament() {
 	const response = await fetchRequest(
@@ -230,3 +230,33 @@ async function onClickCancelMatchInvite(button: HTMLButtonElement) {
 	}
 }
 
+const profileOnclick = async () => {
+
+	console.log("(opt.value === view-profile")
+	try {
+		const data = await fetchRequest('/profile', 'GET', {});
+		console.log("DATA PROFILE = ", data);
+		if (data.message === 'success') {
+			profile.username = data.existUser.username;
+			profile.id = data.existUser.id;
+			profile.email = data.existUser.email;
+			profile.avatar_url = data.existUser.avatar_url;
+			profile.twoFA_enabled = data.existUser.twoFA_enabled ? 1 : 0
+
+
+			console.log("PROFIL = ", profile.username);
+			console.log("EMAIL IIII = ", profile.email);
+			console.log("AVATAR IIII = ", profile.avatar_url);
+			console.log("AVATAR IIII = ", profile.twoFA_enabled);
+
+			navigateTo("/profile");
+		}
+		else {
+			console.error("Erreur lors du chargement du profil :", data);
+		}
+	}
+	catch (err) {
+		console.error("Erreur réseau :", err);
+	}
+
+}

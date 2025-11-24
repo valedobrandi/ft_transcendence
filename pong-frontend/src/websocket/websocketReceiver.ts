@@ -8,11 +8,11 @@ import {
   findIntraMessage,
   updateIntraMessage,
 } from "../states/stateProxyHandler";
-import { serverState } from "../states/serverState";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { navigateTo, setTime } from "../utils";
 import { EmbeddedButton } from "../components/EmbeddedButton";
 import { Alert } from "../components/Alert";
+import { serverState } from "../states/serverState";
 
 export async function websocketReceiver(socket: WebSocket) {
   socket.addEventListener("message", async (event) => {
@@ -27,6 +27,7 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       case "MATCH_ROOM":
         serverState.state = data.message;
+        stateProxyHandler.state = data.message;
         newIntraMessage(`You have joined the match room.`);
         break;
       case "GAME_ROOM":
@@ -42,6 +43,7 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       case "TOURNAMENT_ROOM":
         serverState.state = data.message;
+        stateProxyHandler.state = data.message;
         newIntraMessage(`You have joined the tournament room.`);
         break;
       case "GAME_OVER":
@@ -75,6 +77,12 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       case "SERVER_USERS":
         if ("users" in data) {
+          // sort users by name but keep the user at the top
+          data.users.sort((a: any, b: any) => {
+            if (a.id === profile.id) return -1;
+            if (b.id === profile.id) return 1;
+            return a.name.localeCompare(b.name);
+          });
           stateProxyHandler.serverUsers = data.users;
         }
         break;
@@ -114,6 +122,7 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       }
       case "MATCH_INVITE": {
+        serverState.state = data.message;
         const getName = stateProxyHandler.serverUsers.find(
           (user) => user.id === data.payload.from
         )?.name;

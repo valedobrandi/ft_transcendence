@@ -1,3 +1,4 @@
+import Database from "better-sqlite3";
 import { FastifyRequest, FastifyInstance, FastifyReply } from "fastify";
 import {
 	inviteMatchesQueue,
@@ -8,6 +9,8 @@ import {
 } from "../state/gameRoom.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
+import db from "../../database/db.js";
+import { UsersModel } from "../models/usersModel.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
 	const matcherController = new MatcherController();
@@ -103,6 +106,20 @@ const matchesRoute = (fastify: FastifyInstance) => {
 		},
 		handler: matcherController.joinMatch.bind(matcherController),
 	});
+
+	fastify.get<{ Querystring: { username: string } }>("/match/history", {
+		preHandler: [fastify.authenticate],
+		schema: {
+			querystring: {
+				type: "object",
+				properties: {
+					username: { type: "string" },
+				},
+				required: ["username"],
+			},
+		},
+		handler: matcherController.getMatchHistory.bind(matcherController),
+	});
 };
 
 class MatcherController {
@@ -110,6 +127,14 @@ class MatcherController {
 
 	constructor() {
 		this.matchesService = new MatchesService();
+	}
+
+	getMatchHistory(req: FastifyRequest<{ Querystring: { username: string } }>, res: FastifyReply) {
+		if (!req.query.username) {
+			return res.code(statusCode("NO_CONTENT")).send({ message: "error", data: "username required" });
+		}
+		const { message, data } = this.matchesService.getMatchHistory(req.query.username);
+		return res.code(statusCode("OK")).send({ message, data });
 	}
 
 	getMatch(req: FastifyRequest, res: FastifyReply) {
@@ -170,8 +195,50 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 }
+type MatchesHistory = {
+	wins: number;
+	loses: number;
+	history: {
+		player1: string;
+		score1: number;
+		player2: string;
+		score2: number;
+	}[]
+}
 
 class MatchesService {
+
+	private matchesModel = new MatchesModel(db);
+	private usersModel = new UsersModel(db);
+
+	getMatchHistory(username: string) {	
+		const match = this.matchesModel.getMatchHistoryById(username);
+		if (match === undefined) {
+			return { message: "error", data: "no match history" };
+		}
+
+		const matchesHistory: MatchesHistory = {
+			wins: 0,
+			loses: 0,
+			history: [],
+		};
+
+		for (const m of match) {
+			matchesHistory.history.push({
+				player1: m.player1,
+				score1: m.score1,
+				player2: m.player2,
+				score2: m.score2,
+			});
+			if (m.score1 > m.score2) {
+				matchesHistory.wins += 1;
+			} else {
+				matchesHistory.loses += 1;
+			}
+		}
+
+		return { message: "success", data: matchesHistory };
+	}
 
 	removeMatch(userId: number, matchId: string) {
 		const connected = connectedRoomInstance.getById(userId);
@@ -196,7 +263,7 @@ class MatchesService {
 
 		return { message: "success", data: "match canceled" };
 	}
-	
+
 	joinMatch(userId: number, matchId: string) {
 		const connected = connectedRoomInstance.getById(userId);
 		if (connected === undefined) throw new Error("disconnected");
@@ -234,7 +301,7 @@ class MatchesService {
 		}
 
 		const nexMatch = inviteMatchesQueue.get(matchId);
-		
+
 		inviteMatchesQueue.delete(matchId);
 
 		if (nexMatch === undefined) {
@@ -412,6 +479,36 @@ class MatchesService {
 			message: "success",
 			data: { message: "invite sent", matchId: matchId },
 		};
+	}
+}
+export type MatchesReturnDB = {
+	match_id: string;
+	player1: string;
+	player2: string;
+	score1: number;
+	score2: number;
+	match_status: string;
+	created_at: string;
+};
+
+class MatchesModel {
+	private db: Database.Database;
+	private stmGetMatchHistoryById: Database.Statement;
+
+	constructor(db: Database.Database) {
+		this.db = db;
+		this.stmGetMatchHistoryById = db.prepare(
+			`SELECT match_id, player1, player2, score1, score2, created_at
+			FROM matches
+			WHERE player1 = ? OR player2 = ?
+			ORDER BY created_at DESC;
+			`
+		);
+	}
+
+	getMatchHistoryById(username: string): MatchesReturnDB[] | undefined {
+		const match = this.stmGetMatchHistoryById.all(username, username) as MatchesReturnDB[] | undefined;
+		return match;
 	}
 }
 

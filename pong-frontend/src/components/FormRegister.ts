@@ -4,7 +4,7 @@ import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { CreateAlert } from "./CreateAlert";
-import { profile, jwt } from "../app";
+import { profile } from "../app";
 
 export function Register(): HTMLElement {
 	const viewDiv = document.createElement("div");

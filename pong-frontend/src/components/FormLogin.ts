@@ -5,6 +5,7 @@ import { fetchRequest, navigateTo } from "../utils";
 import { profile, jwt } from "../app";
 import { stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
+import { onClickGetProfileData } from "./UsersList";
 
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
@@ -157,6 +158,7 @@ export function FormLogin(): HTMLElement {
 			profile.username = response.payload.username;
 			//profile.url_avatar = response.payload.existingUser.avatar_url
 			profile.id = response.payload.id;
+			stateProxyHandler.selectChat = { id: profile.id, name: "Bienvenue dans le chat !" };
 
 			const [friendsList, blockedList] = await Promise.all([
 				fetchRequest('/friends-list', 'GET', {}),
@@ -174,6 +176,7 @@ export function FormLogin(): HTMLElement {
 			if (blockedList.message === 'success') {
 				stateProxyHandler.chatBlockList = blockedList.payload;
 			}
+			await onClickGetProfileData();
 			navigateTo("/intra");
 		} else if (response.status === 'error') {
 			const existingAlert = document.getElementById("alert-popup");
