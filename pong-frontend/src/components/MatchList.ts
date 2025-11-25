@@ -1,5 +1,5 @@
 import { profile } from "../app";
-import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
+import { stateProxyHandler } from "../states/stateProxyHandler";
 import { ButtonMatchList } from "./ButtonMatchList";
 
 export function MatchList(): string {

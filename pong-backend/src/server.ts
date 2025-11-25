@@ -34,11 +34,15 @@ const fastify = Fastify({
 
 declare module 'fastify' {
 	interface FastifyRequest {
-		userId: number | null;
+		userId: number;
+	}
+	interface FastifyInstance {
+		authenticate: any;
 	}
 }
 
-fastify.decorateRequest("userId", null);
+
+fastify.decorateRequest("userId", 0);
 
 
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
@@ -47,7 +51,7 @@ fastify.decorate('authenticate', async function (request: FastifyRequest, reply:
 		const decoded = await request.jwtVerify();
         print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
 		request.userId = decoded.id;
-        if (!request.userId) {
+        if (request.userId === 0) {
             reply.code(401).send({ error: 'Unauthorized' });
         }
 

@@ -1,8 +1,6 @@
-import { fetchRequest, navigateTo, toggle2FA } from "../utils";
+import { fetchRequest, toggle2FA } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
-import { HeaderBar } from "./HeaderBar";
-import { FancyButton } from "./Button";
 
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default1.jpg"
@@ -11,7 +9,7 @@ const AVATAR2 = "/default/avatar5.jpg"
 const AVATAR3 = "/default/avatar4.jpg"
 const BACKEND_URL = "http://localhost:3000";
 
-export function ProfilePage(): HTMLElement 
+export function ProfilePage(): HTMLElement
 {
 	const root = document.createElement("div");
 	root.className = "relative min-h-screen flex flex-col";
@@ -44,7 +42,7 @@ export function ProfilePage(): HTMLElement
 	title.textContent = "UPDATE PROFIL"
 	titleContainer.appendChild(title);
 
-	
+
 
 	headerInner.appendChild(titleContainer);
 	header.appendChild(headerInner);
@@ -79,7 +77,7 @@ export function ProfilePage(): HTMLElement
 	avatarGrid.id = "avatarGrid";
 	avatarGrid.className = "grid grid-cols-4 gap-4 mt-1";
 
-	function makePreset(src: string, label: string): HTMLButtonElement 
+	function makePreset(src: string, label: string): HTMLButtonElement
 	{
 		const btn = document.createElement("button");
 		btn.type = "button";
@@ -170,7 +168,7 @@ export function ProfilePage(): HTMLElement
 	card.appendChild(nameSection);
 
 	// ---------- Change passeword ----------
-	
+
 	const passewordSection = document.createElement("section");
 	passewordSection.className = "flex flex-col gap-4 mt-4";
 
@@ -187,7 +185,7 @@ export function ProfilePage(): HTMLElement
 	passewordInput.className =
 	"w-full h-10 rounded-md px-3 bg-black text-indigo-100 focus:border-[hsl(345,100%,47%)] focus:ring-2 focus:ring-[hsl(345,100%,47%)] outline-none";
 	passewordSection.appendChild(passewordInput);
-	
+
 	const passewordLabels = document.createElement("label");
 	passewordLabels.className = "font-abee text-white";
 	passewordLabels.textContent = `New password: `;
@@ -206,63 +204,63 @@ export function ProfilePage(): HTMLElement
 
 	// ---------- Two-Factor Authentication  ----------
 
-	function updateTwoFAButton() 
+	function updateTwoFAButton()
 	{
 		twoFABtn.innerHTML = `
 			<div class="flex items-center justify-center gap-2">
-				<svg xmlns="http://www.w3.org/2000/svg" 
+				<svg xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 24 24" width="20" height="20"
 					fill="${profile.twoFA_enabled ? "hsl(345,100%,47%)" : "none"}"
-					stroke="currentColor" stroke-width="1.8" 
+					stroke="currentColor" stroke-width="1.8"
 					class="transition-all duration-300">
 					<path stroke-linecap="round" stroke-linejoin="round"
-						d="M16 10V7a4 4 0 10-8 0v3m-2 0h12a2 2 0 012 2v7a2 2 0 
+						d="M16 10V7a4 4 0 10-8 0v3m-2 0h12a2 2 0 012 2v7a2 2 0
 						01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2z"/>
 				</svg>
 				<span>${profile.twoFA_enabled ? "Disable 2FA" : "Enable 2FA"}</span>
 			</div>
 		`;
 	}
-	
+
 	// Popup confirmation
 
-		function open2FAPopup() 
+		function open2FAPopup()
 		{
 		const overlay = document.createElement("div");
 		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
-	
+
 		const modal = document.createElement("div");
 		modal.className = "bg-[#1e2124] p-8 rounded-xl border border-gray-700 flex flex-col gap-6 items-center w-[340px] shadow-xl";
-	
+
 		const text = document.createElement("p");
 		text.className = "text-white text-center font-abee";
 		text.textContent = profile.twoFA_enabled
 			? "Do you really want to disable 2FA?"
 			: "Enable 2FA on your account?";
-	
+
 		const yesBtn = document.createElement("button");
 		yesBtn.className = "w-28 h-10 rounded-md bg-[hsl(345,100%,47%)] text-white hover:[hsl(345,100%,47%)]/20";
 		yesBtn.textContent = "Yes";
 		yesBtn.onclick = async () => {
 			await toggle2FA();
-			updateTwoFAButton(); 
+			updateTwoFAButton();
 			document.body.removeChild(overlay);
 		};
-	
+
 		const cancelBtn = document.createElement("button");
 		cancelBtn.className = "w-28 h-10 rounded-md bg-gray-500 text-white hover:bg-gray-600";
 		cancelBtn.textContent = "Cancel";
 		cancelBtn.onclick = () => document.body.removeChild(overlay);
-	
+
 		modal.appendChild(text);
 		modal.appendChild(yesBtn);
 		modal.appendChild(cancelBtn);
-	
+
 		overlay.appendChild(modal);
 		document.body.appendChild(overlay);
 	}
 
-	// Two-Factor Authentication section 
+	// Two-Factor Authentication section
 
 	const twoFASection = document.createElement("section");
 	twoFASection.className = "flex flex-col gap-2 mt-4";
@@ -278,13 +276,13 @@ export function ProfilePage(): HTMLElement
 		"w-full h-10 rounded-md px-3 bg-[#424549] text-white hover:bg-[#36393e]  transition border-2 border-[#282b30]";
 	twoFABtn.innerHTML = `
     <div class="flex items-center justify-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" 
+        <svg xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24" width="20" height="20"
             fill="${profile.twoFA_enabled ? "hsl(345,100%,47%)" : "none"}"
-            stroke="currentColor" stroke-width="1.8" 
+            stroke="currentColor" stroke-width="1.8"
             class="transition-all duration-300">
             <path stroke-linecap="round" stroke-linejoin="round"
-                d="M16 10V7a4 4 0 10-8 0v3m-2 0h12a2 2 0 012 2v7a2 2 0 
+                d="M16 10V7a4 4 0 10-8 0v3m-2 0h12a2 2 0 012 2v7a2 2 0
                 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2z"/>
         </svg>
 
@@ -301,7 +299,7 @@ export function ProfilePage(): HTMLElement
 
 
 	// ----------change profil ----------
-	
+
 	const sendBtn = Button("Change profil", "w-full", () => {});
 	sendBtn.className =	"mt-4 w-full h-10 rounded-md px-3 bg-[hsl(345,100%,47%)] text-shadow-lg/30  text-white hover:bg-red-800  transition border-2 border-[#36393e]";
     //sendBtn.setAttribute("role", "button");
@@ -332,8 +330,8 @@ export function ProfilePage(): HTMLElement
 	{
 		payload.current_password = curPwd;
 		payload.password = newPwd;
-	} 
-	else if (curPwd || newPwd) 
+	}
+	else if (curPwd || newPwd)
 	{
 		console.warn("To change the password, fill in both fields.");
 		alert("To change the password, fill in both fields.");
@@ -349,7 +347,7 @@ export function ProfilePage(): HTMLElement
 
 	try {
 	const data = await fetchRequest("/update", "PUT", {},  {body: JSON.stringify(payload)});
-	
+
 	if (data.message === 'success')
 	{
 		profile.username = data.payload.username;
@@ -357,7 +355,7 @@ export function ProfilePage(): HTMLElement
 
 		console.log("Profile updated", data);
 		alert(("your profil has changed "));
-			
+
 	}
 	else
 	{
@@ -365,9 +363,9 @@ export function ProfilePage(): HTMLElement
 		alert("Error loading profile: " + (data.error || "Erreur inconnue"));
 	}
 
-	if (payload.username) 
+	if (payload.username)
 		profile.username = String(payload.username);
-	if (payload.email)    
+	if (payload.email)
 		profile.email = String(payload.email);
 
 	if (nameEl) nameEl.value = profile.username ?? "";
@@ -418,7 +416,7 @@ export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFil
 
 	upload_avatar(user, avatarPreview, avatarGrid);
 	bind_user_avatar_upload(user, avatarPreview, pickFileBtn, avatarFile);
-	
+
 }
 
 export function bind_user_avatar_upload(user: { avatar_url: string | null }, avatarPreview: HTMLImageElement,
@@ -458,7 +456,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
             const data = await res.json();
             if (!data.payload?.avatar_url) throw new Error("Avatar non reçu");
 
-            
+
             user.avatar_url = data.payload.avatar_url;
             profile.avatar_url = data.payload.avatar_url;
 
@@ -476,13 +474,13 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 
 export function upload_avatar(user: { avatar_url: string | null},  avatarPreview: HTMLImageElement,
     avatarGrid: HTMLDivElement): void {
-	
+
 	if (!avatarPreview || !avatarGrid) {
 		console.warn("upload_avatar: avatarPreview ou avatarGrid introuvable dans le DOM");
 		return;
 	}
 
-	
+
 	avatarPreview.onerror = () => {
 		avatarPreview.onerror = null;
 		avatarPreview.src = AVATAR_DEFAUT;
@@ -527,7 +525,7 @@ console.log(user.avatar_url);
 
 			try {
 				const res = await fetchRequest(
-					`/avatar`, 
+					`/avatar`,
 					"PUT",
 					{},
 					{body: JSON.stringify({avatar_url: url })}
@@ -539,7 +537,7 @@ console.log(user.avatar_url);
 				user.avatar_url = res.payload.avatar_url;
 				profile.avatar_url = res.payload.avatar_url;
 				avatarPreview.src = profile.avatar_url;
-				
+
 				highlight(btn);
 				selected = btn;
 			} catch (err) {

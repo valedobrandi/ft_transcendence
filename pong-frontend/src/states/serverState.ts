@@ -1,11 +1,11 @@
 export const serverState = new Proxy({ state: "" }, {
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
-		
+
         const matchBtn = document.getElementById("match-btn");
         const tourBtn = document.getElementById("tournament-btn");
 
-        const joinButtons = document.querySelectorAll(".btn-game-join");
+
 
         if (!matchBtn || !tourBtn) return true;
 

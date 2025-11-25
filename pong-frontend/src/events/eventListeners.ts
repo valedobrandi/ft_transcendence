@@ -104,7 +104,9 @@ export function eventListeners() {
 					const chatId = button.name;
 
 					console.log("Selected chat:", chatName, chatId);
+
 					stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
+
 					const buttons = document.querySelectorAll("#select-chat-btn");
 					buttons.forEach((button) => {
 						button.classList.remove("bg-gray-100");

@@ -2,7 +2,7 @@ import DOMPurify from "dompurify";
 import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
 
-export const matches = Array.from({ length: 40 }, (_, i) => ({
+export const matches = Array.from({ length: 40 }, (_) => ({
 	createAt: new Date(),
 	player1: "messi",
 	score1: 5,
@@ -67,8 +67,8 @@ export function ProfileContainer() {
 				<div class="flex items-center justify-around">
 					<!-- Avatar -->
 					<div class="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl overflow-hidden">
-						<img src=${stateProxyHandler.profile.avatar} 
-						alt="Avatar" 
+						<img src=${stateProxyHandler.profile.avatar}
+						alt="Avatar"
 						class="w-full h-full object-cover" />
 					</div>
 
@@ -95,7 +95,7 @@ export function ProfileContainer() {
 							.map(
 								(match) =>
 									`<li class="p-2">
-							<span>${match.createAt.toLocaleDateString()}</span>
+							<span>${match.createAt}</span>
 							<span>${match.player1}</span>
 							<span class=${match.score1 > match.score2 ? "text-green-800" : "text-red-800"}>
 								${match.score1}
@@ -120,9 +120,9 @@ export function ProfileContainer() {
 		`;
 	}
 
+	onRender();
 	onStateChange("profile", onRender);
 	onStateChange("matchesHistory", onRender);
 	onStateChange("chatBlockList", onRender);
-	onRender();
 	return mainDiv;
 }
