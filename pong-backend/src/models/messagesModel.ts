@@ -11,15 +11,6 @@ export type MessageReturnDB = {
 	sender: number;
 }
 
-export type MessageReturnDB = {
-	id: number;
-	sender_id: number;
-	receiver_id: number;
-	content: string;
-	timestamp: string;
-	isBlocked: number;
-	sender: number;
-}
 
 export type GetMessages = {
 	status: 'success' | 'error';

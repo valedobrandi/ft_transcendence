@@ -10,8 +10,8 @@ services:
     ports:
       - "443:443"
     environment:
-      - VITE_PONG_BACKEND_API=http://localhost:3000
-      - VITE_PONG_BACKEND_WEBSOCKET=ws://localhost:3000/ws
+      - VITE_PONG_BACKEND_API=https://localhost/api
+      - VITE_PONG_BACKEND_WEBSOCKET=wss://localhost/ws
     volumes:
       # SSL certificates
       - ./certs:/etc/ssl/private:ro

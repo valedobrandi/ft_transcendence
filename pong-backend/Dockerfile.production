@@ -27,11 +27,18 @@ COPY --from=builder /app/database ./database
 
 RUN useradd -m nodeuser \
     && chown -R nodeuser:nodeuser /app
+
+RUN mkdir -p /app/database && chown -R nodeuser:nodeuser /app/database
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
     
 USER nodeuser
 
 ENV NODE_ENV=production
 
 EXPOSE 3000
+
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 CMD ["node", "--trace-uncaught", "--trace-warnings", "dist/src/start.js"]
