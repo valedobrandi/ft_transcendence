@@ -1,6 +1,5 @@
 import { Intra } from "./components/Intra";
 import { Default } from "./components/PageDefault";
-import { Menu } from "./components/Menu";
 import { RenderGame } from "./components/RenderGame";
 import { Register } from "./components/FormRegister";
 import { FormLogin } from "./components/FormLogin";
@@ -37,7 +36,7 @@ export function intraView(root: HTMLElement) {
 
   // Main Intra Container
   const intraContainerUI = IntraContainer()
-  
+
   root.appendChild(intraContainerUI);
   //root.appendChild(Menu());
 

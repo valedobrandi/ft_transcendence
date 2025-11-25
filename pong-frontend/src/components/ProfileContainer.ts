@@ -2,7 +2,7 @@ import DOMPurify from "dompurify";
 import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
 
-export const matches = Array.from({ length: 40 }, (_, i) => ({
+export const matches = Array.from({ length: 40 }, (_) => ({
 	createAt: new Date(),
 	player1: "messi",
 	score1: 5,
@@ -11,6 +11,7 @@ export const matches = Array.from({ length: 40 }, (_, i) => ({
 }));
 
 function BlockButton(): string {
+	console.log("BlockButton render", stateProxyHandler.chatBlockList);
 	const isBlocked = stateProxyHandler.chatBlockList?.includes(
 		stateProxyHandler.selectChat?.id
 	);
@@ -52,9 +53,8 @@ function addFriendButton(): string {
 export function ProfileContainer() {
 	const mainDiv = document.createElement("div");
 
-
-
 	function onRender() {
+		const matchesHistory = stateProxyHandler.matchesHistory;
 		const isUserProfile = stateProxyHandler.selectChat.id === profile.id;
 		mainDiv.innerHTML = `
 		<div class="flex flex-col border-2 border-black rounded-2xl h-full text-base">
@@ -67,8 +67,8 @@ export function ProfileContainer() {
 				<div class="flex items-center justify-around">
 					<!-- Avatar -->
 					<div class="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl overflow-hidden">
-						<img src=${stateProxyHandler.profile.avatar} 
-						alt="Avatar" 
+						<img src=${stateProxyHandler.profile.avatar}
+						alt="Avatar"
 						class="w-full h-full object-cover" />
 					</div>
 
@@ -82,20 +82,20 @@ export function ProfileContainer() {
 				<!-- Container 2: Stack of P tags -->
 				<div class="flex flex-col items-start gap-2">
 					<p>${DOMPurify.sanitize(stateProxyHandler.profile.username)} </p>
-					<p>WINS: ${stateProxyHandler.matchesHistory.wins}</p>
-					<p>LOSES: ${stateProxyHandler.matchesHistory.loses}</p>
+					<p>WINS: ${matchesHistory.wins}</p>
+					<p>LOSES: ${matchesHistory.loses}</p>
 				</div>
 
 				<!-- Container 3: List -->
 				<div class="min-h-0">
 					<h3 class="text-lg font-bold mb-2">Match History</h3>
 					<ul class=" overflow-y-auto min-h-0 max-h-[50vh] space-y-2 text-base">
-						${matches.length !== 0
-						? matches
+						${matchesHistory.history.length !== 0
+						? matchesHistory.history
 							.map(
 								(match) =>
 									`<li class="p-2">
-							<span>${match.createAt.toLocaleDateString()}</span>
+							<span>${match.createAt}</span>
 							<span>${match.player1}</span>
 							<span class=${match.score1 > match.score2 ? "text-green-800" : "text-red-800"}>
 								${match.score1}
@@ -120,9 +120,9 @@ export function ProfileContainer() {
 		`;
 	}
 
+	onRender();
 	onStateChange("profile", onRender);
 	onStateChange("matchesHistory", onRender);
 	onStateChange("chatBlockList", onRender);
-	onRender();
 	return mainDiv;
 }

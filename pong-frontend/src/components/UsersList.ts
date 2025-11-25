@@ -1,5 +1,4 @@
 import { stateProxyHandler, onMessageChange, type FriendListType, type ServerUsersList } from "../states/stateProxyHandler";
-import { profile } from "../app";
 import { fetchRequest } from "../utils";
 
 export type ListType = "FRIENDS" | "SERVER";
@@ -49,7 +48,7 @@ export function List(
 
         btn.value = `${name}`;
         btn.name = `${user.id}`;
-        
+
         usersDiv.appendChild(btn);
     });
     // Add bg-gray-100 to the selected chat button

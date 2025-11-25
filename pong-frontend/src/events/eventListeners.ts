@@ -104,7 +104,9 @@ export function eventListeners() {
 					const chatId = button.name;
 
 					console.log("Selected chat:", chatName, chatId);
+
 					stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
+
 					const buttons = document.querySelectorAll("#select-chat-btn");
 					buttons.forEach((button) => {
 						button.classList.remove("bg-gray-100");
@@ -126,6 +128,12 @@ export function eventListeners() {
 				const socket = getSocket();
 				if (!socket) return;
 				socket.send(JSON.stringify({ type: 'MATCH', username: profile.username, userId: profile.id }));
+			}
+				break;
+			case "create-match-btn": {
+				await fetchRequest("/match-create", "POST", {}, {
+					body: JSON.stringify({ settings: { username: profile.username } })
+				});
 			}
 				break;
 		}
@@ -167,6 +175,11 @@ async function blockUser() {
 		newIntraMessage(
 			`User ${stateProxyHandler.selectChat.name} has been blocked.`
 		);
+		await fetchRequest("/block-list", "GET", {}).then((data) => {
+			if (data.message === "success") {
+				stateProxyHandler.chatBlockList = data.payload;
+			}
+		});
 	}
 };
 

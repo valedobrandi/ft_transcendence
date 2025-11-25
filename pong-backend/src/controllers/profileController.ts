@@ -14,37 +14,38 @@ class ProfileControler {
     async updateUser(req: FastifyRequest<{ Params: { id: number }, Body: UpdateBody }>, res: FastifyReply) {
         const usersModel = new UsersModel(db);
         try {
-            const { email, username, password } = req.body;
-            const { id } = req.user as { id: number };
 
-            const player = getIdUser(id);
+
+            const player = getIdUser(req.userId);
             if (!player)
                 return res.status(404).send({ error: 'user not found' });
+			if (req.body.username) {
+				const checkUsernameAlready = usersModel.findUserByUsername(req.body.username);
+				if (checkUsernameAlready)
+					return res.status(408).send({ error: 'user already use' })
+				const checkEmailAlready = usersModel.findUserByEmail(req.body.username);
+				if (checkEmailAlready)
+					return res.status(407).send({ error: 'Email already use' })
+			}
 
-            const checkUsernameAlready = usersModel.findUserByUsername(username);
-            if (checkUsernameAlready)
-                return res.status(408).send({ error: 'user already use' })
-            const checkEmailAlready = usersModel.findUserByEmail(username);
-            if (checkEmailAlready)
-                return res.status(407).send({ error: 'Email already use' })
+            if (req.body.email !== undefined)
+                player.email = req.body.email;
+            if (req.body.username !== undefined)
+                player.username = req.body.username;
 
-            if (email !== undefined)
-                player.email = email;
-            if (username !== undefined)
-                player.username = username;
-
-            if (password) {
+            if (req.body.password) {
                 if (!req.body.current_password)
                     return res.status(422).send({ error: 'current_password required to change password' });
                 const ok = await bcrypt.compare(req.body.current_password, player.password);
                 if (!ok)
                     return res.status(401).send({ error: 'invalid current password' });
-                player.password = await bcrypt.hash(password, 10);
+                player.password = await bcrypt.hash(req.body.password, 10);
             }
+
             // <-- BERNARDO START EDIT -->
             updatedUserInDB(player);
             // <-- BERNARDO END EDIT -->
-            return res.status(200).send({ message: 'success', payload: { username, email } });
+            return res.status(200).send({ message: 'success', payload: { username: req.body.username, email:req.body.email } });
         }
         catch (error) {
             req.log.error(error);
@@ -84,7 +85,7 @@ class ProfileService {
         const profileData = {
             id: data.id,
             username: data.username,
-            avatar: data.avatar_url ? data.avatar_url : "",
+            avatar: data.avatar_url,
         };
         return { message: 'success', data: profileData };
     }

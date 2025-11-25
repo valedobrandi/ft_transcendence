@@ -28,7 +28,7 @@ export function Menu(): HTMLDivElement {
     joinTournament.id = "tournament-btn";
 
     const CreateMatchBtn = Button("CREATE MATCH", "h-10 w-30 rounded", async () => {
-        const response = await fetchRequest("/match-create", "POST", {}, {
+        await fetchRequest("/match-create", "POST", {}, {
             body: JSON.stringify({ settings: {username: profile.username} })
         });
     });

@@ -1,12 +1,6 @@
 import { profile } from "../app";
-import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
+import { stateProxyHandler } from "../states/stateProxyHandler";
 import { ButtonMatchList } from "./ButtonMatchList";
-
-
-export const mockMatches = Array.from({ length: 40 }, (_, i) => ({
-   matchId: "OTHER SETTINGS", status: "PLAYER NAME", createId: i,
-}));
-
 
 export function MatchList(): string {
   const matchDiv = document.createElement("div");
@@ -16,10 +10,9 @@ export function MatchList(): string {
   matchListUl.id = "match-list";
   matchListUl.className = "space-y-2";
 
-  const matchList = mockMatches;
   function onRenderMatchList() {
     matchListUl.innerHTML = "";
-    matchList.forEach((match) => {
+    stateProxyHandler.availableMatches.forEach((match) => {
       const matchesLi = document.createElement("li");
       matchesLi.className =
         "flex justify-between items-center border-b-2 p-2";
@@ -58,10 +51,8 @@ export function MatchList(): string {
   }
 
   onRenderMatchList();
-  onStateChange("availableMatches", onRenderMatchList);
-  //onStateChange("state", onRenderMatchList);
 
-  if (matchList.length === 0) {
+  if (stateProxyHandler.availableMatches.length === 0) {
     const noMatchesLi = document.createElement("li");
     noMatchesLi.className = "text-center";
     noMatchesLi.innerText = "NO MATCHES AVAILABLE";
@@ -69,5 +60,5 @@ export function MatchList(): string {
   }
 
   matchDiv.appendChild(matchListUl);
-  return matchDiv.innerHTML || "";
+  return matchDiv.innerHTML;
 }

@@ -1,6 +1,6 @@
 export type GuestPostDTO = {
     username: string;
-    id: number | bigint;
+    id: number;
     code: string
 };
 

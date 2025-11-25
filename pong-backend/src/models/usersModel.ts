@@ -4,6 +4,16 @@ import { SaveUser } from '../types/RouteGuest';
 import { print } from '../server';
 import { connectedRoomInstance } from '../state/ConnectedRoom';
 
+export type UserReturnDB = {
+	id: number;
+	username: string;
+	email: string;
+	password: string;
+	status: string;
+	twoFA_enabled: number;
+	avatar_url: string | null;
+}
+
 class UsersModel {
     private db: Database.Database;
     private stmFindUser: Database.Statement;
@@ -45,21 +55,21 @@ class UsersModel {
         return { message: 'success', data: returnDB };
     }
 
-    saveGuestUsername(username: string): SaveUser {
-        try {
-            const guestEmail = `${username}@guest.com`;
-            const guestPassword = crypto.randomUUID();
-            const response: RunResult = this.stmSaveGuestUsername.run(username, guestEmail, guestPassword, 'DISCONNECT', 0);
-            connectedRoomInstance.broadcastRegisteredUsers();
-            return { message: 'success', id: response.lastInsertRowid, username };
-        } catch (error) {
-            print('error saving guest username');
-            return { status: 'error', error: 'error saving guest username' };
-        }
-    }
+    // saveNewUser(username: string): SaveUser {
+    //     try {
+    //         const guestEmail = `${username}@guest.com`;
+    //         const guestPassword = crypto.randomUUID();
+    //         const response: RunResult = this.stmSaveGuestUsername.run(username, guestEmail, guestPassword, 'DISCONNECT', 0);
+    //         connectedRoomInstance.broadcastRegisteredUsers();
+    //         return { message: 'success', id: response.lastInsertRowid, username };
+    //     } catch (error) {
+    //         print('error saving guest username');
+    //         return { status: 'error', error: 'error saving guest username' };
+    //     }
+    // }
 
     getAllUsers(): Array<{ id: number | bigint; username: string }> {
-        return this.stmGetAllUsers.all();
+        return this.stmGetAllUsers.all() as UserReturnDB[];
     }
 }
 

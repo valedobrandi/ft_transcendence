@@ -122,6 +122,7 @@ export type MatchesHistory = {
     wins: number;
     loses: number;
     history: {
+        createAt: Date;
         player1: string;
         score1: number;
         player2: string;
@@ -219,9 +220,13 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
 
         if (prop === 'selectChat') {
             changeChatHeader(stateProxyHandler.selectChat.name);
+
             const isIntra = stateProxyHandler.selectChat.id === -1;
+
             const chatMenu = document.getElementById("chat-menu");
+
             if (chatMenu) chatMenu.classList.remove("hidden");
+			
             if (isIntra && chatMenu) {
                 chatMenu.classList.add("hidden");
             };

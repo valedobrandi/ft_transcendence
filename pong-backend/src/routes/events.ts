@@ -37,13 +37,15 @@ function eventsRoutes(fastify: FastifyInstance) {
     fastify.post('/add-event', {
         preHandler: [fastify.authenticate],
         schema: {
-            types: 'object',
-            properties: {
-                to_id: { type: 'number' },
-                from_id: { type: 'number' },
-                type: { type: 'string' },
-                message: { type: 'string' }
-            },
+			body: {
+				type: 'object',
+				properties: {
+					to_id: { type: 'number' },
+					from_id: { type: 'number' },
+					type: { type: 'string' },
+					message: { type: 'string' }
+				},
+			},
             required: ['to_id', 'from_id', 'type', 'message']
         },
         handler: eventsControllerInstance.insertEvent.bind(eventsControllerInstance)
@@ -99,7 +101,7 @@ class EventsController {
         return res.status(statusCode('OK')).send({ message, data });
     }
 
-    deleteEvent(req: FastifyRequest<{ querystring: { eventId: number } }>, res: FastifyReply) {
+    deleteEvent(req: FastifyRequest<{ Querystring: { eventId: number } }>, res: FastifyReply) {
         const eventId = Number(req.query.eventId);
         const { message, data } = this.eventsServiceInstance.deleteEvent(eventId);
         return res.status(statusCode('OK')).send({ message, data });
@@ -156,6 +158,15 @@ class EventsService {
     }
 }
 
+export type EventsReturnDB = {
+	id: number;
+	type: string;
+	from_id: number;
+	to_id: number;
+	payload: string;
+	timestamp: string;
+}
+
 class EventsModel {
     private db: Database.Database;
     private stmInsertEvent: Database.Statement;
@@ -180,7 +191,7 @@ class EventsModel {
     }
 
     getDuplicateEvent(type: string, fromId: number, toId: number): GetEvents {
-        const response = this.stmGetDuplicateEvent.all({ type, fromId, toId });
+        const response = this.stmGetDuplicateEvent.all({ type, fromId, toId }) as NewEventsDB[];
         return { message: 'success', data: response };
     }
 

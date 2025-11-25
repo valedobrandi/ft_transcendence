@@ -1,4 +1,3 @@
-import { ChatHeader } from "./ChatHeader";
 import { SystemMessageChat } from "./ChatIntra";
 import { ChatSendInput } from "./ChatSendInput";
 import { UsersList } from "./UsersList";
