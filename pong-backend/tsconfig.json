@@ -1,18 +1,23 @@
 {
-    "compilerOptions": {
-      "lib": ["es2023"],
-      "target": "es2022",
-      "module": "ESNext",
-      "moduleResolution": "node",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "allowSyntheticDefaultImports": true,
-      "resolveJsonModule": true,
-      "outDir": "dist"
-    },
-    "ts-node": {
-      "esm": true
-    },
-    "exclude": ["node_modules", "vitest"]
-  }
+	"compilerOptions": {
+		"lib": [
+			"es2023"
+		],
+		"target": "es2022",
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"outDir": "dist"
+	},
+	"ts-node": {
+		"esm": true
+	},
+	"exclude": [
+		"node_modules",
+		"vitest"
+	]
+}
