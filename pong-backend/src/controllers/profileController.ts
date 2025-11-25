@@ -82,6 +82,9 @@ class ProfileService {
         if (message === 'error') {
             return { message: 'error', data: 'user not found' };
         }
+        const controlFolderAvatar = data.avatar_url.startsWith("/images/")
+        if(controlFolderAvatar)
+            data.avatar_url = "http://localhost:3000" + data.avatar_url;
         const profileData = {
             id: data.id,
             username: data.username,
