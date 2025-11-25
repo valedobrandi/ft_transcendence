@@ -19,8 +19,6 @@ fastify.put(
             const { twoFA_enabled } = req.body;
             const userId = req.userId;
 
-            console.log("2FA received =", twoFA_enabled);
-
             if (twoFA_enabled !== 0 && twoFA_enabled !== 1) {
                 return reply.status(400).send({ error: "Invalid 2FA value (must be 0 or 1)" });
             }
@@ -39,7 +37,6 @@ fastify.put(
             });
 
         } catch (e) {
-            console.error(e);
             return reply.status(500).send({ message: "error", error: e });
         }
     }

@@ -54,7 +54,7 @@ export function FormLogin(): HTMLElement {
 		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
 
 		const modal = document.createElement("div");
-		modal.className = "bg-gray-900 p-8 rounded-xl border border-gray-700 flex flex-col gap-6 items-center w-[380px] shadow-xl";
+		modal.className = "bg-[#1e2124] p-8 rounded-xl border border-[#424549] flex flex-col gap-6 items-center w-[380px] shadow-xl";
 
 		const title = document.createElement("h2");
 		title.className = "text-3xl game-font text-[hsl(345,100%,47%)]";
@@ -67,7 +67,7 @@ export function FormLogin(): HTMLElement {
 		const input = document.createElement("input");
 		input.type = "text";
 		input.maxLength = 6;
-		input.className = "text-gray-900 bg-gray-400 px-4 py-2 rounded w-full";
+		input.className = "text-gray-200 bg-black px-4 py-2 rounded w-full";
 		input.placeholder = "123456";
 
 		const error = document.createElement("p");
@@ -158,7 +158,7 @@ export function FormLogin(): HTMLElement {
 			profile.username = response.payload.username;
 			//profile.url_avatar = response.payload.existingUser.avatar_url
 			profile.id = response.payload.id;
-			stateProxyHandler.selectChat = { id: profile.id, name: "Bienvenue dans le chat !" };
+			stateProxyHandler.selectChat = { id: profile.id, name: "Welcome to the chat !" };
 
 			const [friendsList, blockedList] = await Promise.all([
 				fetchRequest('/friends-list', 'GET', {}),

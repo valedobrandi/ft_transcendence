@@ -1,6 +1,7 @@
 import { fetchRequest, toggle2FA } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
+import { navigateTo } from "../utils";
 
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default1.jpg"
@@ -32,6 +33,43 @@ export function ProfilePage(): HTMLElement
 	const headerInner = document.createElement("div");
 	headerInner.className = "flex items-center justify-between relative";
 
+	// Bouton flèche "Gaming Back"
+	const backBtn = document.createElement("button");
+	backBtn.className = `
+		absolute left-0 top-2
+		flex items-center justify-center
+		w-12 h-12
+		group
+		transition
+	`;
+
+	backBtn.innerHTML = `
+		<div class="
+			w-12 h-12 flex items-center justify-center
+			bg-black/40 border border-red-600
+			rounded-xl
+			shadow-[0_0_10px_rgba(255,0,0,0.4)]
+			group-hover:shadow-[0_0_18px_rgba(255,0,0,0.9)]
+			group-hover:border-red-500
+			transition-all duration-200
+			group-hover:scale-110
+		">
+			<svg xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				class="w-8 h-8 text-red-500 group-hover:text-red-400 transition">
+				
+				<!-- Chevron gaming stylisé -->
+				<path fill="currentColor"
+					d="M14.8 3.3 6.1 12l8.7 8.7 1.9-1.9L9.9 12l6.8-6.8-1.9-1.9z"/>
+			</svg>
+		</div>
+	`;
+
+backBtn.onclick = () => {
+    navigateTo("/intra");
+};
+
+
 	// ===== Zone centre : Profil =====
 
 	const titleContainer = document.createElement("div");
@@ -43,7 +81,7 @@ export function ProfilePage(): HTMLElement
 	titleContainer.appendChild(title);
 
 
-
+	headerInner.appendChild(backBtn);
 	headerInner.appendChild(titleContainer);
 	header.appendChild(headerInner);
 	root.appendChild(header);
@@ -103,11 +141,14 @@ export function ProfilePage(): HTMLElement
 	pickFileBtn.type = "button";
 	pickFileBtn.id = "pickFileAvatar";
 	pickFileBtn.className =
-		"w-16 h-16 rounded-full bg-[#36393e] flex items-center justify-center hover:bg-black/40 transition ring-0 focus:outline-none";
-	pickFileBtn.setAttribute("aria-label", "Ajouter un avatar personnalisé");
+		"w-16 h-16 rounded-full bg-[#36393e] flex items-center justify-center hover:bg-black/40 transition ring-0 focus:outline-none group";
+	pickFileBtn.setAttribute("aria-label", "Add a custom avatar");
 
 	pickFileBtn.innerHTML = `
-		<svg viewBox="0 0 24 24" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2">
+		<svg viewBox="0 0 24 24" 
+			class="w-7 h-7 text-black group-hover:text-red-500 transition" 
+			fill="none" stroke="currentColor" stroke-width="2">
+			
 			<circle cx="12" cy="12" r="11" class="opacity-20"></circle>
 			<path d="M12 7v10M7 12h10" />
 		</svg>

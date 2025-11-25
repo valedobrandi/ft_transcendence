@@ -27,7 +27,6 @@ export default function profilRoute(fastify: FastifyInstance)
             {
                 try 
                 {
-                    
                     const id = request.user.id
                     const existUser = getIdUser(id);
                     if(!existUser)
