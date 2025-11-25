@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { fastify, print } from "../server";
+import { fastify, print } from "../server.js";
 
 export type MessageReturnDB = {
 	id: number;
