@@ -17,6 +17,7 @@ FROM nginx:1.25.0-alpine AS production
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
-EXPOSE 5173
+EXPOSE 80
+EXPOSE 443
 
 CMD [ "nginx", "-g", "daemon off;" ]
