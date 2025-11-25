@@ -223,10 +223,19 @@ class MatchesService {
 				player2: m.player2,
 				score2: m.score2,
 			});
-			if (m.score1 > m.score2) {
-				matchesHistory.wins += 1;
-			} else {
-				matchesHistory.loses += 1;
+			if(m.player1 === username)
+			{
+				if (m.score1 > m.score2)
+					matchesHistory.wins += 1;
+				if (m.score1 < m.score2)
+					matchesHistory.loses += 1;
+			}
+			if(m.player2 === username)
+			{
+				if (m.score1 < m.score2)
+					matchesHistory.wins += 1;
+				if (m.score1 > m.score2)
+					matchesHistory.loses += 1;
 			}
 		}
 

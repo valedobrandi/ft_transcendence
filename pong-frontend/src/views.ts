@@ -13,6 +13,8 @@ import { profile } from "./app";
 import { ProfileContainer } from "./components/ProfileContainer";
 import { GameContainerUI } from "./components/GameContainer";
 import { IntraContainer } from "./components/IntraContainer";
+import { stateProxyHandler } from "./states/stateProxyHandler";
+
 
 // <!-- OLD INTRA VIEW -->
 
@@ -33,6 +35,7 @@ export function intraView(root: HTMLElement) {
   initSocket(endpoint.pong_backend_websocket, profile.username);
   websocketConnect();
   root.innerHTML = "";
+  stateProxyHandler.selectChat = {id: profile.id, name: profile.username}
 
   // Main Intra Container
   const intraContainerUI = IntraContainer()
