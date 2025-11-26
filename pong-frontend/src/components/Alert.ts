@@ -19,7 +19,6 @@ export class Alert {
       "game-font ",
       "relative",
       "p-6",
-      "max-w-lg",
       "w-[90%]",
       "text-center",
       "rounded-lg",

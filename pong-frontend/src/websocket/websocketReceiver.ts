@@ -41,7 +41,18 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       case "TOURNAMENT_ROOM":
         stateProxyHandler.state = data.message;
-        newIntraMessage(`You have joined the tournament room.`);
+        const idx = newIntraMessage("");
+        updateIntraMessage(
+          idx,
+          `You have joined the tournament room.
+          <button 
+          class="bg-red-500 text-white ml-4 p-1 rounded text-xs"
+          id="btn-leave-tournament"
+          data-eventindex=${idx}
+          >
+            CANCEL
+          </button>`
+        );
         break;
       case "GAME_OVER":
         newIntraMessage(data.payload.message);
@@ -124,27 +135,41 @@ export async function websocketReceiver(socket: WebSocket) {
           (user) => user.id === data.payload.from
         )?.name;
         const idx = newIntraMessage("");
-        updateIntraMessage(idx, `You have received a game invite from ${getName}.
-          ${EmbeddedButton(data.payload.matchId, "YES", `${idx}`, "accept-match-invite")}
-          ${EmbeddedButton(data.payload.matchId, "NO", `${idx}`, "cancel-match-invite")}`);
+        updateIntraMessage(
+          idx,
+          `You have received a game invite from ${getName}.
+          ${EmbeddedButton(
+            data.payload.matchId,
+            "YES",
+            `${idx}`,
+            "accept-match-invite"
+          )}
+          ${EmbeddedButton(
+            data.payload.matchId,
+            "NO",
+            `${idx}`,
+            "cancel-match-invite"
+          )}`
+        );
         stateProxyHandler.state = "MATCH_INVITE";
         break;
       }
-      case "MATCH_DECLINED": {
-        const getName = stateProxyHandler.serverUsers.find(
-          (user) => user.id === data.payload.from
-        )?.name;
-        newIntraMessage(`invitation canceled by ${getName}`);
-        const idx = stateProxyHandler.systemMessages.findIndex((msg) =>
-          msg.message.includes(`${data.payload.matchId}"`)
-        );
-        if (idx !== -1) {
-          removeIntraMessage(idx);
+      case "MATCH_DECLINED":
+        {
+          const getName = stateProxyHandler.serverUsers.find(
+            (user) => user.id === data.payload.from
+          )?.name;
+          newIntraMessage(`invitation canceled by ${getName}`);
+          const idx = stateProxyHandler.systemMessages.findIndex((msg) =>
+            msg.message.includes(`${data.payload.matchId}"`)
+          );
+          if (idx !== -1) {
+            removeIntraMessage(idx);
+          }
+          stateProxyHandler.state = "CONNECT_ROOM";
         }
-        stateProxyHandler.state = "CONNECT_ROOM";
-      }
         break;
-      case 'intra:message': {
+      case "intra:message": {
         newIntraMessage(data.payload.message);
       }
     }
