@@ -4,7 +4,7 @@ import authRoutes from './routes/auth.js';
 import loginRoute from './routes/login.js';
 import { friendsRoute } from './routes/friend.js';
 import websocketRoute from './routes/websocket.js';
-import * as jwt from '@fastify/jwt';
+import jwt from '@fastify/jwt';
 import profilRoute from './routes/profil.js';
 import chatBlockRoute from './routes/chatBlock.js';
 import { eventsRoutes } from './routes/events.js';
@@ -49,7 +49,7 @@ fastify.decorateRequest("userId", 0);
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
 	try
 	{
-		const decoded = await request.jwtVerify();
+		const decoded = await request.jwtVerify() as { id: number };
         print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
 		request.userId = decoded.id;
         if (request.userId === 0) {

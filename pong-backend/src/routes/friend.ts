@@ -1,9 +1,9 @@
 import Database from 'better-sqlite3'
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { fastify, print } from '../server.js';
-import { statusCode } from "../types/statusCode";
-import db from "../../database/db";
-import { connectedRoomInstance } from "../state/ConnectedRoom";
+import { statusCode } from "../types/statusCode.js";
+import db from "../../database/db.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 
 export interface FriendListDTO {
 	id: string;
@@ -97,9 +97,9 @@ class FriendService {
 		connectedRoomInstance.friendListSet(userId).save(data.filter(id => id !== Number(userId)));
 		const createFriendList = connectedRoomInstance.friendListSet(userId)
 			.get().map((friendId: number | bigint) => ({
-			id: friendId,
-			isConnected: connectedRoomInstance.has(friendId) ? true : false
-		}));
+				id: friendId,
+				isConnected: connectedRoomInstance.has(friendId) ? true : false
+			}));
 		return { message, data: createFriendList };
 	}
 
@@ -130,6 +130,12 @@ class FriendService {
 	}
 }
 
+export type FriendReturnDB = {
+	id: number;
+	user_id: number;
+	friend_id: number;
+	created_at: string;
+}
 
 class FriendsModel {
 	private db: Database.Database;
@@ -147,14 +153,15 @@ class FriendsModel {
 		this.stmAddFriend = db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)');
 		this.stmRemoveFriend = db.prepare('DELETE FROM friends WHERE user_id = ? AND friend_id = ?');
 		this.stmGetFriendStatus = db.prepare(
-			`SELECT * FROM friends 
-				WHERE user_id = ? AND friend_id = ? 
+			`SELECT * FROM friends
+				WHERE user_id = ? AND friend_id = ?
 					OR user_id = ? AND friend_id = ?`);
 	}
 
 	getFriendsList(userId: number): GetFriendsList {
-		const response = this.stmGetFriendsList.all(userId, userId);
-		return { message: 'success', data: response.map(row => row.friendId) };
+		const response = this.stmGetFriendsList.all(userId, userId) as FriendsTableModel[];
+		const friendIds = response.map(row => row.friend_id);
+		return { message: 'success', data: friendIds};
 	}
 
 	checkFriendsStatus(userId: number, friendId: number): boolean {

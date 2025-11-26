@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { fastify, print } from "../server";
+import { fastify, print } from "../server.js";
 
 export type MessageReturnDB = {
 	id: number;
@@ -10,6 +10,7 @@ export type MessageReturnDB = {
 	isBlocked: number;
 	sender: number;
 }
+
 
 export type GetMessages = {
 	status: 'success' | 'error';

@@ -1,6 +1,6 @@
-import { FastifyInstance, FastifyRequest } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ProfileControler } from '../controllers/profileController.js';
-import { getIdUser, updatedUserInDB } from '../user_service/user_service';
+import { getIdUser } from '../user_service/user_service.js';
 
 export default function profilRoute(fastify: FastifyInstance)
 {
@@ -23,17 +23,18 @@ export default function profilRoute(fastify: FastifyInstance)
 
         fastify.get('/profile', {
             preHandler: [fastify.authenticate],
-            handler: (async (request: FastifyRequest, res) => 
+            handler: (async (request: FastifyRequest, res: FastifyReply) =>
             {
-                try 
+                try
                 {
-                    const id = request.user.id
+
+                    const id = request.userId;
                     const existUser = getIdUser(id);
                     if(!existUser)
                         return res.status(400).send({error: "error user not found"})
                     return res.status(200).send({ message: 'success', existUser });
                 }
-                catch (error) 
+                catch (error)
                 {
                     const err = error as Error;
                     return res.status(404).send({ error: err.message });

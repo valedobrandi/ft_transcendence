@@ -1,11 +1,11 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { getIdUser, updatedUserInDB } from '../user_service/user_service';
+import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
 import bcrypt from 'bcrypt';
-import { UpdateBody } from '../types/ProfilType';
+import { UpdateBody } from '../types/ProfilType.js';
 import { UsersModel } from '../models/usersModel.js';
 import db from '../../database/db.js'
-import { print } from '../server';
-import { statusCode } from '../types/statusCode';
+import { print } from '../server.js';
+import { statusCode } from '../types/statusCode.js';
 
 class ProfileControler {
 
