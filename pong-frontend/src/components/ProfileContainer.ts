@@ -50,6 +50,15 @@ function addFriendButton(): string {
 	}
 }
 
+function updateProfileButton(): string {
+	return `
+		<button id="update-profile"
+			class="border-2 border-black p-6 rounded hover:bg-blue-300">
+			UPDATE PROFILE
+		</button>
+		`;
+}
+
 export function ProfileContainer() {
 	const mainDiv = document.createElement("div");
 
@@ -78,6 +87,7 @@ export function ProfileContainer() {
 					<div class="flex flex-col gap-2 w-40 h-40">
 						${ isUserProfile ? "" : addFriendButton()}
 						${ isUserProfile ? "" : BlockButton()}
+						${ isUserProfile ? updateProfileButton() : "" }
 					</div>
 				</div>
 

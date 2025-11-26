@@ -1,3 +1,4 @@
+import { profile } from "../app";
 import { stateProxyHandler, onMessageChange, type FriendListType, type ServerUsersList } from "../states/stateProxyHandler";
 import { fetchRequest } from "../utils";
 
@@ -29,6 +30,9 @@ export function List(
 
     users.forEach((user) => {
         // Get name form serverUsers
+        if (user.id === profile.id) {
+            return; // Skip current user
+        }
         const serverUSer = stateProxyHandler.serverUsers.find((u) => u.id === user.id);
         const name = serverUSer ? serverUSer.name : "Unknown";
         const btn = document.createElement("button");
