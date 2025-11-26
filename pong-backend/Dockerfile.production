@@ -4,12 +4,9 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 # Copy source and build
 COPY . .
-
-# Remove test-related files
-RUN rm -rf app/scripts_test
 
 RUN npm run build
 
@@ -19,19 +16,20 @@ WORKDIR /app
 
 # Install only production dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci --omit=dev
+
 
 # Copy compiled output and any runtime assets
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/database ./database
 
-RUN useradd -m nodeuser \
-    && chown -R nodeuser:nodeuser /app
-    
-USER nodeuser
+# Initialize the database
+RUN npx tsx /app/database/init.ts
 
 ENV NODE_ENV=production
 
 EXPOSE 3000
+
+
 
 CMD ["node", "--trace-uncaught", "--trace-warnings", "dist/src/start.js"]
