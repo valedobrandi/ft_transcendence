@@ -64,7 +64,6 @@ export function ProfileContainer() {
 
 	function onRender() {
 		const matchesHistory = stateProxyHandler.matchesHistory;
-		console.log("HFUDHIFUDIFIASFGIUFA", matchesHistory);
 		const isUserProfile = stateProxyHandler.selectChat.id === profile.id;
 		
 		mainDiv.innerHTML = `

@@ -6,6 +6,7 @@ import { profile, jwt } from "../app";
 import { stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
 import { onClickGetProfileData } from "./UsersList";
+import { closeSocket } from "../websocket";
 
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
@@ -137,27 +138,30 @@ export function FormLogin(): HTMLElement {
 		const username_input = document.getElementById('register_username') as HTMLInputElement;
 		const password_input = document.getElementById('register_password') as HTMLInputElement;
 		if (username_input === null || password_input === null) return;
-
+		
 		const username = username_input.value.trim();
 		const password = password_input.value.trim();
-
+		
 		const response = await fetchRequest(
 			`/login`,
 			'POST',
 			{},
 			{ body: JSON.stringify({ username, password }) }
 		);
-
+		
 		if (response.message === "2FA_REQUIRED") {
 			create2FAPopup(response.username);
 			return;
 		}
-
+		
 		if (response.message === 'success') {
+			stateProxyHandler.reset();
+			closeSocket();
 			jwt.token = response.payload.accessToken;
 			profile.username = response.payload.username;
 			//profile.url_avatar = response.payload.existingUser.avatar_url
 			profile.id = response.payload.id;
+			// reset stateProxy/handler
 			stateProxyHandler.selectChat = { id: profile.id, name: "Welcome to the chat !" };
 
 			const [friendsList, blockedList] = await Promise.all([
