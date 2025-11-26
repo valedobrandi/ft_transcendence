@@ -2,7 +2,7 @@ export function ProfileLogoutButton() {;
   return `
 <div class="p-4 flex justify-around items-center w-full">
   <button 
-  id="profile-btn" 
+  id="view-profile" 
   class="border-2 border-black p-4 rounded cursor-pointer hover:bg-gray-200">
     PROFILE
   </button>

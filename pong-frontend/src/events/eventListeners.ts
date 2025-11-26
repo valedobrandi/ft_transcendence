@@ -90,7 +90,11 @@ export function eventListeners() {
 		console.log("Button clicked:", button.id);
 
 		switch (button.id) {
-			case "profile-btn": { await profileOnclick(); }
+			case "update-profile": { await profileOnclick(); }
+				break;
+			case "view-profile": { 
+				stateProxyHandler.selectChat = { name: profile.username, id: profile.id };
+			 }
 				break;
 			case "accept-match-invite": { await onClickAcceptMatchInvite(button); }
 				break;
