@@ -196,6 +196,7 @@ type MatchesHistory = {
 		score1: number;
 		player2: string;
 		score2: number;
+		createdAt: string;
 	}[]
 }
 
@@ -222,6 +223,7 @@ class MatchesService {
 				score1: m.score1,
 				player2: m.player2,
 				score2: m.score2,
+				createdAt: m.created_at,
 			});
 			if(m.player1 === username)
 			{

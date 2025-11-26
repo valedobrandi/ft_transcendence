@@ -17,6 +17,7 @@ import fs from "fs";
 import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
 import { tournamentsRoute } from './routes/tournament.js';
+import { logout } from './routes/logout.js';
 
 const fastify = Fastify({
 	logger: {
@@ -113,6 +114,7 @@ fastify.register(chatBlockRoute);
 fastify.register(avatarRoute);
 fastify.register(twoFARoutes);
 fastify.register(tournamentsRoute);
+fastify.register(logout);
 await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {

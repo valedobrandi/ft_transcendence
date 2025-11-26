@@ -136,6 +136,8 @@ export function eventListeners() {
 				});
 			}
 				break;
+			case "btn-logout": { await joinLogout(); }
+				break;
 		}
 	});
 }
@@ -215,6 +217,17 @@ async function joinTournament() {
 		const alert = new Alert(`${response.data}`);
 		alert.show();
 	}
+}
+
+async function joinLogout() {
+	const response = await fetchRequest(
+		`/logout`,
+		"GET"
+	);
+	if (response.message === "success") {
+		navigateTo('/login');
+	}
+
 }
 
 async function onClickAcceptMatchInvite(button: HTMLButtonElement) {

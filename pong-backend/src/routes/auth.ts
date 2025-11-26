@@ -31,6 +31,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
 	});
 
 	fastify.post('/register', async (request: FastifyRequest<{ Body: RegisterBody }>, res: FastifyReply) => {
+		
 		const { email, username, password } = request.body;
 
 		if (!email && !username && !password)

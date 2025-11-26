@@ -8,5 +8,3 @@ drop_tables();
 createSchema();
 seedUsers();
 seedMatch();
-
-

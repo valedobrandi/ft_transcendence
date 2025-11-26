@@ -113,13 +113,6 @@ const profileOnclick = async () => {
 			profile.email = data.existUser.email;
 			profile.avatar_url = data.existUser.avatar_url;
 			profile.twoFA_enabled = data.existUser.twoFA_enabled ? 1 : 0
-			
-
-			console.log("PROFIL = ", profile.username);
-			console.log("EMAIL IIII = ", profile.email);
-			console.log("AVATAR IIII = ", profile.avatar_url);
-			console.log("AVATAR IIII = ", profile.twoFA_enabled);
-
 			navigateTo("/profile");
 		}
 		else {

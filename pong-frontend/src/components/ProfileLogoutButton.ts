@@ -6,7 +6,8 @@ export function ProfileLogoutButton() {;
   class="border-2 border-black p-4 rounded cursor-pointer hover:bg-gray-200">
     PROFILE
   </button>
-  <button class="border-2 border-black p-4 rounded cursor-pointer hover:bg-gray-200">LOGOUT</button>
+  <button id="btn-logout" class="border-2 border-black p-4 rounded cursor-pointer hover:bg-gray-200">LOGOUT</button>
 </div>
 `;
+
 }

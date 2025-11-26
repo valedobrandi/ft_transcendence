@@ -3,7 +3,7 @@ import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
 
 export const matches = Array.from({ length: 40 }, (_) => ({
-	createAt: new Date(),
+	createdAt: new Date(),
 	player1: "messi",
 	score1: 5,
 	player2: "ronaldo",
@@ -55,7 +55,9 @@ export function ProfileContainer() {
 
 	function onRender() {
 		const matchesHistory = stateProxyHandler.matchesHistory;
+		console.log("HFUDHIFUDIFIASFGIUFA", matchesHistory);
 		const isUserProfile = stateProxyHandler.selectChat.id === profile.id;
+		
 		mainDiv.innerHTML = `
 		<div class="flex flex-col border-2 border-black rounded-2xl h-full text-base">
 			<h2 class="border-b-2 border-black text-xl font-bold p-2 text-center">
@@ -94,8 +96,8 @@ export function ProfileContainer() {
 						? matchesHistory.history
 							.map(
 								(match) =>
-									`<li class="p-2">
-							<span>${match.createAt}</span>
+								`<li class="p-2">
+							<span>${match.createdAt}</span>
 							<span>${match.player1}</span>
 							<span class=${match.score1 > match.score2 ? "text-green-800" : "text-red-800"}>
 								${match.score1}
