@@ -128,6 +128,8 @@ export function eventListeners() {
 				break;
 			case "tournament-btn": { await joinTournament(); }
 				break;
+			case "btn-leave-tournament": { await leaveTournament(button); }
+				break;
 			case "match-btn": {
 				const socket = getSocket();
 				if (!socket) return;
@@ -220,6 +222,20 @@ async function joinTournament() {
 	if (response.message === "error") {
 		const alert = new Alert(`${response.data}`);
 		alert.show();
+	}
+}
+
+async function leaveTournament(button: HTMLButtonElement) {
+	const eventId = button.dataset.eventindex;
+	console.log("EVENT ID LEAVE TOURNEY =", eventId);
+	const response = await fetchRequest(
+		`/tournament/quit`,
+		"GET"
+	);
+
+	if (response.message === "success") {
+		newIntraMessage(`You have left the tournament room.`);
+		removeIntraMessage(Number(eventId));
 	}
 }
 

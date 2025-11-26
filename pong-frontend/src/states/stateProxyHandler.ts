@@ -20,10 +20,10 @@ export function updateIntraMessage(idx: number, newMessage: string) {
     });
 }
 
-export function removeIntraMessage(tagId: number) {
+export function removeIntraMessage(idx: number) {
     // Update message to "" by index
     stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.map(msg => {
-        if (msg.index === tagId) {
+        if (msg.index === idx) {
             return { ...msg, message: "" };
         }
         return msg;
