@@ -8,12 +8,22 @@ RUN npm install
 
 COPY . .
 
-RUN rm -rf vitest 
-RUN rm -rf vitest.config.ts
+ENV VITE_PONG_BACKEND_API=https://localhost/api
+ENV VITE_PONG_BACKEND_WEBSOCKET=wss://localhost/ws
 
 RUN npm run build
 
 FROM nginx:1.25.0-alpine AS production
+
+# Generate self-signed certs at build time
+RUN apk add --no-cache openssl && \
+    mkdir -p /etc/ssl/private && \
+    openssl req -x509 -newkey rsa:4096 -nodes \
+    -keyout /etc/ssl/private/key.pem \
+    -out /etc/ssl/private/cert.pem \
+    -days 365 \
+    -subj "/CN=localhost" \
+    -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
