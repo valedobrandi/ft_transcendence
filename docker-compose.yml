@@ -45,6 +45,7 @@ services:
       - ./tests/backend:/app/vitest
       - /app/node_modules
       - ./hardhat/artifacts:/app/artifacts
+      - ./hardhat/deployed:/app/deployed
     environment:
       - NODE_ENV=development
       - ADRESS=192.0.7
@@ -55,6 +56,9 @@ services:
     command: npm run dev
     networks:
       - transcedence-network
+    depends_on:
+      blockchain:
+        condition: service_healthy
     env_file:
       - .env
 
@@ -68,7 +72,16 @@ services:
     volumes:
       - ./hardhat:/app
       - /app/node_modules
-    command: npx hardhat node
+    command: >
+      sh -c "npx hardhat node & sleep 5 &&
+          npx hardhat run scripts/Score.ts --network localhost &&
+          tail -f /dev/null"
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/deployed/TournamentMatches.local.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - transcedence-network
 

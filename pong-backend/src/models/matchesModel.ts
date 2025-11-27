@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3'
-import { tournamentContract } from '../server';
+import { contractWithSigner } from '../bockchain';
+import { print } from '../server';
 
 class MatchesModel {
 	private db: Database.Database;
@@ -21,9 +22,9 @@ class MatchesModel {
 		player2Score: number
 	): Promise<void> {
 		try {
-			const tx = await tournamentContract.saveMatch(machId, player1Score, player2Score)
+			const tx = await contractWithSigner.saveMatch(machId, player1Score, player2Score)
 			await tx.wait();
-
+			print(`[BLOCKCHAIN] Match ${machId} saved on blockchain.`);
 			this.stmSaveMatch.run(
 				machId, player1, player2);
 		} catch (error) {

@@ -18,10 +18,6 @@ import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
 import { tournamentsRoute } from './routes/tournament.js';
 import { logout } from './routes/logout.js';
-import { ethers } from 'ethers';
-import TournamentMatchersArtifact from "../artifacts/contracts/TournamentMatches.sol/TournamentMatches.json" assert { type: "json" };
-import contractData from "../artifacts/TournamentMatches.local.json";
-
 
 const fastify = Fastify({
 	logger: {
@@ -46,15 +42,6 @@ declare module 'fastify' {
 	}
 }
 
-const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
-
-const signer = provider.getSigner(0);
-
-export const tournamentContract = new ethers.Contract(
-	contractData.address,
-	TournamentMatchersArtifact.abi,
-	signer
-);
 
 
 fastify.decorateRequest("userId", 0);

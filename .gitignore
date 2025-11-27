@@ -36,7 +36,7 @@ database.db
 # pnpm deploy output
 /bundle
 # Hardhat Build Artifacts
-/artifacts
+hardhat/artifacts
 # Hardhat compilation (v2) support directory
 /cache
 # Typechain output

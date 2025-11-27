@@ -12,4 +12,4 @@ EXPOSE 8545
 
 
 
-CMD ["npx",  "hardhat",  "build"]
+CMD ["npx",  "hardhat",  "node"]

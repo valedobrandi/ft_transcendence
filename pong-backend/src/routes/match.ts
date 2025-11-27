@@ -11,7 +11,8 @@ import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
 import db from "../../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
-import { tournamentContract } from "../server.js";
+import { contractReadOnly } from "../bockchain.js";
+import { print } from "../server.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
 	const matcherController = new MatcherController();
@@ -208,6 +209,7 @@ class MatchesService {
 
 	async getMatchHistory(username: string) {
 		const match = await this.matchesModel.getMatchHistoryById(username);
+		print(`[MATCH HISTORY] Retrieved match history for user: ${JSON.stringify(match)}`);
 		if (match === undefined) {
 			return { message: "error", data: "no match history" };
 		}
@@ -217,6 +219,9 @@ class MatchesService {
 			loses: 0,
 			history: [],
 		};
+		if (match.length === 0) {
+			return { message: "success", data: matchesHistory };
+		}
 
 		for (const m of match) {
 			const { score1, score2 } = await this.matchesModel.getScoreBlockchain(m.match_id);
@@ -504,7 +509,7 @@ class MatchesModel {
 	constructor(db: Database.Database) {
 		this.db = db;
 		this.stmGetMatchHistoryById = db.prepare(
-			`SELECT match_id, player1, player2, score1, score2, created_at
+			`SELECT match_id, player1, player2, created_at
 			FROM matches
 			WHERE player1 = ? OR player2 = ?
 			ORDER BY created_at DESC;
@@ -514,11 +519,15 @@ class MatchesModel {
 
 	async getScoreBlockchain(matchid: string) {
 		try {
-			const [score1, socre2] = await tournamentContract.getMatchScore(matchid);
+			const response = await contractReadOnly.getMatch(matchid);
+			if (!response || response.length === 0) {
+				return { score1: 0, score2: 0 };
+			}
+			const [score1, socre2] = response;
 			return { score1: score1.toNumber(), score2: socre2.toNumber() };
 		} catch (error) {
 			console.error('Error getting match score from blockchain:', error);
-			throw error;
+			return { score1: 0, score2: 0 };
 		}
 	}
 

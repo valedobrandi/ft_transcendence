@@ -14,18 +14,18 @@ async function main() {
 		`Deploying contracts with the account: ${deployer.address}`
 	);
 
-	const TournamentMatches = await ethers.getContractFactory("TournamentMatches");
+	const TournamentMatches = await ethers.getContractFactory("TournamentScores");
 
 	const contract = await TournamentMatches.deploy();
 	await contract.waitForDeployment();
 
 	console.log(
-		`TournamentMatches deployed to: `, await contract.getAddress();
+		`TournamentScores deployed to: `, await contract.getAddress()
 	);
 
 
 	fs.writeFileSync(
-		"./hardhat/scripts/TournamentMatches.local.json",
+		"./deployed/TournamentMatches.local.json",
 		JSON.stringify({ address: await contract.getAddress() }, null, 2)
 	);
 }
@@ -35,3 +35,4 @@ main().catch((error) => {
 	process.exitCode = 1;
 });
 
+/* const { network } = await import("hardhat"); */
