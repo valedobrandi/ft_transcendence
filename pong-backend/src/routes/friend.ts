@@ -10,7 +10,7 @@ export interface FriendListDTO {
 }
 
 export type FriendsTableModel = {
-	friend_id: number;
+	friendId: number;
 }
 
 export type GetFriendsList = {
@@ -94,9 +94,13 @@ class FriendService {
 
 	getFriendsList(userId: number) {
 		const { message, data } = this.friendModelInstance.getFriendsList(userId);
-		connectedRoomInstance.friendListSet(userId).save(data.filter(id => id !== Number(userId)));
-		const createFriendList = connectedRoomInstance.friendListSet(userId)
-			.get().map((friendId: number | bigint) => ({
+		connectedRoomInstance.friendListSet(userId).save(data);
+
+		if (data.length === 0) {
+			return {message: 'error', data: 'friend_list_empty'};
+		}
+		const createFriendList = data
+			.map((friendId: number | bigint) => ({
 				id: friendId,
 				isConnected: connectedRoomInstance.has(friendId) ? true : false
 			}));
@@ -160,7 +164,8 @@ class FriendsModel {
 
 	getFriendsList(userId: number): GetFriendsList {
 		const response = this.stmGetFriendsList.all(userId, userId) as FriendsTableModel[];
-		const friendIds = response.map(row => row.friend_id);
+		print(`[FRIENDLIST DB] ${JSON.stringify(response)}`)
+		const friendIds = response.map(row => row.friendId);
 		return { message: 'success', data: friendIds};
 	}
 

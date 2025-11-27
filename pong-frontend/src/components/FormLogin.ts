@@ -157,12 +157,13 @@ export function FormLogin(): HTMLElement {
 		if (response.message === 'success') {
 			stateProxyHandler.reset();
 			closeSocket();
+			
 			jwt.token = response.payload.accessToken;
 			profile.username = response.payload.username;
 			//profile.url_avatar = response.payload.existingUser.avatar_url
 			profile.id = response.payload.id;
 			// reset stateProxy/handler
-			stateProxyHandler.selectChat = { id: profile.id, name: "Welcome to the chat !" };
+			stateProxyHandler.selectChat = { id: profile.id, name: profile.username};
 
 			const [friendsList, blockedList] = await Promise.all([
 				fetchRequest('/friends-list', 'GET', {}),

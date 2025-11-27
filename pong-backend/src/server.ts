@@ -50,7 +50,7 @@ fastify.decorate('authenticate', async function (request: FastifyRequest, reply:
 	try
 	{
 		const decoded = await request.jwtVerify() as { id: number };
-        print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
+        //print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
 		request.userId = decoded.id;
         if (request.userId === 0) {
             reply.code(401).send({ error: 'Unauthorized' });
