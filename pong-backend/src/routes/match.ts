@@ -11,6 +11,7 @@ import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
 import db from "../../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
+import { tournamentContract } from "../server.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
 	const matcherController = new MatcherController();
@@ -205,8 +206,8 @@ class MatchesService {
 	private matchesModel = new MatchesModel(db);
 	private usersModel = new UsersModel(db);
 
-	getMatchHistory(username: string) {
-		const match = this.matchesModel.getMatchHistoryById(username);
+	async getMatchHistory(username: string) {
+		const match = await this.matchesModel.getMatchHistoryById(username);
 		if (match === undefined) {
 			return { message: "error", data: "no match history" };
 		}
@@ -218,11 +219,12 @@ class MatchesService {
 		};
 
 		for (const m of match) {
+			const { score1, score2 } = await this.matchesModel.getScoreBlockchain(m.match_id);
 			matchesHistory.history.push({
 				player1: m.player1,
-				score1: m.score1,
+				score1: score1,
 				player2: m.player2,
-				score2: m.score2,
+				score2: score2,
 				createdAt: m.created_at,
 			});
 			if(m.player1 === username)
@@ -510,7 +512,17 @@ class MatchesModel {
 		);
 	}
 
-	getMatchHistoryById(username: string): MatchesReturnDB[] | undefined {
+	async getScoreBlockchain(matchid: string) {
+		try {
+			const [score1, socre2] = await tournamentContract.getMatchScore(matchid);
+			return { score1: score1.toNumber(), score2: socre2.toNumber() };
+		} catch (error) {
+			console.error('Error getting match score from blockchain:', error);
+			throw error;
+		}
+	}
+
+	async getMatchHistoryById(username: string): Promise<MatchesReturnDB[] | undefined> {
 		const match = this.stmGetMatchHistoryById.all(username, username) as MatchesReturnDB[] | undefined;
 		return match;
 	}

@@ -44,6 +44,7 @@ services:
       - ./pong-backend:/app
       - ./tests/backend:/app/vitest
       - /app/node_modules
+      - ./hardhat/artifacts:/app/artifacts
     environment:
       - NODE_ENV=development
       - ADRESS=192.0.7

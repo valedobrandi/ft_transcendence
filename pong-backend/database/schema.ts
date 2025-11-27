@@ -18,8 +18,6 @@ export async function createSchema() {
 			match_id TEXT PRIMARY KEY,
 			player1 TEXT NOT NULL,
 			player2 TEXT NOT NULL,
-			score1 INTEGER DEFAULT 0,
-			score2 INTEGER DEFAULT 0,
 			match_status TEXT DEFAULT 'waiting',
 			created_at DATE DEFAULT (date('now')))`);
 

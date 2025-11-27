@@ -2,33 +2,28 @@
 pragma solidity ^0.8.28;
 
 contract TournamentScores {
-	struct Score {
+	struct MatchResult {
+		uint256 score1;
+		uint256 score2;
 		uint256 timestamp;
-		uint256 points;
 	}
 
-	mapping(address => Score[]) private playerScores;
+	mapping(string => MatchResult) private matches;
 
-	event ScoreSubmitted(address indexed player, uint256 points, uint256 timestamp);
+	event MatchSaved(string matchId, uint256 score1, uint256 score2, uint256 timestamp);
 
-	function submitScore(uint256 _points) external {
-		Score memory newScore = Score({
-			timestamp: block.timestamp,
-			points: _points
+	function saveMatch(string calldata matchId, uint256 score1, uint256 score2) external {
+		matches[matchId] = MatchResult({
+			score1: score1,
+			score2: score2,
+			timestamp: block.timestamp
 		});
-
-		playerScores[msg.sender].push(newScore);
-		emit ScoreSubmitted(msg.sender, _points, block.timestamp);
+		emit MatchSaved(matchId, score1, score2, block.timestamp);
 	}
 
-	function getScore(address _player) external view returns (Score[] memory) {
-		return playerScores[_player];
-	}
-
-	function getLatestScore(address _player) external view returns (uint256 points, uint256 timestamp) {
-		uint256 len = playerScores[_player].length;
-		require(len > 0, "No scores found");
-		Score memory latest = playerScores[_player][len-1];
-		return (latest.points, latest.timestamp);
+	function getMatch(string calldata matchId) external view returns (uint256 score1, uint256 score2, uint256 timestamp) {
+		MatchResult memory m = matches[matchId];
+		require(m.timestamp !=0, "Match not found");
+		return (m.score1, m.score2, m.timestamp);
 	}
 }
