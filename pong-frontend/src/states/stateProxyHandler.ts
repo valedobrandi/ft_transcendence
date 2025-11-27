@@ -171,21 +171,59 @@ export interface StateProxyHandler {
     availableMatches: NewMatch[];
     matchesHistory: MatchesHistory;
     profile: { username: string, avatar: string };
+    reset: () => void;
 }
 
-export const stateProxyHandler: StateProxyHandler = new Proxy({
-    messages: new Map<number, ChatMessage[]>(),
-    serverUsers: [],
-    friendList: [],
-    chatBlockList: [],
-    connectedUsers: [],
-    selectChat: { id: -1, name: '' },
-    state: "CONNECT_ROOM",
-    systemMessages: [],
-    availableMatches: [],
-    matchesHistory: { wins: 0, loses: 0, history: [] },
-    profile: { username: '', avatar: '' },
-}, {
+class State {
+  messages!: Map<number, ChatMessage[]>;
+    serverUsers!: ServerUsersList[];
+    friendList!: FriendListType[];
+    chatBlockList!: number[];
+    connectedUsers!: { id: number; name: string }[];
+    selectChat!: { id: number; name: string };
+    state!: "CONNECT_ROOM" |
+    "MATCH_QUEUE" |
+    "MATCH_ROOM" |
+    "TOURNAMENT_QUEUE" |
+    "TOURNAMENT_ROOM" |
+    "GAME_ROOM" |
+    "GAME_START" |
+    "SEND_INVITE" |
+    "MATCH_INVITE";
+    systemMessages!: { index: number; message: string }[];
+    availableMatches!: NewMatch[];
+    matchesHistory!: MatchesHistory;
+    profile!: { username: string, avatar: string };
+
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.messages = new Map();
+    this.serverUsers = [];
+    this.friendList = [];
+    this.chatBlockList = [];
+    this.connectedUsers = [];
+    this.selectChat = { id: -1, name: "" };
+    this.state = "CONNECT_ROOM";
+    this.systemMessages = [];
+    this.availableMatches = [];
+    this.matchesHistory = { wins: 0, loses: 0, history: [] };
+    this.profile = { username: "", avatar: "" };
+  }
+}
+
+export const stateProxyHandler: StateProxyHandler = new Proxy(
+   new State(), {
+    get(target, prop) {
+        if (prop === 'reset') {
+            return () => {
+                target.reset();
+            };
+        }
+        return target[prop as keyof typeof target];
+    },
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
 
@@ -202,10 +240,10 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
                     });
                     break;
                 case "CHAT_MESSAGE":
-                    renderChatMessages(stateProxyHandler.selectChat.name, stateProxyHandler.selectChat.id);
+                    renderChatMessages(target.selectChat.name, target.selectChat.id);
                     break;
                 case "CHAT_HISTORY":
-                    renderChatMessages(stateProxyHandler.selectChat.name, stateProxyHandler.selectChat.id);
+                    renderChatMessages(target.selectChat.name, target.selectChat.id);
                     break;
                 case "SYSTEM_MESSAGE":
                     renderSystemMessages();
@@ -219,9 +257,9 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
         }
 
         if (prop === 'selectChat') {
-            changeChatHeader(stateProxyHandler.selectChat.name);
+            changeChatHeader(target.selectChat.name);
 
-            const isIntra = stateProxyHandler.selectChat.id === -1;
+            const isIntra = target.selectChat.id === -1;
 
             const chatMenu = document.getElementById("chat-menu");
 
@@ -238,7 +276,7 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
 
         if (prop === 'friendList') {
             messageListeners.forEach(fn => fn());
-            console.log("Friend list updated:", stateProxyHandler.friendList);
+            console.log("Friend list updated:", target.friendList);
         }
 
         if (prop === 'serverUsers') {
@@ -248,3 +286,8 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
         return true;
     }
 });
+
+
+
+
+

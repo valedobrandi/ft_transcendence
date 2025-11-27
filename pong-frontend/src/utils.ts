@@ -118,6 +118,7 @@ export async function fetchRequest
         options: RequestInit = {}) {
 
     const url = `${endpoint.pong_backend_api}${path}`;
+    console.log(`[REQUEST] ${method} ${url} response:`,JSON.stringify(options));
     const defaultHeaders: Record<string, string> = {
         // Add auth token
         'Authorization': `Bearer ${jwt.token}`,
