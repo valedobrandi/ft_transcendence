@@ -58,7 +58,7 @@ services:
       - transcedence-network
     depends_on:
       hardhat:
-        condition: service_healthy
+        condition: service_started
     env_file:
       - .env
 
@@ -73,12 +73,6 @@ services:
     volumes:
       - ./hardhat:/app
       - /app/node_modules
-    healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:8545 | grep -q '{}' || exit 1"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-      start_period: 5s
     networks:
       - transcedence-network
 
