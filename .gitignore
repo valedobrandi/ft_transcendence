@@ -38,6 +38,13 @@ database.db
 # Hardhat Build Artifacts
 hardhat/artifacts
 # Hardhat compilation (v2) support directory
+hardhat/ignition/.cache
+hardhat/ignition/deployments/
+# Hardhat typechain output
+hardhat/typechain
+# Hardhat coverage directory
+hardhat/coverage
+# TypeScript cache
 /cache
 # Typechain output
 /types
