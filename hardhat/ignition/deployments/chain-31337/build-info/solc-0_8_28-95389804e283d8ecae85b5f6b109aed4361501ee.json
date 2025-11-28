@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-95389804e283d8ecae85b5f6b109aed4361501ee",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/TournamentScores.sol": "project/contracts/TournamentScores.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/TournamentScores.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\ncontract TournamentScores {\n\tstruct MatchResult {\n\t\tuint256 score1;\n\t\tuint256 score2;\n\t\tuint256 timestamp;\n\t}\n\n\tmapping(string => MatchResult) private matches;\n\n\tevent MatchSaved(string matchId, uint256 score1, uint256 score2, uint256 timestamp);\n\n\tfunction saveMatch(string calldata matchId, uint256 score1, uint256 score2) external {\n\t\tmatches[matchId] = MatchResult({\n\t\t\tscore1: score1,\n\t\t\tscore2: score2,\n\t\t\ttimestamp: block.timestamp\n\t\t});\n\t\temit MatchSaved(matchId, score1, score2, block.timestamp);\n\t}\n\n\tfunction getMatch(string calldata matchId) external view returns (uint256 score1, uint256 score2, uint256 timestamp) {\n\t\tMatchResult memory m = matches[matchId];\n\t\trequire(m.timestamp !=0, \"Match not found\");\n\t\treturn (m.score1, m.score2, m.timestamp);\n\t}\n}"
+      }
+    }
+  }
+}

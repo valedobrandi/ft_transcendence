@@ -11,7 +11,7 @@ import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
 import db from "../../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
-import { contractReadOnly } from "../bockchain.js";
+import { contractReadOnly } from "../blockchain.js";
 import { print } from "../server.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
@@ -131,11 +131,11 @@ class MatcherController {
 		this.matchesService = new MatchesService();
 	}
 
-	getMatchHistory(req: FastifyRequest<{ Querystring: { username: string } }>, res: FastifyReply) {
+	async getMatchHistory(req: FastifyRequest<{ Querystring: { username: string } }>, res: FastifyReply) {
 		if (!req.query.username) {
 			return res.code(statusCode("NO_CONTENT")).send({ message: "error", data: "username required" });
 		}
-		const { message, data } = this.matchesService.getMatchHistory(req.query.username);
+		const { message, data } = await this.matchesService.getMatchHistory(req.query.username);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
@@ -210,7 +210,7 @@ class MatchesService {
 	async getMatchHistory(username: string) {
 		const match = await this.matchesModel.getMatchHistoryById(username);
 		print(`[MATCH HISTORY] Retrieved match history for user: ${JSON.stringify(match)}`);
-		if (match === undefined) {
+		if (match === undefined || match.length === 0) {
 			return { message: "error", data: "no match history" };
 		}
 
@@ -219,17 +219,15 @@ class MatchesService {
 			loses: 0,
 			history: [],
 		};
-		if (match.length === 0) {
-			return { message: "success", data: matchesHistory };
-		}
 
 		for (const m of match) {
 			const { score1, score2 } = await this.matchesModel.getScoreBlockchain(m.match_id);
+			print(`[BLOCKCHAIN] Fetched match score for match ID ${m.match_id}: ${score1}, ${score2}`);
 			matchesHistory.history.push({
 				player1: m.player1,
-				score1: score1,
+				score1: Number(score1),
 				player2: m.player2,
-				score2: score2,
+				score2: Number(score2),
 				createdAt: m.created_at,
 			});
 			if(m.player1 === username)
@@ -520,13 +518,11 @@ class MatchesModel {
 	async getScoreBlockchain(matchid: string) {
 		try {
 			const response = await contractReadOnly.getMatch(matchid);
-			if (!response || response.length === 0) {
-				return { score1: 0, score2: 0 };
-			}
-			const [score1, socre2] = response;
-			return { score1: score1.toNumber(), score2: socre2.toNumber() };
+			
+			const [score1, score2] = response;
+			return { score1: Number(score1), score2: Number(score2) };
 		} catch (error) {
-			console.error('Error getting match score from blockchain:', error);
+			print(`[BLOCKCHAIN ERROR] Failed to fetch match score for match ID ${matchid}: ${error}`);
 			return { score1: 0, score2: 0 };
 		}
 	}

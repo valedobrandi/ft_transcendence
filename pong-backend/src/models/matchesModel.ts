@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3'
-import { contractWithSigner } from '../bockchain';
+import { contractWithSigner } from '../blockchain';
 import { print } from '../server';
 
 class MatchesModel {
