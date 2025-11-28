@@ -64,21 +64,45 @@ class PingPong {
 		const aiId = this.side.LEFT;
 		const ball = this.gameState.ball;
 		const paddle = this.gameState.userX;
+		const paddleHeight = 0.150; // 0.99 - 0.15 = 0.84 / 0.1  
+		const margin = paddleHeight * 0.2; 
 
 		let up = false;
 		let down = false;
-		if (ball.x < 0.5 && ball.velocityX < 0) {
-			if (ball.y < paddle.y) {
-				up = true;
-				down = false;
-			} 
-			else if (ball.y > paddle.y) {
-				up = false;
-				down = true;
-			}
+
+		const aiX = paddle.x;       // ~0.01
+		const vx = ball.velocityX;
+		const vy = ball.velocityY;
+
+		let targetY: number;
+		if (vx < 0 && ball.x > aiX)
+		{
+			const timeToreachAI = (aiX - ball.x) / vx;
+			let predictedY = ball.y + vy * timeToreachAI;
+
+			if (predictedY < 0) predictedY = 0;
+			if (predictedY > 1) predictedY = 1;
+
+			targetY = predictedY;
 		}
+		else
+		{
+			targetY = 0.5
+		}
+		const paddleCenter = paddle.y;
+
+		if (paddleCenter < targetY - margin) {
+			up = false;
+			down = true;
+		} 
+		else if (paddleCenter > targetY + margin) {
+			up = true;
+			down = false;
+		}
+		
 		this.inputs.set(aiId, {up, down});
 	}
+
 
 	updateGame() {
 		if (this.matchState === 'COUNTDOWN') {
