@@ -6,8 +6,9 @@
     "scripts": {
         "test:frontend": "docker-compose exec -it pong-frontend npm run test",
         "test:backend": "docker-compose exec -it pong-backend npm run test",
-        "build": "docker compose up --build pong-backend pong-frontend",
-        "up": "docker compose up pong-backend pong-frontend hardhat",
+        "up": "make up",
+        "down": "make down",
+        "build": "make build",
         "update:test": "git submodule update --init --recursive",
 		"production:up": "docker compose -f docker-compose.production.yml up pong-backend nginx",
 		"production:build": "docker compose -f docker-compose.production.yml up --build pong-backend nginx"
