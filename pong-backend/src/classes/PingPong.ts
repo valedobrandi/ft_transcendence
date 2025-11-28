@@ -40,7 +40,7 @@ class PingPong {
 	}
 
 	getFromConnectedRoom(username: string): PlayerType | undefined {
-		print(`[GAME GET PLAYER]: ${username}`);
+		//print(`[GAME GET PLAYER]: ${username}`);
 		return connectedRoomInstance.getByUsername(username) || undefined;
 	}
 

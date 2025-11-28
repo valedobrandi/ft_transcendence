@@ -7,4 +7,4 @@ import { seedUsers } from "./seeds/seed_users.js";
 drop_tables();
 createSchema();
 seedUsers();
-seedMatch();
+//seedMatch();

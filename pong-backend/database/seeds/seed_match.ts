@@ -33,8 +33,8 @@ const  matches = [
 
 export async function seedMatch() {
 	const insertUser = db.prepare(`
-    INSERT INTO matches (match_id, player1, player2, score1, score2)
-    VALUES (@match_id, @player1, @player2, @score1, @score2)
+    INSERT INTO matches (match_id, player1)
+    VALUES (@match_id, @player1, @player2)
   `);
 	const insertMany = db.transaction((matches) => {
 		for (const user of matches) insertUser.run(user);

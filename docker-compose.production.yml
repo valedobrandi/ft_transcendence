@@ -33,11 +33,36 @@ services:
       - NODE_ENV=production
       - ADDRESS=192.0.7
       - RESEND_API_KEY=${RESEND_API_KEY}
+      - ./hardhat/artifacts/contracts/TournamentScores.sol:/app/artifacts
+      - ./hardhat/ignition/deployments/chain-31337/deployed_addresses.json:/app/deployed/deployed_addresses.json
     env_file:
       - .env
+    depends_on:
+      hardhat:
+        condition: service_healthy
     networks:
       - transcedence-network
     restart: unless-stopped
+
+  hardhat:
+    image: hardhat-node
+    build:
+      context: ./hardhat
+      dockerfile: Dockerfile
+    container_name: hardhat-node
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./hardhat:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8545 | grep -q '{}' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    networks:
+      - transcedence-network
 networks:
   transcedence-network:
     driver: bridge

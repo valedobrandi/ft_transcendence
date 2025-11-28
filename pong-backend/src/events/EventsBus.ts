@@ -24,10 +24,11 @@ class EventBus<Events extends Record<string, any>> {
         }
     }
 
-    registerListeners(matchesModel: MatchesModel): void {
-        this.on('game:savehistory', (data) => {
+
+    async registerListeners(matchesModel: MatchesModel) {
+        this.on('game:savehistory', async (data) => {
             const { matchId, player1, player2, score1, score2 } = data;
-            matchesModel.saveMatch(matchId, player1, player2, score1, score2);
+            await matchesModel.saveMatch(matchId, player1, player2, score1, score2);
         });
 
         this.on('game:start', (data) => {

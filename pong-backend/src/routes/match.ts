@@ -11,6 +11,8 @@ import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
 import db from "../../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
+import { contractReadOnly } from "../blockchain.js";
+import { print } from "../server.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
 	const matcherController = new MatcherController();
@@ -129,11 +131,11 @@ class MatcherController {
 		this.matchesService = new MatchesService();
 	}
 
-	getMatchHistory(req: FastifyRequest<{ Querystring: { username: string } }>, res: FastifyReply) {
+	async getMatchHistory(req: FastifyRequest<{ Querystring: { username: string } }>, res: FastifyReply) {
 		if (!req.query.username) {
 			return res.code(statusCode("NO_CONTENT")).send({ message: "error", data: "username required" });
 		}
-		const { message, data } = this.matchesService.getMatchHistory(req.query.username);
+		const { message, data } = await this.matchesService.getMatchHistory(req.query.username);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
@@ -205,9 +207,10 @@ class MatchesService {
 	private matchesModel = new MatchesModel(db);
 	private usersModel = new UsersModel(db);
 
-	getMatchHistory(username: string) {
-		const match = this.matchesModel.getMatchHistoryById(username);
-		if (match === undefined) {
+	async getMatchHistory(username: string) {
+		const match = await this.matchesModel.getMatchHistoryById(username);
+		print(`[MATCH HISTORY] Retrieved match history for user: ${JSON.stringify(match)}`);
+		if (match === undefined || match.length === 0) {
 			return { message: "error", data: "no match history" };
 		}
 
@@ -218,11 +221,13 @@ class MatchesService {
 		};
 
 		for (const m of match) {
+			const { score1, score2 } = await this.matchesModel.getScoreBlockchain(m.match_id);
+			print(`[BLOCKCHAIN] Fetched match score for match ID ${m.match_id}: ${score1}, ${score2}`);
 			matchesHistory.history.push({
 				player1: m.player1,
-				score1: m.score1,
+				score1: Number(score1),
 				player2: m.player2,
-				score2: m.score2,
+				score2: Number(score2),
 				createdAt: m.created_at,
 			});
 			if(m.player1 === username)
@@ -502,7 +507,7 @@ class MatchesModel {
 	constructor(db: Database.Database) {
 		this.db = db;
 		this.stmGetMatchHistoryById = db.prepare(
-			`SELECT match_id, player1, player2, score1, score2, created_at
+			`SELECT match_id, player1, player2, created_at
 			FROM matches
 			WHERE player1 = ? OR player2 = ?
 			ORDER BY created_at DESC;
@@ -510,7 +515,19 @@ class MatchesModel {
 		);
 	}
 
-	getMatchHistoryById(username: string): MatchesReturnDB[] | undefined {
+	async getScoreBlockchain(matchid: string) {
+		try {
+			const response = await contractReadOnly.getMatch(matchid);
+			
+			const [score1, score2] = response;
+			return { score1: Number(score1), score2: Number(score2) };
+		} catch (error) {
+			print(`[BLOCKCHAIN ERROR] Failed to fetch match score for match ID ${matchid}: ${error}`);
+			return { score1: 0, score2: 0 };
+		}
+	}
+
+	async getMatchHistoryById(username: string): Promise<MatchesReturnDB[] | undefined> {
 		const match = this.stmGetMatchHistoryById.all(username, username) as MatchesReturnDB[] | undefined;
 		return match;
 	}

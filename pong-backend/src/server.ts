@@ -43,6 +43,7 @@ declare module 'fastify' {
 }
 
 
+
 fastify.decorateRequest("userId", 0);
 
 
