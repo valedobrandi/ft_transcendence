@@ -50,6 +50,9 @@ hardhat/coverage
 /types
 # Hardhat coverage reports
 /coverage
+# Hardhat Ignition deployments
+hardhat/ignition/deployments/
+
 
 /certs
 *.pem
