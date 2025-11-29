@@ -145,6 +145,7 @@ const listeners: Record<StateKey, (() => void)[]> = {
     availableMatches: [],
     matchesHistory: [],
     profile: [],
+    reset: [],
 };
 
 export function onStateChange<K extends StateKey>(key: K, fn: () => void) {

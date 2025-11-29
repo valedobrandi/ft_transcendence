@@ -12,7 +12,6 @@ import { websocketNewEvents } from "./websocketNewEvents";
 import { navigateTo, setTime } from "../utils";
 import { EmbeddedButton } from "../components/EmbeddedButton";
 import { Alert } from "../components/Alert";
-import { serverState } from "../states/serverState";
 
 export async function websocketReceiver(socket: WebSocket) {
   socket.addEventListener("message", async (event) => {
@@ -130,7 +129,8 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       }
       case "MATCH_INVITE": {
-        serverState.state = data.message;
+        stateProxyHandler.state = data.message;
+        
         const getName = stateProxyHandler.serverUsers.find(
           (user) => user.id === data.payload.from
         )?.name;

@@ -1,6 +1,6 @@
 
 import { FastifyInstance, FastifyRequest } from 'fastify';
-import { connectedRoomInstance } from '../state/ConnectedRoom'
+import { connectedRoomInstance } from '../state/ConnectedRoom.js'
 
 export function logout(fastify: FastifyInstance)
 {

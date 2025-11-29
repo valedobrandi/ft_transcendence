@@ -1,4 +1,3 @@
-import { serverState } from "../states/serverState";
 
 import { Button } from "./Button";
 import { profile } from "../app";
@@ -8,11 +7,6 @@ import { fetchRequest } from "../utils";
 export function Menu(): HTMLDivElement {
 
     const socket = getSocket();
-
-    const shouldDisable = serverState.state === "MATCH_ROOM" || serverState.state === "TOURNAMENT_ROOM";
-    const isMatch = serverState.state === "MATCH_ROOM";
-    const isTournament = serverState.state === "TOURNAMENT_ROOM";
-
 
     const divElement = document.createElement("div");
     divElement.id = "menu-bar";
@@ -32,13 +26,8 @@ export function Menu(): HTMLDivElement {
             body: JSON.stringify({ settings: {username: profile.username} })
         });
     });
+    
     CreateMatchBtn.id = "create-match-btn";
-
-    shouldDisable && matchBtn.setAttribute("disabled", "true");
-    shouldDisable && joinTournament.setAttribute("disabled", "true");
-
-    matchBtn.className += ` ${shouldDisable ? "cursor-not-allowed opacity-50" : ""} ${isMatch ? "bg-green-500" : ""}`;
-    joinTournament.className += ` ${shouldDisable ? "cursor-not-allowed opacity-50" : ""} ${isTournament ? "bg-green-500" : ""}`;
 
     divElement.appendChild(matchBtn);
     divElement.appendChild(joinTournament);
