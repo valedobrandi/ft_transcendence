@@ -29,9 +29,9 @@ export function FormLogin(): HTMLElement {
 		console.log("2FA code submitted");
 	};
 
-    // Add inputs Name + Password to the form
-    const inputContainer = document.createElement("div");
-    inputContainer.className = "flex flex-col gap-10 w-full";
+	// Add inputs Name + Password to the form
+	const inputContainer = document.createElement("div");
+	inputContainer.className = "flex flex-col gap-10 w-full";
 
 	const inputNameUI = InputName();
 	inputContainer.appendChild(inputNameUI);
@@ -50,12 +50,12 @@ export function FormLogin(): HTMLElement {
 	// POPUP 2FA
 	// -------------------------
 
-	function create2FAPopup(username: string) {
+	function create2FAPopup(username: string, from: string, to: string, subject: string, email: string) {
 		const overlay = document.createElement("div");
 		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
 
 		const modal = document.createElement("div");
-		modal.className = "bg-[#1e2124] p-8 rounded-xl border border-[#424549] flex flex-col gap-6 items-center w-[380px] shadow-xl";
+		modal.className = "bg-[#1e2124] p-8 rounded-xl border border-[#424549] flex flex-col gap-6 items-center w-fit shadow-xl";
 
 		const title = document.createElement("h2");
 		title.className = "text-3xl game-font text-[hsl(345,100%,47%)]";
@@ -64,6 +64,14 @@ export function FormLogin(): HTMLElement {
 		const subtitle = document.createElement("p");
 		subtitle.className = "text-gray-300 text-center";
 		subtitle.textContent = "A code has been sent to you by email.";
+
+		const emailDemo = document.createElement("div");
+		emailDemo.className = "text-black text-base border p-4 rounded bg-white";
+		emailDemo.innerHTML = `
+						<p>From: ${from}</p>
+						<p>To: ${to}</p>
+						<p>Subject: ${subject}</p>
+						${email}`;
 
 		const input = document.createElement("input");
 		input.type = "text";
@@ -119,6 +127,7 @@ export function FormLogin(): HTMLElement {
 
 		modal.appendChild(title);
 		modal.appendChild(subtitle);
+		modal.appendChild(emailDemo);
 		modal.appendChild(input);
 		modal.appendChild(error);
 		modal.appendChild(confirmBtn);
@@ -131,39 +140,45 @@ export function FormLogin(): HTMLElement {
 	// -------------------------
 	// FETCH LOGIN
 	// -------------------------
-	
+
 	formElement.onsubmit = async (e) => {
 		e.preventDefault();
 
 		const username_input = document.getElementById('register_username') as HTMLInputElement;
 		const password_input = document.getElementById('register_password') as HTMLInputElement;
 		if (username_input === null || password_input === null) return;
-		
+
 		const username = username_input.value.trim();
 		const password = password_input.value.trim();
-		
+
 		const response = await fetchRequest(
 			`/login`,
 			'POST',
 			{},
 			{ body: JSON.stringify({ username, password }) }
 		);
-		
+
 		if (response.message === "2FA_REQUIRED") {
-			create2FAPopup(response.username);
+			create2FAPopup(
+				response.data.username,
+				response.data.from,
+				response.data.to,
+				response.data.subject,
+				response.data.email
+			);
 			return;
 		}
-		
+
 		if (response.message === 'success') {
 			stateProxyHandler.reset();
 			closeSocket();
-			
+
 			jwt.token = response.payload.accessToken;
 			profile.username = response.payload.username;
 			//profile.url_avatar = response.payload.existingUser.avatar_url
 			profile.id = response.payload.id;
 			// reset stateProxy/handler
-			stateProxyHandler.selectChat = { id: profile.id, name: profile.username};
+			stateProxyHandler.selectChat = { id: profile.id, name: profile.username };
 
 			const [friendsList, blockedList] = await Promise.all([
 				fetchRequest('/friends-list', 'GET', {}),
