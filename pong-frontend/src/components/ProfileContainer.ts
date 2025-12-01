@@ -10,7 +10,16 @@ export const matches = Array.from({ length: 40 }, (_) => ({
 	score2: 4,
 }));
 
-function BlockButton(): string {
+function inviteMatchButton(): string {
+	return `
+		<button id="btn-invite-match"
+			class="border-2 border-black p-6 rounded bg-yellow-300">
+			INVITE TO MATCH
+		</button>
+		`;
+}
+
+function blockButton(): string {
 	console.log("BlockButton render", stateProxyHandler.chatBlockList);
 	const isBlocked = stateProxyHandler.chatBlockList?.includes(
 		stateProxyHandler.selectChat?.id
@@ -83,9 +92,10 @@ export function ProfileContainer() {
 					</div>
 
 					<!-- Buttons column -->
-					<div class="flex flex-col gap-2 w-40 h-40">
+					<div class="flex flex-col gap-2 w-40 h-fit">
 						${ isUserProfile ? "" : addFriendButton()}
-						${ isUserProfile ? "" : BlockButton()}
+						${ isUserProfile ? "" : blockButton()}
+						${ isUserProfile ? "" : inviteMatchButton()}
 						${ isUserProfile ? updateProfileButton() : "" }
 					</div>
 				</div>

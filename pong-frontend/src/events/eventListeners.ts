@@ -3,11 +3,13 @@ import { Alert } from "../components/Alert";
 import {
 	acceptFriendOnClick,
 	denyFriendOnClick,
+	EmbeddedButton,
 } from "../components/EmbeddedButton";
 import {
 	newIntraMessage,
 	removeIntraMessage,
 	stateProxyHandler,
+	updateIntraMessage,
 } from "../states/stateProxyHandler";
 import { fetchRequest, navigateTo, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
@@ -101,6 +103,8 @@ export function eventListeners() {
 			case "btn-block-user": { await blockUser(); }
 				break;
 			case "btn-unblock-user": { await unblockUser(); }
+				break;
+			case "btn-invite-match": { await inviteToMatch(); }
 				break;
 			case "select-chat-btn":
 				{
@@ -305,4 +309,30 @@ const profileOnclick = async () => {
 		console.error("Erreur réseau :", err);
 	}
 
+}
+
+const inviteToMatch = async () => {
+	console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
+	const response = await fetchRequest('/match-invite', 'POST', {}, {
+		body: JSON.stringify({
+			invitedId: stateProxyHandler.selectChat.id,
+			settings: {
+				mode: "NORMAL",
+				ballSpeed: "MEDIUM",
+				paddleSize: "MEDIUM"
+			}
+		})
+	});
+	if (response.message === 'success') {
+		const getMatch = await fetchRequest(`/match-invite?matchId=${response.data.matchId}`, 'GET', {});
+		if (getMatch.message === "success") {
+			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
+			const idx = newIntraMessage(""); 
+			updateIntraMessage(idx, `Invite sent to ${getTo?.name} 
+				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite')}`);
+			stateProxyHandler.state = "SEND_INVITE"
+		}
+	} else if (response.message = 'error') {
+		newIntraMessage(response.data);
+	}
 }
