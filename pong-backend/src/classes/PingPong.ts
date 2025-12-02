@@ -55,6 +55,7 @@ class PingPong {
 		this.gameState.ball.velocityY = 0;
 	}
 
+	
 	updateAI(nowMs:number)
 	{
 		if (nowMs - this.lastAIUpdate < this.aiUpdateInterval)
@@ -66,43 +67,80 @@ class PingPong {
 		const paddle = this.gameState.userX;
 		const paddleHeight = 0.150; // 0.99 - 0.15 = 0.84 / 0.1  
 		const margin = paddleHeight * 0.2; 
-
+		
 		let up = false;
 		let down = false;
-
+		
 		const aiX = paddle.x;       // ~0.01
 		const vx = ball.velocityX;
 		const vy = ball.velocityY;
-
+		
 		let targetY: number;
 		if (vx < 0 && ball.x > aiX)
 		{
-			const timeToreachAI = (aiX - ball.x) / vx;
-			let predictedY = ball.y + vy * timeToreachAI;
-
+			const timeToReachAI = (aiX - ball.x) / vx;
+			// let predictedY = ball.y + vy * timeToreachAI;
+			let predictedY = this.simulateVertical(ball.y, vy, timeToReachAI);
+			
 			if (predictedY < 0) predictedY = 0;
 			if (predictedY > 1) predictedY = 1;
-
+			
 			targetY = predictedY;
 		}
 		else
-		{
-			targetY = 0.5
-		}
-		const paddleCenter = paddle.y;
-
-		if (paddleCenter < targetY - margin) {
-			up = false;
-			down = true;
-		} 
-		else if (paddleCenter > targetY + margin) {
-			up = true;
-			down = false;
-		}
-		
-		this.inputs.set(aiId, {up, down});
+			{
+				targetY = 0.5
+			}
+			const paddleCenter = paddle.y;
+			
+			if (paddleCenter < targetY - margin) {
+				up = false;
+				down = true;
+			} 
+			else if (paddleCenter > targetY + margin) {
+				up = true;
+				down = false;
+			}
+			
+			this.inputs.set(aiId, {up, down});
 	}
 
+	simulateVertical(y: number, vy:number, timeToReachAI:number):number
+	{
+		let pos = y;
+		let vel = vy;
+		let remaining = timeToReachAI;
+		const minY  = 0;
+		const maxY = 1;
+
+		if (pos < minY) pos = minY;
+    	if (pos > maxY) pos = maxY;
+		
+		if (vel === 0) {
+			return pos;
+		}
+		while (remaining > 0)
+		{
+			// Temps jusqu'au prochain mur
+			let timeToWall: number;
+			if (vel > 0) // la ball va en bas
+				timeToWall = (maxY - pos) / vel;
+			else // la ball va en haut
+				timeToWall = (minY - pos) / vel;
+			if (timeToWall >= remaining || timeToWall <= 0)
+			{
+				pos = pos + vel * remaining;
+				return pos;
+			}
+			pos = pos + vel * timeToWall;
+			vel = -vel;
+			remaining -= timeToWall;
+			if (pos < minY) pos = minY;
+        	if (pos > maxY) pos = maxY;
+		}
+		
+		return pos;
+	}
 
 	updateGame() {
 		if (this.matchState === 'COUNTDOWN') {
@@ -404,7 +442,32 @@ class PingPong {
 
 				for (const [id, { disconnect }] of this.playerConnectionInfo) {
 					const connected = this.getFromConnectedRoom(id);
-					print(`[GAME OVER] Sending GAME_OVER to ${id}`);
+					print(`[GAME OVER] Sending GAME_OVER t		{
+			const timeToReachAI = (aiX - ball.x) / vx;
+			// let predictedY = ball.y + vy * timeToreachAI;
+			let predictedY = simulateVertical(ball.y, vy, timeToReachAI);
+			
+			if (predictedY < 0) predictedY = 0;
+			if (predictedY > 1) predictedY = 1;
+			
+			targetY = predictedY;
+		}
+		else
+			{
+				targetY = 0.5
+			}
+			const paddleCenter = paddle.y;
+			
+			if (paddleCenter < targetY - margin) {
+				up = false;
+				down = true;
+			} 
+			else if (paddleCenter > targetY + margin) {
+				up = true;
+				down = false;
+			}
+			
+			this.inputs.set(aiId, {up, down});o ${id}`);
 					if (!connected || !connected.socket) continue;
 					connected.socket.send(JSON.stringify({
 						status: 200,
