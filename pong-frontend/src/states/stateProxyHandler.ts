@@ -146,9 +146,11 @@ const listeners: Record<StateKey, (() => void)[]> = {
     matchesHistory: [],
     profile: [],
     reset: [],
+    settings: [],
 };
 
 export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
+     console.log("Listener registered for settings");
     listeners[key].push(fn);
 }
 
@@ -172,6 +174,7 @@ export interface StateProxyHandler {
     availableMatches: NewMatch[];
     matchesHistory: MatchesHistory;
     profile: { username: string, avatar: string };
+    settings: { state: string };
     reset: () => void;
 }
 
@@ -195,6 +198,7 @@ class State {
     availableMatches!: NewMatch[];
     matchesHistory!: MatchesHistory;
     profile!: { username: string, avatar: string };
+    settings!: { state: string };
 
   constructor() {
     this.reset();
@@ -212,6 +216,7 @@ class State {
     this.availableMatches = [];
     this.matchesHistory = { wins: 0, loses: 0, history: [] };
     this.profile = { username: "", avatar: "" };
+    this.settings = {state: '0'};
   }
 }
 
@@ -254,6 +259,7 @@ export const stateProxyHandler: StateProxyHandler = new Proxy(
 
         const key = prop as StateKey;
         if (listeners[key]) {
+            console.log("Notifying listeners for key:", key);
             listeners[key].forEach(fn => fn());
         }
 

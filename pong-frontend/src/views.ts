@@ -43,7 +43,7 @@ export function intraView(root: HTMLElement) {
 
   root.appendChild(intraContainerUI);
   //root.appendChild(Menu());
-
+  root.appendChild(SettignsContainer());
   // Chat View
   intraContainerUI.appendChild(Intra());
   // Profile View

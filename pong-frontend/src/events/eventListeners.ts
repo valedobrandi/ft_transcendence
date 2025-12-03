@@ -127,9 +127,7 @@ export function eventListeners() {
 			}
 				break;
 			case "create-match-btn": {
-				await fetchRequest("/match-create", "POST", {}, {
-					body: JSON.stringify({ settings: { username: profile.username } })
-				});
+				stateProxyHandler.settings = { state: '1' };
 			}
 				break;
 			case "btn-logout": { await joinLogout(); }
@@ -159,10 +157,7 @@ async function onSendSettings(event: Event) {
 
 function onCancelSettings(event: Event) {
   event.preventDefault();
-  const settingsContainer = document.getElementById("settings-container");
-  if (settingsContainer) {
-    settingsContainer.remove();
-  }
+  stateProxyHandler.settings = { state: '0' };
 }
 
 
