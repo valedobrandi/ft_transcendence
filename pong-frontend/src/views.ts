@@ -66,7 +66,7 @@ export function matchView(root: HTMLElement) {
 export function defaultView(root: HTMLElement) {
   root.innerHTML = "";
   const loginUI = Default();
-  root.appendChild(SettignsContainer());
+  //root.appendChild(SettignsContainer());
   root.appendChild(loginUI);
 }
 

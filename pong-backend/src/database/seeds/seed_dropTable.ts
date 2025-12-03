@@ -1,4 +1,4 @@
-import db from "../db";
+import db from "../db.js";
 
 export function drop_tables() {
     db.exec('BEGIN');

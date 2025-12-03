@@ -12,7 +12,6 @@
 		"allowSyntheticDefaultImports": true,
 		"resolveJsonModule": true,
 		"outDir": "dist",
-		"rootDir": "src"
 	},
 	"ts-node": {
 		"esm": true
