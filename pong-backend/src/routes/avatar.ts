@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import db from '../../database/db.js'
+import db from '../database/db.js'
 import fs from "fs";
 import path from "path";
 import fastifyMultipart from "@fastify/multipart";

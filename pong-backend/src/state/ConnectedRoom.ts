@@ -1,4 +1,4 @@
-import db from "../../database/db.js";
+import db from "../database/db.js";
 import ChatManager from "../classes/ChatManager.js";
 import { UsersModel } from "../models/usersModel.js";
 import { matchServiceInstance } from "../routes/match.js";
