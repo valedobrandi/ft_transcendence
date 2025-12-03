@@ -8,7 +8,8 @@ services:
     image: pong-nginx:latest
     container_name: pong-nginx
     ports:
-      - "443:443"
+      - "8080:80"     # HTTP mapped to 8080
+      - "8443:443"    # HTTPS mapped to 8443
     environment:
       - VITE_PONG_BACKEND_API=https://localhost/api
       - VITE_PONG_BACKEND_WEBSOCKET=wss://localhost/ws
@@ -28,7 +29,7 @@ services:
       dockerfile: Dockerfile.production
     image: pong-backend:latest
     container_name: pong-backend
-    expose:
+    ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
