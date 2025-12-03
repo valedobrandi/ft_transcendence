@@ -1,7 +1,8 @@
-// export default {
-//   plugins: {
-//     '@tailwindcss/postcss': {},
-//     autoprefixer: {},
-//   },
-// }
+const production = process.env.NODE_ENV === "production";
 
+export default {
+  plugins: {
+    ...(production && { '@tailwindcss/postcss': {} }),
+    ...(production && { autoprefixer: {} }),
+  },
+};

@@ -8,6 +8,7 @@ import type { NetType } from "../interface/net";
 import type { PlayerType } from "../interface/player";
 import { getSocket } from "../websocket";
 
+const PADDLE_HEIGHT = 0.150;
 
 export function RenderGame(): HTMLElement {
 
@@ -28,11 +29,11 @@ export function RenderGame(): HTMLElement {
     canvasElement.width = 1200;
     canvasElement.height = 600;
     canvasElement.className = "border-4 border-blue-500 bg-black my-4";
-    const paddleHeight = 0.150;
 
     setActiveCanvas(canvasElement);
 
     const netWidth = Math.max(2, Math.min(canvasElement.width * 0.002, 6));
+
     const net: NetType = {
         x: canvasElement.width / 2 - netWidth / 2,
         y: 0,
@@ -105,11 +106,12 @@ export function RenderGame(): HTMLElement {
         drawText({ text: userX.score, x: scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
         drawText({ text: userY.score, x: 3 * scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
 
-        drawRect({ x: userX.x * scaleX, y: (userX.y * scaleY) - (paddleHeight * scaleY / 2), w: 10, h: 100, color: "white" });
-        drawRect({ x: userY.x * scaleX - 10, y: (userY.y * scaleY) - (paddleHeight * scaleY / 2), w: 10, h: 100, color: "white" });
+        drawRect({ x: userX.x * scaleX, y: (userX.y * scaleY) - (PADDLE_HEIGHT * scaleY / 2), w: 8, h: 100, color: "white" });
+        drawRect({ x: userY.x * scaleX - 10, y: (userY.y * scaleY) - (PADDLE_HEIGHT * scaleY / 2), w: 8, h: 100, color: "white" });
 
-        const ballRadius = Math.min(ball.radius * ((scaleX + scaleY) / 2), 8);
-        drawCircle({ x: ball.x * scaleX, y: ball.y * scaleY, r: ballRadius, color: "white" });
+        const BALL_RADIUS = Math.min(ball.radius * ((scaleX + scaleY) / 2), 8);
+
+        drawCircle({ x: ball.x * scaleX, y: ball.y * scaleY, r: BALL_RADIUS, color: "white" });
         drawCountdown(scaleX, scaleY);
         drawEndGame(scaleX, scaleY);
     }

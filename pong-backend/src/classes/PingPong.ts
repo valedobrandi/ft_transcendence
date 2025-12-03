@@ -6,13 +6,16 @@ import { userGameStateType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
 
 const WIN_SCORE = 2
+const PADDLE_HEIGHT = 0.150;
+const PADDLE_SPEED = 0.010;
+const BALL_RADIUS = 0.007;
 
 class PingPong {
 	machId: string;
 	tournamentId: string | undefined;
 	playerConnectionInfo = new Map<string, { disconnect: boolean }>();
 	inputs: Map<string, { up: boolean; down: boolean }>;
-	initialBallSpeed: number = 0.003;
+	INITIAL_BALL_SPEED: number = 0.004;
 	gameState: userGameStateType;
 	winnerId: string | undefined = undefined;
 	loserId: string | undefined = undefined;
@@ -31,9 +34,9 @@ class PingPong {
 			ball: {
 				x: 0.5,
 				y: 0.5,
-				radius: 0.02,
-				speed: this.initialBallSpeed,
-				velocityX: this.initialBallSpeed * 1,
+				radius: BALL_RADIUS,
+				speed: this.INITIAL_BALL_SPEED,
+				velocityX: this.INITIAL_BALL_SPEED * 1,
 				velocityY: 0,
 			},
 		};
@@ -47,9 +50,9 @@ class PingPong {
 	resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
 		this.gameState.ball.x = 0.5;
 		this.gameState.ball.y = 0.5;
-		this.gameState.ball.speed = this.initialBallSpeed;
+		this.gameState.ball.speed = this.INITIAL_BALL_SPEED;
 		const direction = side === 'LEFT' ? -1 : 1;
-		this.gameState.ball.velocityX = this.initialBallSpeed * direction;
+		this.gameState.ball.velocityX = this.INITIAL_BALL_SPEED * direction;
 		this.gameState.ball.velocityY = 0;
 	}
 
@@ -60,9 +63,6 @@ class PingPong {
 		}
 		const ball = this.gameState.ball;
 
-		const paddleHeight = 0.150;
-		const paddleSpeed = 0.010;
-
 		ball.x += ball.velocityX;
 		ball.y += ball.velocityY;
 
@@ -70,11 +70,11 @@ class PingPong {
 			const connected = this.getFromConnectedRoom(id);
 			if (!connected) continue;
 			if (id === this.side.LEFT) {
-				if (input.up && this.gameState.userX.y > 0 + (paddleHeight / 2)) this.gameState.userX.y -= paddleSpeed;
-				if (input.down && this.gameState.userX.y < 1 - (paddleHeight / 2)) this.gameState.userX.y += paddleSpeed;
+				if (input.up && this.gameState.userX.y > 0 + (PADDLE_HEIGHT / 2)) this.gameState.userX.y -= PADDLE_SPEED;
+				if (input.down && this.gameState.userX.y < 1 - (PADDLE_HEIGHT / 2)) this.gameState.userX.y += PADDLE_SPEED;
 			} else if (id === this.side.RIGHT) {
-				if (input.up && this.gameState.userY.y > 0 + (paddleHeight / 2)) this.gameState.userY.y -= paddleSpeed;
-				if (input.down && this.gameState.userY.y < 1 - (paddleHeight / 2)) this.gameState.userY.y += paddleSpeed;
+				if (input.up && this.gameState.userY.y > 0 + (PADDLE_HEIGHT / 2)) this.gameState.userY.y -= PADDLE_SPEED;
+				if (input.down && this.gameState.userY.y < 1 - (PADDLE_HEIGHT / 2)) this.gameState.userY.y += PADDLE_SPEED;
 			}
 		}
 
@@ -89,17 +89,17 @@ class PingPong {
 
 		const ballTop = ball.y - ball.radius;
 		const ballBottom = ball.y + ball.radius;
-		const paddleTop = player.y - (paddleHeight / 2);
-		const paddleBottom = player.y + (paddleHeight / 2);
+		const paddleTop = player.y - (PADDLE_HEIGHT / 2);
+		const paddleBottom = player.y + (PADDLE_HEIGHT / 2);
 
 		if (
 			Math.abs(ball.x - playerX) < ball.radius &&
 			ballBottom >= paddleTop &&
 			ballTop <= paddleBottom
 		) {
-			//const paddleCenter = player.y + paddleHeight / 2;
-			const collidePoint = (ball.y - player.y) / (paddleHeight / 2);
-			//const normalized = collidePoint / (paddleHeight / 2);
+			//const paddleCenter = player.y + PADDLE_HEIGHT / 2;
+			const collidePoint = (ball.y - player.y) / (PADDLE_HEIGHT / 2);
+			//const normalized = collidePoint / (PADDLE_HEIGHT / 2);
 			const clamped = Math.max(-1, Math.min(1, collidePoint));
 
 			const maxBounceAngle = Math.PI / 4;

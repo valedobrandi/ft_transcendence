@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3'
-import { contractWithSigner } from '../blockchain';
-import { print } from '../server';
+
+import { print } from '../server.js';
+import { contractWithSigner } from '../blockchain.js';
 
 class MatchesModel {
 	private db: Database.Database;
