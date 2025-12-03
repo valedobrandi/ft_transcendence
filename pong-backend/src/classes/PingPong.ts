@@ -5,6 +5,21 @@ import { gameRoom } from "../state/gameRoom.js";
 import { SettingsType, userGameStateType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
 
+export type DifficultyLevel = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export type ModuleType = {
+	IA: boolean;
+	score: DifficultyLevel;
+	ball: {
+		size: DifficultyLevel;
+		speed: DifficultyLevel;
+	};
+	paddle: {
+		height: DifficultyLevel;
+		speed: DifficultyLevel;
+	};
+};
+
 export const module = {
 			IA: false,
 			score: {
