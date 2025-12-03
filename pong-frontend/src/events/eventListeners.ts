@@ -92,13 +92,19 @@ export function eventListeners() {
 		console.log("Button clicked:", button.id);
 
 		switch (button.id) {
+			case "save-settings": { await onSendSettings(event); }
+				break;
+			case "cancel-settings": { onCancelSettings(event); }
+				break;
 			case "update-profile": { await profileOnclick(); }
 				break;
-			case "view-profile": { 
+			case "view-profile": {
 				stateProxyHandler.selectChat = { name: profile.username, id: profile.id };
-			 }
+			}
 				break;
 			case "accept-match-invite": { await onClickAcceptMatchInvite(button); }
+				break;
+			case "cancel-match-invite": { await onClickCancelMatchInvite(button); }
 				break;
 			case "btn-block-user": { await blockUser(); }
 				break;
@@ -106,27 +112,7 @@ export function eventListeners() {
 				break;
 			case "btn-invite-match": { await inviteToMatch(); }
 				break;
-			case "select-chat-btn":
-				{
-					const chatName = button.value;
-					const chatId = button.name;
-
-					console.log("Selected chat:", chatName, chatId);
-
-					stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
-
-					const buttons = document.querySelectorAll("#select-chat-btn");
-					buttons.forEach((button) => {
-						button.classList.remove("bg-gray-100");
-					});
-					Array.from(document.getElementsByClassName(chatName)).forEach(
-						(elem) => {
-							elem.classList.add("bg-gray-100");
-						}
-					);
-				}
-				break;
-			case "cancel-match-invite": { await onClickCancelMatchInvite(button); }
+			case "select-chat-btn": { selectChat(button);}
 				break;
 			case "btn-friend-list": { await inviteFriendList(); }
 				break;
@@ -150,6 +136,53 @@ export function eventListeners() {
 				break;
 		}
 	});
+}
+
+async function onSendSettings(event: Event) {
+  event.preventDefault();
+
+  const settingsContainer = document.getElementById("settings-container");
+
+  await fetchRequest("/match-create", "POST", {}, {
+    body: JSON.stringify({ settings: {
+      ballSpeed: "medium",
+      ballSize: "medium",
+      paddleSize: "medium",
+      matchPoints: "medium"
+    } })
+  });
+
+  if (settingsContainer) {
+    settingsContainer.remove();
+  }
+}
+
+function onCancelSettings(event: Event) {
+  event.preventDefault();
+  const settingsContainer = document.getElementById("settings-container");
+  if (settingsContainer) {
+    settingsContainer.remove();
+  }
+}
+
+
+function selectChat(button: HTMLButtonElement) {
+	const chatName = button.value;
+	const chatId = button.name;
+
+	console.log("Selected chat:", chatName, chatId);
+
+	stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
+
+	const buttons = document.querySelectorAll("#select-chat-btn");
+	buttons.forEach((button) => {
+		button.classList.remove("bg-gray-100");
+	});
+	Array.from(document.getElementsByClassName(chatName)).forEach(
+		(elem) => {
+			elem.classList.add("bg-gray-100");
+		}
+	);
 }
 
 async function unblockUser() {
@@ -327,7 +360,7 @@ const inviteToMatch = async () => {
 		const getMatch = await fetchRequest(`/match-invite?matchId=${response.data.matchId}`, 'GET', {});
 		if (getMatch.message === "success") {
 			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
-			const idx = newIntraMessage(""); 
+			const idx = newIntraMessage("");
 			updateIntraMessage(idx, `Invite sent to ${getTo?.name} 
 				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite')}`);
 			stateProxyHandler.state = "SEND_INVITE"

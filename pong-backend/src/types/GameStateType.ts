@@ -21,4 +21,23 @@ export interface userGameStateType {
     userX: PlayerStatType;
     userY: PlayerStatType;
     ball: BallType;
+    paddle: {
+        height: number;
+        speed: number;
+    };
+    score: number;
+    IA: boolean;
 }
+
+export type SettingsType = {
+    paddle: {
+        height: number;
+        speed: number;
+    };
+    ball: {
+        size: number;
+        speed: number;
+    };
+    score: number;
+    IA: boolean;
+};

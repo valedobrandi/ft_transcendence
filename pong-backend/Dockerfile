@@ -8,7 +8,7 @@ RUN npm install --include=dev
 
 COPY . .
 
-RUN mkdir -p /app/data
+RUN npx tsx /app/database/init.ts 
 
 EXPOSE 3000
 

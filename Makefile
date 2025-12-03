@@ -14,40 +14,40 @@ NC = \033[0m
 .PHONY: all stop clean fclean re logs
 
 production.down:
-	docker-compose -f $(COMPOSE_FILE_PROD) down --volumes --remove-orphans
+	docker compose -f $(COMPOSE_FILE_PROD) down --volumes --remove-orphans
 
 production.build: 
-	docker-compose -f $(COMPOSE_FILE_PROD) up --build -d hardhat
+	docker compose -f $(COMPOSE_FILE_PROD) up --build -d hardhat
 	# Wait for Hardhat to be healthy
 	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
 	@echo "$(GREEN)Hardhat is healthy. TournamentScores contract...$(NC)"
 	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
 	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
 	@echo "$(GREEN)TournamentScores contract OK.$(NC)"
-	docker-compose -f $(COMPOSE_FILE_PROD) up --build -d pong-backend nginx
+	docker compose -f $(COMPOSE_FILE_PROD) up --build -d pong-backend nginx
 
 build:
-	docker-compose up --build -d hardhat
+	docker compose up --build -d hardhat
 	# Wait for Hardhat to be healthy
 	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
 	@echo "$(GREEN)Hardhat is healthy. Deploying TournamentScores contract...$(NC)"
 	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
 	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
 	@echo "$(GREEN)TournamentScores contract deployed.$(NC)"
-	docker-compose up --build -d pong-backend pong-frontend
+	docker compose up --build -d pong-backend pong-frontend
 
 up: 
-	docker-compose up -d hardhat
+	docker compose up -d hardhat
 	# Wait for Hardhat to be healthy
 	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
 	@echo "$(GREEN)Hardhat is healthy. Deploying TournamentScores contract...$(NC)"
 	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
 	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
 	@echo "$(GREEN)TournamentScores contract deployed.$(NC)"
-	docker-compose up -d pong-backend pong-frontend
+	docker compose up -d pong-backend pong-frontend
 
 down:
-	docker-compose down --volumes --remove-orphans
+	docker compose down --volumes --remove-orphans
 
 start:
 	npm run up
