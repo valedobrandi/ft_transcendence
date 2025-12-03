@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import Database from 'better-sqlite3';
-import db from "../../database/db.js";
+import db from "../database/db.js";
 import { statusCode } from "../types/statusCode.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { print } from "../server.js";

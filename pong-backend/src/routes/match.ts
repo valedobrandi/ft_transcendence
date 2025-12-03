@@ -9,7 +9,7 @@ import {
 } from "../state/gameRoom.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
-import db from "../../database/db.js";
+import db from "../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
 import { contractReadOnly } from "../blockchain.js";
 import { print } from "../server.js";

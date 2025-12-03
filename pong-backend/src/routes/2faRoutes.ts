@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import db from '../../database/db.js';
+import db from '../database/db.js';
 import { authenticationRoomInstance } from "../state/authenticationRoom.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';

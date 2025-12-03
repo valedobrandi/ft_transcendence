@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { UsersModel } from "../models/usersModel.js";
-import db from "../../database/db.js";
+import db from "../database/db.js";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 

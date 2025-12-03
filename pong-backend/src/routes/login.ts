@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import { authenticationRoomInstance } from '../state/authenticationRoom.js';
-import db from '../../database/db.js'
+import db from '../database/db.js'
 import { AuthService } from '../services/authService.js';
 import { AuthController } from '../controllers/authController.js';
 import { UsersModel } from '../models/usersModel.js';

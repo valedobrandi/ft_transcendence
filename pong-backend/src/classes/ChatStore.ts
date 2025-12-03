@@ -1,4 +1,4 @@
-import db from "../../database/db.js";
+import db from "../database/db.js";
 import { MessagesModel } from "../models/messagesModel.js";
 import { print } from "../server.js";
 import { ChatHistory } from "../types/ChatHistory.js";

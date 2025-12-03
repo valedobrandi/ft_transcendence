@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { fastify, print } from '../server.js';
 import { statusCode } from "../types/statusCode.js";
-import db from "../../database/db.js";
+import db from "../database/db.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 
 export interface FriendListDTO {
