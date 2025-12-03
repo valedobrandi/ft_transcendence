@@ -14,6 +14,7 @@ import { ProfileContainer } from "./components/ProfileContainer";
 import { GameContainerUI } from "./components/GameContainer";
 import { IntraContainer } from "./components/IntraContainer";
 import { stateProxyHandler } from "./states/stateProxyHandler";
+import { SettignsContainer } from "./components/SettignsContainer";
 
 
 // <!-- OLD INTRA VIEW -->
@@ -65,6 +66,7 @@ export function matchView(root: HTMLElement) {
 export function defaultView(root: HTMLElement) {
   root.innerHTML = "";
   const loginUI = Default();
+  root.appendChild(SettignsContainer());
   root.appendChild(loginUI);
 }
 

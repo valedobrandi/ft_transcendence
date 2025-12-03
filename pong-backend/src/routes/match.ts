@@ -13,6 +13,7 @@ import db from "../../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
 import { contractReadOnly } from "../blockchain.js";
 import { print } from "../server.js";
+import { SettingsType } from "../types/GameStateType.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
 	const matcherController = new MatcherController();
@@ -76,7 +77,18 @@ const matchesRoute = (fastify: FastifyInstance) => {
 			body: {
 				type: "object",
 				properties: {
-					settings: { type: "object" },
+					settings: {
+						ball: {
+							size: { type: "number" },
+							speed: { type: "number" }
+						},
+						paddle: {
+							height: { type: "number" },
+							speed: { type: "number" }
+						},
+						score: { type: "number" },
+						IA: { type: "boolean" },
+					},
 				},
 			},
 			require: ["settings"],
@@ -144,7 +156,7 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	sendMatchInvite(req: FastifyRequest<{Body: {invitedId: number, settings: object}}>, res: FastifyReply) {
+	sendMatchInvite(req: FastifyRequest<{ Body: { invitedId: number, settings: object } }>, res: FastifyReply) {
 		const { invitedId, settings } = req.body;
 		const { message, data } = this.matchesService.sendMatchInvite(
 			req.userId,
@@ -172,7 +184,7 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	createMatch(req: FastifyRequest<{Body: {settings: any}}>, res: FastifyReply) {
+	createMatch(req: FastifyRequest<{ Body: { settings: SettingsType } }>, res: FastifyReply) {
 		const { settings } = req.body;
 		const { message, data } = this.matchesService.createMatch(req.userId, settings);
 		return res.code(statusCode("OK")).send({ message, data });
@@ -230,15 +242,13 @@ class MatchesService {
 				score2: Number(score2),
 				createdAt: m.created_at,
 			});
-			if(m.player1 === username)
-			{
+			if (m.player1 === username) {
 				if (m.score1 > m.score2)
 					matchesHistory.wins += 1;
 				if (m.score1 < m.score2)
 					matchesHistory.loses += 1;
 			}
-			if(m.player2 === username)
-			{
+			if (m.player2 === username) {
 				if (m.score1 < m.score2)
 					matchesHistory.wins += 1;
 				if (m.score1 > m.score2)
@@ -341,7 +351,7 @@ class MatchesService {
 		return { data, message };
 	}
 
-	createMatch(userId: number, settings: {}) {
+	createMatch(userId: number, settings: SettingsType) {
 		const connected = connectedRoomInstance.getById(userId);
 		if (connected === undefined) throw new Error("disconnected");
 
@@ -490,6 +500,7 @@ class MatchesService {
 		};
 	}
 }
+
 export type MatchesReturnDB = {
 	match_id: string;
 	player1: string;
@@ -518,7 +529,7 @@ class MatchesModel {
 	async getScoreBlockchain(matchid: string) {
 		try {
 			const response = await contractReadOnly.getMatch(matchid);
-			
+
 			const [score1, score2] = response;
 			return { score1: Number(score1), score2: Number(score2) };
 		} catch (error) {

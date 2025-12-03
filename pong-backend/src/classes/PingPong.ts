@@ -5,10 +5,26 @@ import { gameRoom } from "../state/gameRoom.js";
 import { userGameStateType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
 
-const WIN_SCORE = 2
-const PADDLE_HEIGHT = 0.150;
-const PADDLE_SPEED = 0.010;
-const BALL_RADIUS = 0.007;
+
+
+const defaultGameState: userGameStateType = {
+	userX: { x: 0.01, y: 0.5, score: 0 },
+	userY: { x: 0.99, y: 0.5, score: 0 },
+	ball: {
+		x: 0.5,
+		y: 0.5,
+		radius: 0.007,
+		speed: 0.004,
+		velocityX: 0.004,
+		velocityY: 0,
+	},
+	paddle: {
+		height: 0.150,
+		speed: 0.010,
+	},
+	score: 2,
+	IA: false,
+};
 
 class PingPong {
 	machId: string;
@@ -23,23 +39,15 @@ class PingPong {
 	side: { RIGHT: string, LEFT: string };
 	matchState: 'COUNTDOWN' | 'PLAYING' | 'ENDED' = 'COUNTDOWN';
 
-	constructor(id: string) {
+	constructor(id: string, gameState?: userGameStateType) {
 		this.machId = id;
 		this.tournamentId = undefined;
 		this.inputs = new Map<string, { up: boolean; down: boolean }>();
 		this.side = { RIGHT: "", LEFT: "" };
-		this.gameState = {
-			userX: { x: 0.01, y: 0.5, score: 0 },
-			userY: { x: 0.99, y: 0.5, score: 0 },
-			ball: {
-				x: 0.5,
-				y: 0.5,
-				radius: BALL_RADIUS,
-				speed: this.INITIAL_BALL_SPEED,
-				velocityX: this.INITIAL_BALL_SPEED * 1,
-				velocityY: 0,
-			},
-		};
+		this.gameState = setSettings(gameState);
+
+	setSettings(settings: Partial<userGameStateType>) {
+		this.gameState = { ...defaultGameState, ...settings };
 	}
 
 	getFromConnectedRoom(username: string): PlayerType | undefined {
@@ -70,11 +78,19 @@ class PingPong {
 			const connected = this.getFromConnectedRoom(id);
 			if (!connected) continue;
 			if (id === this.side.LEFT) {
-				if (input.up && this.gameState.userX.y > 0 + (PADDLE_HEIGHT / 2)) this.gameState.userX.y -= PADDLE_SPEED;
-				if (input.down && this.gameState.userX.y < 1 - (PADDLE_HEIGHT / 2)) this.gameState.userX.y += PADDLE_SPEED;
+				if (input.up && this.gameState.userX.y > 0 + (this.gameState.paddle.height / 2)) {
+					this.gameState.userX.y -= this.gameState.paddle.speed;
+				} 
+				if (input.down && this.gameState.userX.y < 1 - (this.gameState.paddle.height / 2)) {
+					this.gameState.userX.y += this.gameState.paddle.speed;
+				} 
 			} else if (id === this.side.RIGHT) {
-				if (input.up && this.gameState.userY.y > 0 + (PADDLE_HEIGHT / 2)) this.gameState.userY.y -= PADDLE_SPEED;
-				if (input.down && this.gameState.userY.y < 1 - (PADDLE_HEIGHT / 2)) this.gameState.userY.y += PADDLE_SPEED;
+				if (input.up && this.gameState.userY.y > 0 + (this.gameState.paddle.height / 2)) {
+					this.gameState.userY.y -= this.gameState.paddle.speed;
+				}
+				if (input.down && this.gameState.userY.y < 1 - (this.gameState.paddle.height / 2)) {
+					this.gameState.userY.y += this.gameState.paddle.speed;
+				}
 			}
 		}
 
@@ -89,17 +105,17 @@ class PingPong {
 
 		const ballTop = ball.y - ball.radius;
 		const ballBottom = ball.y + ball.radius;
-		const paddleTop = player.y - (PADDLE_HEIGHT / 2);
-		const paddleBottom = player.y + (PADDLE_HEIGHT / 2);
+		const paddleTop = player.y - (this.gameState.paddle.height / 2);
+		const paddleBottom = player.y + (this.gameState.paddle.height / 2);
 
 		if (
 			Math.abs(ball.x - playerX) < ball.radius &&
 			ballBottom >= paddleTop &&
 			ballTop <= paddleBottom
 		) {
-			//const paddleCenter = player.y + PADDLE_HEIGHT / 2;
-			const collidePoint = (ball.y - player.y) / (PADDLE_HEIGHT / 2);
-			//const normalized = collidePoint / (PADDLE_HEIGHT / 2);
+			//const paddleCenter = player.y + this.gameState.paddle.height / 2;
+			const collidePoint = (ball.y - player.y) / (this.gameState.paddle.height / 2);
+			//const normalized = collidePoint / (this.gameState.paddle.height / 2);
 			const clamped = Math.max(-1, Math.min(1, collidePoint));
 
 			const maxBounceAngle = Math.PI / 4;
@@ -117,7 +133,7 @@ class PingPong {
 			//ball.velocityX = direction * Math.sqrt(ball.speed ** 2 - ball.velocityY ** 2);
 
 			ball.velocityX = direction * speed * Math.cos(bounceAngle);
-    		ball.velocityY = speed * Math.sin(bounceAngle);
+			ball.velocityY = speed * Math.sin(bounceAngle);
 
 			if (ball.speed < 0.008) {
 				ball.speed = Math.min(ball.speed + 0.0005, 0.02);
@@ -265,8 +281,8 @@ class PingPong {
 			.every(({ disconnect }) => disconnect)
 
 		if (isDisconnected ||
-			this.gameState.userX.score === WIN_SCORE ||
-			this.gameState.userY.score === WIN_SCORE) {
+			this.gameState.userX.score === this.gameState.score ||
+			this.gameState.userY.score === this.gameState.score) {
 
 			this.endMatch();
 		}
