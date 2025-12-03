@@ -13,8 +13,12 @@ import db from "../../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
 import { contractReadOnly } from "../blockchain.js";
 import { print } from "../server.js";
+import { module, ModuleType } from "../classes/PingPong.js";
 import { SettingsType } from "../types/GameStateType.js";
-import { module } from "../classes/PingPong.js";
+
+type RequestSettingsType = {
+	settings: ModuleType;
+}
 
 const matchesRoute = (fastify: FastifyInstance) => {
 	const matcherController = new MatcherController();
@@ -194,19 +198,19 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	createMatch(req: FastifyRequest<{ Body: { settings: typeof module } }>, res: FastifyReply) {
-		const { settings } = req.body;
+	createMatch(req: FastifyRequest<{ Body: RequestSettingsType }>, res: FastifyReply) {
+		const { settings } = req.body as RequestSettingsType;
 
 		const parsedSettings: SettingsType = {
 			paddle: {
-				height: module.paddle.height[settings.paddle.height as "HIGH" | "MEDIUM" | "LOW"],
-				speed: module.paddle.speed[settings.paddle.speed as "HIGH" | "MEDIUM" | "LOW"],
+				height: module.paddle.height[settings.paddle.height],
+				speed: module.paddle.speed[settings.paddle.speed],
 			},
 			ball: {
-				size: module.ball.size[settings.ball.size as "HIGH" | "MEDIUM" | "LOW"],
-				speed: module.ball.speed[settings.ball.speed as "HIGH" | "MEDIUM" | "LOW"],
+				size: module.ball.size[settings.ball.size],
+				speed: module.ball.speed[settings.ball.speed],
 			},
-			score: module.score[settings.score as "HIGH" | "MEDIUM" | "LOW"],
+			score: module.score[settings.score],
 			IA: settings.IA,
 		};
 
