@@ -7,6 +7,11 @@ import { PlayerType } from "../types/PlayerType.js";
 
 export const module = {
 			IA: false,
+			score: {
+				'HIGH': 6,
+				'MEDIUM': 4,
+				'LOW': 2
+			},
 			ball: {
 				size: {
 					'HIGH': 0.009,
@@ -18,11 +23,6 @@ export const module = {
 					'MEDIUM': 0.004,
 					'LOW': 0.002
 				},
-				score: {
-					'HIGH': 6,
-					'MEDIUM': 4,
-					'LOW': 2
-				}
 			},
 			paddle: {
 				height: {

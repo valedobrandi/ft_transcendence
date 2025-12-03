@@ -199,14 +199,14 @@ class MatcherController {
 
 		const parsedSettings: SettingsType = {
 			paddle: {
-				height: parseInt(settings.paddle.height),
-				speed: parseInt(settings.paddle.speed),
+				height: module.paddle.height[settings.paddle.height as "HIGH" | "MEDIUM" | "LOW"],
+				speed: module.paddle.speed[settings.paddle.speed as "HIGH" | "MEDIUM" | "LOW"],
 			},
 			ball: {
-				size: parseInt(settings.ball.size),
-				speed: parseInt(settings.ball.speed),
+				size: module.ball.size[settings.ball.size as "HIGH" | "MEDIUM" | "LOW"],
+				speed: module.ball.speed[settings.ball.speed as "HIGH" | "MEDIUM" | "LOW"],
 			},
-			score: parseInt(settings.score),
+			score: module.score[settings.score as "HIGH" | "MEDIUM" | "LOW"],
 			IA: settings.IA,
 		};
 
