@@ -24,12 +24,10 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/database ./database
 
 # Initialize the database
-RUN npx tsx /app/database/init.ts
+RUN node /app/database/init.js
 
 ENV NODE_ENV=production
 
 EXPOSE 3000
-
-
 
 CMD ["node", "--trace-uncaught", "--trace-warnings", "dist/src/start.js"]

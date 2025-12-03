@@ -2,10 +2,41 @@ import { eventsBus, events } from "../events/EventsBus.js";
 import { print } from "../server.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { gameRoom } from "../state/gameRoom.js";
-import { userGameStateType } from "../types/GameStateType.js";
+import { SettingsType, userGameStateType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
 
-
+export const module = {
+			IA: false,
+			ball: {
+				size: {
+					'HIGH': 0.009,
+					'MEDIUM': 0.007,
+					'LOW': 0.005
+				},
+				speed: {
+					'HIGH': 0.006,
+					'MEDIUM': 0.004,
+					'LOW': 0.002
+				},
+				score: {
+					'HIGH': 6,
+					'MEDIUM': 4,
+					'LOW': 2
+				}
+			},
+			paddle: {
+				height: {
+					'HIGH': 0.200,
+					'MEDIUM': 0.150,
+					'LOW': 0.100
+				},
+				speed: {
+					'HIGH': 0.015,
+					'MEDIUM': 0.01,
+					'LOW': 0.005
+				}
+			},
+		};
 
 const defaultGameState: userGameStateType = {
 	userX: { x: 0.01, y: 0.5, score: 0 },
@@ -39,15 +70,32 @@ class PingPong {
 	side: { RIGHT: string, LEFT: string };
 	matchState: 'COUNTDOWN' | 'PLAYING' | 'ENDED' = 'COUNTDOWN';
 
-	constructor(id: string, gameState?: userGameStateType) {
+	constructor(id: string, settings?: SettingsType) {
 		this.machId = id;
 		this.tournamentId = undefined;
 		this.inputs = new Map<string, { up: boolean; down: boolean }>();
 		this.side = { RIGHT: "", LEFT: "" };
-		this.gameState = setSettings(gameState);
+		this.gameState = this.setSettings(settings);
+	}
 
-	setSettings(settings: Partial<userGameStateType>) {
-		this.gameState = { ...defaultGameState, ...settings };
+	setSettings(settings: SettingsType | undefined): userGameStateType {
+		if (!settings) return defaultGameState;
+		return {
+			...defaultGameState,
+			ball: {
+				...defaultGameState.ball,
+				radius: settings.ball.size,
+				speed: settings.ball.speed,
+				velocityX: settings.ball.speed,
+			},
+			paddle: {
+				...defaultGameState.paddle,
+				height: settings.paddle.height,
+				speed: settings.paddle.speed,
+			},
+			score: settings.score,
+			IA: settings.IA,
+		};
 	}
 
 	getFromConnectedRoom(username: string): PlayerType | undefined {

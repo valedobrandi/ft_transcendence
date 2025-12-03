@@ -47,7 +47,7 @@ up:
 	docker compose up -d pong-backend pong-frontend
 
 down:
-	docker-compose down --volumes --remove-orphans
+	docker compose down --volumes --remove-orphans
 
 start:
 	npm run up

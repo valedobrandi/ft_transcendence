@@ -14,6 +14,7 @@ import { UsersModel } from "../models/usersModel.js";
 import { contractReadOnly } from "../blockchain.js";
 import { print } from "../server.js";
 import { SettingsType } from "../types/GameStateType.js";
+import { module } from "../classes/PingPong.js";
 
 const matchesRoute = (fastify: FastifyInstance) => {
 	const matcherController = new MatcherController();
@@ -78,20 +79,29 @@ const matchesRoute = (fastify: FastifyInstance) => {
 				type: "object",
 				properties: {
 					settings: {
-						ball: {
-							size: { type: "number" },
-							speed: { type: "number" }
+						type: "object",
+						properties: {
+							ball: {
+								type: "object",
+								properties: {
+									size: { type: "string" },
+									speed: { type: "string" }
+								}
+							},
+							paddle: {
+								type: "object",
+								properties: {
+									height: { type: "string" },
+									speed: { type: "string" }
+								}
+							},
+							score: { type: "string" },
+							IA: { type: "boolean" },
 						},
-						paddle: {
-							height: { type: "number" },
-							speed: { type: "number" }
-						},
-						score: { type: "number" },
-						IA: { type: "boolean" },
 					},
 				},
+				required: ["settings"],
 			},
-			require: ["settings"],
 		},
 		handler: matcherController.createMatch.bind(matcherController),
 	});
@@ -184,9 +194,24 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	createMatch(req: FastifyRequest<{ Body: { settings: SettingsType } }>, res: FastifyReply) {
+	createMatch(req: FastifyRequest<{ Body: { settings: typeof module } }>, res: FastifyReply) {
 		const { settings } = req.body;
-		const { message, data } = this.matchesService.createMatch(req.userId, settings);
+
+		const parsedSettings: SettingsType = {
+			paddle: {
+				height: parseInt(settings.paddle.height),
+				speed: parseInt(settings.paddle.speed),
+			},
+			ball: {
+				size: parseInt(settings.ball.size),
+				speed: parseInt(settings.ball.speed),
+			},
+			score: parseInt(settings.score),
+			IA: settings.IA,
+		};
+
+		const { message, data } = this.matchesService.createMatch(req.userId, parsedSettings);
+
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
