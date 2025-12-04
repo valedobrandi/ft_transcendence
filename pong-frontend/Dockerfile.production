@@ -8,8 +8,13 @@ RUN npm install
 
 COPY . .
 
-ENV VITE_PONG_BACKEND_API=https://localhost/api
-ENV VITE_PONG_BACKEND_WEBSOCKET=wss://localhost/ws
+# Accept build-time variables from docker-compose
+ARG VITE_PONG_BACKEND_API
+ARG VITE_PONG_BACKEND_WEBSOCKET
+
+# Expose them to Vite build
+ENV VITE_PONG_BACKEND_API=$VITE_PONG_BACKEND_API
+ENV VITE_PONG_BACKEND_WEBSOCKET=$VITE_PONG_BACKEND_WEBSOCKETdock
 
 RUN npm run build
 

@@ -5,14 +5,15 @@ services:
     build:
       context: ./pong-frontend
       dockerfile: Dockerfile.production
+      args:
+        - VITE_PONG_BACKEND_API=https://localhost:8443/api
+        - VITE_PONG_BACKEND_WEBSOCKET=wss://localhost:8443/ws
     image: pong-nginx:latest
     container_name: pong-nginx
     ports:
       - "8080:80"     # HTTP mapped to 8080
       - "8443:443"    # HTTPS mapped to 8443
     environment:
-      - VITE_PONG_BACKEND_API=https://localhost/api
-      - VITE_PONG_BACKEND_WEBSOCKET=wss://localhost/ws
       - NODE_ENV=production
     volumes:
       # Nginx configuration

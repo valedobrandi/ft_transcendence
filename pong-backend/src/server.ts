@@ -121,7 +121,8 @@ await fastify.register(websocketRoute);
 await fastify.register(fastifyCors, {
 	origin: true,
 	methods: ['POST', 'OPTIONS', 'GET', 'DELETE', 'PUT'],
-
+	allowedHeaders: ['Authorization', 'Content-Type'],
+  	credentials: true
 });
 
 export function print(message: string) {
