@@ -55,7 +55,7 @@ start:
 # --- build & run ---
 all:
 	@echo "🔼 Lancement des services avec build..."
-	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) -p $(PROJECT_NAME) up -d --build
+	$(DOCKER_COMPOSE) -f $(COMPOSE_FILE) -p $(PROJECT_NAME) up -d #--build
 
 # --- stop services ---
 stop:

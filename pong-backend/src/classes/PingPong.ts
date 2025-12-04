@@ -84,6 +84,10 @@ class PingPong {
 	drawMatch: boolean = false;
 	side: { RIGHT: string, LEFT: string };
 	matchState: 'COUNTDOWN' | 'PLAYING' | 'ENDED' = 'COUNTDOWN';
+	lastAIUpdate = 0;
+	aiUpdateInterval = 1000;
+	
+	constructor(id: string) {
 
 	constructor(id: string, settings?: SettingsType) {
 		this.machId = id;
@@ -98,6 +102,12 @@ class PingPong {
 		return {
 			...defaultGameState,
 			ball: {
+				x: 0.5,
+				y: 0.5,
+				radius: 0.02, //radius = rayon de la balle
+				speed: this.initialBallSpeed,
+				velocityX: this.initialBallSpeed * 1,
+				velocityY: 0, //deux composantes de la vitesse
 				...defaultGameState.ball,
 				radius: settings.ball.size,
 				speed: settings.ball.speed,
@@ -112,12 +122,12 @@ class PingPong {
 			IA: settings.IA,
 		};
 	}
-
+	
 	getFromConnectedRoom(username: string): PlayerType | undefined {
 		//print(`[GAME GET PLAYER]: ${username}`);
 		return connectedRoomInstance.getByUsername(username) || undefined;
 	}
-
+	
 	resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
 		this.gameState.ball.x = 0.5;
 		this.gameState.ball.y = 0.5;
@@ -125,6 +135,93 @@ class PingPong {
 		const direction = side === 'LEFT' ? -1 : 1;
 		this.gameState.ball.velocityX = this.INITIAL_BALL_SPEED * direction;
 		this.gameState.ball.velocityY = 0;
+	}
+
+	
+	updateAI(nowMs:number)
+	{
+		if (nowMs - this.lastAIUpdate < this.aiUpdateInterval)
+			return;
+		this.lastAIUpdate = nowMs;
+		//lire le input
+		const aiId = this.side.LEFT;
+		const ball = this.gameState.ball;
+		const paddle = this.gameState.userX;
+		const paddleHeight = 0.150; // 0.99 - 0.15 = 0.84 / 0.1  
+		const margin = paddleHeight * 0.2; 
+		
+		let up = false;
+		let down = false;
+		
+		const aiX = paddle.x;       // ~0.01
+		const vx = ball.velocityX;
+		const vy = ball.velocityY;
+		
+		let targetY: number;
+		if (vx < 0 && ball.x > aiX)
+		{
+			const timeToReachAI = (aiX - ball.x) / vx;
+			// let predictedY = ball.y + vy * timeToreachAI;
+			let predictedY = this.simulateVertical(ball.y, vy, timeToReachAI);
+			
+			if (predictedY < 0) predictedY = 0;
+			if (predictedY > 1) predictedY = 1;
+			
+			targetY = predictedY;
+		}
+		else
+			{
+				targetY = 0.5
+			}
+			const paddleCenter = paddle.y;
+			
+			if (paddleCenter < targetY - margin) {
+				up = false;
+				down = true;
+			} 
+			else if (paddleCenter > targetY + margin) {
+				up = true;
+				down = false;
+			}
+			
+			this.inputs.set(aiId, {up, down});
+	}
+
+	simulateVertical(y: number, vy:number, timeToReachAI:number):number
+	{
+		let pos = y;
+		let vel = vy;
+		let remaining = timeToReachAI;
+		const minY  = 0;
+		const maxY = 1;
+
+		if (pos < minY) pos = minY;
+    	if (pos > maxY) pos = maxY;
+		
+		if (vel === 0) {
+			return pos;
+		}
+		while (remaining > 0)
+		{
+			// Temps jusqu'au prochain mur
+			let timeToWall: number;
+			if (vel > 0) // la ball va en bas
+				timeToWall = (maxY - pos) / vel;
+			else // la ball va en haut
+				timeToWall = (minY - pos) / vel;
+			if (timeToWall >= remaining || timeToWall <= 0)
+			{
+				pos = pos + vel * remaining;
+				return pos;
+			}
+			pos = pos + vel * timeToWall;
+			vel = -vel;
+			remaining -= timeToWall;
+			if (pos < minY) pos = minY;
+        	if (pos > maxY) pos = maxY;
+		}
+		
+		return pos;
 	}
 
 	updateGame() {
@@ -163,7 +260,7 @@ class PingPong {
 		}
 
 		// Paddle collision
-		const player = ball.x < 0.5 ? this.gameState.userX : this.gameState.userY;
+		const player = ball.x < 0.5 ? this.gameState.userX : this.gameState.userY; //(position de la raquette gauche ou droite)
 		const playerX = ball.x < 0.5 ? 0.01 : 0.99;
 
 		const ballTop = ball.y - ball.radius;
@@ -171,8 +268,7 @@ class PingPong {
 		const paddleTop = player.y - (this.gameState.paddle.height / 2);
 		const paddleBottom = player.y + (this.gameState.paddle.height / 2);
 
-		if (
-			Math.abs(ball.x - playerX) < ball.radius &&
+		if ( Math.abs(ball.x - playerX) < ball.radius &&
 			ballBottom >= paddleTop &&
 			ballTop <= paddleBottom
 		) {
@@ -181,7 +277,7 @@ class PingPong {
 			//const normalized = collidePoint / (this.gameState.paddle.height / 2);
 			const clamped = Math.max(-1, Math.min(1, collidePoint));
 
-			const maxBounceAngle = Math.PI / 4;
+			const maxBounceAngle = Math.PI / 4; //Math.PI / 4 → π / 4 radians, π / 4 radians = 45 degrés
 
 			// Map collision point to bounce angle
 			// Map to a fixed vertical velocity range
@@ -333,6 +429,24 @@ class PingPong {
 		print(`[MATCH CREATED]: ${this.machId} between ${playerXId} and ${playerYId}`);
 	}
 
+	creatMatchIA(humainId: string, aiId: string)
+	{
+		this.add(humainId);
+		this.add(aiId);
+		gameRoom.set(this.machId, this);
+		const isConnect = this.getFromConnectedRoom(humainId);
+		if (isConnect) {
+			isConnect.status = 'GAME_ROOM';
+		}
+		this.side.LEFT = aiId;
+		this.side.RIGHT = humainId;
+
+		this.messages("MATCH_CREATED");
+		this.messages("COUNTDOWN");
+
+		print(`[MATCH CREATED]: ${this.machId} between ${humainId} and ${aiId}`);
+	}
+
 	disconnect(playerId: string) {
 		if (this.matchState === 'ENDED') return;
 		const player = this.playerConnectionInfo.get(playerId);
@@ -352,6 +466,8 @@ class PingPong {
 	}
 
 	update() {
+		const nowMs = Date.now();
+		this.updateAI(nowMs);
 		this.updateGame();
 		this.handleMatch();
 		this.send();
@@ -413,7 +529,32 @@ class PingPong {
 
 				for (const [id, { disconnect }] of this.playerConnectionInfo) {
 					const connected = this.getFromConnectedRoom(id);
-					print(`[GAME OVER] Sending GAME_OVER to ${id}`);
+					print(`[GAME OVER] Sending GAME_OVER t		{
+			const timeToReachAI = (aiX - ball.x) / vx;
+			// let predictedY = ball.y + vy * timeToreachAI;
+			let predictedY = simulateVertical(ball.y, vy, timeToReachAI);
+			
+			if (predictedY < 0) predictedY = 0;
+			if (predictedY > 1) predictedY = 1;
+			
+			targetY = predictedY;
+		}
+		else
+			{
+				targetY = 0.5
+			}
+			const paddleCenter = paddle.y;
+			
+			if (paddleCenter < targetY - margin) {
+				up = false;
+				down = true;
+			} 
+			else if (paddleCenter > targetY + margin) {
+				up = true;
+				down = false;
+			}
+			
+			this.inputs.set(aiId, {up, down});o ${id}`);
 					if (!connected || !connected.socket) continue;
 					connected.socket.send(JSON.stringify({
 						status: 200,

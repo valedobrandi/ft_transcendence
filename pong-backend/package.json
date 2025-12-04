@@ -9,7 +9,8 @@
         "test": "vitest --run --reporter verbose",
         "database": "npx tsx /app/src/database/init.ts",
         "print": "npx tsx /app/database/table_print.ts",
-        "dev": "nodemon"
+        "dev": "nodemon",
+        "test:ai": "ts-node src/classes/test-ai.ts"
     },
     "dependencies": {
         "@fastify/cookie": "^11.0.2",
@@ -34,6 +35,7 @@
         "@types/ws": "^8.18.1",
         "ethers": "^6.15.0",
         "nodemon": "^3.1.10",
+        "ts-node": "^10.9.2",
         "tsx": "^4.20.6",
         "typescript": "~5.8.0",
         "vitest": "^4.0.4",

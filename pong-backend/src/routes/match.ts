@@ -198,6 +198,11 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
+	createMatch(req: FastifyRequest, res: FastifyReply) {
+		const { id } = req.user;
+		const { settings } = req.body;
+		//settings.ia  true/false
+		const { message, data } = this.matchesService.createMatch(id, settings);
 	createMatch(req: FastifyRequest<{ Body: RequestSettingsType }>, res: FastifyReply) {
 		const { settings } = req.body as RequestSettingsType;
 
@@ -411,7 +416,11 @@ class MatchesService {
 			settings,
 			status: "OPEN",
 		};
-
+		// IF AI 
+		// {
+		// 		creatMatchIA(humainId: string, aiId: string)
+		//      return;		
+		// }
 		newMatchesQueue.set(matchId, newMatch);
 		connectedRoomInstance.broadcastNewMatchesList();
 
