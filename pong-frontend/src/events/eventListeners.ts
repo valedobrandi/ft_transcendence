@@ -3,13 +3,15 @@ import { Alert } from "../components/Alert";
 import {
 	acceptFriendOnClick,
 	denyFriendOnClick,
+	EmbeddedButton,
 } from "../components/EmbeddedButton";
 import {
 	newIntraMessage,
 	removeIntraMessage,
 	stateProxyHandler,
+	updateIntraMessage,
 } from "../states/stateProxyHandler";
-import { fetchRequest, renderRoute } from "../utils";
+import { fetchRequest, navigateTo, renderRoute } from "../utils";
 import { getSocket } from "../websocket";
 import { setupPaddleListeners } from "./paddleListeners";
 
@@ -90,107 +92,158 @@ export function eventListeners() {
 		console.log("Button clicked:", button.id);
 
 		switch (button.id) {
-			case "accept-match-invite": {
-				await onClickAcceptMatchInvite(button);
+			case "save-settings": { await onSendSettings(event); }
+				break;
+			case "cancel-settings": { onCancelSettings(event); }
+				break;
+			case "update-profile": { await profileOnclick(); }
+				break;
+			case "view-profile": {
+				stateProxyHandler.selectChat = { name: profile.username, id: profile.id };
 			}
 				break;
-			case "btn-block-user":
-				{
-					const response = await fetchRequest(
-						`/add-block`,
-						"POST",
-						{},
-						{
-							body: JSON.stringify({
-								id: stateProxyHandler.selectChat.id,
-							}),
-						}
-					);
-
-					if (response.message === "success") {
-						newIntraMessage(
-							`User ${stateProxyHandler.selectChat.name} has been blocked.`
-						);
-						await fetchRequest("/block-list", "GET", {}).then((data) => {
-							if (data.message === "success") {
-								stateProxyHandler.chatBlockList = data.payload;
-							}
-						});
-					}
-				}
+			case "accept-match-invite": { await onClickAcceptMatchInvite(button); }
 				break;
-			case "btn-unblock-user":
-				{
-					const response = await fetchRequest(
-						`/remove-block?id=${stateProxyHandler.selectChat.id}`,
-						"DELETE",
-						{}
-					);
-
-					if (response.message === "success") {
-						newIntraMessage(
-							`User ${stateProxyHandler.selectChat.name} has been unblocked.`
-						);
-						await fetchRequest("/block-list", "GET", {}).then((data) => {
-							if (data.message === "success") {
-								stateProxyHandler.chatBlockList = data.payload;
-							}
-						});
-					}
-				}
+			case "cancel-match-invite": { await onClickCancelMatchInvite(button); }
 				break;
-			case "select-chat-btn":
-				{
-					const chatName = button.value;
-					const chatId = button.name;
-
-					console.log("Selected chat:", chatName, chatId);
-					stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
-					const buttons = document.querySelectorAll("#select-chat-btn");
-					buttons.forEach((button) => {
-						button.classList.remove("bg-gray-100");
-					});
-					Array.from(document.getElementsByClassName(chatName)).forEach(
-						(elem) => {
-							elem.classList.add("bg-gray-100");
-						}
-					);
-				}
+			case "btn-block-user": { await blockUser(); }
 				break;
-			case "cancel-match-invite": {
-				await onClickCancelMatchInvite(button);
+			case "btn-unblock-user": { await unblockUser(); }
+				break;
+			case "btn-invite-match": { await inviteToMatch(); }
+				break;
+			case "select-chat-btn": { selectChat(button);}
+				break;
+			case "btn-friend-list": { await inviteFriendList(); }
+				break;
+			case "tournament-btn": { await joinTournament(); }
+				break;
+			case "btn-leave-tournament": { await leaveTournament(button); }
+				break;
+			case "match-btn": {
+				const socket = getSocket();
+				if (!socket) return;
+				socket.send(JSON.stringify({ type: 'MATCH', username: profile.username, userId: profile.id }));
 			}
 				break;
-			case "btn-friend-list":
-				{
-					var response = await fetchRequest(
-						`/add-event`,
-						"POST",
-						{},
-						{
-							body: JSON.stringify({
-								to_id: stateProxyHandler.selectChat.id,
-								from_id: Number(profile.id),
-								type: "friend:add",
-								message: "",
-							}),
-						}
-					);
-
-					if (response.message === "success") {
-						newIntraMessage(
-							`Friend request sent to ${stateProxyHandler.selectChat.name}`
-						);
-					}
-				}
+			case "create-match-btn": {
+				stateProxyHandler.settings = { state: '1' };
+			}
 				break;
-			case "tournament-btn": {
-					await joinTournament();
-				}
+			case "btn-logout": { await joinLogout(); }
 				break;
 		}
 	});
 }
+
+async function onSendSettings(event: Event) {
+  event.preventDefault();
+
+  const settingsContainer = document.getElementById("settings-container");
+
+  await fetchRequest("/match-create", "POST", {}, {
+    body: JSON.stringify({ settings: {
+      ballSpeed: "medium",
+      ballSize: "medium",
+      paddleSize: "medium",
+      matchPoints: "medium"
+    } })
+  });
+
+  if (settingsContainer) {
+    settingsContainer.remove();
+  }
+}
+
+function onCancelSettings(event: Event) {
+  event.preventDefault();
+  stateProxyHandler.settings = { state: '0' };
+}
+
+
+function selectChat(button: HTMLButtonElement) {
+	const chatName = button.value;
+	const chatId = button.name;
+
+	console.log("Selected chat:", chatName, chatId);
+
+	stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
+
+	const buttons = document.querySelectorAll("#select-chat-btn");
+	buttons.forEach((button) => {
+		button.classList.remove("bg-gray-100");
+	});
+	Array.from(document.getElementsByClassName(chatName)).forEach(
+		(elem) => {
+			elem.classList.add("bg-gray-100");
+		}
+	);
+}
+
+async function unblockUser() {
+	const response = await fetchRequest(
+		`/remove-block?id=${stateProxyHandler.selectChat.id}`,
+		"DELETE",
+		{}
+	);
+
+	if (response.message === "success") {
+		newIntraMessage(
+			`User ${stateProxyHandler.selectChat.name} has been unblocked.`
+		);
+		await fetchRequest("/block-list", "GET", {}).then((data) => {
+			if (data.message === "success") {
+				stateProxyHandler.chatBlockList = data.payload;
+			}
+		});
+	}
+}
+
+async function blockUser() {
+	var response = await fetchRequest(
+		`/add-block`,
+		"POST",
+		{},
+		{
+			body: JSON.stringify({
+				id: stateProxyHandler.selectChat.id,
+			}),
+		}
+	);
+
+	if (response.message === "success") {
+		newIntraMessage(
+			`User ${stateProxyHandler.selectChat.name} has been blocked.`
+		);
+		await fetchRequest("/block-list", "GET", {}).then((data) => {
+			if (data.message === "success") {
+				stateProxyHandler.chatBlockList = data.payload;
+			}
+		});
+	}
+};
+
+async function inviteFriendList() {
+	var response = await fetchRequest(
+		`/add-event`,
+		"POST",
+		{},
+		{
+			body: JSON.stringify({
+				to_id: stateProxyHandler.selectChat.id,
+				from_id: Number(profile.id),
+				type: "friend:add",
+				message: "",
+			}),
+		}
+	);
+
+	if (response.message === "success") {
+		newIntraMessage(
+			`Friend request sent to ${stateProxyHandler.selectChat.name}`
+		);
+	}
+};
 
 async function joinTournament() {
 	const response = await fetchRequest(
@@ -202,6 +255,31 @@ async function joinTournament() {
 		const alert = new Alert(`${response.data}`);
 		alert.show();
 	}
+}
+
+async function leaveTournament(button: HTMLButtonElement) {
+	const eventId = button.dataset.eventindex;
+	console.log("EVENT ID LEAVE TOURNEY =", eventId);
+	const response = await fetchRequest(
+		`/tournament/quit`,
+		"GET"
+	);
+
+	if (response.message === "success") {
+		newIntraMessage(`You have left the tournament room.`);
+		removeIntraMessage(Number(eventId));
+	}
+}
+
+async function joinLogout() {
+	const response = await fetchRequest(
+		`/logout`,
+		"GET"
+	);
+	if (response.message === "success") {
+		navigateTo('/login');
+	}
+
 }
 
 async function onClickAcceptMatchInvite(button: HTMLButtonElement) {
@@ -230,3 +308,59 @@ async function onClickCancelMatchInvite(button: HTMLButtonElement) {
 	}
 }
 
+const profileOnclick = async () => {
+
+	console.log("(opt.value === view-profile")
+	try {
+		const data = await fetchRequest('/profile', 'GET', {});
+		console.log("DATA PROFILE = ", data);
+		if (data.message === 'success') {
+			profile.username = data.existUser.username;
+			profile.id = data.existUser.id;
+			profile.email = data.existUser.email;
+			profile.avatar_url = data.existUser.avatar_url;
+			profile.twoFA_enabled = data.existUser.twoFA_enabled ? 1 : 0
+
+
+			console.log("PROFIL = ", profile.username);
+			console.log("EMAIL IIII = ", profile.email);
+			console.log("AVATAR IIII = ", profile.avatar_url);
+			console.log("AVATAR IIII = ", profile.twoFA_enabled);
+
+			navigateTo("/profile");
+		}
+		else {
+			console.error("Erreur lors du chargement du profil :", data);
+		}
+	}
+	catch (err) {
+		console.error("Erreur réseau :", err);
+	}
+
+}
+
+const inviteToMatch = async () => {
+	console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
+	const response = await fetchRequest('/match-invite', 'POST', {}, {
+		body: JSON.stringify({
+			invitedId: stateProxyHandler.selectChat.id,
+			settings: {
+				mode: "NORMAL",
+				ballSpeed: "MEDIUM",
+				paddleSize: "MEDIUM"
+			}
+		})
+	});
+	if (response.message === 'success') {
+		const getMatch = await fetchRequest(`/match-invite?matchId=${response.data.matchId}`, 'GET', {});
+		if (getMatch.message === "success") {
+			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
+			const idx = newIntraMessage("");
+			updateIntraMessage(idx, `Invite sent to ${getTo?.name} 
+				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite')}`);
+			stateProxyHandler.state = "SEND_INVITE"
+		}
+	} else if (response.message = 'error') {
+		newIntraMessage(response.data);
+	}
+}

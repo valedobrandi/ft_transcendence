@@ -5,7 +5,7 @@ export function Default(): HTMLElement {
 	const viewDiv = document.createElement("div");
     viewDiv.id = "view-container";
 	viewDiv.className = "flex flex-col items-center h-screen";
-	viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
+	viewDiv.style.backgroundImage = "url('/default_background.jpg')";
 	viewDiv.style.backgroundSize = "cover";
 
 	const mainDiv = document.createElement("div");

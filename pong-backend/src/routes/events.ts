@@ -1,9 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import Database from 'better-sqlite3';
-import db from "../../database/db";
-import { statusCode } from "../types/statusCode";
-import { connectedRoomInstance } from "../state/ConnectedRoom";
-import { print } from "../server";
+import db from "../database/db.js";
+import { statusCode } from "../types/statusCode.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
+import { print } from "../server.js";
 
 type EventOnChangeDB = {
     message: 'error' | 'success';
@@ -37,13 +37,15 @@ function eventsRoutes(fastify: FastifyInstance) {
     fastify.post('/add-event', {
         preHandler: [fastify.authenticate],
         schema: {
-            types: 'object',
-            properties: {
-                to_id: { type: 'number' },
-                from_id: { type: 'number' },
-                type: { type: 'string' },
-                message: { type: 'string' }
-            },
+			body: {
+				type: 'object',
+				properties: {
+					to_id: { type: 'number' },
+					from_id: { type: 'number' },
+					type: { type: 'string' },
+					message: { type: 'string' }
+				},
+			},
             required: ['to_id', 'from_id', 'type', 'message']
         },
         handler: eventsControllerInstance.insertEvent.bind(eventsControllerInstance)
@@ -99,7 +101,7 @@ class EventsController {
         return res.status(statusCode('OK')).send({ message, data });
     }
 
-    deleteEvent(req: FastifyRequest<{ querystring: { eventId: number } }>, res: FastifyReply) {
+    deleteEvent(req: FastifyRequest<{ Querystring: { eventId: number } }>, res: FastifyReply) {
         const eventId = Number(req.query.eventId);
         const { message, data } = this.eventsServiceInstance.deleteEvent(eventId);
         return res.status(statusCode('OK')).send({ message, data });
@@ -156,6 +158,20 @@ class EventsService {
     }
 }
 
+export type EventsReturnDB = {
+	id: number;
+	type: string;
+	from_id: number;
+	to_id: number;
+	payload: string;
+	timestamp: string;
+}
+
+export type EventInsertDB = {
+	lastInsertRowid: number,
+	changes: number
+}
+
 class EventsModel {
     private db: Database.Database;
     private stmInsertEvent: Database.Statement;
@@ -180,30 +196,30 @@ class EventsModel {
     }
 
     getDuplicateEvent(type: string, fromId: number, toId: number): GetEvents {
-        const response = this.stmGetDuplicateEvent.all({ type, fromId, toId });
+        const response = this.stmGetDuplicateEvent.all({ type, fromId, toId }) as NewEventsDB[];
         return { message: 'success', data: response };
     }
 
     insertEvent(type: string, fromId: number, toId: number, payload: string): EventOnChangeDB {
-        const { lastInsertRowid, changes } = this.stmInsertEvent.run({ type, fromId, toId, payload });
+        const { lastInsertRowid, changes } = this.stmInsertEvent.run({ type, fromId, toId, payload }) as EventInsertDB;
         if (changes === 1) {
-            return { message: 'success', data: { message: lastInsertRowid } };
+            return { message: 'success', data: { message: 'event_inserted' } };
         }
         return { message: 'error', data: { message: 'event not inserted' } };
     }
 
     getToEvents(toId: number): GetEvents {
-        const response = this.stmGetToEvents.all({ toId });
+        const response = this.stmGetToEvents.all({ toId }) as NewEventsDB[];
         return { message: 'success', data: response };
     }
 
     getFromEvents(fromId: number): GetEvents {
-        const response = this.stmGetFromEvents.all({ fromId });
+        const response = this.stmGetFromEvents.all({ fromId }) as NewEventsDB[];
         return { message: 'success', data: response };
     }
 
     deleteEvent(eventId: number): EventOnChangeDB {
-        const { changes } = this.stmDeleteEvent.run({ eventId: Number(eventId) });
+        const { changes } = this.stmDeleteEvent.run({ eventId: Number(eventId) }) as EventInsertDB;
         print(`[DELETE] Event ID ${eventId}, changes: ${changes}`);
         if (changes === 1) {
             return { message: 'success', data: { message: 'event removed' } };

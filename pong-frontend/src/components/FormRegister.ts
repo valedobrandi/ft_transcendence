@@ -61,11 +61,29 @@ export function Register(): HTMLElement {
 		const email = email_input.value.trim();
 		const password = password_input.value.trim();
 
+		if (username.length > 8)
+		{
+			alert("username too long");
+			return;
+		}
+		if (password.length > 8)
+		{
+			alert("password too long");
+			return;
+		}
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+		if (!emailRegex.test(email))
+		{
+			alert("Invalid email format");
+			return;
+		}
+
 		const response = await fetchRequest(
 			`/register`,'POST',{},
 			{body: JSON.stringify({username, email, password})}
 		);
-
+		
 		if (response.message === 'success') {
 			profile.username = response.payload.username;
 			profile.id = response.payload.id;

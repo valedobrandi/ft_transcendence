@@ -5,36 +5,36 @@ import { statusCode } from "../types/statusCode.js";
 
 
 class ChatBlockController {
-    private chatBlockServiceInstance = new ChatBlockService();
+	private chatBlockServiceInstance = new ChatBlockService();
 
-    blockUser(req: FastifyRequest<{body: ChatBlockPostDTO}>, res: FastifyReply) {
-        const id = Number(req.userId);
+	blockUser(req: FastifyRequest<{ Body: ChatBlockPostDTO }>, res: FastifyReply) {
+		const id = Number(req.userId);
 		const friendId = Number(req.body.id);
-        const { status } = this.chatBlockServiceInstance.addUserToBlockList(id, friendId);
-        if (status === "success") {
-            return res.status(statusCode('OK')).send({ message: status });
-        }
-        return res.status(statusCode('NO_CONTENT')).send({ message: status });
-    }
+		const { status } = this.chatBlockServiceInstance.addUserToBlockList(id, friendId);
+		if (status === "success") {
+			return res.status(statusCode('OK')).send({ message: status });
+		}
+		return res.status(statusCode('NO_CONTENT')).send({ message: status });
+	}
 
-    unblockUser(req: FastifyRequest<{Querystring: ChatBlockDeleteDTO}>, res: FastifyReply) {
-        const id = Number(req.userId);
+	unblockUser(req: FastifyRequest<{ Querystring: ChatBlockDeleteDTO }>, res: FastifyReply) {
+		const id = Number(req.userId);
 		const friendId = Number(req.query.id);
-        const { status } = this.chatBlockServiceInstance.deleteUserFromBlockList(id, friendId);
-        if (status === "success") {
-            return res.status(statusCode('OK')).send({ message: status });
-        }
-        return res.status(statusCode('NO_CONTENT')).send({ message: status });
-    }
+		const { status } = this.chatBlockServiceInstance.deleteUserFromBlockList(id, friendId);
+		if (status === "success") {
+			return res.status(statusCode('OK')).send({ message: status });
+		}
+		return res.status(statusCode('NO_CONTENT')).send({ message: status });
+	}
 
-    getBlockedUsers(req: FastifyRequest, res: FastifyReply) {
-        const id = Number(req.userId);
-        const { status, data } = this.chatBlockServiceInstance.getBlockedUsers(id);
-        if (status === "success") {
-            return res.status(statusCode('OK')).send({ message: status, payload: data });
-        }
-        return res.status(statusCode('NO_CONTENT')).send({ message: status });
-    }
+	getBlockedUsers(req: FastifyRequest, res: FastifyReply) {
+		const id = Number(req.userId);
+		const { status, data } = this.chatBlockServiceInstance.getBlockedUsers(id);
+		if (status === "success") {
+			return res.status(statusCode('OK')).send({ message: status, payload: data });
+		}
+		return res.status(statusCode('NO_CONTENT')).send({ message: status });
+	}
 }
 
 export { ChatBlockController };

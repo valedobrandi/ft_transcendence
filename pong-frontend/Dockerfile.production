@@ -8,15 +8,31 @@ RUN npm install
 
 COPY . .
 
-RUN rm -rf vitest 
-RUN rm -rf vitest.config.ts
+# Accept build-time variables from docker-compose
+ARG VITE_PONG_BACKEND_API
+ARG VITE_PONG_BACKEND_WEBSOCKET
+
+# Expose them to Vite build
+ENV VITE_PONG_BACKEND_API=$VITE_PONG_BACKEND_API
+ENV VITE_PONG_BACKEND_WEBSOCKET=$VITE_PONG_BACKEND_WEBSOCKETdock
 
 RUN npm run build
 
 FROM nginx:1.25.0-alpine AS production
 
+# Generate self-signed certs at build time
+RUN apk add --no-cache openssl && \
+    mkdir -p /etc/ssl/private && \
+    openssl req -x509 -newkey rsa:4096 -nodes \
+    -keyout /etc/ssl/private/key.pem \
+    -out /etc/ssl/private/cert.pem \
+    -days 365 \
+    -subj "/CN=localhost" \
+    -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+
 COPY --from=build /app/dist /usr/share/nginx/html
 
-EXPOSE 5173
+EXPOSE 80
+EXPOSE 443
 
 CMD [ "nginx", "-g", "daemon off;" ]

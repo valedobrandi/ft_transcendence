@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import MatchesModel from '../models/matchesModel';
-import { EventsMap } from '../types/GameEvents';
-import { PingPong } from '../classes/PingPong';
+import MatchesModel from '../models/matchesModel.js';
+import { EventsMap } from '../types/GameEvents.js';
+import { PingPong } from '../classes/PingPong.js';
 
 export const events = new EventEmitter();
 
@@ -24,15 +24,16 @@ class EventBus<Events extends Record<string, any>> {
         }
     }
 
-    registerListeners(matchesModel: MatchesModel): void {
-        this.on('game:savehistory', (data) => {
+
+    async registerListeners(matchesModel: MatchesModel) {
+        this.on('game:savehistory', async (data) => {
             const { matchId, player1, player2, score1, score2 } = data;
-            matchesModel.saveMatch(matchId, player1, player2, score1, score2);
+            await matchesModel.saveMatch(matchId, player1, player2, score1, score2);
         });
 
         this.on('game:start', (data) => {
 
-            const newMatch = new PingPong(data.matchId);
+            const newMatch = new PingPong(data.matchId, data.settings);
             newMatch.createMatch(data.oponentes[0], data.oponentes[1]);
         })
     }

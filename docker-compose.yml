@@ -44,20 +44,26 @@ services:
       - ./pong-backend:/app
       - ./tests/backend:/app/vitest
       - /app/node_modules
+      - ./hardhat/artifacts/contracts/TournamentScores.sol:/app/artifacts
+      - ./hardhat/ignition/deployments/chain-31337/deployed_addresses.json:/app/deployed/deployed_addresses.json
     environment:
       - NODE_ENV=development
       - ADRESS=192.0.7
-      - RPC_URL=http://blockchain:8545
+      - RPC_URL=http://hardhat:8545
       - RESEND_API_KEY=${RESEND_API_KEY}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_TIME=${JWT_TIME}
     command: npm run dev
     networks:
       - transcedence-network
+    depends_on:
+      hardhat:
+        condition: service_started
     env_file:
       - .env
 
-  blockchain:
+  hardhat:
+    image: hardhat-node
     build:
       context: ./hardhat
       dockerfile: Dockerfile
@@ -67,7 +73,6 @@ services:
     volumes:
       - ./hardhat:/app
       - /app/node_modules
-    command: npx hardhat node
     networks:
       - transcedence-network
 

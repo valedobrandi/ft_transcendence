@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import db from '../../database/db.js'
+import db from '../database/db.js'
 import fs from "fs";
 import path from "path";
 import fastifyMultipart from "@fastify/multipart";
@@ -20,17 +20,12 @@ export default function avatarRoute(fastify: FastifyInstance)
 
       const existUser = db.prepare('SELECT * FROM users WHERE id = ?').get(idUser);
       if (!existUser) 
-      {
-        console.log("PAD DE  USER");
         return reply.status(404).send({ error: "User not found" });
-      }
+  
 
       const data = await request.file();
       if (!data)
-      {
-        console.log("PAD DE  FILE");
         return reply.status(400).send({ error: "File not found" });
-      }
 
       const allowedTypes: { [key: string]: string } = {
         "image/png": "png",

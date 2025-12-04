@@ -36,22 +36,31 @@ database.db
 # pnpm deploy output
 /bundle
 # Hardhat Build Artifacts
-/artifacts
+hardhat/artifacts
 # Hardhat compilation (v2) support directory
+hardhat/ignition/.cache
+hardhat/ignition/deployments/
+# Hardhat typechain output
+hardhat/typechain
+# Hardhat coverage directory
+hardhat/coverage
+# TypeScript cache
 /cache
 # Typechain output
 /types
 # Hardhat coverage reports
 /coverage
+# Hardhat Ignition deployments
+hardhat/ignition/deployments/
+
 
 /certs
 *.pem
-<<<<<<< HEAD
 *.key
 
 # Git submodule tests
 pong-frontend/vitest/*
 pong-backend/vitest/*
-=======
-*.keyft_transcendence.pdf
->>>>>>> main
+
+# Pong database
+pong.db

@@ -1,6 +1,6 @@
 import { playerStatus } from '../enum_status/enum_userStatus.js';
 import { User } from '../types/RegisterType.js';
-import db from '../../database/db.js';
+import db from '../database/db.js';
 
 export function getIdUser(id: number): User | null 
 {

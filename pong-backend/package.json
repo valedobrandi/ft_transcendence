@@ -7,7 +7,7 @@
         "prestart": "npm run build",
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "test": "vitest --run --reporter verbose",
-        "database": "npx tsx /app/database/init.ts",
+        "database": "npx tsx /app/src/database/init.ts",
         "print": "npx tsx /app/database/table_print.ts",
         "dev": "nodemon",
         "test:ai": "ts-node src/classes/test-ai.ts"
@@ -25,7 +25,8 @@
         "jsonwebtoken": "^9.0.2",
         "node-fetch": "^3.3.2",
         "pino-pretty": "^13.1.2",
-        "resend": "^6.3.0"
+        "resend": "^6.3.0",
+        "ethers": "^6.15.0"
     },
     "devDependencies": {
         "@types/bcrypt": "^6.0.0",

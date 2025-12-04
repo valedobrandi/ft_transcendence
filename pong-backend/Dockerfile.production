@@ -4,12 +4,9 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 # Copy source and build
 COPY . .
-
-# Remove test-related files
-RUN rm -rf app/scripts_test
 
 RUN npm run build
 
@@ -17,21 +14,17 @@ RUN npm run build
 FROM node:20-bullseye AS production
 WORKDIR /app
 
-# Install only production dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy compiled output and any runtime assets
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/database ./database
 
-RUN useradd -m nodeuser \
-    && chown -R nodeuser:nodeuser /app
-    
-USER nodeuser
+RUN mkdir -p /app/database
+
+# Initialize the database
+RUN node /app/dist/database/init.js
 
 ENV NODE_ENV=production
 
 EXPOSE 3000
 
-CMD ["node", "--trace-uncaught", "--trace-warnings", "dist/src/start.js"]
+CMD ["node", "--trace-uncaught", "--trace-warnings", "dist/start.js"]

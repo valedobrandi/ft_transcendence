@@ -1,5 +1,6 @@
-import { stateProxyHandler, onMessageChange, type FriendListType, type ServerUsersList } from "../states/stateProxyHandler";
 import { profile } from "../app";
+import { stateProxyHandler, onMessageChange, type FriendListType, type ServerUsersList } from "../states/stateProxyHandler";
+import { fetchRequest } from "../utils";
 
 export type ListType = "FRIENDS" | "SERVER";
 
@@ -28,8 +29,10 @@ export function List(
     }
 
     users.forEach((user) => {
-        if (Number(profile.id) === Number(user.id)) return;
         // Get name form serverUsers
+        if (user.id === profile.id) {
+            return; // Skip current user
+        }
         const serverUSer = stateProxyHandler.serverUsers.find((u) => u.id === user.id);
         const name = serverUSer ? serverUSer.name : "Unknown";
         const btn = document.createElement("button");
@@ -106,4 +109,26 @@ export function selectChatByButton(button: HTMLButtonElement) {
     console.log("Selected chat:", chatName, chatId);
 
     stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
+}
+
+
+export async function onClickGetProfileData() {
+    const [getProfile, getMatchHistory] = await Promise.all([
+			fetchRequest(
+				`/profile/user?id=${stateProxyHandler.selectChat.id}`,
+				"GET"
+			),
+			fetchRequest(
+				`/match/history?username=${stateProxyHandler.selectChat.name}`,
+				"GET"
+			),
+		]);
+
+		if (getProfile.message === "success") {
+			stateProxyHandler.profile = getProfile.data;
+		}
+
+		if (getMatchHistory.message === "success") {
+			stateProxyHandler.matchesHistory = getMatchHistory.data;
+		}
 }

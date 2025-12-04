@@ -1,3 +1,4 @@
+import Database from "better-sqlite3";
 import { FastifyRequest, FastifyInstance, FastifyReply } from "fastify";
 import {
 	inviteMatchesQueue,
@@ -8,6 +9,16 @@ import {
 } from "../state/gameRoom.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
+import db from "../database/db.js";
+import { UsersModel } from "../models/usersModel.js";
+import { contractReadOnly } from "../blockchain.js";
+import { print } from "../server.js";
+import { module, ModuleType } from "../classes/PingPong.js";
+import { SettingsType } from "../types/GameStateType.js";
+
+type RequestSettingsType = {
+	settings: ModuleType;
+}
 
 const matchesRoute = (fastify: FastifyInstance) => {
 	const matcherController = new MatcherController();
@@ -71,10 +82,30 @@ const matchesRoute = (fastify: FastifyInstance) => {
 			body: {
 				type: "object",
 				properties: {
-					settings: { type: "object" },
+					settings: {
+						type: "object",
+						properties: {
+							ball: {
+								type: "object",
+								properties: {
+									size: { type: "string" },
+									speed: { type: "string" }
+								}
+							},
+							paddle: {
+								type: "object",
+								properties: {
+									height: { type: "string" },
+									speed: { type: "string" }
+								}
+							},
+							score: { type: "string" },
+							IA: { type: "boolean" },
+						},
+					},
 				},
+				required: ["settings"],
 			},
-			require: ["settings"],
 		},
 		handler: matcherController.createMatch.bind(matcherController),
 	});
@@ -103,6 +134,20 @@ const matchesRoute = (fastify: FastifyInstance) => {
 		},
 		handler: matcherController.joinMatch.bind(matcherController),
 	});
+
+	fastify.get<{ Querystring: { username: string } }>("/match/history", {
+		preHandler: [fastify.authenticate],
+		schema: {
+			querystring: {
+				type: "object",
+				properties: {
+					username: { type: "string" },
+				},
+				required: ["username"],
+			},
+		},
+		handler: matcherController.getMatchHistory.bind(matcherController),
+	});
 };
 
 class MatcherController {
@@ -112,37 +157,41 @@ class MatcherController {
 		this.matchesService = new MatchesService();
 	}
 
-	getMatch(req: FastifyRequest, res: FastifyReply) {
-		const { matchId } = req.query;
-		const { message, data } = this.matchesService.getMatch(matchId);
+	async getMatchHistory(req: FastifyRequest<{ Querystring: { username: string } }>, res: FastifyReply) {
+		if (!req.query.username) {
+			return res.code(statusCode("NO_CONTENT")).send({ message: "error", data: "username required" });
+		}
+		const { message, data } = await this.matchesService.getMatchHistory(req.query.username);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	sendMatchInvite(req: FastifyRequest, res: FastifyReply) {
-		const { id } = req.user;
+	getMatch(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
+		const { message, data } = this.matchesService.getMatch(req.query.matchId);
+		return res.code(statusCode("OK")).send({ message, data });
+	}
+
+	sendMatchInvite(req: FastifyRequest<{ Body: { invitedId: number, settings: object } }>, res: FastifyReply) {
 		const { invitedId, settings } = req.body;
 		const { message, data } = this.matchesService.sendMatchInvite(
-			id,
+			req.userId,
 			invitedId,
 			settings
 		);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	matchRemove(req: FastifyRequest, res: FastifyReply) {
-		const { id } = req.user;
+	matchRemove(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { matchId } = req.query;
 
-		const { message, data } = this.matchesService.matchRemove(matchId, id);
+		const { message, data } = this.matchesService.matchRemove(matchId, req.userId);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	acceptMatchInvite(req: FastifyRequest, res: FastifyReply) {
-		const { id } = req.user;
+	acceptMatchInvite(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { matchId } = req.query;
 
 		const { message, data } = this.matchesService.acceptMatchInvite(
-			id,
+			req.userId,
 			matchId
 		);
 
@@ -154,25 +203,95 @@ class MatcherController {
 		const { settings } = req.body;
 		//settings.ia  true/false
 		const { message, data } = this.matchesService.createMatch(id, settings);
+	createMatch(req: FastifyRequest<{ Body: RequestSettingsType }>, res: FastifyReply) {
+		const { settings } = req.body as RequestSettingsType;
+
+		const parsedSettings: SettingsType = {
+			paddle: {
+				height: module.paddle.height[settings.paddle.height],
+				speed: module.paddle.speed[settings.paddle.speed],
+			},
+			ball: {
+				size: module.ball.size[settings.ball.size],
+				speed: module.ball.speed[settings.ball.speed],
+			},
+			score: module.score[settings.score],
+			IA: settings.IA,
+		};
+
+		const { message, data } = this.matchesService.createMatch(req.userId, parsedSettings);
+
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	removeMatch(req: FastifyRequest, res: FastifyReply) {
-		const { id } = req.user;
+	removeMatch(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { matchId } = req.query;
-		const { message, data } = this.matchesService.removeMatch(id, matchId);
+		const { message, data } = this.matchesService.removeMatch(req.userId, matchId);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	joinMatch(req: FastifyRequest, res: FastifyReply) {
-		const { id } = req.user;
+	joinMatch(req: FastifyRequest<{ Querystring: { matchId: string } }>, res: FastifyReply) {
 		const { matchId } = req.query;
-		const { message, data } = this.matchesService.joinMatch(id, matchId);
+		const { message, data } = this.matchesService.joinMatch(req.userId, matchId);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 }
+type MatchesHistory = {
+	wins: number;
+	loses: number;
+	history: {
+		player1: string;
+		score1: number;
+		player2: string;
+		score2: number;
+		createdAt: string;
+	}[]
+}
 
 class MatchesService {
+
+	private matchesModel = new MatchesModel(db);
+	private usersModel = new UsersModel(db);
+
+	async getMatchHistory(username: string) {
+		const match = await this.matchesModel.getMatchHistoryById(username);
+		print(`[MATCH HISTORY] Retrieved match history for user: ${JSON.stringify(match)}`);
+		if (match === undefined || match.length === 0) {
+			return { message: "error", data: "no match history" };
+		}
+
+		const matchesHistory: MatchesHistory = {
+			wins: 0,
+			loses: 0,
+			history: [],
+		};
+
+		for (const m of match) {
+			const { score1, score2 } = await this.matchesModel.getScoreBlockchain(m.match_id);
+			print(`[BLOCKCHAIN] Fetched match score for match ID ${m.match_id}: ${score1}, ${score2}`);
+			matchesHistory.history.push({
+				player1: m.player1,
+				score1: Number(score1),
+				player2: m.player2,
+				score2: Number(score2),
+				createdAt: m.created_at,
+			});
+			if (m.player1 === username) {
+				if (m.score1 > m.score2)
+					matchesHistory.wins += 1;
+				if (m.score1 < m.score2)
+					matchesHistory.loses += 1;
+			}
+			if (m.player2 === username) {
+				if (m.score1 < m.score2)
+					matchesHistory.wins += 1;
+				if (m.score1 > m.score2)
+					matchesHistory.loses += 1;
+			}
+		}
+
+		return { message: "success", data: matchesHistory };
+	}
 
 	removeMatch(userId: number, matchId: string) {
 		const connected = connectedRoomInstance.getById(userId);
@@ -197,7 +316,7 @@ class MatchesService {
 
 		return { message: "success", data: "match canceled" };
 	}
-	
+
 	joinMatch(userId: number, matchId: string) {
 		const connected = connectedRoomInstance.getById(userId);
 		if (connected === undefined) throw new Error("disconnected");
@@ -235,7 +354,7 @@ class MatchesService {
 		}
 
 		const nexMatch = inviteMatchesQueue.get(matchId);
-		
+
 		inviteMatchesQueue.delete(matchId);
 
 		if (nexMatch === undefined) {
@@ -266,7 +385,7 @@ class MatchesService {
 		return { data, message };
 	}
 
-	createMatch(userId: number, settings: {}) {
+	createMatch(userId: number, settings: SettingsType) {
 		const connected = connectedRoomInstance.getById(userId);
 		if (connected === undefined) throw new Error("disconnected");
 
@@ -417,6 +536,49 @@ class MatchesService {
 			message: "success",
 			data: { message: "invite sent", matchId: matchId },
 		};
+	}
+}
+
+export type MatchesReturnDB = {
+	match_id: string;
+	player1: string;
+	player2: string;
+	score1: number;
+	score2: number;
+	match_status: string;
+	created_at: string;
+};
+
+class MatchesModel {
+	private db: Database.Database;
+	private stmGetMatchHistoryById: Database.Statement;
+
+	constructor(db: Database.Database) {
+		this.db = db;
+		this.stmGetMatchHistoryById = db.prepare(
+			`SELECT match_id, player1, player2, created_at
+			FROM matches
+			WHERE player1 = ? OR player2 = ?
+			ORDER BY created_at DESC;
+			`
+		);
+	}
+
+	async getScoreBlockchain(matchid: string) {
+		try {
+			const response = await contractReadOnly.getMatch(matchid);
+
+			const [score1, score2] = response;
+			return { score1: Number(score1), score2: Number(score2) };
+		} catch (error) {
+			print(`[BLOCKCHAIN ERROR] Failed to fetch match score for match ID ${matchid}: ${error}`);
+			return { score1: 0, score2: 0 };
+		}
+	}
+
+	async getMatchHistoryById(username: string): Promise<MatchesReturnDB[] | undefined> {
+		const match = this.stmGetMatchHistoryById.all(username, username) as MatchesReturnDB[] | undefined;
+		return match;
 	}
 }
 

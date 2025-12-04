@@ -1,15 +1,15 @@
-FROM node:22-alpine
+FROM node:22.10.0-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+RUN apk add --no-cache python3 make g++ git
 
+COPY package*.json ./
+
+RUN npm install
 
 COPY . .
 
 EXPOSE 8545
 
-
-
-CMD ["npx",  "hardhat",  "build"]
+CMD ["npx",  "hardhat",  "node"]

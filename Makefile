@@ -1,9 +1,56 @@
 # Variables
 DOCKER_COMPOSE = docker compose
 COMPOSE_FILE = docker-compose.yml
+COMPOSE_FILE_PROD = docker-compose.production.yml
 PROJECT_NAME = ft_transcendence
 
+# COLORS
+GREEN = \033[0;32m
+YELLOW = \033[1;33m
+RED = \033[0;31m
+BLUE = \033[0;34m
+NC = \033[0m
+
 .PHONY: all stop clean fclean re logs
+
+production.down:
+	docker compose -f $(COMPOSE_FILE_PROD) down --volumes --remove-orphans
+
+production.build: 
+	docker compose -f $(COMPOSE_FILE_PROD) up --build -d hardhat
+	# Wait for Hardhat to be healthy
+	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
+	@echo "$(GREEN)Hardhat is healthy. TournamentScores contract...$(NC)"
+	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
+	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
+	@echo "$(GREEN)TournamentScores contract OK.$(NC)"
+	docker compose -f $(COMPOSE_FILE_PROD) up --build -d pong-backend nginx
+
+build:
+	docker compose up --build -d hardhat
+	# Wait for Hardhat to be healthy
+	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
+	@echo "$(GREEN)Hardhat is healthy. Deploying TournamentScores contract...$(NC)"
+	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
+	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
+	@echo "$(GREEN)TournamentScores contract deployed.$(NC)"
+	docker compose up --build -d pong-backend pong-frontend
+
+up: 
+	docker compose up -d hardhat
+	# Wait for Hardhat to be healthy
+	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
+	@echo "$(GREEN)Hardhat is healthy. Deploying TournamentScores contract...$(NC)"
+	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
+	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
+	@echo "$(GREEN)TournamentScores contract deployed.$(NC)"
+	docker compose up -d pong-backend pong-frontend
+
+down:
+	docker compose down --volumes --remove-orphans
+
+start:
+	npm run up
 
 # --- build & run ---
 all:

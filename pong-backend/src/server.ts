@@ -4,7 +4,7 @@ import authRoutes from './routes/auth.js';
 import loginRoute from './routes/login.js';
 import { friendsRoute } from './routes/friend.js';
 import websocketRoute from './routes/websocket.js';
-import * as jwt from '@fastify/jwt';
+import jwt from '@fastify/jwt';
 import profilRoute from './routes/profil.js';
 import chatBlockRoute from './routes/chatBlock.js';
 import { eventsRoutes } from './routes/events.js';
@@ -17,6 +17,7 @@ import fs from "fs";
 import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
 import { tournamentsRoute } from './routes/tournament.js';
+import { logout } from './routes/logout.js';
 
 const fastify = Fastify({
 	logger: {
@@ -34,20 +35,25 @@ const fastify = Fastify({
 
 declare module 'fastify' {
 	interface FastifyRequest {
-		userId: number | null;
+		userId: number;
+	}
+	interface FastifyInstance {
+		authenticate: any;
 	}
 }
 
-fastify.decorateRequest("userId", null);
+
+
+fastify.decorateRequest("userId", 0);
 
 
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
 	try
 	{
-		const decoded = await request.jwtVerify();
-        print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
+		const decoded = await request.jwtVerify() as { id: number };
+        //print(`Authenticated user with ID: ${JSON.stringify(decoded)}`);
 		request.userId = decoded.id;
-        if (!request.userId) {
+        if (request.userId === 0) {
             reply.code(401).send({ error: 'Unauthorized' });
         }
 
@@ -109,12 +115,14 @@ fastify.register(chatBlockRoute);
 fastify.register(avatarRoute);
 fastify.register(twoFARoutes);
 fastify.register(tournamentsRoute);
+fastify.register(logout);
 await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {
 	origin: true,
 	methods: ['POST', 'OPTIONS', 'GET', 'DELETE', 'PUT'],
-
+	allowedHeaders: ['Authorization', 'Content-Type'],
+  	credentials: true
 });
 
 export function print(message: string) {

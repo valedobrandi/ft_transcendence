@@ -1,4 +1,4 @@
-import db from "../database/db.js";
+import db from "./database/db.js";
 import { eventsBus } from "./events/EventsBus.js";
 import MatchesModel from "./models/matchesModel.js";
 import { fastify } from "./server.js";

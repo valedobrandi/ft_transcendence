@@ -1,18 +1,20 @@
 import Database from "better-sqlite3";
-import { fastify, print } from "../server";
+import { fastify, print } from "../server.js";
+
+export type MessageReturnDB = {
+	id: number;
+	sender_id: number;
+	receiver_id: number;
+	content: string;
+	timestamp: string;
+	isBlocked: number;
+	sender: number;
+}
+
 
 export type GetMessages = {
 	status: 'success' | 'error';
-	data: [] |
-	{
-		id: number;
-		sender_id: number;
-		receiver_id: number;
-		content: string;
-		timestamp: string;
-		isBlocked: number;
-		sender: number;
-	}[];
+	data: [] | MessageReturnDB[];
 }
 
 class MessagesModel {
@@ -57,10 +59,12 @@ class MessagesModel {
 				Number(receiverId),
 				Number(senderId),
 				Number(senderId)
-			);
+			) as MessageReturnDB[];
+
 			if (response.length === 0) {
 				return { status: 'error', data: [] };
 			}
+
 			const data = response.filter((msg: any) => {
 				if (msg.sender_id === senderId) return true;
 				if (msg.receiver_id === senderId && msg.isBlocked === 0) return true;
@@ -68,7 +72,7 @@ class MessagesModel {
 			})
 			return { status: 'success', data: data };
 		} catch (error) {
-			fastify.log.error(`[MESSAGES MODEL]`, error);
+			fastify.log.error(`[MESSAGES MODEL] ${String(error)}`);
 		}
 		return { status: 'error', data: [] };
 	}

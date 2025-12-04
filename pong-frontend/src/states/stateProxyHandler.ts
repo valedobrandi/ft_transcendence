@@ -1,4 +1,5 @@
 import { profile } from "../app";
+import { onClickGetProfileData } from "../components/UsersList";
 import type { ChatMessage } from "../interface/ChatMessage";
 import { navigateTo, setTime } from "../utils";
 
@@ -19,10 +20,10 @@ export function updateIntraMessage(idx: number, newMessage: string) {
     });
 }
 
-export function removeIntraMessage(tagId: number) {
+export function removeIntraMessage(idx: number) {
     // Update message to "" by index
     stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.map(msg => {
-        if (msg.index === tagId) {
+        if (msg.index === idx) {
             return { ...msg, message: "" };
         }
         return msg;
@@ -117,6 +118,18 @@ export type NewMatch = {
     settings: {};
 }
 
+export type MatchesHistory = {
+    wins: number;
+    loses: number;
+    history: {
+        createdAt: string;
+        player1: string;
+        score1: number;
+        player2: string;
+        score2: number;
+    }[]
+}
+
 
 type StateKey = keyof StateProxyHandler;
 
@@ -129,14 +142,17 @@ const listeners: Record<StateKey, (() => void)[]> = {
     selectChat: [],
     state: [],
     systemMessages: [],
-    availableMatches: []
+    availableMatches: [],
+    matchesHistory: [],
+    profile: [],
+    reset: [],
+    settings: [],
 };
 
-
 export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
+     console.log("Listener registered for settings");
     listeners[key].push(fn);
 }
-
 
 export interface StateProxyHandler {
     messages: Map<number, ChatMessage[]>;
@@ -147,6 +163,7 @@ export interface StateProxyHandler {
     selectChat: { id: number; name: string };
     state: "CONNECT_ROOM" |
     "MATCH_QUEUE" |
+    "MATCH_ROOM" |
     "TOURNAMENT_QUEUE" |
     "TOURNAMENT_ROOM" |
     "GAME_ROOM" |
@@ -155,19 +172,64 @@ export interface StateProxyHandler {
     "MATCH_INVITE",
     systemMessages: { index: number; message: string }[];
     availableMatches: NewMatch[];
+    matchesHistory: MatchesHistory;
+    profile: { username: string, avatar: string };
+    settings: { state: string };
+    reset: () => void;
 }
 
-export const stateProxyHandler: StateProxyHandler = new Proxy({
-    messages: new Map<number, ChatMessage[]>(),
-    serverUsers: [],
-    friendList: [],
-    chatBlockList: [],
-    connectedUsers: [],
-    selectChat: { id: -1, name: '' },
-    state: "CONNECT_ROOM",
-    systemMessages: [],
-    availableMatches: []
-}, {
+class State {
+  messages!: Map<number, ChatMessage[]>;
+    serverUsers!: ServerUsersList[];
+    friendList!: FriendListType[];
+    chatBlockList!: number[];
+    connectedUsers!: { id: number; name: string }[];
+    selectChat!: { id: number; name: string };
+    state!: "CONNECT_ROOM" |
+    "MATCH_QUEUE" |
+    "MATCH_ROOM" |
+    "TOURNAMENT_QUEUE" |
+    "TOURNAMENT_ROOM" |
+    "GAME_ROOM" |
+    "GAME_START" |
+    "SEND_INVITE" |
+    "MATCH_INVITE";
+    systemMessages!: { index: number; message: string }[];
+    availableMatches!: NewMatch[];
+    matchesHistory!: MatchesHistory;
+    profile!: { username: string, avatar: string };
+    settings!: { state: string };
+
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.messages = new Map();
+    this.serverUsers = [];
+    this.friendList = [];
+    this.chatBlockList = [];
+    this.connectedUsers = [];
+    this.selectChat = { id: -1, name: "" };
+    this.state = "CONNECT_ROOM";
+    this.systemMessages = [];
+    this.availableMatches = [];
+    this.matchesHistory = { wins: 0, loses: 0, history: [] };
+    this.profile = { username: "", avatar: "" };
+    this.settings = {state: '0'};
+  }
+}
+
+export const stateProxyHandler: StateProxyHandler = new Proxy(
+   new State(), {
+    get(target, prop) {
+        if (prop === 'reset') {
+            return () => {
+                target.reset();
+            };
+        }
+        return target[prop as keyof typeof target];
+    },
     set(target, prop, value) {
         target[prop as keyof typeof target] = value;
 
@@ -184,10 +246,10 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
                     });
                     break;
                 case "CHAT_MESSAGE":
-                    renderChatMessages(stateProxyHandler.selectChat.name, stateProxyHandler.selectChat.id);
+                    renderChatMessages(target.selectChat.name, target.selectChat.id);
                     break;
                 case "CHAT_HISTORY":
-                    renderChatMessages(stateProxyHandler.selectChat.name, stateProxyHandler.selectChat.id);
+                    renderChatMessages(target.selectChat.name, target.selectChat.id);
                     break;
                 case "SYSTEM_MESSAGE":
                     renderSystemMessages();
@@ -197,24 +259,31 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
 
         const key = prop as StateKey;
         if (listeners[key]) {
+            console.log("Notifying listeners for key:", key);
             listeners[key].forEach(fn => fn());
         }
 
-
         if (prop === 'selectChat') {
-            changeChatHeader(stateProxyHandler.selectChat.name);
-            const isIntra = stateProxyHandler.selectChat.id === -1;
+            changeChatHeader(target.selectChat.name);
+
+            const isIntra = target.selectChat.id === -1;
+
             const chatMenu = document.getElementById("chat-menu");
+
             if (chatMenu) chatMenu.classList.remove("hidden");
+			
             if (isIntra && chatMenu) {
                 chatMenu.classList.add("hidden");
             };
             messageListeners.forEach(fn => fn());
+
+            // CHANGE PROFILE DATA
+            queueMicrotask(() => onClickGetProfileData());
         }
 
         if (prop === 'friendList') {
             messageListeners.forEach(fn => fn());
-            console.log("Friend list updated:", stateProxyHandler.friendList);
+            console.log("Friend list updated:", target.friendList);
         }
 
         if (prop === 'serverUsers') {
@@ -224,3 +293,8 @@ export const stateProxyHandler: StateProxyHandler = new Proxy({
         return true;
     }
 });
+
+
+
+
+
