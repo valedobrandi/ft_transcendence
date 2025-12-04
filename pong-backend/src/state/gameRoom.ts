@@ -1,3 +1,4 @@
+import { GameSettings } from "../classes/PingPong.js";
 import { PingPong } from "../classes/PingPong.js";
 import { eventsBus } from "../events/EventsBus.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";
@@ -9,14 +10,14 @@ export type NewInviteMatch = {
     from: number;
     to: number;
     matchId: string;
-    settings: {}
+    settings: GameSettings | undefined;
 }
 
 export type NewMatch = {
   players: { id: number; username: string }[];
   createId: number;
   matchId: string;
-  settings: {};
+  settings: GameSettings | undefined;
   status: "OPEN" | "PLAYING";
 };
 

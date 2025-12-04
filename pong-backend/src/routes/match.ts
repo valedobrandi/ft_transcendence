@@ -13,11 +13,12 @@ import db from "../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
 import { contractReadOnly } from "../blockchain.js";
 import { print } from "../server.js";
-import { module, ModuleType } from "../classes/PingPong.js";
+
 import { SettingsType } from "../types/GameStateType.js";
+import { GameSettings, PingPong, gameSettings } from "../classes/PingPong.js";
 
 type RequestSettingsType = {
-	settings: ModuleType;
+	settings: GameSettings;
 }
 
 const matchesRoute = (fastify: FastifyInstance) => {
@@ -56,7 +57,6 @@ const matchesRoute = (fastify: FastifyInstance) => {
 				type: "object",
 				properties: {
 					invitedId: { type: "number" },
-					settings: { type: "object" },
 				},
 			},
 		},
@@ -170,12 +170,11 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	sendMatchInvite(req: FastifyRequest<{ Body: { invitedId: number, settings: object } }>, res: FastifyReply) {
-		const { invitedId, settings } = req.body;
+	sendMatchInvite(req: FastifyRequest<{ Body: { invitedId: number } }>, res: FastifyReply) {
+		const { invitedId } = req.body;
 		const { message, data } = this.matchesService.sendMatchInvite(
 			req.userId,
 			invitedId,
-			settings
 		);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
@@ -198,24 +197,19 @@ class MatcherController {
 		return res.code(statusCode("OK")).send({ message, data });
 	}
 
-	createMatch(req: FastifyRequest, res: FastifyReply) {
-		const { id } = req.user;
-		const { settings } = req.body;
-		//settings.ia  true/false
-		const { message, data } = this.matchesService.createMatch(id, settings);
 	createMatch(req: FastifyRequest<{ Body: RequestSettingsType }>, res: FastifyReply) {
 		const { settings } = req.body as RequestSettingsType;
 
 		const parsedSettings: SettingsType = {
 			paddle: {
-				height: module.paddle.height[settings.paddle.height],
-				speed: module.paddle.speed[settings.paddle.speed],
+				height: gameSettings.paddle.height[settings.paddle.height],
+				speed: gameSettings.paddle.speed[settings.paddle.speed],
 			},
 			ball: {
-				size: module.ball.size[settings.ball.size],
-				speed: module.ball.speed[settings.ball.speed],
+				size: gameSettings.ball.size[settings.ball.size],
+				speed: gameSettings.ball.speed[settings.ball.speed],
 			},
-			score: module.score[settings.score],
+			score: gameSettings.score[settings.score],
 			IA: settings.IA,
 		};
 
@@ -404,6 +398,7 @@ class MatchesService {
 		}
 
 		const matchId = crypto.randomUUID();
+
 		connected.matchId = matchId;
 		connected.status = "MATCH_QUEUE";
 
@@ -416,11 +411,13 @@ class MatchesService {
 			settings,
 			status: "OPEN",
 		};
-		// IF AI 
-		// {
-		// 		creatMatchIA(humainId: string, aiId: string)
-		//      return;		
-		// }
+
+		if (settings.IA) {
+			const newMatch = new PingPong(matchId, settings);
+    		newMatch.createMatch(connected.username, 'PONG-IA');
+			return {message: 'success', data: 'new game with IA started'}
+		}
+
 		newMatchesQueue.set(matchId, newMatch);
 		connectedRoomInstance.broadcastNewMatchesList();
 
@@ -474,7 +471,7 @@ class MatchesService {
 		return { message: "error", data: "unable to cancel invitation" };
 	}
 
-	sendMatchInvite(id: number, invitedId: number, settings: {}) {
+	sendMatchInvite(id: number, invitedId: number) {
 		const connected = connectedRoomInstance.getById(id);
 		if (connected === undefined) {
 			return { message: "error", data: "user disconnected" };
@@ -487,7 +484,7 @@ class MatchesService {
 			matchId,
 			from: id,
 			to: invitedId,
-			settings: settings,
+			settings: undefined,
 		};
 
 		for (const playerId of [invitedId, id]) {
@@ -523,7 +520,6 @@ class MatchesService {
 							payload: {
 								from: id,
 								matchId: matchId,
-								settings: settings,
 							},
 						})
 					);
