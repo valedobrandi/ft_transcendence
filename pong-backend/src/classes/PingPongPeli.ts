@@ -7,7 +7,7 @@ import { PlayerType } from "../types/PlayerType.js";
 
 export type DifficultyLevel = 'HIGH' | 'MEDIUM' | 'LOW';
 
-export type GameSettings = {
+export type ModuleType = {
 	IA: boolean;
 	score: DifficultyLevel;
 	ball: {
@@ -20,20 +20,40 @@ export type GameSettings = {
 	};
 };
 
-export const gameSettings = {
-	IA: false,
-	score: { 'HIGH': 6, 'MEDIUM': 4,'LOW': 2 },
-	ball: { 
-		size: {'HIGH': 0.012,'MEDIUM': 0.006,'LOW': 0.003},
-		speed: {'HIGH': 0.006,'MEDIUM': 0.004,'LOW': 0.002},
-	},
-	paddle: {
-		height: {'HIGH': 0.200,'MEDIUM': 0.150,'LOW': 0.100},
-		speed: {'HIGH': 0.015,'MEDIUM': 0.010,'LOW': 0.005}
-	},
-};
+export const module = {
+			IA: false,
+			score: {
+				'HIGH': 6,
+				'MEDIUM': 4,
+				'LOW': 2
+			},
+			ball: {
+				size: {
+					'HIGH': 0.009,
+					'MEDIUM': 0.007,
+					'LOW': 0.005
+				},
+				speed: {
+					'HIGH': 0.006,
+					'MEDIUM': 0.004,
+					'LOW': 0.002
+				},
+			},
+			paddle: {
+				height: {
+					'HIGH': 0.200,
+					'MEDIUM': 0.150,
+					'LOW': 0.100
+				},
+				speed: {
+					'HIGH': 0.015,
+					'MEDIUM': 0.01,
+					'LOW': 0.005
+				}
+			},
+		};
 
-/* const defaultGameState: userGameStateType = {
+const defaultGameState: userGameStateType = {
 	userX: { x: 0.01, y: 0.5, score: 0 },
 	userY: { x: 0.99, y: 0.5, score: 0 },
 	ball: {
@@ -50,13 +70,14 @@ export const gameSettings = {
 	},
 	score: 2,
 	IA: false,
-}; */
+};
 
 class PingPong {
 	machId: string;
 	tournamentId: string | undefined;
 	playerConnectionInfo = new Map<string, { disconnect: boolean }>();
 	inputs: Map<string, { up: boolean; down: boolean }>;
+	INITIAL_BALL_SPEED: number = 0.004;
 	gameState: userGameStateType;
 	winnerId: string | undefined = undefined;
 	loserId: string | undefined = undefined;
@@ -65,51 +86,37 @@ class PingPong {
 	matchState: 'COUNTDOWN' | 'PLAYING' | 'ENDED' = 'COUNTDOWN';
 	lastAIUpdate = 0;
 	aiUpdateInterval = 1000;
-	INITIAL_BALL_SPEED: number = 0.006;
-	WIN_SCORE: number = 2;
-	BALL_RADIUS: number = 0.006;
-	PADDLE_SPEED: number = 0.010;
-	PADDLE_HEIGHT: number = 0.150;
 	
+	constructor(id: string) {
 
 	constructor(id: string, settings?: SettingsType) {
 		this.machId = id;
 		this.tournamentId = undefined;
 		this.inputs = new Map<string, { up: boolean; down: boolean }>();
 		this.side = { RIGHT: "", LEFT: "" };
-		//this.gameState = this.setSettings(settings);
 		this.gameState = this.setSettings(settings);
 	}
 
 	setSettings(settings: SettingsType | undefined): userGameStateType {
-
-		if (settings) {
-			print(`[SETTINGS APPLIED]: ${JSON.stringify(settings)}`);
-			this.WIN_SCORE = settings.score;
-			this.INITIAL_BALL_SPEED = settings.ball.speed;
-			this.BALL_RADIUS = settings.ball.size;
-			this.PADDLE_SPEED = settings.paddle.speed;
-			this.PADDLE_HEIGHT = settings.paddle.height;
-		}
-
-		const gameState: userGameStateType = {
-			userX: { x: 0.01, y: 0.5, score: 0 },
-			userY: { x: 0.99, y: 0.5, score: 0 },
-			ball: {
-				x: 0.5,
-				y: 0.5,
-				radius: this.BALL_RADIUS,
-				speed: this.INITIAL_BALL_SPEED,
-				velocityX: this.INITIAL_BALL_SPEED * 1,
-				velocityY: 0,
-			},
-		};
-
-
-		return gameState;
+		return defaultGameState;
 
 	}
+	
+	getFromConnectedRoom(username: string): PlayerType | undefined {
+		//print(`[GAME GET PLAYER]: ${username}`);
+		return connectedRoomInstance.getByUsername(username) || undefined;
+	}
+	
+	resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
+		this.gameState.ball.x = 0.5;
+		this.gameState.ball.y = 0.5;
+		this.gameState.ball.speed = this.INITIAL_BALL_SPEED;
+		const direction = side === 'LEFT' ? -1 : 1;
+		this.gameState.ball.velocityX = this.INITIAL_BALL_SPEED * direction;
+		this.gameState.ball.velocityY = 0;
+	}
 
+	
 	updateAI(nowMs:number)
 	{
 		if (nowMs - this.lastAIUpdate < this.aiUpdateInterval)
@@ -196,20 +203,6 @@ class PingPong {
 		return pos;
 	}
 
-	getFromConnectedRoom(username: string): PlayerType | undefined {
-		//print(`[GAME GET PLAYER]: ${username}`);
-		return connectedRoomInstance.getByUsername(username) || undefined;
-	}
-
-	resetBall(side: 'LEFT' | 'RIGHT' = 'LEFT') {
-		this.gameState.ball.x = 0.5;
-		this.gameState.ball.y = 0.5;
-		this.gameState.ball.speed = this.INITIAL_BALL_SPEED;
-		const direction = side === 'LEFT' ? -1 : 1;
-		this.gameState.ball.velocityX = this.INITIAL_BALL_SPEED * direction;
-		this.gameState.ball.velocityY = 0;
-	}
-
 	updateGame() {
 		if (this.matchState === 'COUNTDOWN') {
 			this.matchState = 'PLAYING'
@@ -224,18 +217,18 @@ class PingPong {
 			const connected = this.getFromConnectedRoom(id);
 			if (!connected) continue;
 			if (id === this.side.LEFT) {
-				if (input.up && this.gameState.userX.y > 0 + (this.PADDLE_HEIGHT / 2)) {
-					this.gameState.userX.y -= this.PADDLE_SPEED;
-				}
-				if (input.down && this.gameState.userX.y < 1 - (this.PADDLE_HEIGHT / 2)) {
-					this.gameState.userX.y += this.PADDLE_SPEED;
-				}
+				if (input.up && this.gameState.userX.y > 0 + (this.gameState.paddle.height / 2)) {
+					this.gameState.userX.y -= this.gameState.paddle.speed;
+				} 
+				if (input.down && this.gameState.userX.y < 1 - (this.gameState.paddle.height / 2)) {
+					this.gameState.userX.y += this.gameState.paddle.speed;
+				} 
 			} else if (id === this.side.RIGHT) {
-				if (input.up && this.gameState.userY.y > 0 + (this.PADDLE_HEIGHT / 2)) {
-					this.gameState.userY.y -= this.PADDLE_SPEED;
+				if (input.up && this.gameState.userY.y > 0 + (this.gameState.paddle.height / 2)) {
+					this.gameState.userY.y -= this.gameState.paddle.speed;
 				}
-				if (input.down && this.gameState.userY.y < 1 - (this.PADDLE_HEIGHT / 2)) {
-					this.gameState.userY.y += this.PADDLE_SPEED;
+				if (input.down && this.gameState.userY.y < 1 - (this.gameState.paddle.height / 2)) {
+					this.gameState.userY.y += this.gameState.paddle.speed;
 				}
 			}
 		}
@@ -246,25 +239,24 @@ class PingPong {
 		}
 
 		// Paddle collision
-		const player = ball.x < 0.5 ? this.gameState.userX : this.gameState.userY;
+		const player = ball.x < 0.5 ? this.gameState.userX : this.gameState.userY; //(position de la raquette gauche ou droite)
 		const playerX = ball.x < 0.5 ? 0.01 : 0.99;
 
 		const ballTop = ball.y - ball.radius;
 		const ballBottom = ball.y + ball.radius;
-		const paddleTop = player.y - (this.PADDLE_HEIGHT / 2);
-		const paddleBottom = player.y + (this.PADDLE_HEIGHT / 2);
+		const paddleTop = player.y - (this.gameState.paddle.height / 2);
+		const paddleBottom = player.y + (this.gameState.paddle.height / 2);
 
-		if (
-			Math.abs(ball.x - playerX) < ball.radius &&
+		if ( Math.abs(ball.x - playerX) < ball.radius &&
 			ballBottom >= paddleTop &&
 			ballTop <= paddleBottom
 		) {
 			//const paddleCenter = player.y + this.gameState.paddle.height / 2;
-			const collidePoint = (ball.y - player.y) / (this.PADDLE_HEIGHT / 2);
+			const collidePoint = (ball.y - player.y) / (this.gameState.paddle.height / 2);
 			//const normalized = collidePoint / (this.gameState.paddle.height / 2);
 			const clamped = Math.max(-1, Math.min(1, collidePoint));
 
-			const maxBounceAngle = Math.PI / 4;
+			const maxBounceAngle = Math.PI / 4; //Math.PI / 4 → π / 4 radians, π / 4 radians = 45 degrés
 
 			// Map collision point to bounce angle
 			// Map to a fixed vertical velocity range
@@ -371,7 +363,6 @@ class PingPong {
 			message: 'STATE',
 			payload: {
 				ball: this.gameState.ball,
-				paddleHeight: this.PADDLE_HEIGHT,
 				players: {
 					userX: this.gameState.userX,
 					userY: this.gameState.userY,
@@ -392,24 +383,6 @@ class PingPong {
 
 	setTournamentId(tournamentId: string) {
 		this.tournamentId = tournamentId;
-	}
-
-	createMatchIA(humanId: string, aiId: string)
-	{
-		this.add(humanId);
-		this.add(aiId);
-		gameRoom.set(this.machId, this);
-		const isConnect = this.getFromConnectedRoom(humanId);
-		if (isConnect) {
-			isConnect.status = 'GAME_ROOM';
-		}
-		this.side.LEFT = aiId;
-		this.side.RIGHT = humanId;
-
-		this.messages("MATCH_CREATED");
-		this.messages("COUNTDOWN");
-
-		print(`[MATCH CREATED]: ${this.machId} between ${humanId} and ${aiId}`);
 	}
 
 	createMatch(playerXId: string, playerYId: string) {
@@ -435,6 +408,24 @@ class PingPong {
 		print(`[MATCH CREATED]: ${this.machId} between ${playerXId} and ${playerYId}`);
 	}
 
+	creatMatchIA(humainId: string, aiId: string)
+	{
+		this.add(humainId);
+		this.add(aiId);
+		gameRoom.set(this.machId, this);
+		const isConnect = this.getFromConnectedRoom(humainId);
+		if (isConnect) {
+			isConnect.status = 'GAME_ROOM';
+		}
+		this.side.LEFT = aiId;
+		this.side.RIGHT = humainId;
+
+		this.messages("MATCH_CREATED");
+		this.messages("COUNTDOWN");
+
+		print(`[MATCH CREATED]: ${this.machId} between ${humainId} and ${aiId}`);
+	}
+
 	disconnect(playerId: string) {
 		if (this.matchState === 'ENDED') return;
 		const player = this.playerConnectionInfo.get(playerId);
@@ -442,24 +433,20 @@ class PingPong {
 	}
 
 	handleMatch() {
-		const isDisconnected = [
-			connectedRoomInstance.getByUsername(this.side.LEFT),
-			connectedRoomInstance.getByUsername(this.side.RIGHT),
-		].every((connected) => connected === undefined);
+		const isDisconnected = [...this.playerConnectionInfo.values()]
+			.every(({ disconnect }) => disconnect)
 
 		if (isDisconnected ||
-			this.gameState.userX.score === this.WIN_SCORE ||
-			this.gameState.userY.score === this.WIN_SCORE) {
+			this.gameState.userX.score === this.gameState.score ||
+			this.gameState.userY.score === this.gameState.score) {
 
 			this.endMatch();
 		}
 	}
 
 	update() {
-		// if (this.gameState.IA) {
-		// 	const nowMs = Date.now();
-		// 	this.updateAI(nowMs);
-		// }
+		const nowMs = Date.now();
+		this.updateAI(nowMs);
 		this.updateGame();
 		this.handleMatch();
 		this.send();
@@ -521,7 +508,32 @@ class PingPong {
 
 				for (const [id, { disconnect }] of this.playerConnectionInfo) {
 					const connected = this.getFromConnectedRoom(id);
-					print(`[GAME OVER] Sending GAME_OVER to ${id}`);
+					print(`[GAME OVER] Sending GAME_OVER t		{
+			const timeToReachAI = (aiX - ball.x) / vx;
+			// let predictedY = ball.y + vy * timeToreachAI;
+			let predictedY = simulateVertical(ball.y, vy, timeToReachAI);
+			
+			if (predictedY < 0) predictedY = 0;
+			if (predictedY > 1) predictedY = 1;
+			
+			targetY = predictedY;
+		}
+		else
+			{
+				targetY = 0.5
+			}
+			const paddleCenter = paddle.y;
+			
+			if (paddleCenter < targetY - margin) {
+				up = false;
+				down = true;
+			} 
+			else if (paddleCenter > targetY + margin) {
+				up = true;
+				down = false;
+			}
+			
+			this.inputs.set(aiId, {up, down});o ${id}`);
 					if (!connected || !connected.socket) continue;
 					connected.socket.send(JSON.stringify({
 						status: 200,

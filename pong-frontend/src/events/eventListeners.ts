@@ -92,7 +92,9 @@ export function eventListeners() {
 		console.log("Button clicked:", button.id);
 
 		switch (button.id) {
-			case "save-settings": { await onSendSettings(event); }
+			case "save-settings": { await onSendSettingsVsHuman(event); }
+				break;
+			case "save-settings-computer": { await onSendSettingsVsComputer(event); }
 				break;
 			case "cancel-settings": { onCancelSettings(event); }
 				break;
@@ -136,18 +138,67 @@ export function eventListeners() {
 	});
 }
 
-async function onSendSettings(event: Event) {
+function getSelectValue(id: string): string {
+  return (document.getElementById(id) as HTMLSelectElement).value;
+}
+
+async function onSendSettingsVsHuman(event: Event) {
+  event.preventDefault();
+
+  const settingsContainer = document.getElementById("settings-container");
+  
+  const formData = document.getElementById("settings-form") as HTMLFormElement;
+  if (!formData) return;
+
+  const gameSetting = {
+	settings: {
+		ball: {
+			speed: getSelectValue("BALL SPEED"),
+			size: getSelectValue("BALL SIZE"),
+		},
+		paddle: {
+			size: getSelectValue("PADDLE SIZE"),
+			speed: getSelectValue("PADDLE SPEED"),
+		},
+		score: getSelectValue("MATCH POINTS"),
+		IA: false
+	}
+  };
+  
+  await fetchRequest("/match-create", "POST", {}, {
+    body: JSON.stringify(gameSetting)
+  });
+
+  if (settingsContainer) {
+    settingsContainer.remove();
+  }
+}
+
+async function onSendSettingsVsComputer(event: Event) {
   event.preventDefault();
 
   const settingsContainer = document.getElementById("settings-container");
 
+  const formData = document.getElementById("settings-form") as HTMLFormElement;
+  if (!formData) return;
+
+  const gameSetting = {
+	settings: {
+		ball: {
+			speed: getSelectValue("BALL SPEED"),
+			size: getSelectValue("BALL SIZE"),
+		},
+		paddle: {
+			size: getSelectValue("PADDLE SIZE"),
+			speed: getSelectValue("PADDLE SPEED"),
+		},
+		score: getSelectValue("MATCH POINTS"),
+		IA: true
+	}
+  };
+  
   await fetchRequest("/match-create", "POST", {}, {
-    body: JSON.stringify({ settings: {
-      ballSpeed: "medium",
-      ballSize: "medium",
-      paddleSize: "medium",
-      matchPoints: "medium"
-    } })
+    body: JSON.stringify(gameSetting)
   });
 
   if (settingsContainer) {
@@ -344,11 +395,6 @@ const inviteToMatch = async () => {
 	const response = await fetchRequest('/match-invite', 'POST', {}, {
 		body: JSON.stringify({
 			invitedId: stateProxyHandler.selectChat.id,
-			settings: {
-				mode: "NORMAL",
-				ballSpeed: "MEDIUM",
-				paddleSize: "MEDIUM"
-			}
 		})
 	});
 	if (response.message === 'success') {
