@@ -90,7 +90,7 @@ export function RenderGame(): HTMLElement {
         }
         ctx.fillStyle = color;
         ctx.font = font;
-        ctx.fillText(text.toString() || '', x, y);
+        ctx.fillText(text.toString(), x, y);
     }
 
     drawText({ text: 0, x: 300, y: 200, color: "white", font: "45px Verdana" });
@@ -103,8 +103,13 @@ export function RenderGame(): HTMLElement {
 
         drawNet(net);
 
-        drawText({ text: userX.score, x: scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
-        drawText({ text: userY.score, x: 3 * scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
+        if (Number(userX.score) !== 0) {
+            drawText({ text: userX.score, x: scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
+        }
+
+        if (Number(userY.score) !== 0) {
+            drawText({ text: userY.score, x: 3 * scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
+        }
 
     const paddlePixelHeight = Math.max(6, PADDLE_HEIGHT * scaleY);
     const paddleWidth = Math.max(6, Math.min(12, scaleX * 0.01));
@@ -203,10 +208,10 @@ export function RenderGame(): HTMLElement {
                 y: interpolate(previousState.players.userY.y, currentState.players.userY.y, t),
             };
 
-            render(interpBall, interpUserX, interpUserY);
+            render(interpBall, interpUserX, interpUserY, currentState.paddleHeight);
         } else if (currentState) {
             const { ball, players } = currentState;
-            render(ball, players.userX, players.userY);
+            render(ball, players.userX, players.userY, currentState.paddleHeight);
         }
         requestAnimationFrame(renderLoop);
     }

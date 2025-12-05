@@ -417,6 +417,7 @@ class PingPong {
 			message: 'STATE',
 			payload: {
 				ball: this.gameState.ball,
+				paddleHeight: this.PADDLE_HEIGHT,
 				players: {
 					userX: this.gameState.userX,
 					userY: this.gameState.userY,
