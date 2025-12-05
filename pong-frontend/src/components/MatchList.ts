@@ -15,15 +15,15 @@ export function MatchList(): string {
     stateProxyHandler.availableMatches.forEach((match) => {
       const matchesLi = document.createElement("li");
       matchesLi.className =
-        "flex justify-between items-center border-b-2 p-2";
+        "flex justify-between items-center border-b-2 p-2 border-[#424549]";
 
       const matchInfo = document.createElement("span");
       matchInfo.innerText = `${match.matchId}`;
-      matchInfo.classList = "p-2";
+      matchInfo.classList = "p-2 text-white";
 
       const matchStatus = document.createElement("span");
       matchStatus.innerText = `${match.status}`;
-      matchStatus.classList = "p-2";
+      matchStatus.classList = "p-2 text-white";
       matchesLi.appendChild(matchStatus);
 
       const createMatch = document.createElement("span");
@@ -31,7 +31,7 @@ export function MatchList(): string {
         (user) => user.id === match.createId
       );
       createMatch.innerText = `${createUsername?.name || "STATUS"}`;
-      createMatch.classList = "p-2";
+      createMatch.classList = "p-2 text-white";
 
       const actionBtn = document.createElement("span");
       const isMatchCreatedByUser = match.createId === profile.id;
@@ -54,7 +54,7 @@ export function MatchList(): string {
 
   if (stateProxyHandler.availableMatches.length === 0) {
     const noMatchesLi = document.createElement("li");
-    noMatchesLi.className = "text-center";
+    noMatchesLi.className = "text-center text-white";
     noMatchesLi.innerText = "NO MATCHES AVAILABLE";
     matchListUl.appendChild(noMatchesLi);
   }
