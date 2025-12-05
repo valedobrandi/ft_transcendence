@@ -139,6 +139,8 @@ class PingPong {
 					aiX
 				);
 
+
+
 				// === OFFENSE ADJUSTMENT ===
 
 				let offesiveOffset = 0;
@@ -166,11 +168,14 @@ class PingPong {
 
 				this.aiTargetY = Math.max(halfPaddleHeight, Math.min(1 - halfPaddleHeight, predictedY));
 			}
+			else {
+				this.aiTargetY = 0.5; // il faut garder!!!
+			}
 		}
 
 		// 2. Every frame: blindly move toward the last decided target
 		const paddleCenter = aiPaddle.y;
-		const threshold = 0.04;
+		const threshold = 0.01;
 
 		if (paddleCenter < this.aiTargetY - threshold) {
 			down = true;
