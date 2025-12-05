@@ -2,6 +2,7 @@ import { GameSettings } from "../classes/PingPong.js";
 import { PingPong } from "../classes/PingPong.js";
 import { eventsBus } from "../events/EventsBus.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";
+import { SettingsType } from "../types/GameStateType.js";
 import { PlayerType } from "../types/PlayerType.js";
 import { connectedRoomInstance } from "./ConnectedRoom.js";
 
@@ -10,14 +11,14 @@ export type NewInviteMatch = {
     from: number;
     to: number;
     matchId: string;
-    settings: GameSettings | undefined;
+    settings:  SettingsType | undefined;
 }
 
 export type NewMatch = {
   players: { id: number; username: string }[];
   createId: number;
   matchId: string;
-  settings: GameSettings | undefined;
+  settings: SettingsType | undefined;
   status: "OPEN" | "PLAYING";
 };
 

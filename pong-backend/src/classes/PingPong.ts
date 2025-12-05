@@ -7,17 +7,12 @@ import { PlayerType } from "../types/PlayerType.js";
 
 export type DifficultyLevel = 'HIGH' | 'MEDIUM' | 'LOW';
 
+
 export type GameSettings = {
 	IA: boolean;
 	score: DifficultyLevel;
-	ball: {
-		size: DifficultyLevel;
-		speed: DifficultyLevel;
-	};
-	paddle: {
-		height: DifficultyLevel;
-		speed: DifficultyLevel;
-	};
+	ball: { size: DifficultyLevel; speed: DifficultyLevel;};
+	paddle: { size: DifficultyLevel; speed: DifficultyLevel;};
 };
 
 export const gameSettings = {
@@ -70,6 +65,7 @@ class PingPong {
 	BALL_RADIUS: number = 0.006;
 	PADDLE_SPEED: number = 0.010;
 	PADDLE_HEIGHT: number = 0.150;
+	IA: boolean = false;
 	
 
 	constructor(id: string, settings?: SettingsType) {
@@ -90,6 +86,7 @@ class PingPong {
 			this.BALL_RADIUS = settings.ball.size;
 			this.PADDLE_SPEED = settings.paddle.speed;
 			this.PADDLE_HEIGHT = settings.paddle.height;
+			this.IA = settings.IA;
 		}
 
 		const gameState: userGameStateType = {
@@ -103,6 +100,8 @@ class PingPong {
 				velocityX: this.INITIAL_BALL_SPEED * 1,
 				velocityY: 0,
 			},
+			IA: this.IA
+
 		};
 
 
@@ -116,10 +115,10 @@ class PingPong {
 			return;
 		this.lastAIUpdate = nowMs;
 		//lire le input
-		const aiId = this.side.LEFT;
+
 		const ball = this.gameState.ball;
-		const paddle = this.gameState.userX;
-		const paddleHeight = 0.150; // 0.99 - 0.15 = 0.84 / 0.1  
+		const paddle = this.gameState.userY;
+		const paddleHeight = this.PADDLE_HEIGHT; // use instance paddle height
 		const margin = paddleHeight * 0.2; 
 		
 		let up = false;
@@ -141,22 +140,20 @@ class PingPong {
 			
 			targetY = predictedY;
 		}
-		else
-			{
-				targetY = 0.5
-			}
-			const paddleCenter = paddle.y;
-			
-			if (paddleCenter < targetY - margin) {
-				up = false;
-				down = true;
-			} 
-			else if (paddleCenter > targetY + margin) {
-				up = true;
-				down = false;
-			}
-			
-			this.inputs.set(aiId, {up, down});
+		else {
+			targetY = 0.5
+		}
+		const paddleCenter = paddle.y;
+		
+		if (paddleCenter < targetY - margin) {
+			up = false;
+			down = true;
+		} else if (paddleCenter > targetY + margin) {
+			up = true;
+			down = false;
+		}
+		
+		this.inputs.set('PONG-IA', {up, down});
 	}
 
 	simulateVertical(y: number, vy:number, timeToReachAI:number):number
@@ -371,7 +368,6 @@ class PingPong {
 			message: 'STATE',
 			payload: {
 				ball: this.gameState.ball,
-				paddleHeight: this.PADDLE_HEIGHT,
 				players: {
 					userX: this.gameState.userX,
 					userY: this.gameState.userY,
@@ -387,7 +383,24 @@ class PingPong {
 				connected.socket.send(message);
 			}
 		}
+	}
 
+	sendPADDLEHEIGHT() {
+		const payload = {
+			message: 'PADDLE_HEIGHT',
+			payload: {
+				height: this.PADDLE_HEIGHT,
+			},
+		};
+
+		const message = JSON.stringify(payload);
+		for (const [id, { disconnect }] of this.playerConnectionInfo) {
+			const connected = this.getFromConnectedRoom(id);
+			if (!connected) continue;
+			if (connected.socket) {
+				connected.socket.send(message);
+			}
+		}
 	}
 
 	setTournamentId(tournamentId: string) {
@@ -397,7 +410,9 @@ class PingPong {
 	createMatchIA(humanId: string, aiId: string)
 	{
 		this.add(humanId);
+
 		this.add(aiId);
+
 		gameRoom.set(this.machId, this);
 		const isConnect = this.getFromConnectedRoom(humanId);
 		if (isConnect) {
@@ -415,6 +430,7 @@ class PingPong {
 	createMatch(playerXId: string, playerYId: string) {
 
 		this.add(playerXId);
+
 		this.add(playerYId);
 
 		gameRoom.set(this.machId, this);
@@ -427,9 +443,11 @@ class PingPong {
 		};
 
 		this.side.LEFT = playerXId;
+
 		this.side.RIGHT = playerYId;
 
 		this.messages("MATCH_CREATED");
+		this.sendPADDLEHEIGHT();
 		this.messages("COUNTDOWN");
 
 		print(`[MATCH CREATED]: ${this.machId} between ${playerXId} and ${playerYId}`);
@@ -456,10 +474,10 @@ class PingPong {
 	}
 
 	update() {
-		// if (this.gameState.IA) {
-		// 	const nowMs = Date.now();
-		// 	this.updateAI(nowMs);
-		// }
+		if (this.gameState.IA) {
+			const nowMs = Date.now();
+			this.updateAI(nowMs);
+		}
 		this.updateGame();
 		this.handleMatch();
 		this.send();

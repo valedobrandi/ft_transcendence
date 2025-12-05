@@ -21,6 +21,7 @@ export interface userGameStateType {
     userX: PlayerStatType;
     userY: PlayerStatType;
     ball: BallType;
+    IA: boolean;
 }
 
 /* export interface userGameStateType {
