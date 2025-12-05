@@ -389,7 +389,8 @@ backBtn.onclick = () => {
 
 	try {
 	const data = await fetchRequest("/update", "PUT", {},  {body: JSON.stringify(payload)});
-	
+	console.log("DATA FROM BACKEND:", data);
+
 	if (data.message === 'success')
 	{
 		profile.username = data.payload.username;

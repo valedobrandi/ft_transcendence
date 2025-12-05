@@ -96,7 +96,7 @@ export function RenderGame(): HTMLElement {
     drawText({ text: 0, x: 300, y: 200, color: "white", font: "45px Verdana" });
 
     function render(ball: BallType, userX: PlayerType, userY: PlayerType) {
-        const PADDLE_HEIGHT = stateProxyHandler.paddleHeight;
+        const PADDLE_HEIGHT = stateProxyHandler.paddle.height;
         const scaleX = canvasElement.width;
         const scaleY = canvasElement.height;
         drawRect({ x: 0, y: 0, w: scaleX, h: scaleY, color: "black" });
@@ -111,10 +111,11 @@ export function RenderGame(): HTMLElement {
             drawText({ text: userY.score, x: 3 * scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
         }
 
-    const paddlePixelHeight = Math.max(6, PADDLE_HEIGHT * scaleY);
-    const paddleWidth = Math.max(6, Math.min(12, scaleX * 0.01));
-    drawRect({ x: userX.x * scaleX - paddleWidth / 2, y: (userX.y * scaleY) - (paddlePixelHeight / 2), w: paddleWidth, h: paddlePixelHeight, color: "white" });
-    drawRect({ x: userY.x * scaleX - paddleWidth / 2, y: (userY.y * scaleY) - (paddlePixelHeight / 2), w: paddleWidth, h: paddlePixelHeight, color: "white" });
+        const paddlePixelHeight = Math.max(6, PADDLE_HEIGHT * scaleY);
+        // PaddleWidth in fixed pixels
+        const paddleWidth = stateProxyHandler.paddle.width * scaleX;
+        drawRect({ x: userX.x * scaleX - paddleWidth / 2, y: (userX.y * scaleY) - (paddlePixelHeight / 2), w: paddleWidth, h: paddlePixelHeight, color: "white" });
+        drawRect({ x: userY.x * scaleX - paddleWidth / 2, y: (userY.y * scaleY) - (paddlePixelHeight / 2), w: paddleWidth, h: paddlePixelHeight, color: "white" });
 
         const BALL_RADIUS = Math.min(ball.radius * ((scaleX + scaleY) / 2), 8);
 

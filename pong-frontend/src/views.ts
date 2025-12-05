@@ -47,9 +47,9 @@ export function intraView(root: HTMLElement) {
   // Chat View
   intraContainerUI.appendChild(Intra());
   // Profile View
-  intraContainerUI.appendChild(ProfileContainer());
+  // intraContainerUI.appendChild(ProfileContainer());
   // Game View
-  intraContainerUI.appendChild(GameContainerUI());
+  // intraContainerUI.appendChild(GameContainerUI());
 }
 // <!-- BERNARDO END EDIT -->
 
