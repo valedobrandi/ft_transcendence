@@ -255,6 +255,7 @@ class MatchesService {
 			loses: 0,
 			history: [],
 		};
+		
 		if (match === undefined || match.length === 0) {
 		return { message: "success", data: matchesHistory};
 		}
