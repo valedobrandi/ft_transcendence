@@ -1,3 +1,5 @@
+import { SettingsType } from "./GameStateType";
+
 export type EventsMap = {
     'game:savehistory': {
         matchId: string;
@@ -9,7 +11,7 @@ export type EventsMap = {
     'game:start': {
         matchId: string;
         oponentes: [string, string];
-        settings: {};
+        settings: SettingsType | undefined;
     }
 }
 

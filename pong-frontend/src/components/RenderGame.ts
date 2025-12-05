@@ -6,9 +6,8 @@ import type { DrawTextType } from "../interface/drawText";
 import type { GameStateType } from "../interface/GameStateType";
 import type { NetType } from "../interface/net";
 import type { PlayerType } from "../interface/player";
+import { stateProxyHandler } from "../states/stateProxyHandler";
 import { getSocket } from "../websocket";
-
-export const PADDLE = {HEIGHT: 0.150};
 
 export function RenderGame(): HTMLElement {
 
@@ -96,7 +95,8 @@ export function RenderGame(): HTMLElement {
 
     drawText({ text: 0, x: 300, y: 200, color: "white", font: "45px Verdana" });
 
-    function render(ball: BallType, userX: PlayerType, userY: PlayerType, paddleHeight: number) {
+    function render(ball: BallType, userX: PlayerType, userY: PlayerType) {
+        const PADDLE_HEIGHT = stateProxyHandler.paddleHeight;
         const scaleX = canvasElement.width;
         const scaleY = canvasElement.height;
         drawRect({ x: 0, y: 0, w: scaleX, h: scaleY, color: "black" });
@@ -111,8 +111,10 @@ export function RenderGame(): HTMLElement {
             drawText({ text: userY.score, x: 3 * scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
         }
 
-        drawRect({ x: userX.x * scaleX, y: (userX.y * scaleY) - (PADDLE_HEIGHT * scaleY / 2), w: 8, h: 100, color: "white" });
-        drawRect({ x: userY.x * scaleX - 10, y: (userY.y * scaleY) - (PADDLE_HEIGHT * scaleY / 2), w: 8, h: 100, color: "white" });
+    const paddlePixelHeight = Math.max(6, PADDLE_HEIGHT * scaleY);
+    const paddleWidth = Math.max(6, Math.min(12, scaleX * 0.01));
+    drawRect({ x: userX.x * scaleX - paddleWidth / 2, y: (userX.y * scaleY) - (paddlePixelHeight / 2), w: paddleWidth, h: paddlePixelHeight, color: "white" });
+    drawRect({ x: userY.x * scaleX - paddleWidth / 2, y: (userY.y * scaleY) - (paddlePixelHeight / 2), w: paddleWidth, h: paddlePixelHeight, color: "white" });
 
         const BALL_RADIUS = Math.min(ball.radius * ((scaleX + scaleY) / 2), 8);
 
