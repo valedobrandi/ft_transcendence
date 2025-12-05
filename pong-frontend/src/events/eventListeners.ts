@@ -328,7 +328,7 @@ async function joinLogout() {
 		"GET"
 	);
 	if (response.message === "success") {
-		navigateTo('/login');
+		navigateTo('/');
 	}
 
 }

@@ -61,12 +61,12 @@ export function Register(): HTMLElement {
 		const email = email_input.value.trim();
 		const password = password_input.value.trim();
 
-		if (username.length > 8)
+		if (username.length > 15)
 		{
 			alert("username too long");
 			return;
 		}
-		if (password.length > 8)
+		if (password.length > 15)
 		{
 			alert("password too long");
 			return;

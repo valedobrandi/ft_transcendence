@@ -11,7 +11,8 @@ class ProfileControler {
 
     private profileService = new ProfileService();
 
-    async updateUser(req: FastifyRequest<{ Params: { id: number }, Body: UpdateBody }>, res: FastifyReply) {
+    async updateUser(req: FastifyRequest<{ Params: { id: number }, Body: UpdateBody }>, res: FastifyReply)
+    {
         const usersModel = new UsersModel(db);
         try {
 
