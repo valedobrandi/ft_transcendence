@@ -2,8 +2,6 @@ import { fetchRequest, toggle2FA } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
 import { navigateTo } from "../utils";
-import { CreateAlert } from "./CreateAlert";
-
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default1.jpg"
 const AVATAR1 = "/default/avatar_default1.jpg"

@@ -155,7 +155,7 @@ export function RenderGame(): HTMLElement {
     function drawCountdown(scaleX: number, scaleY: number) {
         if (!ctx) return;
         const readyText = "READY";
-        const textWidth = ctx.measureText(readyText).width;
+        //const textWidth = ctx.measureText(readyText).width;
         if (countdown !== null) {
             if (countdown < 2) {
                 drawText({
@@ -167,8 +167,8 @@ export function RenderGame(): HTMLElement {
                 });
             } else {
                 drawText({
-                    text: "READY",
-                    x: (0.5 * scaleX - (textWidth)),
+                    text: readyText,
+                    x: (0.5 * scaleX ),
                     y: 0.5 * scaleY + 30,
                     color: "white",
                     font: "120px Verdana"
@@ -209,10 +209,10 @@ export function RenderGame(): HTMLElement {
                 y: interpolate(previousState.players.userY.y, currentState.players.userY.y, t),
             };
 
-            render(interpBall, interpUserX, interpUserY, currentState.paddleHeight);
+            render(interpBall, interpUserX, interpUserY);
         } else if (currentState) {
             const { ball, players } = currentState;
-            render(ball, players.userX, players.userY, currentState.paddleHeight);
+            render(ball, players.userX, players.userY);
         }
         requestAnimationFrame(renderLoop);
     }
