@@ -45,7 +45,7 @@ jobs:
         run: docker compose build pong-backend
 
       - name: Create database
-        run: docker compose run --rm pong-backend npx tsx /app/database/init.ts
+        run: docker compose run --rm pong-backend npx tsx /app/src/database/init.ts
 
       - name: Run backend tests
         run: docker compose run --rm pong-backend npx vitest --run --reporter verbose

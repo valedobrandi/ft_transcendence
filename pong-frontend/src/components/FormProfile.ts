@@ -2,6 +2,7 @@ import { fetchRequest, toggle2FA } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
 import { navigateTo } from "../utils";
+import { CreateAlert } from "./CreateAlert";
 
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default1.jpg"
@@ -388,6 +389,7 @@ backBtn.onclick = () => {
 
 	try {
 	const data = await fetchRequest("/update", "PUT", {},  {body: JSON.stringify(payload)});
+	console.log("DATA FROM BACKEND:", data);
 
 	if (data.message === 'success')
 	{
@@ -412,9 +414,9 @@ backBtn.onclick = () => {
 	if (nameEl) nameEl.value = profile.username ?? "";
 	if (mailEl) mailEl.value = profile.email ?? "";
 
-	} catch (e) {
-	console.error("Erreur réseau :", e);
-	alert("Erreur lors de la mise à jour : " + (e || "Erreur inconnue"));
+	} catch (error) {
+	//console.error("Erreur réseau :", e);
+	alert("Error update profile : " + (error) || "Erreur inconnue");
 	} finally {
 
 	}

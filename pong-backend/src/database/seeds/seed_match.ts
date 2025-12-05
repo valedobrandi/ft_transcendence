@@ -29,6 +29,14 @@ const  matches = [
 		score1: 1,
 		score2: 6,
 	},
+	{
+		match_id: '4',
+		player1: 'bobMarley',
+		player2: 'lola',
+		score1: 1,
+		score2: 6,
+	},
+	
 ];
 
 export async function seedMatch() {

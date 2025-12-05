@@ -65,13 +65,13 @@ export function FormLogin(): HTMLElement {
 		subtitle.className = "text-gray-300 text-center";
 		subtitle.textContent = "A code has been sent to you by email.";
 
-		const emailDemo = document.createElement("div");
-		emailDemo.className = "text-black text-base border p-4 rounded bg-white";
-		emailDemo.innerHTML = `
-						<p>From: ${from}</p>
-						<p>To: ${to}</p>
-						<p>Subject: ${subject}</p>
-						${email}`;
+		// const emailDemo = document.createElement("div");
+		// emailDemo.className = "text-black text-base border p-4 rounded bg-white";
+		// emailDemo.innerHTML = `
+		// 				<p>From: ${from}</p>
+		// 				<p>To: ${to}</p>
+		// 				<p>Subject: ${subject}</p>
+		// 				${email}`;
 
 		const input = document.createElement("input");
 		input.type = "text";
@@ -127,7 +127,7 @@ export function FormLogin(): HTMLElement {
 
 		modal.appendChild(title);
 		modal.appendChild(subtitle);
-		modal.appendChild(emailDemo);
+		//modal.appendChild(emailDemo);
 		modal.appendChild(input);
 		modal.appendChild(error);
 		modal.appendChild(confirmBtn);
