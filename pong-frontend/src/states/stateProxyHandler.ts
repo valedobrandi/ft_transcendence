@@ -147,6 +147,7 @@ const listeners: Record<StateKey, (() => void)[]> = {
     profile: [],
     reset: [],
     settings: [],
+    paddleHeight: [],
 };
 
 export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
@@ -175,6 +176,7 @@ export interface StateProxyHandler {
     matchesHistory: MatchesHistory;
     profile: { username: string, avatar: string };
     settings: { state: string };
+    paddleHeight: number;
     reset: () => void;
 }
 
@@ -199,6 +201,7 @@ class State {
     matchesHistory!: MatchesHistory;
     profile!: { username: string, avatar: string };
     settings!: { state: string };
+    paddleHeight!: number;
 
   constructor() {
     this.reset();
@@ -217,6 +220,7 @@ class State {
     this.matchesHistory = { wins: 0, loses: 0, history: [] };
     this.profile = { username: "", avatar: "" };
     this.settings = {state: '0'};
+    this.paddleHeight = 0.150;
   }
 }
 

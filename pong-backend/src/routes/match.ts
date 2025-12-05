@@ -199,10 +199,10 @@ class MatcherController {
 
 	createMatch(req: FastifyRequest<{ Body: RequestSettingsType }>, res: FastifyReply) {
 		const { settings } = req.body as RequestSettingsType;
-
+		
 		const parsedSettings: SettingsType = {
 			paddle: {
-				height: gameSettings.paddle.height[settings.paddle.height],
+				height: gameSettings.paddle.height[settings.paddle.size],
 				speed: gameSettings.paddle.speed[settings.paddle.speed],
 			},
 			ball: {
@@ -212,7 +212,6 @@ class MatcherController {
 			score: gameSettings.score[settings.score],
 			IA: settings.IA,
 		};
-
 		const { message, data } = this.matchesService.createMatch(req.userId, parsedSettings);
 
 		return res.code(statusCode("OK")).send({ message, data });
