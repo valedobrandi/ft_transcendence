@@ -19,15 +19,16 @@ class ProfileControler {
 
             const player = getIdUser(req.userId);
             if (!player)
-                return res.status(404).send({ error: 'user not found' });
+                return res.status(200).send({ error: 'user not found' });
 			if (req.body.username) {
 				const checkUsernameAlready = usersModel.findUserByUsername(req.body.username);
 				if (checkUsernameAlready)
-					return res.status(408).send({ error: 'user already use' })
-				const checkEmailAlready = usersModel.findUserByEmail(req.body.username);
+					return res.status(200).send({ error: 'user already use' })}
+            if (req.body.email) {
+				const checkEmailAlready = usersModel.findUserByEmail(req.body.email);
 				if (checkEmailAlready)
-					return res.status(407).send({ error: 'Email already use' })
-			}
+					return res.status(200).send({ error: 'Email already use' })}
+			
 
             if (req.body.email !== undefined)
                 player.email = req.body.email;
@@ -36,10 +37,10 @@ class ProfileControler {
 
             if (req.body.password) {
                 if (!req.body.current_password)
-                    return res.status(422).send({ error: 'current_password required to change password' });
+                    return res.status(200).send({ error: 'current_password required to change password' });
                 const ok = await bcrypt.compare(req.body.current_password, player.password);
                 if (!ok)
-                    return res.status(401).send({ error: 'invalid current password' });
+                    return res.status(200).send({ error: 'invalid current password' });
                 player.password = await bcrypt.hash(req.body.password, 10);
             }
 
