@@ -21,7 +21,8 @@ export async function websocketReceiver(socket: WebSocket) {
     }
     switch (data.message) {
       case "PADDLE_HEIGHT":
-        stateProxyHandler.paddleHeight = data.payload.height;
+        stateProxyHandler.paddle.height = data.payload.height;
+        stateProxyHandler.paddle.width = data.payload.width;
         break;
       case "CONNECT_ROOM":
         stateProxyHandler.state = data.message;

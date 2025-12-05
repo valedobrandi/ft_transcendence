@@ -147,7 +147,7 @@ const listeners: Record<StateKey, (() => void)[]> = {
     profile: [],
     reset: [],
     settings: [],
-    paddleHeight: [],
+    paddle: [],
 };
 
 export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
@@ -176,7 +176,7 @@ export interface StateProxyHandler {
     matchesHistory: MatchesHistory;
     profile: { username: string, avatar: string };
     settings: { state: string };
-    paddleHeight: number;
+    paddle: { height: number, width: number };
     reset: () => void;
 }
 
@@ -201,7 +201,7 @@ class State {
     matchesHistory!: MatchesHistory;
     profile!: { username: string, avatar: string };
     settings!: { state: string };
-    paddleHeight!: number;
+    paddle!: { height: number, width: number };
 
   constructor() {
     this.reset();
@@ -220,7 +220,7 @@ class State {
     this.matchesHistory = { wins: 0, loses: 0, history: [] };
     this.profile = { username: "", avatar: "" };
     this.settings = {state: '0'};
-    this.paddleHeight = 0.150;
+    this.paddle = { height: 0.150, width: 0.020};
   }
 }
 
@@ -235,6 +235,7 @@ export const stateProxyHandler: StateProxyHandler = new Proxy(
         return target[prop as keyof typeof target];
     },
     set(target, prop, value) {
+
         target[prop as keyof typeof target] = value;
 
         if (prop === 'state') {
