@@ -6,11 +6,14 @@ import { UsersModel } from '../models/usersModel.js';
 import db from '../database/db.js'
 import { print } from '../server.js';
 import { statusCode } from '../types/statusCode.js';
+import { connectedRoomInstance } from '../state/ConnectedRoom.js';
+import { MatchesModel } from '../routes/match.js';
 
 class ProfileControler {
 
     private profileService = new ProfileService();
-
+    private matchesModel = new MatchesModel(db);
+    
     async updateUser(req: FastifyRequest<{ Params: { id: number }, Body: UpdateBody }>, res: FastifyReply)
     {
         const usersModel = new UsersModel(db);
@@ -20,6 +23,12 @@ class ProfileControler {
             const player = getIdUser(req.userId);
             if (!player)
                 return res.status(404).send({ error: 'user not found' });
+            const username = player.username;
+            const connected = connectedRoomInstance.getById(req.userId);
+            if (connected && connected.status !== "CONNECT_ROOM") {
+                return res.status(200).send({ error: 'user is in a match or a tournament' });
+            }
+
 			if (req.body.username) {
 				const checkUsernameAlready = usersModel.findUserByUsername(req.body.username);
 				if (checkUsernameAlready)
@@ -45,6 +54,10 @@ class ProfileControler {
 
             // <-- BERNARDO START EDIT -->
             updatedUserInDB(player);
+
+            connectedRoomInstance.broadcastRegisteredUsers();
+            this.matchesModel.updateMatchPlayerUsername(username, player.username);
+            
             // <-- BERNARDO END EDIT -->
             return res.status(200).send({ message: 'success', payload: { username: req.body.username, email:req.body.email } });
         }

@@ -50,7 +50,7 @@ export function FormLogin(): HTMLElement {
 	// POPUP 2FA
 	// -------------------------
 
-	function create2FAPopup(username: string, from: string, to: string, subject: string, email: string) {
+	function create2FAPopup(username: string) {
 		const overlay = document.createElement("div");
 		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
 
@@ -161,10 +161,6 @@ export function FormLogin(): HTMLElement {
 		if (response.message === "2FA_REQUIRED") {
 			create2FAPopup(
 				response.data.username,
-				response.data.from,
-				response.data.to,
-				response.data.subject,
-				response.data.email
 			);
 			return;
 		}

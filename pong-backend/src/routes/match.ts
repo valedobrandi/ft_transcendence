@@ -547,6 +547,7 @@ export type MatchesReturnDB = {
 class MatchesModel {
 	private db: Database.Database;
 	private stmGetMatchHistoryById: Database.Statement;
+	private stmUpdateMatchPlayerUsername: Database.Statement;
 
 	constructor(db: Database.Database) {
 		this.db = db;
@@ -555,6 +556,13 @@ class MatchesModel {
 			FROM matches
 			WHERE player1 = ? OR player2 = ?
 			ORDER BY created_at DESC;
+			`
+		);
+		this.stmUpdateMatchPlayerUsername = db.prepare(
+			`UPDATE matches
+			SET player1 = CASE WHEN player1 = ? THEN ? ELSE player1 END,
+				player2 = CASE WHEN player2 = ? THEN ? ELSE player2 END
+			WHERE player1 = ? OR player2 = ?;
 			`
 		);
 	}
@@ -575,8 +583,12 @@ class MatchesModel {
 		const match = this.stmGetMatchHistoryById.all(username, username) as MatchesReturnDB[] | undefined;
 		return match;
 	}
+
+	updateMatchPlayerUsername(oldUsername: string, newUsername: string) {
+		this.stmUpdateMatchPlayerUsername.run(oldUsername, newUsername, oldUsername, newUsername, oldUsername, oldUsername);
+	}
 }
 
 const matchServiceInstance = new MatchesService();
 
-export { matchesRoute, matchServiceInstance };
+export { matchesRoute, matchServiceInstance, MatchesModel };
