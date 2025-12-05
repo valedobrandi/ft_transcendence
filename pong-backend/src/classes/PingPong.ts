@@ -103,93 +103,141 @@ class PingPong {
 			IA: this.IA
 
 		};
-
-
+		
+		
 		return gameState;
-
+		
 	}
-
+	
 	updateAI(nowMs:number)
 	{
-		if (nowMs - this.lastAIUpdate < this.aiUpdateInterval)
-			return;
+		if (nowMs - this.lastAIUpdate < this.aiUpdateInterval) return;
+		
 		this.lastAIUpdate = nowMs;
-		//lire le input
-
+		
 		const ball = this.gameState.ball;
-		const paddle = this.gameState.userY;
-		const paddleHeight = this.PADDLE_HEIGHT; // use instance paddle height
-		const margin = paddleHeight * 0.2; 
-		
-		let up = false;
-		let down = false;
-		
-		const aiX = paddle.x;       // ~0.01
-		const vx = ball.velocityX;
-		const vy = ball.velocityY;
-		
-		let targetY: number;
-		if (vx < 0 && ball.x > aiX)
-		{
-			const timeToReachAI = (aiX - ball.x) / vx;
-			// let predictedY = ball.y + vy * timeToreachAI;
-			let predictedY = this.simulateVertical(ball.y, vy, timeToReachAI);
-			
-			if (predictedY < 0) predictedY = 0;
-			if (predictedY > 1) predictedY = 1;
-			
-			targetY = predictedY;
-		}
+		const vx = ball.velocityX; const vy = ball.velocityY;
+		let up = false; let down = false;
+
+		// Determine which side the AI is on (if any)
+		const aiId = 'PONG-IA';
+		let aiSide: 'LEFT' | 'RIGHT' | undefined;
+
+		if (this.side.LEFT === aiId) {
+			aiSide = 'LEFT';
+		} 
+		else if (this.side.RIGHT === aiId) {
+			aiSide = 'RIGHT';
+		} 
 		else {
-			targetY = 0.5
-		}
-		const paddleCenter = paddle.y;
+			return; // no AI in this match
+		} 
+
+		const paddle = aiSide === 'LEFT' ? this.gameState.userX : this.gameState.userY;
+		const aiX = paddle.x; 
 		
-		if (paddleCenter < targetY - margin) {
-			up = false;
+		const approaching = 
+		(aiSide === 'LEFT' && vx < 0 && ball.x > aiX) || 
+		(aiSide === 'RIGHT' && vx > 0 && ball.x < aiX);
+		
+		// --- Predict ball position after 1s delay ---
+		let targetY = 0.5;
+		if (approaching) {
+			const reactionDelay = 1.0; // seconds
+			const predictedY = ball.y + vy * reactionDelay;
+			// reflect off walls simply
+			targetY = Math.max(0, Math.min(1, predictedY));
+		}
+
+		// --- Methodical movement ---
+		const paddleCenter = paddle.y;
+		const tolerance = this.PADDLE_HEIGHT * 0.1;
+
+		if (paddleCenter < targetY - tolerance) {
 			down = true;
-		} else if (paddleCenter > targetY + margin) {
+		} else if (paddleCenter > targetY + tolerance) {
 			up = true;
-			down = false;
 		}
 		
 		this.inputs.set('PONG-IA', {up, down});
 	}
 
+	simpleSimulate(y:number, vy:number, time:number):number {
+		if (time <= 0) return y;
+
+		// Raw position without walls
+		let rawY = y + vy * time;
+
+		// Each "segment" is 2 units tall (0→1→0)
+		let period = 2.0;
+		let mod = rawY % period;
+		if (mod < 0) mod += period;
+
+		// Reflect: 0→1 is forward, 1→0 is backward
+		let finalY = mod <= 1 ? mod : 2 - mod;
+
+		return finalY;
+	}
+
 	simulateVertical(y: number, vy:number, timeToReachAI:number):number
 	{
+		// Predict the vertical position of the ball after `timeToReachAI` seconds
+		// taking into account bounces on the top (0) and bottom (1) walls.
+		// Parameters:
+		//  - y: current vertical position in normalized coordinates [0..1]
+		//  - vy: current vertical velocity (units per second in the same coordinate system)
+		//  - timeToReachAI: time interval to simulate (seconds). If <= 0, returns current position.
+		// Behavior:
+		//  - The ball moves linearly until it hits a wall, at which point its vertical
+		//    velocity is reflected (vy -> -vy). This repeats until the requested time
+		//    has elapsed. The final clamped position is returned.
+
 		let pos = y;
 		let vel = vy;
 		let remaining = timeToReachAI;
-		const minY  = 0;
+		const minY = 0;
 		const maxY = 1;
 
+		// Ensure starting position is valid
 		if (pos < minY) pos = minY;
-    	if (pos > maxY) pos = maxY;
-		
-		if (vel === 0) {
+		if (pos > maxY) pos = maxY;
+
+		// If no time to simulate or zero vertical velocity, return clipped current pos
+		if (remaining <= 0 || vel === 0) {
 			return pos;
 		}
-		while (remaining > 0)
-		{
-			// Temps jusqu'au prochain mur
+
+		// Simulate in segments: time until next wall bounce (timeToWall).
+		// If the next bounce happens after the remaining time, advance by remaining and finish.
+		while (remaining > 0) {
 			let timeToWall: number;
-			if (vel > 0) // la ball va en bas
+			if (vel > 0) {
+				// moving downward toward maxY
 				timeToWall = (maxY - pos) / vel;
-			else // la ball va en haut
-				timeToWall = (minY - pos) / vel;
-			if (timeToWall >= remaining || timeToWall <= 0)
-			{
+			} else {
+				// moving upward toward minY (vel is negative)
+				timeToWall = (minY - pos) / vel; // division by negative vel yields positive time
+			}
+
+			// If the wall is not reached within the remaining time, advance and return
+			if (timeToWall >= remaining || timeToWall <= 0) {
 				pos = pos + vel * remaining;
+				// final clamp to bounds
+				if (pos < minY) pos = minY;
+				if (pos > maxY) pos = maxY;
 				return pos;
 			}
+
+			// Move to wall, reflect vertical velocity, subtract elapsed time and continue
 			pos = pos + vel * timeToWall;
 			vel = -vel;
 			remaining -= timeToWall;
+
+			// Clamp after bounce to avoid tiny floating point overshoots
 			if (pos < minY) pos = minY;
-        	if (pos > maxY) pos = maxY;
+			if (pos > maxY) pos = maxY;
 		}
-		
+
 		return pos;
 	}
 
@@ -219,7 +267,8 @@ class PingPong {
 
 		for (const [id, input] of this.inputs.entries()) {
 			const connected = this.getFromConnectedRoom(id);
-			if (!connected) continue;
+			// allow AI (e.g. 'PONG-IA') to control paddle even if it's not a connected user
+			if (!connected && id !== 'PONG-IA') continue;
 			if (id === this.side.LEFT) {
 				if (input.up && this.gameState.userX.y > 0 + (this.PADDLE_HEIGHT / 2)) {
 					this.gameState.userX.y -= this.PADDLE_SPEED;
