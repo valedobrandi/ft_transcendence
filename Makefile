@@ -16,14 +16,19 @@ NC = \033[0m
 production.down:
 	docker compose -f $(COMPOSE_FILE_PROD) down --volumes --remove-orphans
 
-production.build: 
+production.build:
+	docker compose -f $(COMPOSE_FILE_PROD) down -v 
 	docker compose -f $(COMPOSE_FILE_PROD) up --build -d hardhat
-	# Wait for Hardhat to be healthy
+	@echo "$(GREEN)WAITING TO HARDHAT TO BE HEALTHY$(NC)"
 	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
-	@echo "$(GREEN)Hardhat is healthy. TournamentScores contract...$(NC)"
+	@echo "$(GREEN)HARDHAT IS READY$(NC)"
+	@echo "$(GREEN)DEPLOYING TournamentScores CONTRACT$(NC)"
+	docker exec -it hardhat-node rm -rf /app/ignition/deployments/chain-31337
 	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
-	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
-	@echo "$(GREEN)TournamentScores contract OK.$(NC)"
+	ADDR=$(docker exec hardhat-node jq -r '.["TournamentScoresModule#TournamentScores"].address' /app/ignition/deployments/chain-31337/deployed_addresses.json)
+	echo "CONTRACT_ADDRESS=$$ADDR" > pong-backend/.env
+	echo "CONTRACT_ADDRESS=$$ADDR" >> .env
+	@echo "$(GREEN)TournamentScores DEPLOYED$(NC)"
 	docker compose -f $(COMPOSE_FILE_PROD) up --build -d pong-backend nginx
 
 build:

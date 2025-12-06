@@ -21,7 +21,7 @@ services:
     depends_on:
       - pong-backend
     networks:
-      - transcedence-network
+      - transcendence-network
     restart: unless-stopped
 
   pong-backend:
@@ -34,18 +34,15 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - ADDRESS=192.0.7
+      - CONTRACT_ADDRESS=${CONTRACT_ADDRESS}
       - RESEND_API_KEY=${RESEND_API_KEY}
-    volumes:
-      - ./hardhat/artifacts/contracts/TournamentScores.sol:/app/artifacts
-      - ./hardhat/ignition/deployments/chain-31337/deployed_addresses.json:/app/deployed/deployed_addresses.json
     env_file:
       - .env
     depends_on:
       hardhat:
         condition: service_started
     networks:
-      - transcedence-network
+      - transcendence-network
     restart: unless-stopped
 
   hardhat:
@@ -60,7 +57,15 @@ services:
       - ./hardhat:/app
       - /app/node_modules
     networks:
-      - transcedence-network
+      - transcendence-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"] 
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+
 networks:
-  transcedence-network:
+  transcendence-network:
     driver: bridge
