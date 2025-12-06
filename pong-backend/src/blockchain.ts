@@ -1,19 +1,34 @@
 import { ethers } from 'ethers';
 import fs from "fs";
+import path from "path";
+
+const artifactPath = path.resolve(
+  __dirname,
+  "artifacts/contracts/TournamentScores.sol/TournamentScores.json"
+);
+if (!fs.existsSync(artifactPath)) {
+  throw new Error(
+	`Artifact file not found at path: ${artifactPath}.`
+  );
+}
 
 const artifact = JSON.parse(
-  fs.readFileSync("/app/artifacts/TournamentScores.json", "utf8")
+  fs.readFileSync(artifactPath, "utf8")
 );
-const contractData = JSON.parse(
-  fs.readFileSync("/app/deployed/deployed_addresses.json", "utf8")
-);
+
+const contractAddress = process.env.CONTRACT_ADDRESS;
+
+if (!contractAddress ) {
+  throw new Error(
+	`Missing CONTRACT_ADDRESS environment variable.`
+  );
+} 
 
 const URL = process.env.RPC_URL || "http://hardhat:8545";
 
 const provider = new ethers.JsonRpcProvider(URL);
 
 
-export const contractAddress = contractData["TournamentScoresModule#TournamentScores"];
 export const contractReadOnly = new ethers.Contract(
 	contractAddress,
 	artifact.abi,
