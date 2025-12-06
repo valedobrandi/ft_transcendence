@@ -6,8 +6,8 @@ services:
       context: ./pong-frontend
       dockerfile: Dockerfile.production
       args:
-        - VITE_PONG_BACKEND_API=/api
-        - VITE_PONG_BACKEND_WEBSOCKET=/ws
+        - VITE_PONG_BACKEND_API=https://localhost:8443/api
+        - VITE_PONG_BACKEND_WEBSOCKET=wss://localhost:8443/ws
     image: pong-nginx:latest
     container_name: pong-nginx
     ports:
@@ -34,8 +34,9 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - CONTRACT_ADDRESS=${CONTRACT_ADDRESS}
       - RESEND_API_KEY=${RESEND_API_KEY}
+    volumes:
+      - hardhat-data:/app/ignition/deployments:ro
     env_file:
       - .env
     depends_on:
@@ -54,18 +55,20 @@ services:
     ports:
       - "8545:8545"
     volumes:
-      - ./hardhat:/app
+      - hardhat-data:/app/ignition/deployments
       - /app/node_modules
-    networks:
-      - transcendence-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8545"] 
       interval: 10s
       timeout: 5s
       retries: 10
     restart: unless-stopped
-
+    networks:
+      - transcendence-network
 
 networks:
   transcendence-network:
     driver: bridge
+
+volumes:
+  hardhat-data:
