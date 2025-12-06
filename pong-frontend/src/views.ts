@@ -10,8 +10,6 @@ import { FormGuest } from "./components/FormGuest";
 import { endpoint } from "./endPoints";
 import { initSocket } from "./websocket";
 import { profile } from "./app";
-import { ProfileContainer } from "./components/ProfileContainer";
-import { GameContainerUI } from "./components/GameContainer";
 import { IntraContainer } from "./components/IntraContainer";
 import { stateProxyHandler } from "./states/stateProxyHandler";
 import { SettignsContainer } from "./components/SettignsContainer";

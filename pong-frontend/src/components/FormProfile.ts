@@ -2,7 +2,6 @@ import { fetchRequest, toggle2FA } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
 import { navigateTo } from "../utils";
-
 import { Button } from "./Button";
 const AVATAR_DEFAUT = "/default/avatar_default1.jpg"
 const AVATAR1 = "/default/avatar_default1.jpg"
@@ -388,6 +387,7 @@ backBtn.onclick = () => {
 
 	try {
 	const data = await fetchRequest("/update", "PUT", {},  {body: JSON.stringify(payload)});
+	console.log("DATA FROM BACKEND:", data);
 
 	if (data.message === 'success')
 	{
@@ -396,6 +396,13 @@ backBtn.onclick = () => {
 
 		console.log("Profile updated", data);
 		alert(("your profil has changed "));
+		const response = await fetchRequest(
+		`/logout`,
+		"GET"
+		);
+		if (response.message === "success") {
+			navigateTo('/');
+		}
 
 	}
 	else
@@ -412,9 +419,8 @@ backBtn.onclick = () => {
 	if (nameEl) nameEl.value = profile.username ?? "";
 	if (mailEl) mailEl.value = profile.email ?? "";
 
-	} catch (e) {
-	console.error("Erreur réseau :", e);
-	alert("Erreur lors de la mise à jour : " + (e || "Erreur inconnue"));
+	} catch (error) {
+	alert("Error update profile : " + (error) || "Erreur inconnue");
 	} finally {
 
 	}
@@ -442,13 +448,13 @@ export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFil
 	try {
 		data = await fetchRequest(`/profile`, 'GET', {}, {});
 	} catch (err) {
-		console.error("Erreur réseau sur /profile:", err);
+		console.error("Error réseau on /profile:", err);
 		window.location.hash = "/login";
 		return;
 	}
 
 	if (data.message !== "success") {
-		console.warn("Profile non accessible:", data);
+		console.warn("Profile not access:", data);
 		window.location.hash = "/login";
 		return;
 	}
@@ -495,14 +501,14 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
                 body: fd
             });
             const data = await res.json();
-            if (!data.payload?.avatar_url) throw new Error("Avatar non reçu");
+            if (!data.payload?.avatar_url) throw new Error("Avatar not receved");
 
 
             user.avatar_url = data.payload.avatar_url;
             profile.avatar_url = data.payload.avatar_url;
 
             avatarPreview.src = `${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}`;
-            console.log("Avatar mis à jour:", profile.avatar_url);
+            console.log("Avatar update:", profile.avatar_url);
         } catch (err) {
             console.error("Upload failed:", err);
             avatarPreview.src = user.avatar_url ? `${BACKEND_URL}${user.avatar_url}` : AVATAR_DEFAUT;

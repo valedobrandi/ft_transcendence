@@ -199,10 +199,10 @@ class MatcherController {
 
 	createMatch(req: FastifyRequest<{ Body: RequestSettingsType }>, res: FastifyReply) {
 		const { settings } = req.body as RequestSettingsType;
-
+		
 		const parsedSettings: SettingsType = {
 			paddle: {
-				height: gameSettings.paddle.height[settings.paddle.height],
+				height: gameSettings.paddle.height[settings.paddle.size],
 				speed: gameSettings.paddle.speed[settings.paddle.speed],
 			},
 			ball: {
@@ -212,7 +212,6 @@ class MatcherController {
 			score: gameSettings.score[settings.score],
 			IA: settings.IA,
 		};
-
 		const { message, data } = this.matchesService.createMatch(req.userId, parsedSettings);
 
 		return res.code(statusCode("OK")).send({ message, data });
@@ -250,15 +249,16 @@ class MatchesService {
 	async getMatchHistory(username: string) {
 		const match = await this.matchesModel.getMatchHistoryById(username);
 		print(`[MATCH HISTORY] Retrieved match history for user: ${JSON.stringify(match)}`);
-		if (match === undefined || match.length === 0) {
-			return { message: "error", data: "no match history" };
-		}
-
+		
 		const matchesHistory: MatchesHistory = {
 			wins: 0,
 			loses: 0,
 			history: [],
 		};
+		
+		if (match === undefined || match.length === 0) {
+		return { message: "success", data: matchesHistory};
+		}
 
 		for (const m of match) {
 			const { score1, score2 } = await this.matchesModel.getScoreBlockchain(m.match_id);
@@ -271,15 +271,15 @@ class MatchesService {
 				createdAt: m.created_at,
 			});
 			if (m.player1 === username) {
-				if (m.score1 > m.score2)
+				if (score1 > score2)
 					matchesHistory.wins += 1;
-				if (m.score1 < m.score2)
+				if (score1 < score2)
 					matchesHistory.loses += 1;
 			}
 			if (m.player2 === username) {
-				if (m.score1 < m.score2)
+				if (score1 < score2)
 					matchesHistory.wins += 1;
-				if (m.score1 > m.score2)
+				if (score1 > score2)
 					matchesHistory.loses += 1;
 			}
 		}
@@ -548,6 +548,7 @@ export type MatchesReturnDB = {
 class MatchesModel {
 	private db: Database.Database;
 	private stmGetMatchHistoryById: Database.Statement;
+	private stmUpdateMatchPlayerUsername: Database.Statement;
 
 	constructor(db: Database.Database) {
 		this.db = db;
@@ -556,6 +557,13 @@ class MatchesModel {
 			FROM matches
 			WHERE player1 = ? OR player2 = ?
 			ORDER BY created_at DESC;
+			`
+		);
+		this.stmUpdateMatchPlayerUsername = db.prepare(
+			`UPDATE matches
+			SET player1 = CASE WHEN player1 = ? THEN ? ELSE player1 END,
+				player2 = CASE WHEN player2 = ? THEN ? ELSE player2 END
+			WHERE player1 = ? OR player2 = ?;
 			`
 		);
 	}
@@ -576,8 +584,12 @@ class MatchesModel {
 		const match = this.stmGetMatchHistoryById.all(username, username) as MatchesReturnDB[] | undefined;
 		return match;
 	}
+
+	updateMatchPlayerUsername(oldUsername: string, newUsername: string) {
+		this.stmUpdateMatchPlayerUsername.run(oldUsername, newUsername, oldUsername, newUsername, oldUsername, oldUsername);
+	}
 }
 
 const matchServiceInstance = new MatchesService();
 
-export { matchesRoute, matchServiceInstance };
+export { matchesRoute, matchServiceInstance, MatchesModel };

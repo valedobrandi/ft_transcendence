@@ -134,6 +134,7 @@ export async function fetchRequest
         });
         if (!response.ok) {
             const error = await response.json();
+            console.log("DATA FROM BACKEND:", error);
             throw new Error(error.message || 'API error');
         }
 

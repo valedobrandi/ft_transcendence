@@ -131,7 +131,7 @@ export function ProfileContainer() {
 						</li>`
 							)
 							.join("")
-						: `<li>PLAY A GAME TO START TRACKING YOUR STATS</li>`
+						: `<li>HELLO</li>`
 					}
 					</ul>
 				</div>

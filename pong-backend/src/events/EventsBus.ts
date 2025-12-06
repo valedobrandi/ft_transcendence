@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import MatchesModel from '../models/matchesModel.js';
 import { EventsMap } from '../types/GameEvents.js';
 import { PingPong } from '../classes/PingPong.js';
+import { print } from '../server.js';
 
 export const events = new EventEmitter();
 
@@ -32,7 +33,7 @@ class EventBus<Events extends Record<string, any>> {
         });
 
         this.on('game:start', (data) => {
-
+            print(`[GAME SETTINGS]: ${data.settings}`);
             const newMatch = new PingPong(data.matchId, data.settings);
             newMatch.createMatch(data.oponentes[0], data.oponentes[1]);
         })

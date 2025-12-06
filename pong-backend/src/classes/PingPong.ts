@@ -7,24 +7,19 @@ import { PlayerType } from "../types/PlayerType.js";
 
 export type DifficultyLevel = 'HIGH' | 'MEDIUM' | 'LOW';
 
+
 export type GameSettings = {
 	IA: boolean;
 	score: DifficultyLevel;
-	ball: {
-		size: DifficultyLevel;
-		speed: DifficultyLevel;
-	};
-	paddle: {
-		height: DifficultyLevel;
-		speed: DifficultyLevel;
-	};
+	ball: { size: DifficultyLevel; speed: DifficultyLevel;};
+	paddle: { size: DifficultyLevel; speed: DifficultyLevel;};
 };
 
 export const gameSettings = {
 	IA: false,
 	score: { 'HIGH': 6, 'MEDIUM': 4,'LOW': 2 },
 	ball: { 
-		size: {'HIGH': 0.012,'MEDIUM': 0.006,'LOW': 0.003},
+		size: {'HIGH': 0.014,'MEDIUM': 0.009,'LOW': 0.005},
 		speed: {'HIGH': 0.006,'MEDIUM': 0.004,'LOW': 0.002},
 	},
 	paddle: {
@@ -70,6 +65,11 @@ class PingPong {
 	BALL_RADIUS: number = 0.006;
 	PADDLE_SPEED: number = 0.010;
 	PADDLE_HEIGHT: number = 0.150;
+	IA: boolean = false;
+	private PADDLE_WIDTH: number = 0.01;
+	private aiDecisionTime: number = 0;
+	private aiTargetY: number = 0.5;
+	private AI_PERCEPTION_DELAY: number = 1000;
 	
 
 	constructor(id: string, settings?: SettingsType) {
@@ -90,6 +90,7 @@ class PingPong {
 			this.BALL_RADIUS = settings.ball.size;
 			this.PADDLE_SPEED = settings.paddle.speed;
 			this.PADDLE_HEIGHT = settings.paddle.height;
+			this.IA = settings.IA;
 		}
 
 		const gameState: userGameStateType = {
@@ -103,97 +104,118 @@ class PingPong {
 				velocityX: this.INITIAL_BALL_SPEED * 1,
 				velocityY: 0,
 			},
+			IA: this.IA
+
 		};
-
-
-		return gameState;
-
-	}
-
-	updateAI(nowMs:number)
-	{
-		if (nowMs - this.lastAIUpdate < this.aiUpdateInterval)
-			return;
-		this.lastAIUpdate = nowMs;
-		//lire le input
-		const aiId = this.side.LEFT;
-		const ball = this.gameState.ball;
-		const paddle = this.gameState.userX;
-		const paddleHeight = 0.150; // 0.99 - 0.15 = 0.84 / 0.1  
-		const margin = paddleHeight * 0.2; 
 		
+		
+		return gameState;
+		
+	}
+	
+	updateAI(nowMs: number) {
+		const ball = this.gameState.ball;
+
+		// IA Paddle
+		const aiPaddle = this.gameState.userY;    
+		const aiX = aiPaddle.x;
+		const halfPaddleHeight = this.PADDLE_HEIGHT / 2;
+
 		let up = false;
 		let down = false;
-		
-		const aiX = paddle.x;       // ~0.01
-		const vx = ball.velocityX;
-		const vy = ball.velocityY;
-		
-		let targetY: number;
-		if (vx < 0 && ball.x > aiX)
-		{
-			const timeToReachAI = (aiX - ball.x) / vx;
-			// let predictedY = ball.y + vy * timeToreachAI;
-			let predictedY = this.simulateVertical(ball.y, vy, timeToReachAI);
-			
-			if (predictedY < 0) predictedY = 0;
-			if (predictedY > 1) predictedY = 1;
-			
-			targetY = predictedY;
+
+		// 1. Every ~1 second: take a fresh look and decide a new target
+		if (nowMs - this.aiDecisionTime >= this.AI_PERCEPTION_DELAY) {
+			this.aiDecisionTime = nowMs;
+
+			// Only react when ball is coming toward the AI
+			if (ball.velocityX > 0 && ball.x < aiX) {
+				// Predict where the ball will be when it reaches the paddle line
+				let predictedY = this.predictBallYAtX(
+					ball.x,
+					ball.y,
+					ball.velocityX,
+					ball.velocityY,
+					aiX
+				);
+
+
+
+				// === OFFENSE ADJUSTMENT ===
+
+				let offesiveOffset = 0;
+
+				if (Math.random() < 0.4) {
+					const oppY = this.gameState.userX.y;
+
+					// Angle +1up -1down 0straight
+					let direction = 0;
+					if (oppY < 0.35) {
+						direction = -1;
+					} else if (oppY > 0.65) {
+						direction = 1;
+					} else {
+						direction = (Math.random() < 0.5) ? -1 : 1;
+					}
+
+					const aggressiveness = 0.7 + Math.random() * 0.2;
+					offesiveOffset = direction * aggressiveness * halfPaddleHeight;
+				}
+
+				// Small random imperfection so it’s not god-like (optional but recommended)
+				const error = (Math.random() - 0.5) * 0.05; 
+				predictedY += offesiveOffset + error;
+
+				this.aiTargetY = Math.max(halfPaddleHeight, Math.min(1 - halfPaddleHeight, predictedY));
+			}
+			else {
+				this.aiTargetY = 0.5; // il faut garder!!!
+			}
 		}
-		else
-			{
-				targetY = 0.5
-			}
-			const paddleCenter = paddle.y;
-			
-			if (paddleCenter < targetY - margin) {
-				up = false;
-				down = true;
-			} 
-			else if (paddleCenter > targetY + margin) {
-				up = true;
-				down = false;
-			}
-			
-			this.inputs.set(aiId, {up, down});
+
+		// 2. Every frame: blindly move toward the last decided target
+		const paddleCenter = aiPaddle.y;
+		const threshold = 0.01;
+
+		if (paddleCenter < this.aiTargetY - threshold) {
+			down = true;
+		} else if (paddleCenter > this.aiTargetY + threshold) {
+			up = true;
+		}
+
+		this.inputs.set('PONG-IA', { up, down });
 	}
 
-	simulateVertical(y: number, vy:number, timeToReachAI:number):number
-	{
-		let pos = y;
-		let vel = vy;
-		let remaining = timeToReachAI;
-		const minY  = 0;
-		const maxY = 1;
+	private predictBallYAtX(
+		startX: number,
+		startY: number,
+		vx: number,
+		vy: number,
+		targetX: number
+	): number {
+		// safety
+		if (vx <= 0) return 0.5; 
 
-		if (pos < minY) pos = minY;
-    	if (pos > maxY) pos = maxY;
-		
-		if (vel === 0) {
-			return pos;
+		const totalTime = (targetX - startX) / vx;
+		if (totalTime <= 0) return startY;
+
+		// Unroll the vertical position with perfect reflection math
+		// This formula works for ANY number of bounces without loops!
+		const period = 2; // because 0 → 1 → 0 is one full cycle (distance 2 in normalized space)
+		const distance = vy * totalTime;
+
+		// Position in the "unfolded" space
+		let unfoldedY = startY + distance;
+
+		// Fold it back into [0,1] with perfect reflection
+		let normalized = unfoldedY % period;
+		if (normalized < 0) normalized += period;
+
+		if (normalized > 1) {
+			normalized = 2 - normalized; // reflect over top
 		}
-		while (remaining > 0)
-		{
-			// Temps jusqu'au prochain mur
-			let timeToWall: number;
-			if (vel > 0) // la ball va en bas
-				timeToWall = (maxY - pos) / vel;
-			else // la ball va en haut
-				timeToWall = (minY - pos) / vel;
-			if (timeToWall >= remaining || timeToWall <= 0)
-			{
-				pos = pos + vel * remaining;
-				return pos;
-			}
-			pos = pos + vel * timeToWall;
-			vel = -vel;
-			remaining -= timeToWall;
-			if (pos < minY) pos = minY;
-        	if (pos > maxY) pos = maxY;
-		}
-		
-		return pos;
+
+		return Math.max(0, Math.min(1, normalized));
 	}
 
 	getFromConnectedRoom(username: string): PlayerType | undefined {
@@ -222,7 +244,8 @@ class PingPong {
 
 		for (const [id, input] of this.inputs.entries()) {
 			const connected = this.getFromConnectedRoom(id);
-			if (!connected) continue;
+			// allow AI (e.g. 'PONG-IA') to control paddle even if it's not a connected user
+			if (!connected && id !== 'PONG-IA') continue;
 			if (id === this.side.LEFT) {
 				if (input.up && this.gameState.userX.y > 0 + (this.PADDLE_HEIGHT / 2)) {
 					this.gameState.userX.y -= this.PADDLE_SPEED;
@@ -240,50 +263,50 @@ class PingPong {
 			}
 		}
 
+		
 		// Wall collision
 		if (ball.y + ball.radius > 1 || ball.y - ball.radius < 0) {
 			ball.velocityY = -ball.velocityY;
 		}
-
+		
 		// Paddle collision
 		const player = ball.x < 0.5 ? this.gameState.userX : this.gameState.userY;
 		const playerX = ball.x < 0.5 ? 0.01 : 0.99;
+		
+		const paddleLeftX  = playerX - this.PADDLE_WIDTH / 2;
+		const paddleRightX = playerX + this.PADDLE_WIDTH / 2;
+		
+		const prevX = ball.x - ball.velocityX;
+		const prevY = ball.y - ball.velocityY;
 
-		const ballTop = ball.y - ball.radius;
-		const ballBottom = ball.y + ball.radius;
 		const paddleTop = player.y - (this.PADDLE_HEIGHT / 2);
 		const paddleBottom = player.y + (this.PADDLE_HEIGHT / 2);
 
 		if (
-			Math.abs(ball.x - playerX) < ball.radius &&
-			ballBottom >= paddleTop &&
-			ballTop <= paddleBottom
+			ball.x + ball.radius >= paddleLeftX &&
+			ball.x - ball.radius <= paddleRightX &&
+			ball.y + ball.radius >= paddleTop &&
+			ball.y - ball.radius <= paddleBottom
 		) {
-			//const paddleCenter = player.y + this.gameState.paddle.height / 2;
-			const collidePoint = (ball.y - player.y) / (this.PADDLE_HEIGHT / 2);
-			//const normalized = collidePoint / (this.gameState.paddle.height / 2);
-			const clamped = Math.max(-1, Math.min(1, collidePoint));
+			const t = ( (ball.velocityX > 0 ? paddleLeftX : paddleRightX) - prevX ) / (ball.x - prevX);
+			const intersectY = prevY + (ball.y - prevY) * t;
 
-			const maxBounceAngle = Math.PI / 4;
+			if (intersectY + ball.radius >= paddleTop && intersectY - ball.radius <= paddleBottom) {
+					const collidePoint = (ball.y - player.y) / (this.PADDLE_HEIGHT / 2);
+					const clamped = Math.max(-1, Math.min(1, collidePoint));
+					const maxBounceAngle = Math.PI / 4;
+					const bounceAngle = clamped * maxBounceAngle;
+					const speed = ball.speed;
+					const direction = ball.x < 0.5 ? 1 : -1;
 
-			// Map collision point to bounce angle
-			// Map to a fixed vertical velocity range
-			// const maxVerticalSpeed = ball.speed * 0.75;
-			// ball.velocityY = clamped * maxVerticalSpeed;
-
-			const bounceAngle = clamped * maxBounceAngle;
-			const speed = ball.speed;
-
-			// Horizontal always goes full speed
-			const direction = ball.x < 0.5 ? 1 : -1;
-			//ball.velocityX = direction * Math.sqrt(ball.speed ** 2 - ball.velocityY ** 2);
-
-			ball.velocityX = direction * speed * Math.cos(bounceAngle);
-			ball.velocityY = speed * Math.sin(bounceAngle);
-
-			if (ball.speed < 0.008) {
-				ball.speed = Math.min(ball.speed + 0.0005, 0.02);
-			}
+					ball.velocityX = direction * speed * Math.cos(bounceAngle);
+					ball.velocityY = speed * Math.sin(bounceAngle);
+				
+					if (ball.speed < 0.008) {
+						ball.speed = Math.min(ball.speed + 0.0005, 0.02);
+					}
+					ball.x = (direction < 0 ? paddleLeftX : paddleRightX) + direction * ball.radius;
+				}
 		}
 
 		// Score
@@ -387,7 +410,25 @@ class PingPong {
 				connected.socket.send(message);
 			}
 		}
+	}
 
+	notifyPaddleSettings() {
+		const payload = {
+			message: 'PADDLE_HEIGHT',
+			payload: {
+				height: this.PADDLE_HEIGHT,
+				width: this.PADDLE_WIDTH,
+			},
+		};
+
+		const message = JSON.stringify(payload);
+		for (const [id, { disconnect }] of this.playerConnectionInfo) {
+			const connected = this.getFromConnectedRoom(id);
+			if (!connected) continue;
+			if (connected.socket) {
+				connected.socket.send(message);
+			}
+		}
 	}
 
 	setTournamentId(tournamentId: string) {
@@ -397,7 +438,9 @@ class PingPong {
 	createMatchIA(humanId: string, aiId: string)
 	{
 		this.add(humanId);
+
 		this.add(aiId);
+
 		gameRoom.set(this.machId, this);
 		const isConnect = this.getFromConnectedRoom(humanId);
 		if (isConnect) {
@@ -415,6 +458,7 @@ class PingPong {
 	createMatch(playerXId: string, playerYId: string) {
 
 		this.add(playerXId);
+
 		this.add(playerYId);
 
 		gameRoom.set(this.machId, this);
@@ -427,9 +471,11 @@ class PingPong {
 		};
 
 		this.side.LEFT = playerXId;
+
 		this.side.RIGHT = playerYId;
 
 		this.messages("MATCH_CREATED");
+		this.notifyPaddleSettings();
 		this.messages("COUNTDOWN");
 
 		print(`[MATCH CREATED]: ${this.machId} between ${playerXId} and ${playerYId}`);
@@ -456,10 +502,10 @@ class PingPong {
 	}
 
 	update() {
-		// if (this.gameState.IA) {
-		// 	const nowMs = Date.now();
-		// 	this.updateAI(nowMs);
-		// }
+		if (this.gameState.IA) {
+			const nowMs = Date.now();
+			this.updateAI(nowMs);
+		}
 		this.updateGame();
 		this.handleMatch();
 		this.send();

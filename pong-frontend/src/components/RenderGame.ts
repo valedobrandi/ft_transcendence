@@ -6,9 +6,8 @@ import type { DrawTextType } from "../interface/drawText";
 import type { GameStateType } from "../interface/GameStateType";
 import type { NetType } from "../interface/net";
 import type { PlayerType } from "../interface/player";
+import { stateProxyHandler } from "../states/stateProxyHandler";
 import { getSocket } from "../websocket";
-
-export const PADDLE = {HEIGHT: 0.150};
 
 export function RenderGame(): HTMLElement {
 
@@ -96,7 +95,8 @@ export function RenderGame(): HTMLElement {
 
     drawText({ text: 0, x: 300, y: 200, color: "white", font: "45px Verdana" });
 
-    function render(ball: BallType, userX: PlayerType, userY: PlayerType, paddleHeight: number) {
+    function render(ball: BallType, userX: PlayerType, userY: PlayerType) {
+        const PADDLE_HEIGHT = stateProxyHandler.paddle.height;
         const scaleX = canvasElement.width;
         const scaleY = canvasElement.height;
         drawRect({ x: 0, y: 0, w: scaleX, h: scaleY, color: "black" });
@@ -111,8 +111,11 @@ export function RenderGame(): HTMLElement {
             drawText({ text: userY.score, x: 3 * scaleX / 4, y: scaleY / 5, color: "white", font: "45px Verdana" });
         }
 
-        drawRect({ x: userX.x * scaleX, y: (userX.y * scaleY) - (PADDLE_HEIGHT * scaleY / 2), w: 8, h: 100, color: "white" });
-        drawRect({ x: userY.x * scaleX - 10, y: (userY.y * scaleY) - (PADDLE_HEIGHT * scaleY / 2), w: 8, h: 100, color: "white" });
+        const paddlePixelHeight = Math.max(6, PADDLE_HEIGHT * scaleY);
+        // PaddleWidth in fixed pixels
+        const paddleWidth = stateProxyHandler.paddle.width * scaleX;
+        drawRect({ x: userX.x * scaleX - paddleWidth / 2, y: (userX.y * scaleY) - (paddlePixelHeight / 2), w: paddleWidth, h: paddlePixelHeight, color: "white" });
+        drawRect({ x: userY.x * scaleX - paddleWidth / 2, y: (userY.y * scaleY) - (paddlePixelHeight / 2), w: paddleWidth, h: paddlePixelHeight, color: "white" });
 
         const BALL_RADIUS = Math.min(ball.radius * ((scaleX + scaleY) / 2), 8);
 
@@ -152,7 +155,7 @@ export function RenderGame(): HTMLElement {
     function drawCountdown(scaleX: number, scaleY: number) {
         if (!ctx) return;
         const readyText = "READY";
-        const textWidth = ctx.measureText(readyText).width;
+        //const textWidth = ctx.measureText(readyText).width;
         if (countdown !== null) {
             if (countdown < 2) {
                 drawText({
@@ -164,8 +167,8 @@ export function RenderGame(): HTMLElement {
                 });
             } else {
                 drawText({
-                    text: "READY",
-                    x: (0.5 * scaleX - (textWidth)),
+                    text: readyText,
+                    x: (0.5 * scaleX ),
                     y: 0.5 * scaleY + 30,
                     color: "white",
                     font: "120px Verdana"
@@ -206,10 +209,10 @@ export function RenderGame(): HTMLElement {
                 y: interpolate(previousState.players.userY.y, currentState.players.userY.y, t),
             };
 
-            render(interpBall, interpUserX, interpUserY, currentState.paddleHeight);
+            render(interpBall, interpUserX, interpUserY);
         } else if (currentState) {
             const { ball, players } = currentState;
-            render(ball, players.userX, players.userY, currentState.paddleHeight);
+            render(ball, players.userX, players.userY);
         }
         requestAnimationFrame(renderLoop);
     }

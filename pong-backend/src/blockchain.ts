@@ -2,10 +2,10 @@ import { ethers } from 'ethers';
 import fs from "fs";
 
 const artifact = JSON.parse(
-  fs.readFileSync("/app/artifacts/TournamentScores.json", "utf8")
+  fs.readFileSync("/app/ignition/deployments/chain-31337/artifacts/TournamentScoresModule#TournamentScores.json", "utf8")
 );
 const contractData = JSON.parse(
-  fs.readFileSync("/app/deployed/deployed_addresses.json", "utf8")
+  fs.readFileSync("/app/ignition/deployments/chain-31337/deployed_addresses.json", "utf8")
 );
 
 const URL = process.env.RPC_URL || "http://hardhat:8545";
