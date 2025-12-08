@@ -18,7 +18,7 @@ export function ProfilePage(): HTMLElement {
 	const bg = document.createElement("div");
 	bg.className = `
 	absolute inset-0
-	bg-[url('/default/profil.jpg')]
+	bg-[url('/profil.jpg')]
 	bg-cover
 	bg-center
 	bg-no-repeat

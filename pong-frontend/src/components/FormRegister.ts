@@ -9,7 +9,7 @@ import { profile } from "../app";
 export function Register(): HTMLElement {
 	const viewDiv = document.createElement("div");
 	viewDiv.className = "flex items-center justify-center h-screen";
-	viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
+	viewDiv.style.backgroundImage = "url('/default_background.jpg')";
 	viewDiv.style.backgroundSize = "cover";
 
 	// Create a card to store Form
