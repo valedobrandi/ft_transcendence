@@ -29,6 +29,10 @@ services:
       - ./pong-backend:/app
       - /app/node_modules
       - hardhat-data:/app/ignition/deployments:ro
+    environment:
+      - NODE_ENV=development
+      - ADRESS=192.0.7
+      - RPC_URL=http://hardhat:8545
     command: npm run dev
     networks:
       - transcendence-network
