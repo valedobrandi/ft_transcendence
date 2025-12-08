@@ -1,6 +1,7 @@
 import DOMPurify from "dompurify";
 import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
+import { endpoint } from "../endPoints";
 
 export const matches = Array.from({ length: 40 }, (_) => ({
 	createdAt: new Date(),
@@ -75,6 +76,8 @@ export function ProfileContainer() {
 		const matchesHistory = stateProxyHandler.matchesHistory;
 		const isUserProfile = stateProxyHandler.selectChat.id === profile.id;
 		
+		const avatar = endpoint.pong_backend_api + stateProxyHandler.profile.avatar;
+		console.log("Rendering ProfileContainer", avatar);
 		mainDiv.innerHTML = `
 		<div class="flex flex-col border-2 border-black rounded-2xl h-full text-base">
 			<h2 class="border-b-2 border-black text-xl font-bold p-2 text-center">
@@ -86,7 +89,7 @@ export function ProfileContainer() {
 				<div class="flex items-center justify-around">
 					<!-- Avatar -->
 					<div class="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl overflow-hidden">
-						<img src=${stateProxyHandler.profile.avatar}
+						<img src=${avatar}
 						alt="Avatar"
 						class="w-full h-full object-cover" />
 					</div>

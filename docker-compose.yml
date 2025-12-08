@@ -1,19 +1,4 @@
 services:
-
-  cypress:
-    image: cypress/included:12.17.4
-    working_dir: /app
-    volumes:
-      - .:/app
-    environment:
-      - CYPRESS_baseUrl=http://pong-frontend:5173
-    depends_on:
-      - pong-frontend
-      - pong-backend
-    command: npx cypress run
-    networks:
-      - transcendence-network
-
   pong-frontend:
     build:
       context: ./pong-frontend

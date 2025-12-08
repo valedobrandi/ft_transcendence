@@ -3,14 +3,15 @@ import { profile } from "../app";
 import { jwt } from "../app";
 import { navigateTo } from "../utils";
 import { Button } from "./Button";
-const AVATAR_DEFAUT = "/default/avatar_default1.jpg"
-const AVATAR1 = "/default/avatar_default1.jpg"
-const AVATAR2 = "/default/avatar5.jpg"
-const AVATAR3 = "/default/avatar4.jpg"
+import { endpoint } from "../endPoints";
+import { stateProxyHandler } from "../states/stateProxyHandler";
+const AVATAR_DEFAUT = "avatar_default.jpg"
+const AVATAR1 = "avatar3.jpg"
+const AVATAR2 = "avatar5.jpg"
+const AVATAR3 = "avatar4.jpg"
 const BACKEND_URL = "http://localhost:3000";
 
-export function ProfilePage(): HTMLElement
-{
+export function ProfilePage(): HTMLElement {
 	const root = document.createElement("div");
 	root.className = "relative min-h-screen flex flex-col";
 
@@ -64,9 +65,9 @@ export function ProfilePage(): HTMLElement
 		</div>
 	`;
 
-backBtn.onclick = () => {
-    navigateTo("/intra");
-};
+	backBtn.onclick = () => {
+		navigateTo("/intra");
+	};
 
 
 	// ===== Zone centre : Profil =====
@@ -103,10 +104,11 @@ backBtn.onclick = () => {
 	avatarSection.appendChild(avatarLabel);
 
 	const avatarPreview = document.createElement("img");
+	const avatarPath = `${endpoint.pong_backend_api}/avatar/${stateProxyHandler.profile.avatar}`;
+	console.log("AVATAR PATH:", avatarPath);
+	avatarPreview.src = avatarPath;
 	avatarPreview.id = "avatarPreview";
 	avatarPreview.className = "w-24 h-24 rounded-full object-cover";
-	avatarPreview.src = profile.avatar_url ?
-	`${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}` : AVATAR_DEFAUT;
 	avatarPreview.alt = "avatar";
 	avatarSection.appendChild(avatarPreview);
 
@@ -114,8 +116,7 @@ backBtn.onclick = () => {
 	avatarGrid.id = "avatarGrid";
 	avatarGrid.className = "grid grid-cols-4 gap-4 mt-1";
 
-	function makePreset(src: string, label: string): HTMLButtonElement
-	{
+	function makePreset(src: string, label: string): HTMLButtonElement {
 		const btn = document.createElement("button");
 		btn.type = "button";
 		btn.className = "preset-btn flex justify-center rounded-full";
@@ -131,9 +132,9 @@ backBtn.onclick = () => {
 		return btn;
 	}
 
-	avatarGrid.appendChild(makePreset(`${AVATAR1}?t=${Date.now()}` as string, "Avatar 1"));
-	avatarGrid.appendChild(makePreset(`${AVATAR2}?t=${Date.now()}` as string, "Avatar 2"));
-	avatarGrid.appendChild(makePreset(`${AVATAR3}?t=${Date.now()}` as string, "Avatar 3"));
+	avatarGrid.appendChild(makePreset(`${endpoint.pong_backend_api}/avatar/${AVATAR1}`, "Avatar 1"));
+	avatarGrid.appendChild(makePreset(`${endpoint.pong_backend_api}/avatar/${AVATAR2}`, "Avatar 2"));
+	avatarGrid.appendChild(makePreset(`${endpoint.pong_backend_api}/avatar/${AVATAR3}`, "Avatar 3"));
 
 	// Bouton "+"
 	const pickFileBtn = document.createElement("button");
@@ -223,7 +224,7 @@ backBtn.onclick = () => {
 	passewordInput.autocomplete = "off";
 	passewordInput.placeholder = "current Password";
 	passewordInput.className =
-	"w-full h-10 rounded-md px-3 bg-black text-indigo-100 focus:border-[hsl(345,100%,47%)] focus:ring-2 focus:ring-[hsl(345,100%,47%)] outline-none";
+		"w-full h-10 rounded-md px-3 bg-black text-indigo-100 focus:border-[hsl(345,100%,47%)] focus:ring-2 focus:ring-[hsl(345,100%,47%)] outline-none";
 	passewordSection.appendChild(passewordInput);
 
 	const passewordLabels = document.createElement("label");
@@ -244,8 +245,7 @@ backBtn.onclick = () => {
 
 	// ---------- Two-Factor Authentication  ----------
 
-	function updateTwoFAButton()
-	{
+	function updateTwoFAButton() {
 		twoFABtn.innerHTML = `
 			<div class="flex items-center justify-center gap-2">
 				<svg xmlns="http://www.w3.org/2000/svg"
@@ -264,8 +264,7 @@ backBtn.onclick = () => {
 
 	// Popup confirmation
 
-		function open2FAPopup()
-		{
+	function open2FAPopup() {
 		const overlay = document.createElement("div");
 		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
 
@@ -340,90 +339,83 @@ backBtn.onclick = () => {
 
 	// ----------change profil ----------
 
-	const sendBtn = Button("Change profil", "w-full", () => {});
-	sendBtn.className =	"mt-4 w-full h-10 rounded-md px-3 bg-[hsl(345,100%,47%)] text-shadow-lg/30  text-white hover:bg-red-800  transition border-2 border-[#36393e]";
-    //sendBtn.setAttribute("role", "button");
+	const sendBtn = Button("Change profil", "w-full", () => { });
+	sendBtn.className = "mt-4 w-full h-10 rounded-md px-3 bg-[hsl(345,100%,47%)] text-shadow-lg/30  text-white hover:bg-red-800  transition border-2 border-[#36393e]";
+	//sendBtn.setAttribute("role", "button");
 	card.appendChild(sendBtn);
 
 	sendBtn.addEventListener("click", async () => {
-	const nameEl  = document.getElementById("change_name_input") as HTMLInputElement | null;
-	const mailEl  = document.getElementById("change_email_input") as HTMLInputElement | null;
-	const curPwdEl = document.getElementById("current_password_input") as HTMLInputElement | null;
-	const newPwdEl = document.getElementById("new_password_input") as HTMLInputElement | null;
+		const nameEl = document.getElementById("change_name_input") as HTMLInputElement | null;
+		const mailEl = document.getElementById("change_email_input") as HTMLInputElement | null;
+		const curPwdEl = document.getElementById("current_password_input") as HTMLInputElement | null;
+		const newPwdEl = document.getElementById("new_password_input") as HTMLInputElement | null;
 
-	const nextName = nameEl?.value.trim() ?? "";
-	const nextMail = mailEl?.value.trim() ?? "";
-	const curPwd   = curPwdEl?.value ?? "";
-	const newPwd   = newPwdEl?.value ?? "";
+		const nextName = nameEl?.value.trim() ?? "";
+		const nextMail = mailEl?.value.trim() ?? "";
+		const curPwd = curPwdEl?.value ?? "";
+		const newPwd = newPwdEl?.value ?? "";
 
-	const payload: Record<string, unknown> = {};
-	if (nextName && nextName !== profile.username)
-	{
-		payload.username = nextName;
-	}
-	if (nextMail && nextMail !== profile.email)
-	{
-		payload.email = nextMail;
-	}
-
-	if (curPwd && newPwd)
-	{
-		payload.current_password = curPwd;
-		payload.password = newPwd;
-	}
-	else if (curPwd || newPwd)
-	{
-		console.warn("To change the password, fill in both fields.");
-		alert("To change the password, fill in both fields.");
-		return;
-	}
-
-	if (Object.keys(payload).length === 0)
-	{
-		console.info("No changes to send.");
-		alert("No changes to send.");
-		return;
-	}
-
-	try {
-	const data = await fetchRequest("/update", "PUT", {},  {body: JSON.stringify(payload)});
-	console.log("DATA FROM BACKEND:", data);
-
-	if (data.message === 'success')
-	{
-		profile.username = data.payload.username;
-		profile.email = data.payload.email;
-
-		console.log("Profile updated", data);
-		alert(("your profil has changed "));
-		const response = await fetchRequest(
-		`/logout`,
-		"GET"
-		);
-		if (response.message === "success") {
-			navigateTo('/');
+		const payload: Record<string, unknown> = {};
+		if (nextName && nextName !== profile.username) {
+			payload.username = nextName;
+		}
+		if (nextMail && nextMail !== profile.email) {
+			payload.email = nextMail;
 		}
 
-	}
-	else
-	{
-		console.error("Error loading profile: ", data);
-		alert("Error loading profile: " + (data.error || "Erreur inconnue"));
-	}
+		if (curPwd && newPwd) {
+			payload.current_password = curPwd;
+			payload.password = newPwd;
+		}
+		else if (curPwd || newPwd) {
+			console.warn("To change the password, fill in both fields.");
+			alert("To change the password, fill in both fields.");
+			return;
+		}
 
-	if (payload.username)
-		profile.username = String(payload.username);
-	if (payload.email)
-		profile.email = String(payload.email);
+		if (Object.keys(payload).length === 0) {
+			console.info("No changes to send.");
+			alert("No changes to send.");
+			return;
+		}
 
-	if (nameEl) nameEl.value = profile.username ?? "";
-	if (mailEl) mailEl.value = profile.email ?? "";
+		try {
+			const data = await fetchRequest("/update", "PUT", {}, { body: JSON.stringify(payload) });
+			console.log("DATA FROM BACKEND:", data);
 
-	} catch (error) {
-	alert("Error update profile : " + (error) || "Erreur inconnue");
-	} finally {
+			if (data.message === 'success') {
+				profile.username = data.payload.username;
+				profile.email = data.payload.email;
 
-	}
+				console.log("Profile updated", data);
+				alert(("your profil has changed "));
+				const response = await fetchRequest(
+					`/logout`,
+					"GET"
+				);
+				if (response.message === "success") {
+					navigateTo('/');
+				}
+
+			}
+			else {
+				console.error("Error loading profile: ", data);
+				alert("Error loading profile: " + (data.error || "Erreur inconnue"));
+			}
+
+			if (payload.username)
+				profile.username = String(payload.username);
+			if (payload.email)
+				profile.email = String(payload.email);
+
+			if (nameEl) nameEl.value = profile.username ?? "";
+			if (mailEl) mailEl.value = profile.email ?? "";
+
+		} catch (error) {
+			alert("Error update profile : " + (error) || "Erreur inconnue");
+		} finally {
+
+		}
 	});
 	main.appendChild(card);
 	root.appendChild(main);
@@ -431,17 +423,17 @@ backBtn.onclick = () => {
 	// ---------- FOOTER ----------
 	// ---------- --- ----------
 
-	 setTimeout(() => {
-        void handleProfilePage(avatarPreview, pickFileBtn, avatarFile, avatarGrid);
-    }, 50);
+	setTimeout(() => {
+		void handleProfilePage(avatarPreview, pickFileBtn, avatarFile, avatarGrid);
+	}, 50);
 
 	return root;
 }
 
 export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFileBtn: HTMLButtonElement,
-    avatarFile: HTMLInputElement,  avatarGrid: HTMLDivElement): Promise<void> {
-			console.log("handleProfilePage called");
-		console.log("DOM check:", {
+	avatarFile: HTMLInputElement, avatarGrid: HTMLDivElement): Promise<void> {
+	console.log("handleProfilePage called");
+	console.log("DOM check:", {
 	});
 
 	let data;
@@ -467,60 +459,60 @@ export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFil
 }
 
 export function bind_user_avatar_upload(user: { avatar_url: string | null }, avatarPreview: HTMLImageElement,
-    pickFileBtn: HTMLButtonElement,
-    avatarFile: HTMLInputElement): void {
+	pickFileBtn: HTMLButtonElement,
+	avatarFile: HTMLInputElement): void {
 
 	avatarPreview.onerror = () => {
-        avatarPreview.onerror = null;
-        avatarPreview.src = AVATAR_DEFAUT;
-    };
+		avatarPreview.onerror = null;
+		avatarPreview.src = `${endpoint.pong_backend_api}/avatar/${AVATAR_DEFAUT}`;
+	};
 
-    pickFileBtn.addEventListener("click", () => avatarFile.click());
+	pickFileBtn.addEventListener("click", () => avatarFile.click());
 
-    avatarFile.addEventListener("change", async () => {
-        const f = avatarFile.files?.[0];
-        if (!f) return;
+	avatarFile.addEventListener("change", async () => {
+		const f = avatarFile.files?.[0];
+		if (!f) return;
 
-        const allow = ["image/png", "image/jpeg", "image/jpg"];
-        if (!allow.includes(f.type) || f.size > 5 * 1024 * 1024) {
-            avatarFile.value = "";
-            console.log("image format error");
-            return;
-        }
+		const allow = ["image/png", "image/jpeg", "image/jpg"];
+		if (!allow.includes(f.type) || f.size > 5 * 1024 * 1024) {
+			avatarFile.value = "";
+			console.log("image format error");
+			return;
+		}
 
-        const tempUrl = URL.createObjectURL(f);
-        avatarPreview.src = tempUrl;
+		const tempUrl = URL.createObjectURL(f);
+		avatarPreview.src = tempUrl;
 
-        const fd = new FormData();
-        fd.append("avatar", f);
+		const fd = new FormData();
+		fd.append("avatar", f);
 
-        try {
-            const res = await fetch(`${BACKEND_URL}/avatar`, {
-                method: "POST",
-                headers: { Authorization: `Bearer ${jwt.token}` },
-                body: fd
-            });
-            const data = await res.json();
-            if (!data.payload?.avatar_url) throw new Error("Avatar not receved");
+		try {
+			const res = await fetch(`${BACKEND_URL}/avatar`, {
+				method: "POST",
+				headers: { Authorization: `Bearer ${jwt.token}` },
+				body: fd
+			});
+			const data = await res.json();
+			if (!data.payload?.avatar_url) throw new Error("Avatar not receved");
 
 
-            user.avatar_url = data.payload.avatar_url;
-            profile.avatar_url = data.payload.avatar_url;
+			user.avatar_url = data.payload.avatar_url;
+			profile.avatar_url = data.payload.avatar_url;
 
-            avatarPreview.src = `${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}`;
-            console.log("Avatar update:", profile.avatar_url);
-        } catch (err) {
-            console.error("Upload failed:", err);
-            avatarPreview.src = user.avatar_url ? `${BACKEND_URL}${user.avatar_url}` : AVATAR_DEFAUT;
-        } finally {
-            URL.revokeObjectURL(tempUrl);
-            avatarFile.value = "";
-        }
+			avatarPreview.src = `${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}`;
+			console.log("Avatar update:", profile.avatar_url);
+		} catch (err) {
+			console.error("Upload failed:", err);
+			avatarPreview.src = user.avatar_url ? `${BACKEND_URL}${user.avatar_url}` : AVATAR_DEFAUT;
+		} finally {
+			URL.revokeObjectURL(tempUrl);
+			avatarFile.value = "";
+		}
 	});
 }
 
-export function upload_avatar(user: { avatar_url: string | null},  avatarPreview: HTMLImageElement,
-    avatarGrid: HTMLDivElement): void {
+export function upload_avatar(user: { avatar_url: string | null }, avatarPreview: HTMLImageElement,
+	avatarGrid: HTMLDivElement): void {
 
 	if (!avatarPreview || !avatarGrid) {
 		console.warn("upload_avatar: avatarPreview ou avatarGrid introuvable dans le DOM");
@@ -532,12 +524,12 @@ export function upload_avatar(user: { avatar_url: string | null},  avatarPreview
 		avatarPreview.onerror = null;
 		avatarPreview.src = AVATAR_DEFAUT;
 	};
-console.log(user.avatar_url);
-	 if (user.avatar_url && user.avatar_url.startsWith("/images/")) {
-        avatarPreview.src = `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`;
-    } else {
-        avatarPreview.src = user.avatar_url || AVATAR_DEFAUT;
-    }
+	console.log(user.avatar_url);
+	if (user.avatar_url && user.avatar_url.startsWith("/images/")) {
+		avatarPreview.src = `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`;
+	} else {
+		avatarPreview.src = user.avatar_url || AVATAR_DEFAUT;
+	}
 
 	const presetButtons = avatarGrid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 
@@ -575,7 +567,7 @@ console.log(user.avatar_url);
 					`/avatar`,
 					"PUT",
 					{},
-					{body: JSON.stringify({avatar_url: url })}
+					{ body: JSON.stringify({ avatar_url: url }) }
 				);
 				if (res.error) {
 					console.error("Server error:", res.status, await res.text());
@@ -589,9 +581,6 @@ console.log(user.avatar_url);
 				selected = btn;
 			} catch (err) {
 				console.error("change avatar update failed:", err);
-                avatarPreview.src = user.avatar_url
-                    ? `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`
-                    : AVATAR_DEFAUT;
 				avatarPreview.src = oldSrc;
 				highlight(selected);
 			}
