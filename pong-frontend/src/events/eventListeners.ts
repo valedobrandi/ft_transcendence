@@ -222,11 +222,11 @@ function selectChat(button: HTMLButtonElement) {
 
 	const buttons = document.querySelectorAll("#select-chat-btn");
 	buttons.forEach((button) => {
-		button.classList.remove("bg-gray-900");
+		button.classList.remove("bg-gray-700");
 	});
 	Array.from(document.getElementsByClassName(chatName)).forEach(
 		(elem) => {
-			elem.classList.add("bg-gray-900");
+			elem.classList.add("bg-[#424549]");
 		}
 	);
 }

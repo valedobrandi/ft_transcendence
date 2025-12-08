@@ -11,7 +11,7 @@ import { closeSocket } from "../websocket";
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
 	viewDiv.className = "flex items-center justify-center h-screen";
-	viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
+	viewDiv.style.backgroundImage = "url('/default_background.jpg')";
 	viewDiv.style.backgroundSize = "cover";
 
 	const card = document.createElement("div");
