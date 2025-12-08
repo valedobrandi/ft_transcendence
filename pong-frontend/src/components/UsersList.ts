@@ -47,7 +47,7 @@ export function List(
         btn.appendChild(btnText);
 
         btn.className = `${name} flex items-center border-b
-                border-[#424549] p-2 w-full text-center text-white hover:bg-green-100`;
+                border-[#424549] p-2 w-full text-center text-white hover:bg-gray-800`;
         btn.id = `select-chat-btn`;
 
         btn.value = `${name}`;
@@ -59,7 +59,7 @@ export function List(
     Array.from(
         document.getElementsByClassName(stateProxyHandler.selectChat.name)
     ).forEach((elem) => {
-        elem.classList.add("bg-gray-100");
+        elem.classList.add("bg-gray-900");
     });
 
     return usersDiv;

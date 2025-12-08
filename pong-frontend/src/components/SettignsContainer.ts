@@ -14,7 +14,7 @@ return;
 }
 root.innerHTML = `
 <div id="settings-container" class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-  <div class="bg-white p-12 rounded shadow-lg">
+  <div class="bg-black p-12 rounded shadow-lg">
     <h2 class="text-xl font-bold mb-4">Settings</h2>
     <form name="settings-form" id="settings-form" class="mb-6">
       ${fields
