@@ -5,6 +5,7 @@ import { SystemMessageChat } from "./ChatIntra";
 import { ChatSendInput } from "./ChatSendInput";
 import { UsersList } from "./UsersList";
 import { MatchList } from "./MatchList";
+import { endpoint } from "../endPoints";
 
 export function Intra(): HTMLElement {
     const mainDiv = document.createElement("div");
@@ -105,7 +106,10 @@ export function Intra(): HTMLElement {
 
         // Avatar
         const profileAvatar = document.createElement("img");
-        profileAvatar.src = stateProxyHandler.profile.avatar ?? "default/avatar_default1.jpg";
+        const usersAvatarPath = `${endpoint.pong_backend_api}/avatar/${stateProxyHandler.profile.avatar}`;
+        const defaultAvatarPath = stateProxyHandler.profile.avatar
+        const isUser = stateProxyHandler.profile.username === profile.username;
+        profileAvatar.src = isUser ? defaultAvatarPath : usersAvatarPath;
         profileAvatar.alt = `${stateProxyHandler.profile.avatar}'s avatar`;
         profileAvatar.className = "w-32 h-32 rounded-full mx-auto mt-6 border-5 border-[#424549] object-cover";
 
