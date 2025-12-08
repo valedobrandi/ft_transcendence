@@ -25,6 +25,9 @@ production.build:
 	@echo "$(GREEN)TournamentScores contract OK.$(NC)"
 	docker compose -f $(COMPOSE_FILE_PROD) up --build -d pong-backend nginx
 
+production.down:
+	docker compose -f $(COMPOSE_FILE_PROD) down --volumes --remove-orphans
+
 build:
 	docker compose up --build -d hardhat
 	# Wait for Hardhat to be healthy
