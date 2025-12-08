@@ -53,6 +53,12 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"] 
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
     networks:
       - transcendence-network
       
