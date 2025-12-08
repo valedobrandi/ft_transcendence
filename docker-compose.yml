@@ -52,14 +52,7 @@ services:
       - "8545:8545"
     volumes:
       - hardhat-data:/app/ignition/deployments
-      - hardhat-data:/app/ignition/deployments
       - /app/node_modules
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8545"] 
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8545"] 
       interval: 10s
@@ -68,14 +61,11 @@ services:
     restart: unless-stopped
     networks:
       - transcendence-network
-      - transcendence-network
 
 
 volumes:
   hardhat-data:
-  hardhat-data:
 
 networks:
-  transcendence-network:
   transcendence-network:
     driver: bridge
