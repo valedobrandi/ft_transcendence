@@ -12,7 +12,7 @@ services:
       - pong-backend
     command: npx cypress run
     networks:
-      - transcedence-network
+      - transcendence-network
 
   pong-frontend:
     build:
@@ -31,7 +31,7 @@ services:
       - NODE_ENV=development
     command: npm run dev
     networks:
-      - transcedence-network
+      - transcendence-network
 
   pong-backend:
     build:
@@ -42,20 +42,15 @@ services:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
-      - ./tests/backend:/app/vitest
       - /app/node_modules
-      - ./hardhat/artifacts/contracts/TournamentScores.sol:/app/artifacts
-      - ./hardhat/ignition/deployments/chain-31337/deployed_addresses.json:/app/deployed/deployed_addresses.json
+      - hardhat-data:/app/ignition/deployments:ro
     environment:
       - NODE_ENV=development
       - ADRESS=192.0.7
       - RPC_URL=http://hardhat:8545
-      - RESEND_API_KEY=${RESEND_API_KEY}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_TIME=${JWT_TIME}
     command: npm run dev
     networks:
-      - transcedence-network
+      - transcendence-network
     depends_on:
       hardhat:
         condition: service_started
@@ -71,15 +66,21 @@ services:
     ports:
       - "8545:8545"
     volumes:
-      - ./hardhat:/app
+      - hardhat-data:/app/ignition/deployments
       - /app/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"] 
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
     networks:
-      - transcedence-network
+      - transcendence-network
 
 
 volumes:
-  pong-backend-data:
+  hardhat-data:
 
 networks:
-  transcedence-network:
+  transcendence-network:
     driver: bridge
