@@ -107,9 +107,7 @@ export function Intra(): HTMLElement {
         // Avatar
         const profileAvatar = document.createElement("img");
         const usersAvatarPath = `${endpoint.pong_backend_api}/avatar/${stateProxyHandler.profile.avatar}`;
-        const defaultAvatarPath = stateProxyHandler.profile.avatar
-        const isUser = stateProxyHandler.profile.username === profile.username;
-        profileAvatar.src = isUser ? defaultAvatarPath : usersAvatarPath;
+        profileAvatar.src = usersAvatarPath;
         profileAvatar.alt = `${stateProxyHandler.profile.avatar}'s avatar`;
         profileAvatar.className = "w-32 h-32 rounded-full mx-auto mt-6 border-5 border-[#424549] object-cover";
 

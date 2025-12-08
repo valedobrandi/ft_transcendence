@@ -116,11 +116,11 @@ export function ProfilePage(): HTMLElement {
 	avatarGrid.id = "avatarGrid";
 	avatarGrid.className = "grid grid-cols-4 gap-4 mt-1";
 
-	function makePreset(src: string, label: string): HTMLButtonElement {
+	function makePreset(dataset: string, src: string, label: string): HTMLButtonElement {
 		const btn = document.createElement("button");
 		btn.type = "button";
 		btn.className = "preset-btn flex justify-center rounded-full";
-		btn.dataset.src = src;
+		btn.dataset.src = dataset;
 		btn.setAttribute("aria-label", label);
 
 		const img = document.createElement("img");
@@ -132,9 +132,9 @@ export function ProfilePage(): HTMLElement {
 		return btn;
 	}
 
-	avatarGrid.appendChild(makePreset(`${endpoint.pong_backend_api}/avatar/${AVATAR1}`, "Avatar 1"));
-	avatarGrid.appendChild(makePreset(`${endpoint.pong_backend_api}/avatar/${AVATAR2}`, "Avatar 2"));
-	avatarGrid.appendChild(makePreset(`${endpoint.pong_backend_api}/avatar/${AVATAR3}`, "Avatar 3"));
+	avatarGrid.appendChild(makePreset(AVATAR1, `${endpoint.pong_backend_api}/avatar/${AVATAR1}`, "Avatar 1"));
+	avatarGrid.appendChild(makePreset(AVATAR2, `${endpoint.pong_backend_api}/avatar/${AVATAR2}`, "Avatar 2"));
+	avatarGrid.appendChild(makePreset(AVATAR3, `${endpoint.pong_backend_api}/avatar/${AVATAR3}`, "Avatar 3"));
 
 	// Bouton "+"
 	const pickFileBtn = document.createElement("button");
@@ -487,23 +487,24 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 		fd.append("avatar", f);
 
 		try {
-			const res = await fetch(`${BACKEND_URL}/avatar`, {
+			const res = await fetch(`${endpoint.pong_backend_api}/avatar`, {
 				method: "POST",
 				headers: { Authorization: `Bearer ${jwt.token}` },
 				body: fd
 			});
+			
 			const data = await res.json();
 			if (!data.payload?.avatar_url) throw new Error("Avatar not receved");
 
 
+			console.log("AVATAR SAVED AT DB:", data.payload.avatar_url);
 			user.avatar_url = data.payload.avatar_url;
 			profile.avatar_url = data.payload.avatar_url;
 
-			avatarPreview.src = `${BACKEND_URL}${profile.avatar_url}?t=${Date.now()}`;
-			console.log("Avatar update:", profile.avatar_url);
+			avatarPreview.src = `${endpoint.pong_backend_api}/avatar/${profile.avatar_url}}`;
 		} catch (err) {
 			console.error("Upload failed:", err);
-			avatarPreview.src = user.avatar_url ? `${BACKEND_URL}${user.avatar_url}` : AVATAR_DEFAUT;
+			avatarPreview.src = user.avatar_url ? `${user.avatar_url}` : AVATAR_DEFAUT;
 		} finally {
 			URL.revokeObjectURL(tempUrl);
 			avatarFile.value = "";
@@ -525,11 +526,6 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 		avatarPreview.src = AVATAR_DEFAUT;
 	};
 	console.log(user.avatar_url);
-	if (user.avatar_url && user.avatar_url.startsWith("/images/")) {
-		avatarPreview.src = `${BACKEND_URL}${user.avatar_url}?t=${Date.now()}`;
-	} else {
-		avatarPreview.src = user.avatar_url || AVATAR_DEFAUT;
-	}
 
 	const presetButtons = avatarGrid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 
@@ -556,7 +552,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 	// clique sur les boutons d'avatar
 	presetButtons.forEach((btn) => {
 		btn.addEventListener("click", async () => {
-			const url = btn.dataset.src || AVATAR_DEFAUT;
+			const url = btn.dataset.src;
 
 			// On met à jour tout de suite côté UI
 			const oldSrc = avatarPreview.src;
