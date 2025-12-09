@@ -31,8 +31,6 @@ import { SettignsContainer } from "./components/SettignsContainer";
 
 // <!-- BERNARDO START EDIT -->
 export function intraView(root: HTMLElement) {
-  initSocket(endpoint.pong_backend_websocket, profile.username);
-  websocketConnect();
   root.innerHTML = "";
   stateProxyHandler.selectChat = {id: profile.id, name: profile.username}
 

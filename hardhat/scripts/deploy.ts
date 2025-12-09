@@ -2,7 +2,7 @@ import fs from "fs";
 import { network } from "hardhat";
 
 async function main() {
-	const { ethers, networkName } = await network.connect();
+	const { ethers } = await network.connect();
 
 	const tournamentScore = await ethers.deployContract("TournamentScores");
 
@@ -15,18 +15,15 @@ async function main() {
 	const tx = await tournamentScore.saveMatch("matchId", 5, 3);
 	await tx.wait();
 
-	const result = await tournamentScore.getMatch("match1");
-	console.log("Match result:", result);
+	const [score1, score2] = await tournamentScore.getMatch("matchId");
+	console.log(`Scores for matchId: ${score1} - ${score2}`);
 
-	fs.writeFileSync(
-		"./deployed/TournamentScores.local.json",
-		JSON.stringify({ address: await tournamentScore.getAddress() }, null, 2)
-	);
+	const address = await tournamentScore.getAddress();
+
+	console.log(`Contract deployed to address: ${address}`);
 }
 
 main().catch((error) => {
 	console.error(error);
 	process.exitCode = 1;
 });
-
-/* const { network } = await import("hardhat"); */

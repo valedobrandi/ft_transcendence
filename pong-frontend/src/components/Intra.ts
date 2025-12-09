@@ -304,12 +304,12 @@ export function Intra(): HTMLElement {
     const matchButton = document.createElement("button");
     matchButton.id = "create-match-btn";
     matchButton.textContent = "Create Match";
-    matchButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600";
+    matchButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase";
 
     const tournamentButton = document.createElement("button");
     tournamentButton.id = "tournament-btn";
-    tournamentButton.textContent = "Create Tournament";
-    tournamentButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600";
+    tournamentButton.textContent = "Join Tournament";
+    tournamentButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase";
 
     gameButtonContainer.appendChild(matchButton);
     gameButtonContainer.appendChild(tournamentButton);
