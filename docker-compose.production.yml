@@ -6,8 +6,8 @@ services:
       context: ./pong-frontend
       dockerfile: Dockerfile.production
       args:
-        - VITE_PONG_BACKEND_API=https://localhost:8443/api
-        - VITE_PONG_BACKEND_WEBSOCKET=wss://localhost:8443/ws
+        - VITE_PONG_BACKEND_API=/api
+        - VITE_PONG_BACKEND_WEBSOCKET=/ws
     image: pong-nginx:latest
     container_name: pong-nginx
     ports:
@@ -55,9 +55,7 @@ services:
     container_name: hardhat-node
     ports:
       - "8545:8545"
-    volumes:
-      - hardhat-data:/app/ignition/deployments
-      - /app/node_modules
+      - "3333:3333"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8545"] 
       interval: 10s
@@ -70,6 +68,3 @@ services:
 networks:
   transcendence-network:
     driver: bridge
-
-volumes:
-  hardhat-data:

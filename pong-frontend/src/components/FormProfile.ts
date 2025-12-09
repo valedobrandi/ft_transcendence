@@ -571,7 +571,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 				}
 				user.avatar_url = res.payload.avatar_url;
 				profile.avatar_url = res.payload.avatar_url;
-				avatarPreview.src = profile.avatar_url;
+				avatarPreview.src = `${endpoint.pong_backend_api}/avatar/${profile.avatar_url}`;
 
 				highlight(btn);
 				selected = btn;

@@ -29,7 +29,7 @@ services:
       - ./pong-backend:/app
       - ./pong-backend/images:/app/images
       - /app/node_modules
-      - hardhat-data:/app/ignition/deployments:ro
+      - ./hardhat/ignition/deployments:/app/ignition/deployments:ro
     environment:
       - NODE_ENV=development
       - ADRESS=192.0.7
@@ -52,7 +52,7 @@ services:
     ports:
       - "8545:8545"
     volumes:
-      - hardhat-data:/app/ignition/deployments
+      - ./hardhat/ignition/deployments:/app/ignition/deployments
       - /app/node_modules
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8545"] 
@@ -62,10 +62,6 @@ services:
     restart: unless-stopped
     networks:
       - transcendence-network
-
-
-volumes:
-  hardhat-data:
 
 networks:
   transcendence-network:
