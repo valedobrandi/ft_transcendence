@@ -37,6 +37,7 @@ services:
       - RESEND_API_KEY=${RESEND_API_KEY}
     volumes:
       - hardhat-data:/app/ignition/deployments:ro
+      - ./pong-backend/images:/app/images
     env_file:
       - .env
     depends_on:
