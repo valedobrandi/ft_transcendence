@@ -9,7 +9,6 @@ const AVATAR_DEFAUT = "avatar_default.jpg"
 const AVATAR1 = "avatar3.jpg"
 const AVATAR2 = "avatar5.jpg"
 const AVATAR3 = "avatar4.jpg"
-const BACKEND_URL = "http://localhost:3000";
 
 export function ProfilePage(): HTMLElement {
 	const root = document.createElement("div");
@@ -501,7 +500,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 			user.avatar_url = data.payload.avatar_url;
 			profile.avatar_url = data.payload.avatar_url;
 
-			avatarPreview.src = `${endpoint.pong_backend_api}/avatar/${profile.avatar_url}}`;
+			avatarPreview.src = `${endpoint.pong_backend_api}/avatar/${profile.avatar_url}`;
 		} catch (err) {
 			console.error("Upload failed:", err);
 			avatarPreview.src = user.avatar_url ? `${user.avatar_url}` : AVATAR_DEFAUT;
@@ -525,6 +524,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 		avatarPreview.onerror = null;
 		avatarPreview.src = AVATAR_DEFAUT;
 	};
+
 	console.log(user.avatar_url);
 
 	const presetButtons = avatarGrid.querySelectorAll<HTMLButtonElement>(".preset-btn");

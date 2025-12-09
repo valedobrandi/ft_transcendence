@@ -4,13 +4,16 @@ import fs from "fs";
 import path from "path";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyStatic from '@fastify/static';
-import { fileURLToPath } from 'url';
+
 
 export default function avatarRoute(fastify: FastifyInstance) {
+
+  const imageDir = '/app/images';
+
   fastify.register(fastifyMultipart);
 
   fastify.register(fastifyStatic, {
-    root: '/app/src/images',
+    root: imageDir,
     prefix: '/avatar/',   // map directly to /avatar/
   });
 
@@ -41,7 +44,7 @@ export default function avatarRoute(fastify: FastifyInstance) {
       if (!ext)
         return reply.status(400).send({ error: "Invalid file type" });
 
-      const uploadDir = path.join(process.cwd(), "src/images");
+      const uploadDir = imageDir;
       if (!fs.existsSync(uploadDir))
         fs.mkdirSync(uploadDir, { recursive: true });
 

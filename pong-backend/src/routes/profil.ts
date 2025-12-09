@@ -29,9 +29,16 @@ export default function profilRoute(fastify: FastifyInstance)
                 {
 
                     const id = request.userId;
-                    const existUser = getIdUser(id);
-                    if(!existUser)
+                    const returnDB = getIdUser(id);
+                    if(!returnDB)
                         return res.status(400).send({error: "error user not found"})
+                    const existUser = {
+                        avatar_url: returnDB.avatar_url,
+                        email: returnDB.email,
+                        username: returnDB.username,
+                        id: returnDB.id,
+                    }
+
                     return res.status(200).send({ message: 'success', existUser });
                 }
                 catch (error)

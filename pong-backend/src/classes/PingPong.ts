@@ -302,7 +302,7 @@ class PingPong {
 					ball.velocityX = direction * speed * Math.cos(bounceAngle);
 					ball.velocityY = speed * Math.sin(bounceAngle);
 				
-					if (ball.speed < 0.008) {
+					if (ball.speed < 0.012) {
 						ball.speed = Math.min(ball.speed + 0.0005, 0.02);
 					}
 					ball.x = (direction < 0 ? paddleLeftX : paddleRightX) + direction * ball.radius;

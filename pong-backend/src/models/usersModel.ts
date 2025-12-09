@@ -1,10 +1,5 @@
 import Database from 'better-sqlite3'
-import type { RunResult } from 'better-sqlite3'
-import { SaveUser } from '../types/RouteGuest';
-import { print } from '../server';
-import { connectedRoomInstance } from '../state/ConnectedRoom';
-import db from '../database/db';
-
+;
 export type UserReturnDB = {
 	id: number;
 	username: string;
@@ -56,6 +51,5 @@ class UsersModel {
     }
 }
 
-const dbUsersInstance = new UsersModel(db);
 
-export { UsersModel, dbUsersInstance };
+export { UsersModel };

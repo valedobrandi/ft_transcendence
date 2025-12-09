@@ -77,8 +77,9 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			// // db.prepare("UPDATE users SET refreshToken = ? WHERE id = ?").run(refreshToken, existingUser.id);
 
 			const accessToken = fastify.jwt.sign(payload, { expiresIn: '10h' });
-			if (!accessToken)
+			if (!accessToken) {
 				return res.status(404).send({ error: "AccessToken not found" });
+			}
 
 			// res.setCookie('refreshToken', refreshToken,
 			// {
@@ -95,6 +96,12 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			// });
 
 			// Add user to connectedRoomInstance
+			const clientIsConnected = connectedRoomInstance.has(Number(existingUser.id));
+
+			if (clientIsConnected) {
+				connectedRoomInstance.disconnect(Number(existingUser.id));
+			}
+			
 			connectedRoomInstance.addUser(existingUser.username, existingUser.id);
 			return res.status(201).send({ message: 'success', payload: { accessToken, ...payload } });
 		}

@@ -27,6 +27,7 @@ services:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
+      - ./pong-backend/images:/app/images
       - /app/node_modules
       - hardhat-data:/app/ignition/deployments:ro
     environment:
