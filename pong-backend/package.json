@@ -40,12 +40,5 @@
         "typescript": "~5.8.0",
         "vitest": "^4.0.4",
         "ws": "^8.13.0"
-    },
-    "vitest": {
-        "test": {
-            "globals": true,
-            "environment": "node",
-            "testTimeout": 10000
-        }
     }
 }

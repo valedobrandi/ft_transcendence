@@ -1,15 +1,25 @@
-FROM node:22.10.0-alpine
+FROM node:22-bullseye
 
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++ git curl jq
+RUN apt-get update && apt-get install -y \
+    python3 \
+    build-essential \
+    git \
+    curl \
+    jq \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install --verbose
 
 COPY . .
 
 EXPOSE 8545
+EXPOSE 3300
 
-CMD ["npx",  "hardhat",  "node"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

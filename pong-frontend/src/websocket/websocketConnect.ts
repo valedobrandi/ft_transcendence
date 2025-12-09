@@ -44,5 +44,7 @@ export async function websocketConnect() {
 		});
 
 	}
+	await waitForSocketOpen(socket);
+	return true;
 };
 

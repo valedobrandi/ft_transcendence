@@ -36,7 +36,6 @@ services:
       - NODE_ENV=production
       - RESEND_API_KEY=${RESEND_API_KEY}
     volumes:
-      - hardhat-data:/app/ignition/deployments:ro
       - ./pong-backend/images:/app/images
     env_file:
       - .env
@@ -53,9 +52,8 @@ services:
       context: ./hardhat
       dockerfile: Dockerfile
     container_name: hardhat-node
-    ports:
-      - "8545:8545"
-      - "3333:3333"
+    environment:
+      - NODE_ENV=production
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8545"] 
       interval: 10s

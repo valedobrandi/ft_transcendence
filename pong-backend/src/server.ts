@@ -10,10 +10,9 @@ import chatBlockRoute from './routes/chatBlock.js';
 import { eventsRoutes } from './routes/events.js';
 import cookie from '@fastify/cookie';
 import { matchesRoute } from './routes/match.js';
-import fastifyMultipart from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
 import path from "path";
-import fs from "fs";
+
 import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
 import { tournamentsRoute } from './routes/tournament.js';

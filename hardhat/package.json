@@ -15,5 +15,10 @@
     "hardhat": "^3.0.16",
     "mocha": "^11.7.5",
     "typescript": "~5.8.0"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "ethers": "^6.16.0",
+    "fastify": "^5.6.2"
   }
 }

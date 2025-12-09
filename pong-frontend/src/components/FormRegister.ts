@@ -1,4 +1,5 @@
 import { FancyButton } from "./Button";
+import DOMPurify from "dompurify";
 import { InputEmail } from "./InputEmail";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
@@ -56,25 +57,34 @@ export function Register(): HTMLElement {
 		const email_input = document.getElementById('register_email') as HTMLInputElement;
 		const password_input = document.getElementById('register_password') as HTMLInputElement;
 		if (username_input === null || email_input === null || password_input === null) return;
+		
+		// Sanitize inputs
+		const username = DOMPurify.sanitize(username_input.value.trim());
+		const email = DOMPurify.sanitize(email_input.value.trim());
+		const password = DOMPurify.sanitize(password_input.value.trim());
 
-		const username = username_input.value.trim();
-		const email = email_input.value.trim();
-		const password = password_input.value.trim();
-
-		if (username.length > 15)
-		{
+		
+		if (username.length > 15) {
 			alert("username too long");
 			return;
 		}
-		if (password.length > 15)
-		{
+		// Check for bad characters in username
+		const badChars = /[ !@#$%^&*()+={}[\]|\\;:'"<>,?/~`]/;
+		if (badChars.test(username)){
+			alert("username contains invalid characters");
+			return;
+		}
+
+		// Sanitize Websocket bad characters
+		username.replace(/[^a-zA-Z0-9._-]/g, '');
+
+		if (password.length > 15) {
 			alert("password too long");
 			return;
 		}
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-		if (!emailRegex.test(email))
-		{
+		if (!emailRegex.test(email)) {
 			alert("Invalid email format");
 			return;
 		}
