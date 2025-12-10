@@ -268,7 +268,7 @@ class PingPong {
 		if (ball.y + ball.radius > 1 || ball.y - ball.radius < 0) {
 			ball.velocityY = -ball.velocityY;
 			if (Math.abs(ball.velocityY) < 0.01) {
-				ball.velocityY = 0.005 * Math.sign(ball.velocityY);
+				ball.velocityY = 0.01 * Math.sign(ball.velocityY);
 			}
 		}
 

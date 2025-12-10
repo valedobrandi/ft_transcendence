@@ -433,7 +433,7 @@ export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFil
 	avatarFile: HTMLInputElement, avatarGrid: HTMLDivElement): Promise<void> {
 	//console.log("handleProfilePage called");
 	//console.log("DOM check:", {
-	});
+	//});
 
 	let data;
 	try {
