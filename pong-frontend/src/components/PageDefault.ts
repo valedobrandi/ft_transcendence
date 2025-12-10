@@ -17,13 +17,13 @@ export function Default(): HTMLElement {
     title.textContent = "Ft_transcendence Ping-Pong";
     viewDiv.appendChild(title);
 
-	const guestBtn = FancyButton("guest", "scale-150 h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/guest"));
+	//const guestBtn = FancyButton("guest", "scale-150 h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/guest"));
 
     const loginBtn = FancyButton("login", "scale-150 h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/login"));
 
 	const registerBtn = FancyButton("register", "scale-150 h-14 w-60 game-font tracking-widest text-lg", () => navigateTo("/register"));
 
-	mainDiv.appendChild(guestBtn);
+	//mainDiv.appendChild(guestBtn);
 	mainDiv.appendChild(loginBtn);
     mainDiv.appendChild(registerBtn);
 	viewDiv.appendChild(mainDiv);

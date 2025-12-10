@@ -92,7 +92,7 @@ export function Intra(): HTMLElement {
         // ================================================================== //
 
         const profileContainer = document.createElement("div");
-        profileContainer.className = "flex justify-between items-center mt-6 px-20";
+        profileContainer.className = "flex justify-between items-center mt-6 px-30";
 
         // Header
         const profileHeader = document.createElement("div");
@@ -140,6 +140,13 @@ export function Intra(): HTMLElement {
             friendButton.className = `px-10 py-4 rounded text-white ${isFriend ? "bg-gray-400 opacity-50 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`;
             friendButton.disabled = !!isFriend;
             buttonsDiv.appendChild(friendButton);
+
+            const removeFriendButton = document.createElement("button");
+            removeFriendButton.id = "btn-remove-friend";
+            removeFriendButton.textContent = "Remove Friend";
+            removeFriendButton.className = `px-10 py-4 rounded text-white ${isFriend ? "bg-red-500 hover:bg-red-600" : "bg-gray-400 opacity-50 cursor-not-allowed"}`;
+            removeFriendButton.disabled = !isFriend;
+            buttonsDiv.appendChild(removeFriendButton);
 
             const isBlocked = stateProxyHandler.chatBlockList?.includes(stateProxyHandler.selectChat?.id);
             const blockButton = document.createElement("button");

@@ -114,7 +114,7 @@ export function eventListeners() {
 				break;
 			case "btn-invite-match": { await inviteToMatch(); }
 				break;
-			case "select-chat-btn": { selectChat(button);}
+			case "select-chat-btn": { selectChat(button); }
 				break;
 			case "btn-friend-list": { await inviteFriendList(); }
 				break;
@@ -134,81 +134,102 @@ export function eventListeners() {
 				break;
 			case "btn-logout": { await joinLogout(); }
 				break;
+			case "btn-remove-friend": { removeFriend(); }
+				break;
 		}
 	});
 }
 
 function getSelectValue(id: string): string {
-  return (document.getElementById(id) as HTMLSelectElement).value;
+	return (document.getElementById(id) as HTMLSelectElement).value;
 }
 
-async function onSendSettingsVsHuman(event: Event) {
-  event.preventDefault();
+async function removeFriend() {
+	const response = await fetchRequest(
+		`/friend?id=${stateProxyHandler.selectChat.id}`,
+		"DELETE",
+	);
 
-  const settingsContainer = document.getElementById("settings-container");
-  
-  const formData = document.getElementById("settings-form") as HTMLFormElement;
-  if (!formData) return;
-
-  const gameSetting = {
-	settings: {
-		ball: {
-			speed: getSelectValue("BALL SPEED"),
-			size: getSelectValue("BALL SIZE"),
-		},
-		paddle: {
-			size: getSelectValue("PADDLE SIZE"),
-			speed: getSelectValue("PADDLE SPEED"),
-		},
-		score: getSelectValue("MATCH POINTS"),
-		IA: false
+	if (response.message === "success") {
+		newIntraMessage(
+			`User ${stateProxyHandler.selectChat.name} has been removed from your friend list.`
+		);
+		
+		await fetchRequest("/friend-list", "GET", {}).then((data) => {
+			if (data.message === "success") {
+				stateProxyHandler.friendList = data.payload;
+			}
+		});
 	}
-  };
-  
-  await fetchRequest("/match-create", "POST", {}, {
-    body: JSON.stringify(gameSetting)
-  });
+};
 
-  if (settingsContainer) {
-    settingsContainer.remove();
-  }
+async function onSendSettingsVsHuman(event: Event) {
+	event.preventDefault();
+
+	const settingsContainer = document.getElementById("settings-container");
+
+	const formData = document.getElementById("settings-form") as HTMLFormElement;
+	if (!formData) return;
+
+	const gameSetting = {
+		settings: {
+			ball: {
+				speed: getSelectValue("BALL SPEED"),
+				size: getSelectValue("BALL SIZE"),
+			},
+			paddle: {
+				size: getSelectValue("PADDLE SIZE"),
+				speed: getSelectValue("PADDLE SPEED"),
+			},
+			score: getSelectValue("MATCH POINTS"),
+			IA: false
+		}
+	};
+
+	await fetchRequest("/match-create", "POST", {}, {
+		body: JSON.stringify(gameSetting)
+	});
+
+	if (settingsContainer) {
+		settingsContainer.remove();
+	}
 }
 
 async function onSendSettingsVsComputer(event: Event) {
-  event.preventDefault();
+	event.preventDefault();
 
-  const settingsContainer = document.getElementById("settings-container");
+	const settingsContainer = document.getElementById("settings-container");
 
-  const formData = document.getElementById("settings-form") as HTMLFormElement;
-  if (!formData) return;
+	const formData = document.getElementById("settings-form") as HTMLFormElement;
+	if (!formData) return;
 
-  const gameSetting = {
-	settings: {
-		ball: {
-			speed: getSelectValue("BALL SPEED"),
-			size: getSelectValue("BALL SIZE"),
-		},
-		paddle: {
-			size: getSelectValue("PADDLE SIZE"),
-			speed: getSelectValue("PADDLE SPEED"),
-		},
-		score: getSelectValue("MATCH POINTS"),
-		IA: true
+	const gameSetting = {
+		settings: {
+			ball: {
+				speed: getSelectValue("BALL SPEED"),
+				size: getSelectValue("BALL SIZE"),
+			},
+			paddle: {
+				size: getSelectValue("PADDLE SIZE"),
+				speed: getSelectValue("PADDLE SPEED"),
+			},
+			score: getSelectValue("MATCH POINTS"),
+			IA: true
+		}
+	};
+
+	await fetchRequest("/match-create", "POST", {}, {
+		body: JSON.stringify(gameSetting)
+	});
+
+	if (settingsContainer) {
+		settingsContainer.remove();
 	}
-  };
-  
-  await fetchRequest("/match-create", "POST", {}, {
-    body: JSON.stringify(gameSetting)
-  });
-
-  if (settingsContainer) {
-    settingsContainer.remove();
-  }
 }
 
 function onCancelSettings(event: Event) {
-  event.preventDefault();
-  stateProxyHandler.settings = { state: '0' };
+	event.preventDefault();
+	stateProxyHandler.settings = { state: '0' };
 }
 
 

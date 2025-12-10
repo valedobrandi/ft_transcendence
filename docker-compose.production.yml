@@ -34,7 +34,6 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - RESEND_API_KEY=${RESEND_API_KEY}
     volumes:
       - ./pong-backend/images:/app/images
     env_file:
@@ -54,8 +53,10 @@ services:
     container_name: hardhat-node
     environment:
       - NODE_ENV=production
+    env_file:
+      - .env
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8545"] 
+      test: ["CMD", "curl", "-f", "http://localhost:health"] 
       interval: 10s
       timeout: 5s
       retries: 10

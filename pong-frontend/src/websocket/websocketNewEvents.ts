@@ -9,12 +9,11 @@ async function websocketNewEvents() {
 	if (message === 'success') {
 		for (const event of data) {
 
-			const { type, from_id } = event;
 
-			switch (type) {
+			switch (event.type) {
 				case 'friend:add':
 					const getSender = stateProxyHandler.serverUsers
-						.find(({ id }) => Number(id) === Number(from_id));
+						.find(({ id }) => Number(id) === Number(event.from_id));
 					if (getSender === undefined) break;
 
 
@@ -22,17 +21,14 @@ async function websocketNewEvents() {
 						`${getSender.name} has send a friend request`
 					);
 
-					const acceptBtn = EmbeddedButton(getSender.id, "YES", `${idx}`, "");
-					const denyBtn = EmbeddedButton(getSender.id, "NO", `${idx}`, "");
+					const acceptBtn = EmbeddedButton(getSender.id, "YES", event.id, `${idx}`);
+					const denyBtn = EmbeddedButton(getSender.id, "NO", event.id, `${idx}`);
 
 					stateProxyHandler.systemMessages = [...stateProxyHandler.systemMessages.slice(0, -1), {
 						message: `${stateProxyHandler.systemMessages[stateProxyHandler.systemMessages.length - 1].message}
 						${acceptBtn} ${denyBtn}`,
 						index: idx,
 					}];
-					break;
-				default:
-
 					break;
 			}
 		}
