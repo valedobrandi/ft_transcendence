@@ -574,7 +574,7 @@ class MatchesModel {
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
-			const data = await response.json();
+			const data = await response.json() as { score1: number; score2: number };
 			const score1 = data.score1;
 			const score2 = data.score2;
 			return { score1, score2 };

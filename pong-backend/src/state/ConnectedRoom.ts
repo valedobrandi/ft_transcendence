@@ -43,7 +43,9 @@ export class ConnectedRoom {
       },
       delete: (friendId: number | bigint) => {
         sender.friendSet.delete(friendId);
-        this.broadcastFriendStatus(friendId);
+        this.sendUpdateStatus( useServiceRequestId, sender.id, true);
+        this.sendUpdateStatus( friendId, useServiceRequestId, true);
+        this.broadcastFriendStatus(friendId, true);
       },
       save: (payload: number[]) => {
         sender.friendSet = new Set(payload);

@@ -43,7 +43,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			const email = `<p>Your 2FA code is: <strong>${authRoom.getCode(existingUser.username)}</strong></p>`
 			const { data, error } = await authService.sendEmail(
 				existingUser.email,
-				'ft_transcendence Ping-Pong 2FA Code',
+				`ft_transcendence Ping-Pong 2FA Code - ${existingUser.email}`,
 				email
 			);
 			if (error) {

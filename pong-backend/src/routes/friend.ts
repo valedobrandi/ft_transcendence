@@ -42,14 +42,14 @@ function friendsRoute(fastify: FastifyInstance) {
 		handler: friendsControllerInstance.addFriend.bind(friendsControllerInstance)
 	});
 
-	fastify.delete('/remove-friend', {
+	fastify.delete('/friend', {
 		preHandler: fastify.authenticate,
 		schema: {
-			body: {
+			querystring: {
 				type: 'object',
 				properties: { id: { type: 'string' } },
 				required: ['id']
-			}
+			},
 		},
 		handler: friendsControllerInstance.removeFriend.bind(friendsControllerInstance)
 	});
@@ -79,9 +79,9 @@ class FriendsController {
 		return res.status(statusCode('OK')).send({ message, data });
 	}
 
-	removeFriend(req: FastifyRequest<{ Body: FriendListDTO }>, res: FastifyReply) {
+	removeFriend(req: FastifyRequest<{ Querystring: FriendListDTO }>, res: FastifyReply) {
 		const id = Number(req.userId);
-		const friendId = Number(req.body.id);
+		const friendId = Number(req.query.id);
 
 		const { message, data } = this.friendsService.removeFriend(id, friendId);
 

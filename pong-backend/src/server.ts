@@ -95,12 +95,7 @@ fastify.register(cookie, {
 });
 
 fastify.register(jwt, {
-	secret: process.env.JWT_SECRET || 'supersecret'
-});
-
-fastify.register(fastifyStatic, {
-    root: path.join(process.cwd(), "src/images"),
-    prefix: "/images/",
+	secret: process.env.JWT_SECRET
 });
 
 

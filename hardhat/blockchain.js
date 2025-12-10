@@ -22,9 +22,9 @@ export const contractReadOnly = new ethers.Contract(
 	provider
 );
 
-
+const privateKey = process.env.HARDHAT_PRIVATE_KEY;
 const signer = new ethers.Wallet(
-	"0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+	privateKey,
 	provider
 );
 
