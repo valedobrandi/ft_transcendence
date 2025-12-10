@@ -17,7 +17,7 @@ export async function websocketReceiver(socket: WebSocket) {
   socket.addEventListener("message", async (event) => {
     const data = JSON.parse(event.data);
     if (data.message != "STATE") {
-      console.log("[WEBSOCKET RECEIVER] ", data);
+      //console.log("[WEBSOCKET RECEIVER] ", data);
     }
     switch (data.message) {
       case "PADDLE_HEIGHT":
@@ -69,7 +69,7 @@ export async function websocketReceiver(socket: WebSocket) {
           // Get the sender id by filter out my own id
           const sender = data.sender.find((sid: number) => sid !== profile.id);
           if (!sender) return;
-          console.log("[WEBSOCKET RECEIVER] CHAT_MESSAGE from ", data.history);
+          //console.log("[WEBSOCKET RECEIVER] CHAT_MESSAGE from ", data.history);
           stateProxyHandler.messages.set(sender, data.history);
           stateProxyHandler.state = data.message;
         }
@@ -146,13 +146,15 @@ export async function websocketReceiver(socket: WebSocket) {
             data.payload.matchId,
             "YES",
             `${idx}`,
+            "accept-match-invite",
             "accept-match-invite"
           )}
           ${EmbeddedButton(
             data.payload.matchId,
             "NO",
             `${idx}`,
-            "cancel-match-invite"
+            "cancel-match-invite",
+            "deny-match-invite"
           )}`
         );
         stateProxyHandler.state = "MATCH_INVITE";
@@ -176,6 +178,11 @@ export async function websocketReceiver(socket: WebSocket) {
       case "intra:message": {
         newIntraMessage(data.payload.message);
       }
+        break;
+      case "friend:list:update": {
+        stateProxyHandler.friendList = data.payload.friends;
+      }
+        break;
     }
   });
 }

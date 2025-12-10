@@ -7,7 +7,7 @@ const fields = ["BALL SPEED", "BALL SIZE", "PADDLE SIZE", "PADDLE SPEED", "MATCH
 const values = ["HIGH", "MEDIUM", "LOW"];
 root.innerHTML = "";
 function onRender() {
-console.log("Rendering Settings Container");
+//console.log("Rendering Settings Container");
 if (stateProxyHandler.settings.state === "0") {
 root.innerHTML = "";
 return;

@@ -23,7 +23,7 @@ export function Register(): HTMLElement {
 
     formElement.onsubmit = (e) => {
         e.preventDefault();
-        console.log("2FA code submitted");
+        //console.log("2FA code submitted");
     };
 
 	// Add a title to the form

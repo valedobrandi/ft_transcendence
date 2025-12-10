@@ -5,7 +5,7 @@ import { fetchRequest } from "../utils";
 
 async function websocketNewEvents() {
 	const { message, data } = await fetchRequest('/to-events', 'GET');
-	console.log('Fetch New-Events: ', data);
+	//console.log('Fetch New-Events: ', data);
 	if (message === 'success') {
 		for (const event of data) {
 
@@ -21,8 +21,8 @@ async function websocketNewEvents() {
 						`${getSender.name} has send a friend request`
 					);
 
-					const acceptBtn = EmbeddedButton(getSender.id, "YES", event.id, `${idx}`);
-					const denyBtn = EmbeddedButton(getSender.id, "NO", event.id, `${idx}`);
+					const acceptBtn = EmbeddedButton(getSender.id, "YES", event.id, `${idx}`, "accept-friend");
+					const denyBtn = EmbeddedButton(getSender.id, "NO", event.id, `${idx}`, "deny-friend");
 
 					stateProxyHandler.systemMessages = [...stateProxyHandler.systemMessages.slice(0, -1), {
 						message: `${stateProxyHandler.systemMessages[stateProxyHandler.systemMessages.length - 1].message}

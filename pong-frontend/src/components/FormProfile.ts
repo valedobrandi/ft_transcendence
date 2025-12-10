@@ -104,7 +104,7 @@ export function ProfilePage(): HTMLElement {
 
 	const avatarPreview = document.createElement("img");
 	const avatarPath = `${endpoint.pong_backend_api}/avatar/${stateProxyHandler.profile.avatar}`;
-	console.log("AVATAR PATH:", avatarPath);
+	//console.log("AVATAR PATH:", avatarPath);
 	avatarPreview.src = avatarPath;
 	avatarPreview.id = "avatarPreview";
 	avatarPreview.className = "w-24 h-24 rounded-full object-cover";
@@ -380,13 +380,13 @@ export function ProfilePage(): HTMLElement {
 
 		try {
 			const data = await fetchRequest("/update", "PUT", {}, { body: JSON.stringify(payload) });
-			console.log("DATA FROM BACKEND:", data);
+			//console.log("DATA FROM BACKEND:", data);
 
 			if (data.message === 'success') {
 				profile.username = data.payload.username;
 				profile.email = data.payload.email;
 
-				console.log("Profile updated", data);
+				//console.log("Profile updated", data);
 				alert(("your profil has changed "));
 				const response = await fetchRequest(
 					`/logout`,
@@ -431,8 +431,8 @@ export function ProfilePage(): HTMLElement {
 
 export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFileBtn: HTMLButtonElement,
 	avatarFile: HTMLInputElement, avatarGrid: HTMLDivElement): Promise<void> {
-	console.log("handleProfilePage called");
-	console.log("DOM check:", {
+	//console.log("handleProfilePage called");
+	//console.log("DOM check:", {
 	});
 
 	let data;
@@ -475,7 +475,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 		const allow = ["image/png", "image/jpeg", "image/jpg"];
 		if (!allow.includes(f.type) || f.size > 5 * 1024 * 1024) {
 			avatarFile.value = "";
-			console.log("image format error");
+			//console.log("image format error");
 			return;
 		}
 
@@ -496,7 +496,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 			if (!data.payload?.avatar_url) throw new Error("Avatar not receved");
 
 
-			console.log("AVATAR SAVED AT DB:", data.payload.avatar_url);
+			//console.log("AVATAR SAVED AT DB:", data.payload.avatar_url);
 			user.avatar_url = data.payload.avatar_url;
 			profile.avatar_url = data.payload.avatar_url;
 
@@ -525,7 +525,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 		avatarPreview.src = AVATAR_DEFAUT;
 	};
 
-	console.log(user.avatar_url);
+	//console.log(user.avatar_url);
 
 	const presetButtons = avatarGrid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 

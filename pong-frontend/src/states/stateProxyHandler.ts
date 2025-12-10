@@ -38,7 +38,7 @@ export function findIntraMessage(tagId: string) {
 }
 
 export function renderSystemMessages() {
-    console.log("Rendering system messages");
+    //console.log("Rendering system messages");
     const messageBox = document.getElementById('system-messages');
     if (!messageBox) return;
 
@@ -53,8 +53,8 @@ export function renderSystemMessages() {
 }
 
 export function renderChatMessages(_: string, selectedChatId: number) {
-    console.log("Rendering messages for chat ID:", selectedChatId);
-    console.log("Messages:", stateProxyHandler.messages);
+    //console.log("Rendering messages for chat ID:", selectedChatId);
+    //console.log("Messages:", stateProxyHandler.messages);
     const messageBox = document.getElementById('messages');
     if (!messageBox) return;
 
@@ -151,7 +151,7 @@ const listeners: Record<StateKey, (() => void)[]> = {
 };
 
 export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
-     console.log("Listener registered for settings");
+     //console.log("Listener registered for settings");
     listeners[key].push(fn);
 }
 
@@ -264,7 +264,7 @@ export const stateProxyHandler: StateProxyHandler = new Proxy(
 
         const key = prop as StateKey;
         if (listeners[key]) {
-            console.log("Notifying listeners for key:", key);
+            //console.log("Notifying listeners for key:", key);
             listeners[key].forEach(fn => fn());
         }
 
@@ -288,7 +288,7 @@ export const stateProxyHandler: StateProxyHandler = new Proxy(
 
         if (prop === 'friendList') {
             messageListeners.forEach(fn => fn());
-            console.log("Friend list updated:", target.friendList);
+            //console.log("Friend list updated:", target.friendList);
         }
 
         if (prop === 'serverUsers') {

@@ -21,7 +21,7 @@ function inviteMatchButton(): string {
 }
 
 function blockButton(): string {
-	console.log("BlockButton render", stateProxyHandler.chatBlockList);
+	//console.log("BlockButton render", stateProxyHandler.chatBlockList);
 	const isBlocked = stateProxyHandler.chatBlockList?.includes(
 		stateProxyHandler.selectChat?.id
 	);
@@ -77,7 +77,7 @@ export function ProfileContainer() {
 		const isUserProfile = stateProxyHandler.selectChat.id === profile.id;
 		
 		const avatar = endpoint.pong_backend_api + stateProxyHandler.profile.avatar;
-		console.log("Rendering ProfileContainer", avatar);
+		//console.log("Rendering ProfileContainer", avatar);
 		mainDiv.innerHTML = `
 		<div class="flex flex-col border-2 border-black rounded-2xl h-full text-base">
 			<h2 class="border-b-2 border-black text-xl font-bold p-2 text-center">
