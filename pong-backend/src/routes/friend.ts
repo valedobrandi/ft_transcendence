@@ -94,7 +94,6 @@ class FriendService {
 
 	getFriendsList(userId: number) {
 		const { message, data } = this.friendModelInstance.getFriendsList(userId);
-		connectedRoomInstance.friendListSet(userId).save(data);
 
 		if (data.length === 0) {
 			return {message: 'error', data: 'friend_list_empty'};
@@ -124,12 +123,28 @@ class FriendService {
 			return { message, data };
 		}
 
-		return { message: 'error', data: "unable to add friend" };
+		return { message: 'error', data: "FriendService_addFriend" };
 	}
 
 	removeFriend(userId: number, friendId: number) {
 		const { message, data } = this.friendModelInstance.removeFriend(userId, friendId);
+		
 		connectedRoomInstance.friendListSet(userId).delete(friendId);
+		connectedRoomInstance.friendListSet(friendId).delete(userId);
+		
+		
+		connectedRoomInstance.broadcastWebsocketMessage(
+			friendId,
+			"friend:list:update", {
+				friends: connectedRoomInstance.friendListSet(friendId).get()
+			}
+		)
+		connectedRoomInstance.broadcastWebsocketMessage(
+			userId,
+			"friend:list:update", {
+				friends: connectedRoomInstance.friendListSet(userId).get()
+			}
+		)
 		return { message, data };
 	}
 }
@@ -155,11 +170,15 @@ class FriendsModel {
 				UNION
 					SELECT user_id AS friendId FROM friends WHERE friend_id = ?`);
 		this.stmAddFriend = db.prepare('INSERT INTO friends (user_id, friend_id) VALUES (?, ?)');
-		this.stmRemoveFriend = db.prepare('DELETE FROM friends WHERE user_id = ? AND friend_id = ?');
+
+		this.stmRemoveFriend = db.prepare(`
+			DELETE FROM friends 
+			WHERE user_id = ? AND friend_id = ?`);
+
+
 		this.stmGetFriendStatus = db.prepare(
 			`SELECT * FROM friends
-				WHERE user_id = ? AND friend_id = ?
-					OR user_id = ? AND friend_id = ?`);
+				WHERE user_id = ? AND friend_id = ?`);
 	}
 
 	getFriendsList(userId: number): GetFriendsList {
@@ -170,22 +189,36 @@ class FriendsModel {
 	}
 
 	checkFriendsStatus(userId: number, friendId: number): boolean {
-		const response = this.stmGetFriendStatus.get(userId, friendId, friendId, userId);
+		if ( userId > friendId) {
+			[userId, friendId] = [friendId, userId];
+		}
+		const response = this.stmGetFriendStatus.get(userId, friendId);
 		return response !== undefined;
 	}
 
 	addFriend(userId: number, friendId: number): AddFriend {
 		try {
+			if ( userId > friendId) {
+				[userId, friendId] = [friendId, userId];
+			}
 			this.stmAddFriend.run(userId, friendId);
 			return { message: 'success', data: "friend added" };
 		} catch (error) {
 			print(`[ERROR] Unable to add friend: ${error}`);
-			return { message: 'error', data: "unable to add friend" };
+			return { message: 'error', data: "FriendsModel_addFriend" };
 		}
 	}
 
 	removeFriend(userId: number, friendId: number): RemoveFriend {
-		const response = this.stmRemoveFriend.run(userId, friendId);
+		print(`[FRIEND REMOVE] userId: ${userId}, friendId: ${friendId}`);
+		if ( userId > friendId) {
+			[userId, friendId] = [friendId, userId];
+		}
+		const response = this.stmRemoveFriend.run(userId, friendId) as Database.RunResult;
+		print(`[FRIEND REMOVE DB] ${JSON.stringify(response)}`);
+		if (response.changes === 0) {
+			return { message: 'error', data: "FriendsModel_removeFriend" };
+		}
 		return { message: 'success', data: "friend removed" };
 	}
 }

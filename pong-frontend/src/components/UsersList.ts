@@ -106,7 +106,7 @@ export function UsersList(): HTMLDivElement {
 export function selectChatByButton(button: HTMLButtonElement) {
     const chatName = button.value;
     const chatId = button.name;
-    console.log("Selected chat:", chatName, chatId);
+    //console.log("Selected chat:", chatName, chatId);
 
     stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
 }

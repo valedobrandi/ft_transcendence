@@ -22,7 +22,7 @@ const routes: Record<string, (root: HTMLElement) => void> = {
  export function renderRoute(path: string) {
     const protectedRoutes = ["/match", "/intra", "/profile"];
 
-    console.log(`username: ${profile.username}`);
+    //console.log(`username: ${profile.username}`);
     const root = document.getElementById("root")!;
     const view = routes[path] || defaultView;
 
@@ -118,7 +118,7 @@ export async function fetchRequest
         options: RequestInit = {}) {
 
     const url = `${endpoint.pong_backend_api}${path}`;
-    console.log(`[REQUEST] ${method} ${url} response:`,JSON.stringify(options));
+    //console.log(`[REQUEST] ${method} ${url} response:`,JSON.stringify(options));
     const defaultHeaders: Record<string, string> = {
         // Add auth token
         'Authorization': `Bearer ${jwt.token}`,
@@ -134,13 +134,13 @@ export async function fetchRequest
         });
         if (!response.ok) {
             const error = await response.json();
-            console.log("DATA FROM BACKEND:", error);
+            //console.log("DATA FROM BACKEND:", error);
             throw new Error(error.message || 'API error');
         }
 
         if ('accessToken' in response) jwt.token = response.accessToken as string;
         const data = await response.json();
-        console.log(`[RESPONSE] ${method} ${url} response:`, data);
+        //console.log(`[RESPONSE] ${method} ${url} response:`, data);
         return data;
     }
     catch (err) {
@@ -155,7 +155,7 @@ export async function toggle2FA(): Promise<void> {
 
 
         const new2FAValue = profile.twoFA_enabled === 1 ? 0 : 1;
-        console.log('NEWVALEUR= ', new2FAValue);
+        //console.log('NEWVALEUR= ', new2FAValue);
 
         const response = await fetchRequest("/updata/2FA", "PUT", {}, {
             body: JSON.stringify({ twoFA_enabled: profile.twoFA_enabled ? 0 : 1 })

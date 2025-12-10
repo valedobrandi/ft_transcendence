@@ -6,7 +6,7 @@ export function ButtonMatchList(context: string, text: string, id: string, actio
     const isTournamentRoom = stateProxyHandler.state === "TOURNAMENT_ROOM";
 
     const disabled = isMatchRoom || isTournamentRoom;
-    console.log("DISABLED BUTTON MATCH LIST:", disabled);
+    //console.log("DISABLED BUTTON MATCH LIST:", disabled);
     const mainDiv = document.createElement("div");
     function onRender() {
 

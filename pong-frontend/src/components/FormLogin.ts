@@ -28,7 +28,7 @@ export function FormLogin(): HTMLElement {
 
 	formElement.onsubmit = (event) => {
 		event.preventDefault();
-		console.log("2FA code submitted");
+		//console.log("2FA code submitted");
 	};
 
 	// Add inputs Name + Password to the form
@@ -187,7 +187,7 @@ export function FormLogin(): HTMLElement {
 					isConnected: friend.isConnected,
 				}));
 				stateProxyHandler.friendList = newFriendList;
-				console.log("[FRIEND LIST ON LOGIN]", stateProxyHandler.friendList);
+				//console.log("[FRIEND LIST ON LOGIN]", stateProxyHandler.friendList);
 			}
 			if (blockedList.message === 'success') {
 				stateProxyHandler.chatBlockList = blockedList.payload;

@@ -75,7 +75,7 @@ export function setButtonToUnblockState(button: HTMLButtonElement) {
 }
 
 const inviteUserOnclick = async () => {
-	console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
+	//console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
 	const response = await fetchRequest('/match-invite', 'POST', {}, {
 		body: JSON.stringify({
 			invitedId: stateProxyHandler.selectChat.id,
@@ -92,7 +92,7 @@ const inviteUserOnclick = async () => {
 			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
 			const idx = newIntraMessage(""); 
 			updateIntraMessage(idx, `Invite sent to ${getTo?.name} 
-				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite')}`);
+				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite', "cancel-match-invite")}`);
 			stateProxyHandler.state = "SEND_INVITE"
 		}
 	} else if (response.message = 'error') {
@@ -103,10 +103,10 @@ const inviteUserOnclick = async () => {
 
 const profileOnclick = async () => {
 
-	console.log("(opt.value === view-profile")
+	//console.log("(opt.value === view-profile")
 	try {
 		const data = await fetchRequest('/profile', 'GET', {});
-		console.log("DATA PROFILE = ", data);
+		//console.log("DATA PROFILE = ", data);
 		if (data.message === 'success') {
 			profile.username = data.existUser.username;
 			profile.id = data.existUser.id;

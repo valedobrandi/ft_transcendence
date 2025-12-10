@@ -37,6 +37,7 @@ export default function profilRoute(fastify: FastifyInstance)
                         email: returnDB.email,
                         username: returnDB.username,
                         id: returnDB.id,
+                        twoFA_enabled: returnDB.twoFA_enabled
                     }
 
                     return res.status(200).send({ message: 'success', existUser });

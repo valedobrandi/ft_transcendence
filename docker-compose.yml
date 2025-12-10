@@ -48,6 +48,8 @@ services:
       context: ./hardhat
       dockerfile: Dockerfile
     container_name: hardhat-node
+    env_file:
+      - .env
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"] 
       interval: 10s

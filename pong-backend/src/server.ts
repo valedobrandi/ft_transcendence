@@ -95,7 +95,7 @@ fastify.register(cookie, {
 });
 
 fastify.register(jwt, {
-	secret: process.env.JWT_SECRET
+	secret: process.env.JWT_SECRET || 'default_secret_key',
 });
 
 
@@ -120,7 +120,7 @@ await fastify.register(fastifyCors, {
 });
 
 export function print(message: string) {
-	console.log(`[Log]: ${message}`);
+	//console.log(`[Log]: ${message}`);
 }
 
 export { fastify };
