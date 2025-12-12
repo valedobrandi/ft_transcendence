@@ -11,7 +11,7 @@ import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
 import db from "../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
-import { contractReadOnly } from "../blockchain.js";
+import fetch from "node-fetch";
 import { print } from "../server.js";
 
 import { SettingsType } from "../types/GameStateType.js";
@@ -261,7 +261,7 @@ class MatchesService {
 		}
 
 		for (const m of match) {
-			const { score1, score2 } = await this.matchesModel.getScoreBlockchain(m.match_id);
+			const { score1, score2 } = await this.matchesModel.getScoreHardhat(m.match_id);
 			print(`[BLOCKCHAIN] Fetched match score for match ID ${m.match_id}: ${score1}, ${score2}`);
 			matchesHistory.history.push({
 				player1: m.player1,
@@ -568,14 +568,18 @@ class MatchesModel {
 		);
 	}
 
-	async getScoreBlockchain(matchid: string) {
+	async getScoreHardhat(matchId: string) {
 		try {
-			const response = await contractReadOnly.getMatch(matchid);
-
-			const [score1, score2] = response;
-			return { score1: Number(score1), score2: Number(score2) };
+			const response = await fetch(`http://hardhat:3300/hardhat/${matchId}`);
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			const data = await response.json() as { score1: number; score2: number };
+			const score1 = data.score1;
+			const score2 = data.score2;
+			return { score1, score2 };
 		} catch (error) {
-			print(`[BLOCKCHAIN ERROR] Failed to fetch match score for match ID ${matchid}: ${error}`);
+			print(`[BLOCKCHAIN ERROR] Failed to fetch match score for match ID ${matchId}: ${error}`);
 			return { score1: 0, score2: 0 };
 		}
 	}

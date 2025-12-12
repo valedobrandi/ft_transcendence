@@ -1,7 +1,6 @@
 import Database from 'better-sqlite3'
-
+import fetch from "node-fetch";
 import { print } from '../server.js';
-import { contractWithSigner } from '../blockchain.js';
 
 class MatchesModel {
 	private db: Database.Database;
@@ -23,9 +22,23 @@ class MatchesModel {
 		player2Score: number
 	): Promise<void> {
 		try {
-			const tx = await contractWithSigner.saveMatch(machId, player1Score, player2Score)
-			await tx.wait();
-			print(`[BLOCKCHAIN] Match ${machId} saved on blockchain.`);
+			const response = await fetch(`http://hardhat:3300/hardhat`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					matchId: machId,
+					score1: player1Score,
+					score2: player2Score,
+				}),
+			});
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			
+			const data = await response.json();
+			print(`[BLOCKCHAIN] Match ${machId} saved on blockchain. ${JSON.stringify(data)}`);
 			this.stmSaveMatch.run(
 				machId, player1, player2);
 		} catch (error) {

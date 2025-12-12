@@ -14,45 +14,28 @@ NC = \033[0m
 .PHONY: all stop clean fclean re logs
 
 production.build: 
-	docker compose -f $(COMPOSE_FILE_PROD) down -v --remove-orphans
-	docker compose -f $(COMPOSE_FILE_PROD) up --build -d hardhat
-	@echo "$(GREEN)WAITING TO HARDHAT TO BE HEALTHY$(NC)"
-	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
-	@echo "$(GREEN)HARDHAT IS READY$(NC)"
-	docker exec -it hardhat-node rm -rf /app/ignition/deployments/chain-31337
-	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
-	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
-	@echo "$(GREEN)TournamentScores contract OK.$(NC)"
-	docker compose -f $(COMPOSE_FILE_PROD) up --build -d pong-backend nginx
+	docker compose -f $(COMPOSE_FILE_PROD) build
+	@echo "$(GREEN)Production Docker images built successfully.$(NC)"
+
+production.up: 
+	docker compose -f $(COMPOSE_FILE_PROD) up -d
+	@echo "$(GREEN)Production Docker containers are up and running.$(NC)"
 
 production.down:
 	docker compose -f $(COMPOSE_FILE_PROD) down --volumes --remove-orphans
 
+
 build:
-	docker compose up --build -d hardhat
-	# Wait for Hardhat to be healthy
-	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
-	@echo "$(GREEN)Hardhat is healthy. Deploying TournamentScores contract...$(NC)"
-	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
-	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
-	@echo "$(GREEN)TournamentScores contract deployed.$(NC)"
-	docker compose up --build -d pong-backend pong-frontend
+	docker compose build
+	@echo "$(GREEN)Docker images built successfully.$(NC)"
 
 up: 
-	docker compose up -d hardhat
-	# Wait for Hardhat to be healthy
-	until curl -s http://localhost:8545 > /dev/null; do sleep 1; done
-	@echo "$(GREEN)Hardhat is healthy. Deploying TournamentScores contract...$(NC)"
-	docker exec -it hardhat-node npx hardhat ignition deploy ignition/modules/TournamentScores.js --network localhost
-	until [ -s hardhat/ignition/deployments/chain-31337/deployed_addresses.json ]; do sleep 1; done
-	@echo "$(GREEN)TournamentScores contract deployed.$(NC)"
-	docker compose up -d pong-backend pong-frontend
+	docker compose up -d
+	@echo "$(GREEN)Docker containers are up and running.$(NC)"
 
 down:
 	docker compose down --volumes --remove-orphans
-
-start:
-	npm run up
+	@echo "$(GREEN)Docker containers are stopped and removed.$(NC)"
 
 # --- build & run ---
 all:

@@ -14,7 +14,7 @@ class AuthService {
     }
 
     async sendEmail(destination: string, subject: string, html: string): Promise<{ data: any, error: any }> {
-        const defaultReceiver = process.env.EMAIL_DEFAULT_RECEIVER || "jelecoq@student.42nice.fr";
+        const defaultReceiver = process.env.EMAIL_DEFAULT_RECEIVER || "";
         const { data, error } = await this.resend.emails.send({
             from: "onboarding@resend.dev",
             to: defaultReceiver,

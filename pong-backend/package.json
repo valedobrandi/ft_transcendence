@@ -9,6 +9,7 @@
         "test": "vitest --run --reporter verbose",
         "database": "npx tsx /app/src/database/init.ts",
         "print": "npx tsx /app/database/table_print.ts",
+        "production:print": "node /app/dist/database/table_print.js",
         "dev": "nodemon",
         "test:ai": "ts-node src/classes/test-ai.ts"
     },
@@ -40,12 +41,5 @@
         "typescript": "~5.8.0",
         "vitest": "^4.0.4",
         "ws": "^8.13.0"
-    },
-    "vitest": {
-        "test": {
-            "globals": true,
-            "environment": "node",
-            "testTimeout": 10000
-        }
     }
 }

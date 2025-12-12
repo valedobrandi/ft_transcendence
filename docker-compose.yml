@@ -27,8 +27,8 @@ services:
       - "3000:3000"
     volumes:
       - ./pong-backend:/app
+      - ./pong-backend/images:/app/images
       - /app/node_modules
-      - hardhat-data:/app/ignition/deployments:ro
     environment:
       - NODE_ENV=development
       - ADRESS=192.0.7
@@ -48,24 +48,19 @@ services:
       context: ./hardhat
       dockerfile: Dockerfile
     container_name: hardhat-node
-    ports:
-      - "8545:8545"
-    volumes:
-      - hardhat-data:/app/ignition/deployments
-      - /app/node_modules
+    env_file:
+      - .env
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8545"] 
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"] 
       interval: 10s
       timeout: 5s
       retries: 10
     restart: unless-stopped
     networks:
       - transcendence-network
-
-
-volumes:
-  hardhat-data:
-
+      
 networks:
   transcendence-network:
     driver: bridge
+
+

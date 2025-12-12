@@ -92,7 +92,7 @@ export function Intra(): HTMLElement {
         // ================================================================== //
 
         const profileContainer = document.createElement("div");
-        profileContainer.className = "flex justify-between items-center mt-6 px-20";
+        profileContainer.className = "flex justify-between items-center mt-6 px-30";
 
         // Header
         const profileHeader = document.createElement("div");
@@ -107,9 +107,7 @@ export function Intra(): HTMLElement {
         // Avatar
         const profileAvatar = document.createElement("img");
         const usersAvatarPath = `${endpoint.pong_backend_api}/avatar/${stateProxyHandler.profile.avatar}`;
-        const defaultAvatarPath = stateProxyHandler.profile.avatar
-        const isUser = stateProxyHandler.profile.username === profile.username;
-        profileAvatar.src = isUser ? defaultAvatarPath : usersAvatarPath;
+        profileAvatar.src = usersAvatarPath;
         profileAvatar.alt = `${stateProxyHandler.profile.avatar}'s avatar`;
         profileAvatar.className = "w-32 h-32 rounded-full mx-auto mt-6 border-5 border-[#424549] object-cover";
 
@@ -142,6 +140,13 @@ export function Intra(): HTMLElement {
             friendButton.className = `px-10 py-4 rounded text-white ${isFriend ? "bg-gray-400 opacity-50 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`;
             friendButton.disabled = !!isFriend;
             buttonsDiv.appendChild(friendButton);
+
+            const removeFriendButton = document.createElement("button");
+            removeFriendButton.id = "btn-remove-friend";
+            removeFriendButton.textContent = "Remove Friend";
+            removeFriendButton.className = `px-10 py-4 rounded text-white ${isFriend ? "bg-red-500 hover:bg-red-600" : "bg-gray-400 opacity-50 cursor-not-allowed"}`;
+            removeFriendButton.disabled = !isFriend;
+            buttonsDiv.appendChild(removeFriendButton);
 
             const isBlocked = stateProxyHandler.chatBlockList?.includes(stateProxyHandler.selectChat?.id);
             const blockButton = document.createElement("button");
@@ -306,12 +311,12 @@ export function Intra(): HTMLElement {
     const matchButton = document.createElement("button");
     matchButton.id = "create-match-btn";
     matchButton.textContent = "Create Match";
-    matchButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600";
+    matchButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase";
 
     const tournamentButton = document.createElement("button");
     tournamentButton.id = "tournament-btn";
-    tournamentButton.textContent = "Create Tournament";
-    tournamentButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600";
+    tournamentButton.textContent = "Join Tournament";
+    tournamentButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase";
 
     gameButtonContainer.appendChild(matchButton);
     gameButtonContainer.appendChild(tournamentButton);

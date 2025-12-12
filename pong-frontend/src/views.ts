@@ -5,10 +5,7 @@ import { Register } from "./components/FormRegister";
 import { FormLogin } from "./components/FormLogin";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { ProfilePage } from "./components/FormProfile";
-import { websocketConnect } from "./websocket/websocketConnect";
 import { FormGuest } from "./components/FormGuest";
-import { endpoint } from "./endPoints";
-import { initSocket } from "./websocket";
 import { profile } from "./app";
 import { IntraContainer } from "./components/IntraContainer";
 import { stateProxyHandler } from "./states/stateProxyHandler";
@@ -31,8 +28,6 @@ import { SettignsContainer } from "./components/SettignsContainer";
 
 // <!-- BERNARDO START EDIT -->
 export function intraView(root: HTMLElement) {
-  initSocket(endpoint.pong_backend_websocket, profile.username);
-  websocketConnect();
   root.innerHTML = "";
   stateProxyHandler.selectChat = {id: profile.id, name: profile.username}
 

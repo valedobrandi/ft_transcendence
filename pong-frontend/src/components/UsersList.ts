@@ -47,7 +47,7 @@ export function List(
         btn.appendChild(btnText);
 
         btn.className = `${name} flex items-center border-b
-                border-[#424549] p-2 w-full text-center text-white hover:bg-green-100`;
+                border-[#424549] p-2 w-full text-center text-white hover:bg-[#36393e]`;
         btn.id = `select-chat-btn`;
 
         btn.value = `${name}`;
@@ -59,7 +59,7 @@ export function List(
     Array.from(
         document.getElementsByClassName(stateProxyHandler.selectChat.name)
     ).forEach((elem) => {
-        elem.classList.add("bg-gray-100");
+        elem.classList.add("bg-[#1e2124]");
     });
 
     return usersDiv;
@@ -78,7 +78,7 @@ export function UsersList(): HTMLDivElement {
         upperDiv.className = "h-1/2 w-full overflow-y-auto flex flex-col ";
 
         const userListTitle = document.createElement("h2");
-        userListTitle.textContent = "USERS LIST";
+        userListTitle.textContent = "CHAT USERS";
         userListTitle.className = "text-center text-white border-5 border-[#424549]";
 
         upperDiv.appendChild(userListTitle);
@@ -106,7 +106,7 @@ export function UsersList(): HTMLDivElement {
 export function selectChatByButton(button: HTMLButtonElement) {
     const chatName = button.value;
     const chatId = button.name;
-    console.log("Selected chat:", chatName, chatId);
+    //console.log("Selected chat:", chatName, chatId);
 
     stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
 }

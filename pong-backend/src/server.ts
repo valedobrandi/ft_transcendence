@@ -10,10 +10,9 @@ import chatBlockRoute from './routes/chatBlock.js';
 import { eventsRoutes } from './routes/events.js';
 import cookie from '@fastify/cookie';
 import { matchesRoute } from './routes/match.js';
-import fastifyMultipart from "@fastify/multipart";
 import fastifyStatic from "@fastify/static";
 import path from "path";
-import fs from "fs";
+
 import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
 import { tournamentsRoute } from './routes/tournament.js';
@@ -96,12 +95,7 @@ fastify.register(cookie, {
 });
 
 fastify.register(jwt, {
-	secret: process.env.JWT_SECRET || 'supersecret'
-});
-
-fastify.register(fastifyStatic, {
-    root: path.join(process.cwd(), "src/images"),
-    prefix: "/images/",
+	secret: process.env.JWT_SECRET || 'default_secret_key',
 });
 
 
@@ -126,7 +120,7 @@ await fastify.register(fastifyCors, {
 });
 
 export function print(message: string) {
-	console.log(`[Log]: ${message}`);
+	//console.log(`[Log]: ${message}`);
 }
 
 export { fastify };

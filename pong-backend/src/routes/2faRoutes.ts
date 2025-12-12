@@ -68,6 +68,12 @@ fastify.put(
         const payload = { id: user.id };
         const accessToken = fastify.jwt.sign(payload, { expiresIn: "10h" });
 
+    const clientIsConnected = connectedRoomInstance.has(Number(user.id));
+
+        if (clientIsConnected) {
+            connectedRoomInstance.disconnect(Number(user.id));
+        }
+
         connectedRoomInstance.addUser(user.username, user.id);
 
         return res.send({

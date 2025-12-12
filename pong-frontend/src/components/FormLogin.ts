@@ -6,12 +6,14 @@ import { profile, jwt } from "../app";
 import { stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
 import { onClickGetProfileData } from "./UsersList";
-import { closeSocket } from "../websocket";
+import { closeSocket, initSocket } from "../websocket";
+import { websocketConnect } from "../websocket/websocketConnect";
+import { endpoint } from "../endPoints";
 
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
 	viewDiv.className = "flex items-center justify-center h-screen";
-	viewDiv.style.backgroundImage = "url('../../default/default_background.jpg')";
+	viewDiv.style.backgroundImage = "url('/default_background.jpg')";
 	viewDiv.style.backgroundSize = "cover";
 
 	const card = document.createElement("div");
@@ -26,7 +28,7 @@ export function FormLogin(): HTMLElement {
 
 	formElement.onsubmit = (event) => {
 		event.preventDefault();
-		console.log("2FA code submitted");
+		//console.log("2FA code submitted");
 	};
 
 	// Add inputs Name + Password to the form
@@ -171,9 +173,7 @@ export function FormLogin(): HTMLElement {
 
 			jwt.token = response.payload.accessToken;
 			profile.username = response.payload.username;
-			//profile.url_avatar = response.payload.existingUser.avatar_url
 			profile.id = response.payload.id;
-			// reset stateProxy/handler
 			stateProxyHandler.selectChat = { id: profile.id, name: profile.username };
 
 			const [friendsList, blockedList] = await Promise.all([
@@ -187,12 +187,14 @@ export function FormLogin(): HTMLElement {
 					isConnected: friend.isConnected,
 				}));
 				stateProxyHandler.friendList = newFriendList;
-				console.log("[FRIEND LIST ON LOGIN]", stateProxyHandler.friendList);
+				//console.log("[FRIEND LIST ON LOGIN]", stateProxyHandler.friendList);
 			}
 			if (blockedList.message === 'success') {
 				stateProxyHandler.chatBlockList = blockedList.payload;
 			}
 			await onClickGetProfileData();
+			initSocket(endpoint.pong_backend_websocket, profile.username);
+  			await websocketConnect();
 			navigateTo("/intra");
 		} else if (response.status === 'error') {
 			const existingAlert = document.getElementById("alert-popup");

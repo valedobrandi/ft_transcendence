@@ -45,7 +45,7 @@ export function ServerStatus(): HTMLParagraphElement {
 	const statusParagraph = document.createElement("p");
 
 	function onRender() {
-		console.log("[SERVER STATUS]", stateProxyHandler.state)
+		//console.log("[SERVER STATUS]", stateProxyHandler.state)
 		statusParagraph.id = "server-state";
 		statusParagraph.className = "text-xs font-bold italic underline text-blue-600";
 		statusParagraph.textContent = `${stateProxyHandler.state}`;

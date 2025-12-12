@@ -75,12 +75,20 @@ export function eventListeners() {
 
 		const action = btn.dataset.action;
 
-		if (action === "accept") {
+		if (action === "accept-friend") {
 			await acceptFriendOnClick(btn);
 		}
 
-		if (action === "decline") {
+		if (action === "deny-friend") {
 			await denyFriendOnClick(btn);
+		}
+
+		if (action === "accept-match-invite") {
+			await onClickAcceptMatchInvite(btn);
+		}
+
+		if (action === "cancel-match-invite") {
+			await onClickCancelMatchInvite(btn);
 		}
 	});
 
@@ -89,7 +97,7 @@ export function eventListeners() {
 		const target = event.target as HTMLButtonElement;
 		const button = target.closest("button");
 		if (!button) return;
-		console.log("Button clicked:", button.id);
+		//console.log("Button clicked:", button.id);
 
 		switch (button.id) {
 			case "save-settings": { await onSendSettingsVsHuman(event); }
@@ -104,17 +112,13 @@ export function eventListeners() {
 				stateProxyHandler.selectChat = { name: profile.username, id: profile.id };
 			}
 				break;
-			case "accept-match-invite": { await onClickAcceptMatchInvite(button); }
-				break;
-			case "cancel-match-invite": { await onClickCancelMatchInvite(button); }
-				break;
 			case "btn-block-user": { await blockUser(); }
 				break;
 			case "btn-unblock-user": { await unblockUser(); }
 				break;
 			case "btn-invite-match": { await inviteToMatch(); }
 				break;
-			case "select-chat-btn": { selectChat(button);}
+			case "select-chat-btn": { selectChat(button); }
 				break;
 			case "btn-friend-list": { await inviteFriendList(); }
 				break;
@@ -134,81 +138,96 @@ export function eventListeners() {
 				break;
 			case "btn-logout": { await joinLogout(); }
 				break;
+			case "btn-remove-friend": { removeFriend(); }
+				break;
 		}
 	});
 }
 
 function getSelectValue(id: string): string {
-  return (document.getElementById(id) as HTMLSelectElement).value;
+	return (document.getElementById(id) as HTMLSelectElement).value;
 }
 
-async function onSendSettingsVsHuman(event: Event) {
-  event.preventDefault();
+async function removeFriend() {
+	const response = await fetchRequest(
+		`/friend?id=${stateProxyHandler.selectChat.id}`,
+		"DELETE",
+	);
 
-  const settingsContainer = document.getElementById("settings-container");
-  
-  const formData = document.getElementById("settings-form") as HTMLFormElement;
-  if (!formData) return;
-
-  const gameSetting = {
-	settings: {
-		ball: {
-			speed: getSelectValue("BALL SPEED"),
-			size: getSelectValue("BALL SIZE"),
-		},
-		paddle: {
-			size: getSelectValue("PADDLE SIZE"),
-			speed: getSelectValue("PADDLE SPEED"),
-		},
-		score: getSelectValue("MATCH POINTS"),
-		IA: false
+	if (response.message === "success") {
+		newIntraMessage(
+			`User ${stateProxyHandler.selectChat.name} has been removed from your friend list.`
+		);
 	}
-  };
-  
-  await fetchRequest("/match-create", "POST", {}, {
-    body: JSON.stringify(gameSetting)
-  });
+};
 
-  if (settingsContainer) {
-    settingsContainer.remove();
-  }
+async function onSendSettingsVsHuman(event: Event) {
+	event.preventDefault();
+
+	const settingsContainer = document.getElementById("settings-container");
+
+	const formData = document.getElementById("settings-form") as HTMLFormElement;
+	if (!formData) return;
+
+	const gameSetting = {
+		settings: {
+			ball: {
+				speed: getSelectValue("BALL SPEED"),
+				size: getSelectValue("BALL SIZE"),
+			},
+			paddle: {
+				size: getSelectValue("PADDLE SIZE"),
+				speed: getSelectValue("PADDLE SPEED"),
+			},
+			score: getSelectValue("MATCH POINTS"),
+			IA: false
+		}
+	};
+
+	await fetchRequest("/match-create", "POST", {}, {
+		body: JSON.stringify(gameSetting)
+	});
+
+	if (settingsContainer) {
+		settingsContainer.remove();
+	}
 }
 
 async function onSendSettingsVsComputer(event: Event) {
-  event.preventDefault();
+	event.preventDefault();
 
-  const settingsContainer = document.getElementById("settings-container");
+	const settingsContainer = document.getElementById("settings-container");
 
-  const formData = document.getElementById("settings-form") as HTMLFormElement;
-  if (!formData) return;
+	const formData = document.getElementById("settings-form") as HTMLFormElement;
+	if (!formData) return;
 
-  const gameSetting = {
-	settings: {
-		ball: {
-			speed: getSelectValue("BALL SPEED"),
-			size: getSelectValue("BALL SIZE"),
-		},
-		paddle: {
-			size: getSelectValue("PADDLE SIZE"),
-			speed: getSelectValue("PADDLE SPEED"),
-		},
-		score: getSelectValue("MATCH POINTS"),
-		IA: true
+	const gameSetting = {
+		settings: {
+			ball: {
+				speed: getSelectValue("BALL SPEED"),
+				size: getSelectValue("BALL SIZE"),
+			},
+			paddle: {
+				size: getSelectValue("PADDLE SIZE"),
+				speed: getSelectValue("PADDLE SPEED"),
+			},
+			score: getSelectValue("MATCH POINTS"),
+			IA: true
+		}
+	};
+
+	await fetchRequest("/match-create", "POST", {}, {
+		body: JSON.stringify(gameSetting)
+	});
+
+	if (settingsContainer) {
+		settingsContainer.remove();
 	}
-  };
-  
-  await fetchRequest("/match-create", "POST", {}, {
-    body: JSON.stringify(gameSetting)
-  });
-
-  if (settingsContainer) {
-    settingsContainer.remove();
-  }
 }
 
 function onCancelSettings(event: Event) {
-  event.preventDefault();
-  stateProxyHandler.settings = { state: '0' };
+	event.preventDefault();
+	stateProxyHandler.settings = { state: '0' };
 }
 
 
@@ -216,17 +235,17 @@ function selectChat(button: HTMLButtonElement) {
 	const chatName = button.value;
 	const chatId = button.name;
 
-	console.log("Selected chat:", chatName, chatId);
+	//console.log("Selected chat:", chatName, chatId);
 
 	stateProxyHandler.selectChat = { name: chatName, id: Number(chatId) };
 
 	const buttons = document.querySelectorAll("#select-chat-btn");
 	buttons.forEach((button) => {
-		button.classList.remove("bg-gray-100");
+		button.classList.remove("bg-gray-700");
 	});
 	Array.from(document.getElementsByClassName(chatName)).forEach(
 		(elem) => {
-			elem.classList.add("bg-gray-100");
+			elem.classList.add("bg-[#424549]");
 		}
 	);
 }
@@ -310,7 +329,7 @@ async function joinTournament() {
 
 async function leaveTournament(button: HTMLButtonElement) {
 	const eventId = button.dataset.eventindex;
-	console.log("EVENT ID LEAVE TOURNEY =", eventId);
+	//console.log("EVENT ID LEAVE TOURNEY =", eventId);
 	const response = await fetchRequest(
 		`/tournament/quit`,
 		"GET"
@@ -347,7 +366,7 @@ async function onClickAcceptMatchInvite(button: HTMLButtonElement) {
 }
 
 async function onClickCancelMatchInvite(button: HTMLButtonElement) {
-	const eventId = button.dataset.eventid;
+	const idx = button.dataset.eventid;
 	const userId = button.dataset.userid;
 
 	const response = await fetchRequest(
@@ -355,16 +374,16 @@ async function onClickCancelMatchInvite(button: HTMLButtonElement) {
 		"DELETE"
 	);
 	if (response.message === "success") {
-		removeIntraMessage(Number(eventId));
+		removeIntraMessage(Number(idx));
 	}
 }
 
 const profileOnclick = async () => {
 
-	console.log("(opt.value === view-profile")
+	//console.log("(opt.value === view-profile")
 	try {
 		const data = await fetchRequest('/profile', 'GET', {});
-		console.log("DATA PROFILE = ", data);
+		//console.log("DATA PROFILE = ", data);
 		if (data.message === 'success') {
 			profile.username = data.existUser.username;
 			profile.id = data.existUser.id;
@@ -373,10 +392,10 @@ const profileOnclick = async () => {
 			profile.twoFA_enabled = data.existUser.twoFA_enabled ? 1 : 0
 
 
-			console.log("PROFIL = ", profile.username);
-			console.log("EMAIL IIII = ", profile.email);
-			console.log("AVATAR IIII = ", profile.avatar_url);
-			console.log("AVATAR IIII = ", profile.twoFA_enabled);
+			//console.log("PROFIL = ", profile.username);
+			//console.log("EMAIL IIII = ", profile.email);
+			//console.log("AVATAR IIII = ", profile.avatar_url);
+			//console.log("AVATAR IIII = ", profile.twoFA_enabled);
 
 			navigateTo("/profile");
 		}
@@ -391,7 +410,7 @@ const profileOnclick = async () => {
 }
 
 const inviteToMatch = async () => {
-	console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
+	//console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
 	const response = await fetchRequest('/match-invite', 'POST', {}, {
 		body: JSON.stringify({
 			invitedId: stateProxyHandler.selectChat.id,
@@ -403,7 +422,7 @@ const inviteToMatch = async () => {
 			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
 			const idx = newIntraMessage("");
 			updateIntraMessage(idx, `Invite sent to ${getTo?.name} 
-				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite')}`);
+				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite', "cancel-match-invite")}`);
 			stateProxyHandler.state = "SEND_INVITE"
 		}
 	} else if (response.message = 'error') {
