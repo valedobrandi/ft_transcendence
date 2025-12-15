@@ -10,14 +10,25 @@ export const tournamentRoom = new Map<string, Tournament>();
 export function joinTournamentQueue(id: number) {
 
 	tournamentQueue.add(id);
-
+	broadcastTournamentQueueUpdate();
 	if (tournamentQueue.size >= 4) {
-		print('Tournament ready is starting;');
+		//print('Tournament ready is starting;');
 		tournamentEvent.emit('ready');
 	}
 }
 
-export function getConnecteds(): { id: number, username: string }[] | undefined {
+export function broadcastTournamentQueueUpdate() {
+	// send the id of connected users in the tournament queue
+	const ids = Array.from(tournamentQueue);
+	for (const id of tournamentQueue) {
+		connectedRoomInstance.broadcastWebsocketMessage(
+			id, 
+			"tournament.queue", 
+			{ queue:  ids} );
+	}
+}
+
+export function getConnected(): { id: number, username: string }[] | undefined {
 	if (tournamentQueue.size === 0) return undefined;
 
 	const iterator = tournamentQueue.values();
@@ -37,17 +48,20 @@ export function getConnecteds(): { id: number, username: string }[] | undefined 
 		}
 		tournament.push({ id: Number(connected.id), username: connected.username });
 	}
+
 	if (tournament.length === 4) {
 		for (const p of tournament) {
 			tournamentQueue.delete(p.id);
 		}
+		broadcastTournamentQueueUpdate();
 		return tournament;
 	}
+
 	return undefined;
 }
 
 tournamentEvent.on('ready', () => {
-	const tournamentPlayers = getConnecteds();
+	const tournamentPlayers = getConnected();
 	if (tournamentPlayers === undefined) return;
 
 	const tournamentId = crypto.randomUUID();

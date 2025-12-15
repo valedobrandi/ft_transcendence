@@ -46,6 +46,7 @@ export async function createSchema() {
 			content TEXT NOT NULL,
 			sender INTEGER NOT NULL,
 			isBlocked BOOLEAN DEFAULT 0,
+			isRead BOOLEAN DEFAULT 0,
 			timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE,
 			FOREIGN KEY(receiver_id) REFERENCES users(id) ON DELETE CASCADE)
@@ -62,5 +63,6 @@ export async function createSchema() {
 			status TEXT DEFAULT 'pending',
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY(from_id) REFERENCES users(id) ON DELETE CASCADE,
-			FOREIGN KEY(to_id) REFERENCES users(id) ON DELETE CASCADE)`);
+			FOREIGN KEY(to_id) REFERENCES users(id) ON DELETE CASCADE)`
+		);
 }

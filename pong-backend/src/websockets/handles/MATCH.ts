@@ -8,9 +8,9 @@ import { print } from '../../server.js';
 export function MATCH(data: MatchType, connection: WebSocket) {
 	const player = connectedRoomInstance.getById(Number(data.userId));
 
-	if (player == undefined || player.status != 'CONNECT_ROOM') return;
+	if (player == undefined || player.status != 'CONNECTED') return;
 
-	print(`[MATCH]: ${data.username}`);
+	//print(`[MATCH]: ${data.username}`);
 
 	joinMatchRoom(player.username, Number(player.id));
 }

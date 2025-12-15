@@ -1,5 +1,4 @@
 import Database from "better-sqlite3";
-import { fastify, print } from "../server.js";
 
 export type MessageReturnDB = {
 	id: number;
@@ -9,6 +8,7 @@ export type MessageReturnDB = {
 	timestamp: string;
 	isBlocked: number;
 	sender: number;
+	isRead: number;
 }
 
 
@@ -22,6 +22,7 @@ class MessagesModel {
 	private stmSaveMessage: Database.Statement;
 	private stmGetMessages: Database.Statement;
 	private stmGetChatHistory: Database.Statement;
+	private stmMarkAsRead: Database.Statement;
 
 	constructor(db: Database.Database) {
 		this.db = db;
@@ -42,16 +43,20 @@ class MessagesModel {
 			)
 			AND NOT (m.receiver_id = ? AND m.isBlocked = 1)
 			ORDER BY m.timestamp ASC`);
+		this.stmMarkAsRead = db.prepare(`
+			UPDATE messages
+			SET isRead = 1
+			WHERE id = ?`);
 	}
 
 	getChatHistory(userId: number): unknown[] {
-		print(`[MESSAGES MODEL] getChatHistory`);
+		//print(`[MESSAGES MODEL] getChatHistory`);
 		const response = this.stmGetChatHistory.all(Number(userId), Number(userId));
 		return response;
 	}
 
 	getMessages(senderId: number, receiverId: number): GetMessages {
-		print(`[MESSAGES MODEL] getMessages`);
+		//print(`[MESSAGES MODEL] getMessages`);
 		try {
 			const response = this.stmGetMessages.all(
 				Number(senderId),
@@ -72,13 +77,17 @@ class MessagesModel {
 			})
 			return { status: 'success', data: data };
 		} catch (error) {
-			fastify.log.error(`[MESSAGES MODEL] ${String(error)}`);
+			// intentionally swallow or handle error at a higher level; avoid importing server to log here
 		}
 		return { status: 'error', data: [] };
 	}
 
 	saveMessage(senderId: number, receiverId: number, content: string, isBlocked = 0): void {
 		this.stmSaveMessage.run(Number(senderId), Number(receiverId), content, Number(senderId), isBlocked);
+	}
+
+	markMessageAsRead(messageId: number): void {
+		this.stmMarkAsRead.run(Number(messageId));
 	}
 }
 

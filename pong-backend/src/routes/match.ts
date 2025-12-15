@@ -12,7 +12,6 @@ import { statusCode } from "../types/statusCode.js";
 import db from "../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
 import fetch from "node-fetch";
-import { print } from "../server.js";
 
 import { SettingsType } from "../types/GameStateType.js";
 import { GameSettings, PingPong, gameSettings } from "../classes/PingPong.js";
@@ -172,6 +171,16 @@ class MatcherController {
 
 	sendMatchInvite(req: FastifyRequest<{ Body: { invitedId: number } }>, res: FastifyReply) {
 		const { invitedId } = req.body;
+
+		const connected = connectedRoomInstance.getById(req.userId);
+		if (connected === undefined) {
+			return res.code(statusCode("UNAUTHORIZED")).send({ message: "error", data: "user disconnected" });	
+		}
+
+		if (connected.status !== "CONNECTED") {
+			return res.code(statusCode("OK")).send({ message: "error", data: "cannot send invite when you are subscribed to a match/tournament" });
+		}
+
 		const { message, data } = this.matchesService.sendMatchInvite(
 			req.userId,
 			invitedId,
@@ -248,7 +257,7 @@ class MatchesService {
 
 	async getMatchHistory(username: string) {
 		const match = await this.matchesModel.getMatchHistoryById(username);
-		print(`[MATCH HISTORY] Retrieved match history for user: ${JSON.stringify(match)}`);
+		//print(`[MATCH HISTORY] Retrieved match history for user: ${JSON.stringify(match)}`);
 		
 		const matchesHistory: MatchesHistory = {
 			wins: 0,
@@ -262,7 +271,7 @@ class MatchesService {
 
 		for (const m of match) {
 			const { score1, score2 } = await this.matchesModel.getScoreHardhat(m.match_id);
-			print(`[BLOCKCHAIN] Fetched match score for match ID ${m.match_id}: ${score1}, ${score2}`);
+			//print(`[BLOCKCHAIN] Fetched match score for match ID ${m.match_id}: ${score1}, ${score2}`);
 			matchesHistory.history.push({
 				player1: m.player1,
 				score1: Number(score1),
@@ -292,7 +301,6 @@ class MatchesService {
 		if (connected === undefined) throw new Error("disconnected");
 
 		const nextMatch = newMatchesQueue.get(matchId);
-
 		if (nextMatch?.createId !== userId) {
 			return { message: "error", data: "FORBIDDEN" };
 		}
@@ -303,9 +311,9 @@ class MatchesService {
 
 		newMatchesQueue.delete(matchId);
 		connected.matchId = undefined;
-		connected.status = "CONNECT_ROOM";
+		connected.status = "CONNECTED";
 
-		connectedRoomInstance.sendWebsocketMessage(userId, "CONNECT_ROOM");
+		connectedRoomInstance.sendWebsocketMessage(userId, "CONNECTED");
 		connectedRoomInstance.broadcastNewMatchesList();
 
 		return { message: "success", data: "match canceled" };
@@ -315,7 +323,7 @@ class MatchesService {
 		const connected = connectedRoomInstance.getById(userId);
 		if (connected === undefined) throw new Error("disconnected");
 
-		if (connected.status !== "CONNECT_ROOM") {
+		if (connected.status !== "CONNECTED") {
 			return { message: "error", data: "already subscribed to a match/tournament" };
 		}
 
@@ -340,11 +348,9 @@ class MatchesService {
 
 	acceptMatchInvite(userId: number, matchId: string) {
 
-		const getUser = connectedRoomInstance.getById(userId);
-		if (getUser === undefined) throw new Error("disconnected");
-
-		if (getUser.status !== "MATCH_INVITE") {
-			return { message: "error", data: `subscribed to ${getUser.status}` };
+		const connected = connectedRoomInstance.getById(userId);
+		if (connected === undefined) {
+			return { message: "error", data: "user disconnected" };
 		}
 
 		const nexMatch = inviteMatchesQueue.get(matchId);
@@ -352,10 +358,10 @@ class MatchesService {
 		inviteMatchesQueue.delete(matchId);
 
 		if (nexMatch === undefined) {
-			return { message: "error", data: "match not find" };
+			return { message: "error", data: "sorry, the invitation has been canceled" };
 		}
 
-		nexMatch.players.push({ id: Number(getUser.id), username: getUser.username });
+		nexMatch.players.push({ id: Number(connected.id), username: connected.username });
 
 		const { data, message } = startNewMatch(nexMatch);
 		// Notify the two players
@@ -390,7 +396,7 @@ class MatchesService {
 			};
 		}
 
-		if (connected.status !== "CONNECT_ROOM") {
+		if (connected.status !== "CONNECTED") {
 			return {
 				message: "error",
 				data: "has a subscribed to match/tournament",
@@ -400,9 +406,9 @@ class MatchesService {
 		const matchId = crypto.randomUUID();
 
 		connected.matchId = matchId;
-		connected.status = "MATCH_QUEUE";
+		connected.status = "MATCH";
 
-		connectedRoomInstance.sendWebsocketMessage(userId, "MATCH_QUEUE");
+		connectedRoomInstance.sendWebsocketMessage(userId, "MATCH");
 
 		const newMatch: NewMatch = {
 			createId: userId,
@@ -410,6 +416,7 @@ class MatchesService {
 			matchId,
 			settings,
 			status: "OPEN",
+			type: "MATCH",
 		};
 
 		if (settings.IA) {
@@ -451,7 +458,7 @@ class MatchesService {
 			const requestUser = connectedRoomInstance.getById(Number(matchUser));
 			if (requestUser && requestUser.socket) {
 				requestUser.matchId = undefined;
-				requestUser.status = "CONNECT_ROOM";
+				requestUser.status = "CONNECTED";
 				requestUser.socket.send(
 					JSON.stringify({
 						status: 200,
@@ -494,29 +501,29 @@ class MatchesService {
 			}
 
 			if (playerId === id) {
-				if (userInstance.status !== "CONNECT_ROOM") {
+				if (userInstance.status !== "CONNECTED") {
 					return {
 						message: "error",
-						data: "cannot send invite in current status",
+						data: "cannot send invite when you are subscribed to a match/tournament",
 					};
 				}
-				userInstance.status = "SEND_INVITE";
+				userInstance.status = "MATCH";
 			}
 			userInstance.matchId = matchId;
 
 			if (playerId === invitedId) {
-				if (userInstance.status !== "CONNECT_ROOM") {
+				if (userInstance.status !== "CONNECTED") {
 					return {
 						message: "error",
-						data: "cannot receive invite in current status",
+						data: "cannot send invite the other player is subscribed to a match/tournament",
 					};
 				}
-				userInstance.status = "MATCH_INVITE";
+				userInstance.status = "MATCH";
 				if (userInstance.socket) {
 					userInstance.socket.send(
 						JSON.stringify({
 							status: 200,
-							message: "MATCH_INVITE",
+							message: "match.invite",
 							payload: {
 								from: id,
 								matchId: matchId,
@@ -579,7 +586,7 @@ class MatchesModel {
 			const score2 = data.score2;
 			return { score1, score2 };
 		} catch (error) {
-			print(`[BLOCKCHAIN ERROR] Failed to fetch match score for match ID ${matchId}: ${error}`);
+			//print(`[BLOCKCHAIN ERROR] Failed to fetch match score for match ID ${matchId}: ${error}`);
 			return { score1: 0, score2: 0 };
 		}
 	}

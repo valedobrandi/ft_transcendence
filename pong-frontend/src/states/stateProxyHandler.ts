@@ -1,80 +1,5 @@
-import { profile } from "../app";
 import { onClickGetProfileData } from "../components/UsersList";
 import type { ChatMessage } from "../interface/ChatMessage";
-import { navigateTo, setTime } from "../utils";
-
-export function newIntraMessage(message: string): number {
-    stateProxyHandler.systemMessages = [...stateProxyHandler.systemMessages, {
-        message: message,
-        index: (stateProxyHandler.systemMessages.length),
-    }];
-    return stateProxyHandler.systemMessages.length - 1;
-}
-
-export function updateIntraMessage(idx: number, newMessage: string) {
-    stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.map(msg => {
-        if (msg.index === idx) {
-            return { ...msg, message: newMessage };
-        }
-        return msg;
-    });
-}
-
-export function removeIntraMessage(idx: number) {
-    // Update message to "" by index
-    stateProxyHandler.systemMessages = stateProxyHandler.systemMessages.map(msg => {
-        if (msg.index === idx) {
-            return { ...msg, message: "" };
-        }
-        return msg;
-    });
-}
-
-export function findIntraMessage(tagId: string) {
-    const idx = stateProxyHandler.systemMessages.findIndex(
-        msg => msg.message.includes(tagId)
-    );
-    return idx;
-}
-
-export function renderSystemMessages() {
-    //console.log("Rendering system messages");
-    const messageBox = document.getElementById('system-messages');
-    if (!messageBox) return;
-
-    messageBox.innerHTML = '';
-    stateProxyHandler.systemMessages.forEach(msg => {
-        const p = document.createElement('p');
-        p.id = `msg-index-${msg.index}`;
-        p.className = "m-2 text-sm text-black bg-yellow-100 p-2 rounded w-fit";
-        p.innerHTML = `${msg.message}`;
-        messageBox.appendChild(p);
-    });
-}
-
-export function renderChatMessages(_: string, selectedChatId: number) {
-    //console.log("Rendering messages for chat ID:", selectedChatId);
-    //console.log("Messages:", stateProxyHandler.messages);
-    const messageBox = document.getElementById('messages');
-    if (!messageBox) return;
-
-    // Create a new paragraph element for each message
-    messageBox.innerHTML = '';
-    // Get messages from the messageState.messages by selectedChatId
-    const messages = stateProxyHandler.messages.get(selectedChatId) || [];
-    messages.forEach(msg => {
-        const p = document.createElement('p');
-        p.id = `msg-${msg.timestamp}`;
-        p.className = "m-2 text-sm text-white max-w-xs break-words";
-        if (Number(msg.from) === Number(profile.id)) {
-            p.className += " p-2 rounded-lg w-fit ml-auto bg-[hsl(345,100%,47%)] text-white shadow-sm";
-        } else {
-            p.className += " p-2 rounded-lg w-fit bg-[#36393e] text-white shadow-sm";
-        }
-        p.innerHTML = `${msg.message}`;
-        messageBox.appendChild(p);
-    });
-}
 
 export const messageListeners: (() => void)[] = [];
 
@@ -89,8 +14,7 @@ export function changeChatHeader(header: string) {
     const tab = document.createElement('h1');
     tab.innerHTML = '';
     tab.textContent = `#${header}`;
-    tab.className = 'm-auto font-bold';
-    renderChatMessages(stateProxyHandler.selectChat.name, stateProxyHandler.selectChat.id);
+    tab.className = 'm-auto font-bold text-white text-2xl tracking-wide';
     chatHeader.innerHTML = '';
     chatHeader.appendChild(tab);
 }
@@ -107,13 +31,15 @@ export type ServerUsersList = {
 
 export type FriendListType = {
     id: number;
-    isConnected: boolean;
+    isConnect: boolean;
 };
 
 export type NewMatch = {
     createId: number;
     players: number[];
-    matchId: number;
+    matchId: string;
+    tournamentId: string;
+    type: "MATCH" | "TOURNAMENT";
     status: string;
     settings: {};
 }
@@ -138,94 +64,126 @@ const listeners: Record<StateKey, (() => void)[]> = {
     serverUsers: [],
     friendList: [],
     chatBlockList: [],
-    connectedUsers: [],
-    selectChat: [],
+    chat: [],
     state: [],
-    systemMessages: [],
     availableMatches: [],
     matchesHistory: [],
     profile: [],
     reset: [],
     settings: [],
     paddle: [],
+    tournamentQueue: [],
+    invite: [],
+    friendRequests: [],
 };
 
 export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
-     //console.log("Listener registered for settings");
     listeners[key].push(fn);
 }
 
+export function loadLocalStorage() {
+    const PERSISTED_KEYS: (keyof State)[] = [
+        "paddle",
+        "state",
+        "settings",
+        "tournamentQueue",
+        "invite"
+    ];
+    PERSISTED_KEYS.forEach((key) => {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+            const value = JSON.parse(stored);
+            (stateProxyHandler as any)[key] = value;
+        }
+    });
+}
+
+export function removeLocalStorage() {
+    console.log("[REMOVE LOCAL STORAGE]");
+    const PERSISTED_KEYS: (keyof State)[] = [
+        "paddle",
+        "state",
+        "settings",
+        "tournamentQueue",
+        "invite"
+    ];
+    PERSISTED_KEYS.forEach((key) => {
+        localStorage.removeItem(key);
+    });
+}
+
 export interface StateProxyHandler {
-    messages: Map<number, ChatMessage[]>;
-    serverUsers: ServerUsersList[];
+    // API CALLS
     friendList: FriendListType[];
     chatBlockList: number[];
-    connectedUsers: { id: number; name: string }[];
-    selectChat: { id: number; name: string };
-    state: "CONNECT_ROOM" |
-    "MATCH_QUEUE" |
-    "MATCH_ROOM" |
-    "TOURNAMENT_QUEUE" |
-    "TOURNAMENT_ROOM" |
-    "GAME_ROOM" |
-    "GAME_START" |
-    "SEND_INVITE" |
-    "MATCH_INVITE",
-    systemMessages: { index: number; message: string }[];
-    availableMatches: NewMatch[];
     matchesHistory: MatchesHistory;
+
+    // WEBSOCKET STATE
+    availableMatches: NewMatch[]; //match:list"
+    serverUsers: ServerUsersList[]; //SERVER_USERS
+    messages: Record<number, ChatMessage[]>; //CHAT_HISTORY"
+    friendRequests: { id: number; username: string, eventId: number }[]; //websocketNewEvents()
+
+    // UI STATE
     profile: { username: string, avatar: string };
-    settings: { state: string };
+    chat: { id: number; name: string };
+
     paddle: { height: number, width: number };
+    state: "CONNECTED" | "MATCH" | "TOURNAMENT",
+    settings: { state: "0" | "game.settings" | "match.waiting" | "match.playing" | "tournament.waiting" | "invite.receive" | "invite.sent" };
+    tournamentQueue: { id: number; username: string }[];
+    invite: { matchId: string; id: number; username: string } | undefined;
     reset: () => void;
 }
 
 class State {
-  messages!: Map<number, ChatMessage[]>;
+    messages!: Record<number, ChatMessage[]>;;
     serverUsers!: ServerUsersList[];
     friendList!: FriendListType[];
     chatBlockList!: number[];
-    connectedUsers!: { id: number; name: string }[];
-    selectChat!: { id: number; name: string };
-    state!: "CONNECT_ROOM" |
-    "MATCH_QUEUE" |
-    "MATCH_ROOM" |
-    "TOURNAMENT_QUEUE" |
-    "TOURNAMENT_ROOM" |
-    "GAME_ROOM" |
-    "GAME_START" |
-    "SEND_INVITE" |
-    "MATCH_INVITE";
-    systemMessages!: { index: number; message: string }[];
+    chat!: { id: number; name: string };
+    state!: "CONNECTED" | "MATCH" | "TOURNAMENT"
     availableMatches!: NewMatch[];
     matchesHistory!: MatchesHistory;
     profile!: { username: string, avatar: string };
-    settings!: { state: string };
+    settings!: {
+        state: "0" | 
+        "game.settings" | 
+        "match.waiting" | 
+        "match.playing" | 
+        "tournament.waiting" | 
+        "invite.receive" | "invite.sent"
+    };
     paddle!: { height: number, width: number };
+    tournamentQueue!: { id: number; username: string }[];
+    invite!: { matchId: string; id: number; username: string } | undefined;
+    friendRequests!: { id: number; username: string, eventId: number }[];
 
-  constructor() {
-    this.reset();
-  }
 
-  reset() {
-    this.messages = new Map();
-    this.serverUsers = [];
-    this.friendList = [];
-    this.chatBlockList = [];
-    this.connectedUsers = [];
-    this.selectChat = { id: -1, name: "" };
-    this.state = "CONNECT_ROOM";
-    this.systemMessages = [];
-    this.availableMatches = [];
-    this.matchesHistory = { wins: 0, loses: 0, history: [] };
-    this.profile = { username: "", avatar: "" };
-    this.settings = {state: '0'};
-    this.paddle = { height: 0.150, width: 0.020};
-  }
+    constructor() {
+        this.reset();
+    }
+
+    reset() {
+        this.messages = {};
+        this.serverUsers = [];
+        this.friendList = [];
+        this.chatBlockList = [];
+        this.chat = { id: -1, name: "" };
+        this.state = "CONNECTED";
+        this.availableMatches = [];
+        this.matchesHistory = { wins: 0, loses: 0, history: [] };
+        this.profile = { username: "", avatar: "" };
+        this.settings = { state: '0' };
+        this.paddle = { height: 0.150, width: 0.020 };
+        this.tournamentQueue = [];
+        this.invite = undefined;
+        this.friendRequests = [];
+    }
 }
 
 export const stateProxyHandler: StateProxyHandler = new Proxy(
-   new State(), {
+    new State(), {
     get(target, prop) {
         if (prop === 'reset') {
             return () => {
@@ -235,48 +193,22 @@ export const stateProxyHandler: StateProxyHandler = new Proxy(
         return target[prop as keyof typeof target];
     },
     set(target, prop, value) {
-
         target[prop as keyof typeof target] = value;
-
-        if (prop === 'state') {
-            switch (value) {
-                case "GAME_ROOM":
-                    setTime(5000, () => {
-                        navigateTo("/match");
-                    });
-                    break;
-                case "GAME_OVER":
-                    setTime(5000, () => {
-                        navigateTo("/intra");
-                    });
-                    break;
-                case "CHAT_MESSAGE":
-                    renderChatMessages(target.selectChat.name, target.selectChat.id);
-                    break;
-                case "CHAT_HISTORY":
-                    renderChatMessages(target.selectChat.name, target.selectChat.id);
-                    break;
-                case "SYSTEM_MESSAGE":
-                    renderSystemMessages();
-                    break;
-            }
-        }
 
         const key = prop as StateKey;
         if (listeners[key]) {
-            //console.log("Notifying listeners for key:", key);
             listeners[key].forEach(fn => fn());
         }
 
-        if (prop === 'selectChat') {
-            changeChatHeader(target.selectChat.name);
+        if (prop === "chat") {
+            changeChatHeader(target.chat.name);
 
-            const isIntra = target.selectChat.id === -1;
+            const isIntra = target.chat.id === -1;
 
             const chatMenu = document.getElementById("chat-menu");
 
             if (chatMenu) chatMenu.classList.remove("hidden");
-			
+
             if (isIntra && chatMenu) {
                 chatMenu.classList.add("hidden");
             };
@@ -284,15 +216,6 @@ export const stateProxyHandler: StateProxyHandler = new Proxy(
 
             // CHANGE PROFILE DATA
             queueMicrotask(() => onClickGetProfileData());
-        }
-
-        if (prop === 'friendList') {
-            messageListeners.forEach(fn => fn());
-            //console.log("Friend list updated:", target.friendList);
-        }
-
-        if (prop === 'serverUsers') {
-            messageListeners.forEach(fn => fn());
         }
 
         return true;

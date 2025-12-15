@@ -3,12 +3,11 @@ import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { profile, jwt } from "../app";
-import { stateProxyHandler } from "../states/stateProxyHandler";
+import { removeLocalStorage, stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
 import { onClickGetProfileData } from "./UsersList";
 import { closeSocket, initSocket } from "../websocket";
 import { websocketConnect } from "../websocket/websocketConnect";
-import { endpoint } from "../endPoints";
 
 export function FormLogin(): HTMLElement {
 	const viewDiv = document.createElement("div");
@@ -28,7 +27,7 @@ export function FormLogin(): HTMLElement {
 
 	formElement.onsubmit = (event) => {
 		event.preventDefault();
-		//console.log("2FA code submitted");
+		console.log("2FA code submitted");
 	};
 
 	// Add inputs Name + Password to the form
@@ -66,14 +65,6 @@ export function FormLogin(): HTMLElement {
 		const subtitle = document.createElement("p");
 		subtitle.className = "text-gray-300 text-center";
 		subtitle.textContent = "A code has been sent to you by email.";
-
-		// const emailDemo = document.createElement("div");
-		// emailDemo.className = "text-black text-base border p-4 rounded bg-white";
-		// emailDemo.innerHTML = `
-		// 				<p>From: ${from}</p>
-		// 				<p>To: ${to}</p>
-		// 				<p>Subject: ${subject}</p>
-		// 				${email}`;
 
 		const input = document.createElement("input");
 		input.type = "text";
@@ -129,7 +120,6 @@ export function FormLogin(): HTMLElement {
 
 		modal.appendChild(title);
 		modal.appendChild(subtitle);
-		//modal.appendChild(emailDemo);
 		modal.appendChild(input);
 		modal.appendChild(error);
 		modal.appendChild(confirmBtn);
@@ -168,13 +158,20 @@ export function FormLogin(): HTMLElement {
 		}
 
 		if (response.message === 'success') {
+
+			removeLocalStorage();
+			localStorage.removeItem('jwt_token');
+
 			stateProxyHandler.reset();
 			closeSocket();
 
 			jwt.token = response.payload.accessToken;
+			localStorage.setItem('jwt_token', jwt.token || '');
+
 			profile.username = response.payload.username;
 			profile.id = response.payload.id;
-			stateProxyHandler.selectChat = { id: profile.id, name: profile.username };
+
+			stateProxyHandler.chat = { id: profile.id, name: profile.username };
 
 			const [friendsList, blockedList] = await Promise.all([
 				fetchRequest('/friends-list', 'GET', {}),
@@ -182,20 +179,19 @@ export function FormLogin(): HTMLElement {
 			]);
 
 			if (friendsList.message === 'success') {
-				const newFriendList = friendsList.payload.map((friend: any) => ({
-					id: friend.id,
-					isConnected: friend.isConnected,
-				}));
-				stateProxyHandler.friendList = newFriendList;
-				//console.log("[FRIEND LIST ON LOGIN]", stateProxyHandler.friendList);
+				stateProxyHandler.friendList = friendsList.payload;
+				console.log("[FRIEND LIST ON LOGIN]", stateProxyHandler.friendList);
 			}
 			if (blockedList.message === 'success') {
 				stateProxyHandler.chatBlockList = blockedList.payload;
 			}
-			await onClickGetProfileData();
-			initSocket(endpoint.pong_backend_websocket, profile.username);
+
+			//await onClickGetProfileData();
+			initSocket();
   			await websocketConnect();
+
 			navigateTo("/intra");
+			
 		} else if (response.status === 'error') {
 			const existingAlert = document.getElementById("alert-popup");
 			if (existingAlert)

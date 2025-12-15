@@ -21,9 +21,9 @@ function inviteMatchButton(): string {
 }
 
 function blockButton(): string {
-	//console.log("BlockButton render", stateProxyHandler.chatBlockList);
+	console.log("BlockButton render", stateProxyHandler.chatBlockList);
 	const isBlocked = stateProxyHandler.chatBlockList?.includes(
-		stateProxyHandler.selectChat?.id
+		stateProxyHandler.chat?.id
 	);
 
 	const html = `
@@ -39,7 +39,7 @@ function blockButton(): string {
 
 function addFriendButton(): string {
 	const isFriend = stateProxyHandler.friendList?.some(
-		(friend) => friend.id === stateProxyHandler.selectChat?.id
+		(friend) => friend.id === stateProxyHandler.chat?.id
 	);
 
 	if (isFriend) {
@@ -74,10 +74,10 @@ export function ProfileContainer() {
 
 	function onRender() {
 		const matchesHistory = stateProxyHandler.matchesHistory;
-		const isUserProfile = stateProxyHandler.selectChat.id === profile.id;
+		const isUserProfile = stateProxyHandler.chat.id === profile.id;
 		
 		const avatar = endpoint.pong_backend_api + stateProxyHandler.profile.avatar;
-		//console.log("Rendering ProfileContainer", avatar);
+		console.log("Rendering ProfileContainer", avatar);
 		mainDiv.innerHTML = `
 		<div class="flex flex-col border-2 border-black rounded-2xl h-full text-base">
 			<h2 class="border-b-2 border-black text-xl font-bold p-2 text-center">

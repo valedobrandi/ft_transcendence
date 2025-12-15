@@ -7,9 +7,9 @@ import { print } from '../../server.js';
 export function TOURNAMENT(data: Tournamentype, connection: WebSocket) {
 	const player = connectedRoomInstance.getById(data.id);
 
-	if (player === undefined || player.status != 'CONNECT_ROOM') return;
+	if (player === undefined || player.status != 'CONNECTED') return;
 
-	print(`Tournament Player: ${data.username}`);
+	//print(`Tournament Player: ${data.username}`);
 
 	joinTournamentQueue(Number(player.id));
 }

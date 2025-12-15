@@ -220,7 +220,7 @@ class EventsModel {
 
     deleteEvent(eventId: number): EventOnChangeDB {
         const { changes } = this.stmDeleteEvent.run({ eventId: Number(eventId) }) as EventInsertDB;
-        print(`[DELETE] Event ID ${eventId}, changes: ${changes}`);
+        //print(`[DELETE] Event ID ${eventId}, changes: ${changes}`);
         if (changes === 1) {
             return { message: 'success', data: { message: 'event removed' } };
         }

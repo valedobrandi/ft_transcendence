@@ -19,21 +19,27 @@ class AuthController {
                 message: 'connected', payload: { username }
             });
         }
-        return res.status(400).send({ error: 'Invalid 2FA code' });
+        return res.status(400).send({ error: 'invalid_2fa_code' });
     }
 
-    guestLogin(req: FastifyRequest<{ Body: GuestPostDTO }>, res: FastifyReply) {
+    async isAuthenticated(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
+        try {
+            const authHeader = req.headers['authorization'];
+            if (!authHeader) {
+                return res.status(401).send({ message: 'error', data: 'token_not_provided' });
+            }
 
-        // const { username } = req.body;
-        // const response = this.authServiceInstance.guestLoginValidation(username);
-
-        // if ('message' in response) {
-        //     return res.status(200).send({
-        //         message: response.message, payload: { username: response.username, id: response.id }
-        //     });
-        // }
-
-        // return res.status(400).send({ error: response.error });
+            const token = await req.jwtVerify() as { id: number };
+            const {message, data} = this.authServiceInstance.verifyToken(token.id);
+            if (message === 'success') {
+                return res.status(200).send({ message: 'success', data: data });
+            } 
+            
+            return res.status(401).send({ message: 'error', data: 'invalid_token' });
+            
+        } catch (error: any) {
+            return res.status(error.statusCode || 500).send({ message: 'error', data: error });
+        }
     }
 }
 

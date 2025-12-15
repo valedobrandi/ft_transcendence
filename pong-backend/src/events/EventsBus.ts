@@ -33,7 +33,7 @@ class EventBus<Events extends Record<string, any>> {
         });
 
         this.on('game:start', (data) => {
-            print(`[GAME SETTINGS]: ${data.settings}`);
+            //print(`[GAME SETTINGS]: ${data.settings}`);
             const newMatch = new PingPong(data.matchId, data.settings);
             newMatch.createMatch(data.oponentes[0], data.oponentes[1]);
         })

@@ -49,7 +49,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			if (error) {
 				return res.status(400).send({ message: "error", data: "error_sending_email" });
 			} else {
-				print(JSON.stringify(data));
+				//print(JSON.stringify(data));
 				return res.status(200).send({
 					message: "2FA_REQUIRED",
 					data: {

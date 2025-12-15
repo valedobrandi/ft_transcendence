@@ -1,4 +1,8 @@
-const socket: {websocket: WebSocket | null} = {websocket: null};
+import { profile } from "./app";
+import { endpoint } from "./endPoints";
+
+const socket: { websocket: WebSocket | null } = { websocket: null };
+
 
 export function closeSocket() {
     if (socket.websocket) {
@@ -7,14 +11,13 @@ export function closeSocket() {
     }
 }
 
-export function initSocket(VITE_BACKEND_WEBSOCKET: string, username: string) {
+export function initSocket() {
     if (!socket.websocket) {
-        socket.websocket = new WebSocket(`${VITE_BACKEND_WEBSOCKET}?username=${username}`);
+        socket.websocket = new WebSocket(`${endpoint.pong_backend_websocket}?username=${profile.username}`);
     }
     return socket.websocket;
 }
 
 export function getSocket() {
-    if (socket.websocket === null) throw new Error('Socket not initialized');
     return socket.websocket;
 }

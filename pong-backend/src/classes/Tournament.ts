@@ -126,7 +126,7 @@ class Tournament {
 			await this.startRound();
 		} else {
 			const winnerId = Array.from(this.currentBracket)[0];
-			print(`Tournament ${this.tournamentId} winner is ${winnerId}`);
+			//print(`Tournament ${this.tournamentId} winner is ${winnerId}`);
 			await this.endTournament(winnerId);
 		}
 	}
@@ -134,10 +134,10 @@ class Tournament {
 	async endTournament(username: string) {
 		const connected = connectedRoomInstance.getByUsername(username);;
 		if (connected) {
-			connected.status = 'CONNECT_ROOM';
+			connected.status = 'CONNECTED';
 			if (connected.socket) {
 				this.broadcastIntraMessage(`Tournament: Winner is ${username}! Congratulations!`, [username]);
-				connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECT_ROOM' }));
+				connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
 			}
 		};
 		tournamentRoom.delete(this.tournamentId);
