@@ -6,61 +6,58 @@ import { FormLogin } from "./components/FormLogin";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { ProfilePage } from "./components/FormProfile";
 import { FormGuest } from "./components/FormGuest";
-import { profile } from "./app";
+import { jwt, profile } from "./app";
 import { IntraContainer } from "./components/IntraContainer";
 import { stateProxyHandler } from "./states/stateProxyHandler";
-import { SettignsContainer } from "./components/SettignsContainer";
+import { GameStateContainer } from "./components/GameStateContainer";
+import { navigateTo } from "./utils";
+import { FriendInvite } from "./components/FriendInvite";
 
 
-// <!-- OLD INTRA VIEW -->
-
-// export function intraView(root: HTMLElement) {
-// 	initSocket(endpoint.pong_backend_websocket, profile.username);
-// 	websocketConnect();
-// 	root.innerHTML = "";
-
-// 	const intraUI = Intra();
-// 	const menuUI = Menu();
-// 	root.appendChild(menuUI);
-// 	root.appendChild(intraUI);
-// 	stateProxyHandler.selectChat = { id: -1, name: 'Bienvenue dans le chat !' };
-// }
-
-// <!-- BERNARDO START EDIT -->
 export function intraView(root: HTMLElement) {
   root.innerHTML = "";
-  stateProxyHandler.selectChat = {id: profile.id, name: profile.username}
+  stateProxyHandler.chat = {id: profile.id, name: profile.username}
 
   // Main Intra Container
   const intraContainerUI = IntraContainer()
-
+  intraContainerUI.appendChild(FriendInvite());
   root.appendChild(intraContainerUI);
-  //root.appendChild(Menu());
-  root.appendChild(SettignsContainer());
-  // Chat View
+  root.appendChild(GameStateContainer());
   intraContainerUI.appendChild(Intra());
-  // Profile View
-  // intraContainerUI.appendChild(ProfileContainer());
-  // Game View
-  // intraContainerUI.appendChild(GameContainerUI());
 }
-// <!-- BERNARDO END EDIT -->
+
 
 export function matchView(root: HTMLElement) {
   root.innerHTML = "";
+
+  // main container
   const container = document.createElement("div");
   container.className =
-    "flex justify-center items-center h-full w-full overflow-hidden";
-  const pongUI = RenderGame();
-  container.appendChild(pongUI);
+    "flex flex-col h-full w-full overflow-hidden";
+  container.style.backgroundImage = "url('/default_background.jpg')";
+  container.id = "match-container";
+
+  // header bar
+  const headerBar = document.createElement("div");
+  headerBar.className = "w-full no-wrap"
+
+  // back button
+  const backBtn = document.createElement("button");
+  backBtn.className = "border border-black bg-black text-white text-2xl p-4 mt-4 ml-10 rounded-lg hover:bg-red-500 hover:border-red-500 hover:cursor-pointer";
+  backBtn.innerText = "QUIT MATCH";
+  backBtn.onclick = () => {
+    navigateTo("/intra");
+  };
+  
+  headerBar.appendChild(backBtn);
+  container.appendChild(headerBar);
+  container.appendChild(RenderGame());
   root.appendChild(container);
 }
 
 export function defaultView(root: HTMLElement) {
   root.innerHTML = "";
-  const loginUI = Default();
-  //root.appendChild(SettignsContainer());
-  root.appendChild(loginUI);
+  root.appendChild(Default());
 }
 
 export function guestView(root: HTMLElement) {
@@ -79,6 +76,9 @@ export function guestView(root: HTMLElement) {
 }
 
 export function loginView(root: HTMLElement) {
+  if (profile.username !== "" && jwt) {
+    navigateTo("/intra");
+  }
   root.innerHTML = "";
   const SingUI = FormLogin();
   root.appendChild(SingUI);

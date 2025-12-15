@@ -12,30 +12,43 @@ export function MatchList(): string {
 
   function onRenderMatchList() {
     matchListUl.innerHTML = "";
+
+    if (stateProxyHandler.availableMatches.length === 0) {
+      return;
+    }
+
+    const header = document.createElement("li");
+    header.className = "grid grid-cols-[1fr_1fr_auto] gap-6 items-center border-b-4 p-2 border-[#424549] font-bold text-white text-lg";
+ 
+    header.innerHTML = `
+        <span>GAME TYPE</span>
+        <span>CREATE BY</span>
+        <span>ACTION</span>
+      `;
+    matchListUl.appendChild(header);
     stateProxyHandler.availableMatches.forEach((match) => {
+      const isMatchCreatedByUser = match.createId === profile.id;
+      if (isMatchCreatedByUser) {
+        return;
+      }
       const matchesLi = document.createElement("li");
-      matchesLi.className =
-        "flex justify-between items-center border-b-2 p-2 border-[#424549]";
+      matchesLi.className = "grid grid-cols-[1fr_1fr_auto] gap-6 items-center border-b-2 p-2 border-[#424549]";
 
-      const matchInfo = document.createElement("span");
-      matchInfo.innerText = `${match.matchId}`;
-      matchInfo.classList = "p-2 text-white";
-
-      const matchStatus = document.createElement("span");
-      matchStatus.innerText = `${match.status}`;
-      matchStatus.classList = "p-2 text-white";
-      matchesLi.appendChild(matchStatus);
+      const matchType = document.createElement("span");
+      matchType.className = "p-2 text-white text-lg font-semibold";
+      matchType.innerText = match.type;
 
       const createMatch = document.createElement("span");
+      createMatch.className = "p-2 text-white text-lg font-semibold";
       const createUsername = stateProxyHandler.serverUsers.find(
         (user) => user.id === match.createId
       );
-      createMatch.innerText = `${createUsername?.name || "STATUS"}`;
-      createMatch.classList = "p-2 text-white";
+      createMatch.innerText = "UNKNOWN";
+      if (createUsername) {
+        createMatch.innerText = `${createUsername.name}`;
+      }
 
       const actionBtn = document.createElement("span");
-      const isMatchCreatedByUser = match.createId === profile.id;
-
       actionBtn.innerHTML = ButtonMatchList(
         "match-list",
         isMatchCreatedByUser ? "cancel" : "join",
@@ -43,7 +56,7 @@ export function MatchList(): string {
         !isMatchCreatedByUser
       );
 
-      matchesLi.appendChild(matchInfo);
+      matchesLi.appendChild(matchType);
       matchesLi.appendChild(createMatch);
       matchesLi.appendChild(actionBtn);
       matchListUl.appendChild(matchesLi);

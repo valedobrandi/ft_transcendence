@@ -25,7 +25,7 @@ class ProfileControler {
                 return res.status(404).send({ error: 'user not found' });
             const username = player.username;
             const connected = connectedRoomInstance.getById(req.userId);
-            if (connected && connected.status !== "CONNECT_ROOM") {
+            if (connected && connected.status !== "CONNECTED") {
                 return res.status(200).send({ error: 'user is in a match or a tournament' });
             }
 
@@ -79,7 +79,7 @@ class ProfileControler {
             if (message === 'error') {
                 return res.status(204).send({message, data});
             }
-            print(`[PROFILE] User profile fetched for ID: ${data}`);
+            //print(`[PROFILE] User profile fetched for ID: ${data}`);
             return res.status(200).send({ message, data });
         } catch (error) {
             const err = error as Error;

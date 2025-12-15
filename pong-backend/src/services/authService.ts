@@ -5,9 +5,9 @@ import db from "../database/db.js";
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 class AuthService {
+    private usersModelInstance = new UsersModel(db)
 
     private resend = new Resend(RESEND_API_KEY || "123");
-    private usersModelInstance = new UsersModel(db);
 
     static generate2FACode(): string {
         return Math.floor(100000 + Math.random() * 900000).toString();
@@ -24,30 +24,14 @@ class AuthService {
         return { data, error };
     }
 
-    guestLoginValidation(username: string) {
-        // Look if the user is connected in the room
-        // const connectedUser = connectedRoomInstance.getById(username);
-        // if (connectedUser) {
-        //     // Disconnect user first
-        //     connectedRoomInstance.disconnect(username);
-        // }
-
-        // // Look for existing user
-        // const existingUser = this.usersModelInstance.findUserByEmailOrUsername(username);
-        // if (existingUser) {
-        //     connectedRoomInstance.addUser(existingUser.username, Number(existingUser.id));
-        //     return { message: 'success', username: existingUser.username, id: existingUser.id };
-        // }
-
-        // // Save guest user
-        // const saveAtDatabase: SaveUser = this.usersModelInstance.saveGuestUsername(username);
-        // if ('error' in saveAtDatabase) {
-        //     return { error: saveAtDatabase.error };
-        // }
-
-        // connectedRoomInstance.addUser(saveAtDatabase.username, Number(saveAtDatabase.id));
-        // return { message: saveAtDatabase.message, username: saveAtDatabase.username, id: saveAtDatabase.id };
+    verifyToken(id: number) {
+        const user = this.usersModelInstance.getProfileById(Number(id));
+        if (user.message === 'error') {
+            return {message: 'error', data: 'invalid_token'};
+        }
+        return {message: 'success', data: user.data };
     }
+
 }
 
 export { AuthService };

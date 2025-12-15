@@ -10,6 +10,7 @@ export type MessageModelTable = {
     receiver_id: number,
     content: string,
     timestamp: string,
+    isRead: number,
 }
 
 export type UserModelTable = {

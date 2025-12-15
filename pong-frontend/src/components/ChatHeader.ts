@@ -1,4 +1,4 @@
-import { newIntraMessage, onStateChange, stateProxyHandler, updateIntraMessage } from "../states/stateProxyHandler";
+import {  onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
 import { EmbeddedButton } from "./EmbeddedButton";
@@ -27,7 +27,7 @@ export function ChatHeader(): HTMLDivElement {
 			btn.textContent = opt.text;
 
 			if (opt.value === "block-user") {
-				const isBlocked = stateProxyHandler.chatBlockList?.includes(stateProxyHandler.selectChat?.id || -1);
+				const isBlocked = stateProxyHandler.chatBlockList?.includes(stateProxyHandler.chat?.id || -1);
 				setButtonToUnblockState(btn);
 				if (isBlocked) {
 					setButtonToBlockState(btn);
@@ -37,7 +37,7 @@ export function ChatHeader(): HTMLDivElement {
 			if (opt.value === "friend-list") {
 				btn.classList.remove("opacity-50", "cursor-not-allowed");
 				btn.setAttribute("disable", "false");
-				const isFriend = stateProxyHandler.friendList?.some(friend => friend.id === stateProxyHandler.selectChat?.id);
+				const isFriend = stateProxyHandler.friendList?.some(friend => friend.id === stateProxyHandler.chat?.id);
 				if (isFriend) {
 					btn.classList.add("opacity-50", "cursor-not-allowed");
 					btn.setAttribute("disabled", "true");
@@ -58,7 +58,7 @@ export function ChatHeader(): HTMLDivElement {
 
 	onRender();
 	onStateChange("chatBlockList", onRender);
-	onStateChange("selectChat", onRender);
+	onStateChange("chat", onRender);
 	return chatMenu;
 }
 
@@ -75,10 +75,10 @@ export function setButtonToUnblockState(button: HTMLButtonElement) {
 }
 
 const inviteUserOnclick = async () => {
-	//console.log("[INVITE USER]: ", stateProxyHandler.selectChat.id);
+	console.log("[INVITE USER]: ", stateProxyHandler.chat.id);
 	const response = await fetchRequest('/match-invite', 'POST', {}, {
 		body: JSON.stringify({
-			invitedId: stateProxyHandler.selectChat.id,
+			invitedId: stateProxyHandler.chat.id,
 			settings: {
 				mode: "NORMAL",
 				ballSpeed: "MEDIUM",
@@ -89,24 +89,18 @@ const inviteUserOnclick = async () => {
 	if (response.message === 'success') {
 		const getMatch = await fetchRequest(`/match-invite?matchId=${response.data.matchId}`, 'GET', {});
 		if (getMatch.message === "success") {
-			const getTo = stateProxyHandler.serverUsers.find(user => user.id === Number(getMatch.data.to))
-			const idx = newIntraMessage(""); 
-			updateIntraMessage(idx, `Invite sent to ${getTo?.name} 
-				${EmbeddedButton(getMatch.data.matchId, 'CANCEL', `${idx}`, 'cancel-match-invite', "cancel-match-invite")}`);
-			stateProxyHandler.state = "SEND_INVITE"
+			stateProxyHandler.state = "MATCH"
 		}
-	} else if (response.message = 'error') {
-		newIntraMessage(response.data);
-	}
+	} 
 }
 
 
 const profileOnclick = async () => {
 
-	//console.log("(opt.value === view-profile")
+	console.log("(opt.value === view-profile")
 	try {
 		const data = await fetchRequest('/profile', 'GET', {});
-		//console.log("DATA PROFILE = ", data);
+		console.log("DATA PROFILE = ", data);
 		if (data.message === 'success') {
 			profile.username = data.existUser.username;
 			profile.id = data.existUser.id;

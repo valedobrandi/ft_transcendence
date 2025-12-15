@@ -10,13 +10,12 @@ import chatBlockRoute from './routes/chatBlock.js';
 import { eventsRoutes } from './routes/events.js';
 import cookie from '@fastify/cookie';
 import { matchesRoute } from './routes/match.js';
-import fastifyStatic from "@fastify/static";
-import path from "path";
 
 import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
 import { tournamentsRoute } from './routes/tournament.js';
 import { logout } from './routes/logout.js';
+import { serverRoute } from './routes/stateServer.js';
 
 const fastify = Fastify({
 	logger: {
@@ -41,10 +40,7 @@ declare module 'fastify' {
 	}
 }
 
-
-
 fastify.decorateRequest("userId", 0);
-
 
 fastify.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
 	try
@@ -110,6 +106,7 @@ fastify.register(avatarRoute);
 fastify.register(twoFARoutes);
 fastify.register(tournamentsRoute);
 fastify.register(logout);
+fastify.register(serverRoute);
 await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {
@@ -120,7 +117,7 @@ await fastify.register(fastifyCors, {
 });
 
 export function print(message: string) {
-	//console.log(`[Log]: ${message}`);
+	console.log(`[Log]: ${message}`);
 }
 
 export { fastify };

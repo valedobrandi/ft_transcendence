@@ -10,7 +10,7 @@ import { print } from '../../server.js';
 
 export function handleMessage(conn: WebSocket, msg: MessageType) {
     if (msg.type !== 'MOVE_PADDLE' && msg.type !== 'input') {
-        print(`[WEBSOCKET INCOMING]: ${JSON.stringify(msg)}`);
+        //print(`[WEBSOCKET INCOMING]: ${JSON.stringify(msg)}`);
     }
     switch (msg.type) {
         case 'CONNECT':

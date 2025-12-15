@@ -1,9 +1,6 @@
 import { eventListeners } from "./events/eventListeners";
 import { renderRoute } from "./utils";
 
-// export const profile = {
-// 	username: "", id: -1, email: "", avatar_url: "", twoFA_enabled: 0 as 0 | 1 
-// }
 
 export const profile: {
     username: string;
@@ -19,9 +16,9 @@ export const profile: {
     twoFA_enabled: 0
 };
 
-export const jwt = {token: ""};
+export const jwt: { token: string | undefined } = {token: undefined};
 
-export function init() {
-    renderRoute(window.location.pathname);
+export async function init() {
+    await renderRoute(window.location.pathname);
     eventListeners();
 }

@@ -6,6 +6,9 @@ import { ChatSendInput } from "./ChatSendInput";
 import { UsersList } from "./UsersList";
 import { MatchList } from "./MatchList";
 import { endpoint } from "../endPoints";
+import { GameActionBtn } from "./GameButtons";
+import { ProfileButton } from "./ProfileButton";
+import { RenderChatMessages } from "../states/RenderChatMessages";
 
 export function Intra(): HTMLElement {
     const mainDiv = document.createElement("div");
@@ -28,7 +31,7 @@ export function Intra(): HTMLElement {
 
     const contentDiv = document.createElement("div");
 	contentDiv.id = "content-div";
-    contentDiv.className = "border-b-10 border-[#1e2124] flex h-2/3 min-h-0";
+    contentDiv.className = "border-b-10 border-[#1e2124] flex h-full min-h-0";
 
     // Chat
     const chatWidget = document.createElement("div");
@@ -36,20 +39,25 @@ export function Intra(): HTMLElement {
     chatWidget.className = "flex flex-col flex-1 border-r-10 border-[#1e2124]";
 
     // Chat Header Text
+    const chatHeader = document.createElement("div");
+    chatHeader.id = "chat-header";
+    chatHeader.className = "w-full p-2 flex tracking-wide items-center justify-center bg-[#282b30] border-5 border-[#424549] text-white";
+    chatHeader.textContent = "FT_TRANSCENDENCE CHAT";
+    chatWidget.appendChild(chatHeader);
+
+    // Chat Tabs
+
     const chatTabs = document.createElement("div");
     chatTabs.id = "chat-tabs";
     chatTabs.className = "flex border-b-1 border-[#424549] bg-[#36393e] h-10 text-white";
 
-    // Chat Message Box
-    const messages = document.createElement("div");
-    messages.id = "messages";
-    messages.className = "border-0 flex-1 overflow-y-auto p-3 bg-[#282b30] text-white";
+ 
 
     // Chat Input
     const inputDiv = ChatSendInput();
 
     chatWidget.appendChild(chatTabs);
-    chatWidget.appendChild(messages);
+    chatWidget.appendChild(RenderChatMessages());
     chatWidget.appendChild(inputDiv);
 
     // User/Friend
@@ -66,7 +74,6 @@ export function Intra(): HTMLElement {
     // ====================================================================== //
 
     const intraContainer = SystemMessageChat();
-    intraContainer.className = "flex flex-col flex-1 border-0 w-full min-h-0 overflow-y-auto";
 
     leftParent.appendChild(contentDiv);
     leftParent.appendChild(intraContainer);
@@ -85,7 +92,6 @@ export function Intra(): HTMLElement {
         middleParent.innerHTML = "";
 
         const matchesHistory = stateProxyHandler.matchesHistory;
-        const isUserProfile = stateProxyHandler.selectChat.id === profile.id;
 
         // ================================================================== //
         //     Upper Section (Avatar + Nickname + Stats + Buttons)            //
@@ -128,49 +134,8 @@ export function Intra(): HTMLElement {
         profileDiv.appendChild(profileAvatar);
         profileDiv.appendChild(profileName);
 
-        // Buttons
-        const buttonsDiv = document.createElement("div");
-        buttonsDiv.className = "flex flex-col gap-10 mb-9";
-
-        if (!isUserProfile) {
-            const isFriend = stateProxyHandler.friendList?.some((friend) => friend.id === stateProxyHandler.selectChat?.id);
-            const friendButton = document.createElement("button");
-            friendButton.id = "btn-friend-list";
-            friendButton.textContent = "Add Friend";
-            friendButton.className = `px-10 py-4 rounded text-white ${isFriend ? "bg-gray-400 opacity-50 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`;
-            friendButton.disabled = !!isFriend;
-            buttonsDiv.appendChild(friendButton);
-
-            const removeFriendButton = document.createElement("button");
-            removeFriendButton.id = "btn-remove-friend";
-            removeFriendButton.textContent = "Remove Friend";
-            removeFriendButton.className = `px-10 py-4 rounded text-white ${isFriend ? "bg-red-500 hover:bg-red-600" : "bg-gray-400 opacity-50 cursor-not-allowed"}`;
-            removeFriendButton.disabled = !isFriend;
-            buttonsDiv.appendChild(removeFriendButton);
-
-            const isBlocked = stateProxyHandler.chatBlockList?.includes(stateProxyHandler.selectChat?.id);
-            const blockButton = document.createElement("button");
-            blockButton.id = `${isBlocked ? "btn-unblock-user" : "btn-block-user"}`;
-            blockButton.textContent = isBlocked ? "Unblock" : "Block";
-            blockButton.className = `px-10 py-4 rounded text-white ${isBlocked ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"}`;
-            buttonsDiv.appendChild(blockButton);
-
-            const inviteButton = document.createElement("button");
-            inviteButton.id = "btn-invite-match";
-            inviteButton.textContent = "Invite"
-            inviteButton.className = "px-10 py-4 rounded text-white bg-yellow-500 hover:bg-yellow-600";
-            buttonsDiv.appendChild(inviteButton);
-        }
-        else {
-            const updateProfileButton = document.createElement("button");
-            updateProfileButton.id = "update-profile";
-            updateProfileButton.textContent = "Update Profile";
-            updateProfileButton.className = "px-10 py-4 rounded text-white bg-blue-500 hover:bg-blue-600";
-            buttonsDiv.appendChild(updateProfileButton);
-        }
-
         profileContainer.appendChild(profileDiv);
-        profileContainer.appendChild(buttonsDiv);
+        profileContainer.appendChild(ProfileButton());
 
         middleParent.appendChild(profileContainer);
 
@@ -260,12 +225,12 @@ export function Intra(): HTMLElement {
 
     const viewProfileButton = document.createElement("button");
     viewProfileButton.id = "view-profile";
-    viewProfileButton.textContent = "View Profile";
+    viewProfileButton.textContent = profile.username;
     viewProfileButton.className = "px-10 py-4 rounded text-white bg-blue-500 hover:bg-blue-600";
 
     const logoutButton = document.createElement("button");
     logoutButton.id = "btn-logout";
-    logoutButton.textContent = "Disconnect";
+    logoutButton.textContent = "DISCONNECT";
     logoutButton.className = "px-10 py-4 rounded text-white bg-red-500 hover:bg-red-600";
 
     menuButtonContainer.appendChild(viewProfileButton);
@@ -279,7 +244,7 @@ export function Intra(): HTMLElement {
     // Header
     const gameListHeader = document.createElement("div");
     gameListHeader.className = "w-full flex items-center justify-center border-5 border-[#424549] text-white";
-    gameListHeader.textContent = "GAMES";
+    gameListHeader.textContent = "CREATED GAMES LIST";
     rightParent.appendChild(gameListHeader);
 
     const gameListWrapper = document.createElement("div");
@@ -302,25 +267,9 @@ export function Intra(): HTMLElement {
     const gameHeader = document.createElement("div");
     gameHeader.className = "w-full flex items-center justify-center border-5 border-[#424549] text-white";
     gameHeader.textContent = "CREATE A GAME";
+
     rightParent.appendChild(gameHeader);    
-
-    // Buttons
-    const gameButtonContainer = document.createElement("div");
-    gameButtonContainer.className = "flex justify-evenly w-full mt-6 mb-6";
-
-    const matchButton = document.createElement("button");
-    matchButton.id = "create-match-btn";
-    matchButton.textContent = "Create Match";
-    matchButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase";
-
-    const tournamentButton = document.createElement("button");
-    tournamentButton.id = "tournament-btn";
-    tournamentButton.textContent = "Join Tournament";
-    tournamentButton.className = "px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase";
-
-    gameButtonContainer.appendChild(matchButton);
-    gameButtonContainer.appendChild(tournamentButton);
-    rightParent.appendChild(gameButtonContainer);
+    rightParent.appendChild(GameActionBtn());
 
     // ====================================================================== //
     //                                                                        //

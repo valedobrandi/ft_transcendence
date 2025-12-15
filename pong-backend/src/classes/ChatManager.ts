@@ -30,7 +30,7 @@ class ChatManager {
         return [userA, userB].sort().join('-');
     }
 
-    sendMessage(receiver: string, message: string, sender: number[], history: ChatMessage[] = []) {
+    sendMessage(sender: number[], history: ChatMessage[] = []) {
         const send = connectedRoomInstance.getById(this.id);
 
         if (send && send.socket) {

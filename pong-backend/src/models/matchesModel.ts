@@ -38,7 +38,7 @@ class MatchesModel {
 			}
 			
 			const data = await response.json();
-			print(`[BLOCKCHAIN] Match ${machId} saved on blockchain. ${JSON.stringify(data)}`);
+			//print(`[BLOCKCHAIN] Match ${machId} saved on blockchain. ${JSON.stringify(data)}`);
 			this.stmSaveMatch.run(
 				machId, player1, player2);
 		} catch (error) {

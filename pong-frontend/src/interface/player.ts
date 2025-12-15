@@ -5,4 +5,5 @@ export interface PlayerType {
     height: number;
     color: string;
     score: number;
+    username: string;
 }
