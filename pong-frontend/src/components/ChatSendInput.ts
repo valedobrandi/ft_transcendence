@@ -11,7 +11,7 @@ export function ChatSendInput(): HTMLDivElement {
     
     function onRender() {
         inputDiv.innerHTML = "";
-        const isChatSelected = stateProxyHandler.selectChat.id === profile.id;;
+        const isChatSelected = stateProxyHandler.chat.id === profile.id;;
         if (isChatSelected) {
             return;
         }
@@ -42,13 +42,13 @@ export function ChatSendInput(): HTMLDivElement {
             event.preventDefault();
             const message = input.value.trim();
             if (message) {
-                const {name, id} = stateProxyHandler.selectChat;
+                const {name, id} = stateProxyHandler.chat;
                 websocketChatSend(message, name, id);
                 input.value = "";
             }
         }
     }
     onRender();
-    onStateChange("selectChat", onRender);
+    onStateChange("chat", onRender);
     return inputDiv;
 }

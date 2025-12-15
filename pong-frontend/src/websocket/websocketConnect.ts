@@ -1,6 +1,5 @@
 import { profile } from "../app";
 import { setupPaddleListeners } from "../events/paddleListeners";
-import { newIntraMessage } from "../states/stateProxyHandler";
 import { getSocket } from "../websocket";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketReceiver } from "./websocketReceiver";
@@ -28,13 +27,13 @@ export async function websocketConnect() {
 		}));
 
 		websocketReceiver(socket);
-		
-		newIntraMessage(`${profile.username} connected.`);
+
 
 		await websocketNewEvents();
 
 
 		setupPaddleListeners((up, down) => {
+			if (socket.readyState !== WebSocket.OPEN) return;
 			socket.send(JSON.stringify({
 				type: "MOVE_PADDLE",
 				username: profile.username,

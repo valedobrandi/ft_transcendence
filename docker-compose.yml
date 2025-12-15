@@ -8,7 +8,6 @@ services:
       - "5173:5173"
     volumes:
       - ./pong-frontend:/app
-      - ./tests/frontend:/app/vitest
       - /app/node_modules
     environment:
       - VITE_PONG_BACKEND_API=http://localhost:3000
@@ -31,8 +30,6 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - ADRESS=192.0.7
-      - RPC_URL=http://hardhat:8545
     command: npm run dev
     networks:
       - transcendence-network

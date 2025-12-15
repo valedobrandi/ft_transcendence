@@ -1,5 +1,4 @@
-import { removeIntraMessage } from "../states/stateProxyHandler";
-import { fetchRequest } from "../utils";
+
 import DOMPurify from 'dompurify';
 
 
@@ -18,38 +17,6 @@ function EmbeddedButton(friendId: number, text: string, eventId: string, msgId: 
 	return safeText
 }
 
-async function acceptFriendOnClick(button: HTMLButtonElement) {
-	//console.log("[ACCEPT FRIEND CLICKED]");
-	const eventId = button.dataset.eventid;
-	const userId = button.dataset.userid;
-	const msgId = button.dataset.msgid;
 
-	let response = await fetchRequest(
-		"/add-friend",
-		"POST",
-		{},
-		{ body: JSON.stringify({ id: userId }) }
-	);
 
-	if (response.message === "success") {
-		response = await fetchRequest(`/delete-event?eventId=${eventId}`, "DELETE");
-		if (response.message === "success") {
-			removeIntraMessage(Number(msgId));
-		}
-	}
-}
-
-async function denyFriendOnClick(button: HTMLButtonElement) {
-
-	const eventId = button.dataset.eventid;
-	const msgId = button.dataset.msgid;
-
-	//console.log("[DENY FRIEND CLICKED]");
-
-	const response = await fetchRequest(`/delete-event?eventId=${eventId}`, "DELETE");
-	if (response.message === "success") {
-		removeIntraMessage(Number(msgId));
-	}
-}
-
-export { EmbeddedButton, acceptFriendOnClick, denyFriendOnClick };
+export { EmbeddedButton};

@@ -3,17 +3,10 @@ import bcrypt from 'bcrypt';
 import { RegisterBody, User } from '../types/RegisterType.js';
 import db from '../database/db.js'
 import { AuthController } from '../controllers/authController.js';
-import { guestPostSchema } from '../types/RouteGuest.js';
-import { UsersModel } from '../models/usersModel.js';
 
 
 export default async function authRoutes(fastify: FastifyInstance) {
 	const authController = new AuthController();
-
-	fastify.post('/guest', {
-		schema: { body: guestPostSchema },
-		handler: authController.guestLogin.bind(authController)
-	});
 
 	fastify.post('/verify-2fa', {
 		schema: {
@@ -28,6 +21,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
 			},
 		},
 		handler: authController.veryify2FA.bind(authController)
+	});
+
+	fastify.get('/authenticate', {
+		handler: authController.isAuthenticated.bind(authController)
 	});
 
 	fastify.post('/register', async (request: FastifyRequest<{ Body: RegisterBody }>, res: FastifyReply) => {

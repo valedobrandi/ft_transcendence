@@ -11,9 +11,9 @@ class ChatHandler {
     private chatBlockModel = new ChatBlockModel(db);
 
     service(data: ChatType) {
-        const {receiverId, senderId, receiver, sender, message} = data;
+        const {receiverId, senderId, message} = data;
 
-        print(`[CHAT] senderId: ${senderId} receiverId: ${receiverId}: ${message}`);
+        //print(`[CHAT] senderId: ${senderId} receiverId: ${receiverId}: ${message}`);
 
         const to = connectedRoomInstance.getById(Number(receiverId));
         const from = connectedRoomInstance.getById(Number(senderId));
@@ -34,11 +34,11 @@ class ChatHandler {
         const participants = chatStore.getSenders(history);
 
         if (to !== undefined && !isBlocked) {
-            to.chat.sendMessage(receiver, message, participants, receiverHistory);
+            to.chat.sendMessage( participants, receiverHistory);
         }
 
         if (from !== undefined) {
-            from.chat.sendMessage(sender, message, participants, senderHistory);
+            from.chat.sendMessage(participants, senderHistory);
         }
     }
 
@@ -57,20 +57,5 @@ class ChatHandler {
         }
     }
 }
-
-// export function CHAT(data: ChatType) {
-
-//     const to = connectedRoomInstance.getById(data.receiver);
-
-//     const from = connectedRoomInstance.getById(data.sender);
-
-//     if (!from || !to) return
-
-//     to.chat.sendMessage(data.sender, data.message, data.sender);
-
-//     from.chat.sendMessage(data.receiver, data.message, data.sender);
-
-
-// }
 
 export const chatHandler = new ChatHandler();

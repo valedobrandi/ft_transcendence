@@ -8,7 +8,7 @@
         "start": "node --trace-uncaught --trace-warnings dist/start.js",
         "test": "vitest --run --reporter verbose",
         "database": "npx tsx /app/src/database/init.ts",
-        "print": "npx tsx /app/database/table_print.ts",
+        "print": "npx tsx /app/src/database/table_print.ts",
         "production:print": "node /app/dist/database/table_print.js",
         "dev": "nodemon",
         "test:ai": "ts-node src/classes/test-ai.ts"

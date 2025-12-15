@@ -1,5 +1,5 @@
 import { ProfileLogoutButton } from "./ProfileLogoutButton";
-import { GameButtons } from "./GameButtons";
+import { GameActionBtn } from "./GameButtons";
 import { MatchList } from "./MatchList";
 import { onStateChange } from "../states/stateProxyHandler";
 
@@ -20,7 +20,7 @@ export function GameContainerUI() {
       <div class="flex-1 overflow-y-auto min-h-0 p-8">
         ${MatchList()}
       </div>
-      ${GameButtons()}
+      ${GameActionBtn()}
     </div>
     `;
   }

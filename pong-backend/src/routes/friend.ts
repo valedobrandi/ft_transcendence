@@ -1,6 +1,5 @@
 import Database from 'better-sqlite3'
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { fastify, print } from '../server.js';
 import { statusCode } from "../types/statusCode.js";
 import db from "../database/db.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
@@ -101,7 +100,7 @@ class FriendService {
 		const createFriendList = data
 			.map((friendId: number | bigint) => ({
 				id: friendId,
-				isConnected: connectedRoomInstance.has(friendId) ? true : false
+				isConnect: connectedRoomInstance.has(friendId),
 			}));
 		return { message, data: createFriendList };
 	}
@@ -111,12 +110,12 @@ class FriendService {
 		if (hasFriend === false) {
 			const { message, data } = this.friendModelInstance.addFriend(requestId, friendId);
 			try {
-				connectedRoomInstance.friendListSet(requestId).add(friendId);
+				connectedRoomInstance.friendListManager(requestId).updateNewFriend(friendId);
 			} catch (error) {
 				fastify.log.error(error);
 			}
 			try {
-				connectedRoomInstance.friendListSet(friendId).add(requestId);
+				connectedRoomInstance.friendListManager(friendId).updateNewFriend(requestId);
 			} catch (error) {
 				fastify.log.error(error);
 			}
@@ -128,23 +127,10 @@ class FriendService {
 
 	removeFriend(userId: number, friendId: number) {
 		const { message, data } = this.friendModelInstance.removeFriend(userId, friendId);
+
+		connectedRoomInstance.friendListManager(userId).broadcastFriendUpdates();
+		connectedRoomInstance.friendListManager(friendId).broadcastFriendUpdates();
 		
-		connectedRoomInstance.friendListSet(userId).delete(friendId);
-		connectedRoomInstance.friendListSet(friendId).delete(userId);
-		
-		
-		connectedRoomInstance.broadcastWebsocketMessage(
-			friendId,
-			"friend:list:update", {
-				friends: connectedRoomInstance.friendListSet(friendId).get()
-			}
-		)
-		connectedRoomInstance.broadcastWebsocketMessage(
-			userId,
-			"friend:list:update", {
-				friends: connectedRoomInstance.friendListSet(userId).get()
-			}
-		)
 		return { message, data };
 	}
 }
@@ -183,7 +169,7 @@ class FriendsModel {
 
 	getFriendsList(userId: number): GetFriendsList {
 		const response = this.stmGetFriendsList.all(userId, userId) as FriendsTableModel[];
-		print(`[FRIENDLIST DB] ${JSON.stringify(response)}`)
+		//print(`[FRIENDLIST DB] ${JSON.stringify(response)}`)
 		const friendIds = response.map(row => row.friendId);
 		return { message: 'success', data: friendIds};
 	}
@@ -204,18 +190,18 @@ class FriendsModel {
 			this.stmAddFriend.run(userId, friendId);
 			return { message: 'success', data: "friend added" };
 		} catch (error) {
-			print(`[ERROR] Unable to add friend: ${error}`);
+			//print(`[ERROR] Unable to add friend: ${error}`);
 			return { message: 'error', data: "FriendsModel_addFriend" };
 		}
 	}
 
 	removeFriend(userId: number, friendId: number): RemoveFriend {
-		print(`[FRIEND REMOVE] userId: ${userId}, friendId: ${friendId}`);
+		//print(`[FRIEND REMOVE] userId: ${userId}, friendId: ${friendId}`);
 		if ( userId > friendId) {
 			[userId, friendId] = [friendId, userId];
 		}
 		const response = this.stmRemoveFriend.run(userId, friendId) as Database.RunResult;
-		print(`[FRIEND REMOVE DB] ${JSON.stringify(response)}`);
+		//print(`[FRIEND REMOVE DB] ${JSON.stringify(response)}`);
 		if (response.changes === 0) {
 			return { message: 'error', data: "FriendsModel_removeFriend" };
 		}

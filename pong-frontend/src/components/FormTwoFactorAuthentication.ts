@@ -14,7 +14,7 @@ export function FormTwoFactorAuthentication(): HTMLElement {
 
     formElement.onsubmit = (e) => {
         e.preventDefault();
-        //console.log("2FA code submitted");
+        console.log("2FA code submitted");
     };
 
     const inputAuthUI = InputNumber();

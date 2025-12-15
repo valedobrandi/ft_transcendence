@@ -11,19 +11,21 @@ import FriendsModel from "../routes/friend.js";
 export class ConnectedRoom {
   private room = new Map<number | bigint, PlayerType>();
   private usersModelsInstance = new UsersModel(db);
+  private friendsModelInstance = new FriendsModel(db);
 
   addUser(name: string, id: number | bigint): Boolean {
     const user: PlayerType = {
       id: id,
       username: name,
       socket: undefined,
-      status: "CONNECT_ROOM",
+      status: "CONNECTED",
       matchId: undefined,
       tournamentId: undefined,
       chat: new ChatManager(Number(id), name),
+      state: "0"
     };
 
-    print(`[ONLINE]: ${name} (${id})`);
+    //print(`[ONLINE]: ${name} (${id})`);
     if (this.room.has(id) === false) {
       this.room.set(id, user);
       return true;
@@ -31,22 +33,37 @@ export class ConnectedRoom {
     return false;
   }
 
-  friendListSet(useServiceRequestId: number | bigint) {
+  friendListManager(useServiceRequestId: number | bigint) {
     return {
-      add: (id: number | bigint) => {
 
-        this.sendUpdateStatus(id, useServiceRequestId, false);
-        this.sendUpdateStatus(useServiceRequestId, id, false);
+      updateNewFriend: (id: number | bigint) => {
+        // send a the new friend list to the user
+        this.broadcastWebsocketMessage(
+          useServiceRequestId,
+          "friend:new", {
+            friends: this.friendListManager(useServiceRequestId).getEveryFriends()
+          }
+        )
       },
-      delete: (friendId: number | bigint) => {
-        this.sendUpdateStatus( friendId, useServiceRequestId, true);
-      },
-      get: () => {
+
+      getEveryFriends: () => {
         // get friend list form database
-        const friendsModelInstance = new FriendsModel(db);
-        const friendsList = friendsModelInstance.getFriendsList(Number(useServiceRequestId));
-        return friendsList.data;
+        const friendsList = this.friendsModelInstance.getFriendsList(Number(useServiceRequestId));
+        // format in {id: isConnected:}
+        return friendsList.data.map(friend => {
+          return { id: friend, isConnect: this.has(friend) }
+        })
+
       },
+
+      broadcastFriendUpdates: () => {
+        this.broadcastWebsocketMessage(
+          useServiceRequestId,
+          "friend:new", {
+          friends: this.friendListManager(useServiceRequestId).getEveryFriends()
+        }
+        )
+      }
     };
   }
 
@@ -56,8 +73,9 @@ export class ConnectedRoom {
     if (player === undefined) throw new Error("disconnected");
 
     player.socket = socket;
+
     this.broadcastRegisteredUsers();
-    this.broadcastFriendStatus(Number(player.id));
+    this.broadcastEachFriend(Number(player.id), true);
     this.broadcastNewMatchesList();
   }
 
@@ -67,11 +85,11 @@ export class ConnectedRoom {
   }
 
   disconnect(id: number | bigint) {
-    this.broadcastFriendStatus(id, true);
+    this.broadcastEachFriend(id, false);
     this.dropWebsocket(Number(id));
     const connected = this.getById(id);
     if (connected && connected.matchId) {
-      if (connected.status === "SEND_INVITE" || connected.status === "MATCH_INVITE") {
+      if (connected.status === "MATCH") {
         const matchId = connected.matchId;
         matchServiceInstance.matchRemove(matchId, Number(id));
       }
@@ -88,7 +106,7 @@ export class ConnectedRoom {
         id: user.id,
         name: user.username,
       }));
-    print(`[BROADCAST USERS REGISTER]: ${registeredUsers.length}`);
+    //print(`[BROADCAST USERS REGISTER]: ${registeredUsers.length}`);
     // SORT OUT ADMIN INTRA
     registeredUsers.sort((a, b) => (a.id === 1 ? -1 : 1)).splice(0, 1);
     this.room.forEach(({ socket }) => {
@@ -104,48 +122,44 @@ export class ConnectedRoom {
   }
 
   broadcastNewMatchesList() {
-	const matchesArray: NewMatch[] = Array.from(newMatchesQueue.values());
+    const matches: NewMatch[] = Array.from(newMatchesQueue.values());
+    //print(`[BROADCAST NEW MATCHES LIST]: ${matches.length}`);
     this.room.forEach(({ socket }) => {
       if (socket !== undefined) {
         socket.send(
-			JSON.stringify({
-				status: 200,
-				message: "match:list",
-				payload: {matches: matchesArray}
-			})
-		)
+          JSON.stringify({
+            status: 200,
+            message: "match:list",
+            payload: { matches }
+          })
+        )
       }
     });
   }
 
   sendUpdateStatus(
     senderId: number | bigint,
-    userListId: number | bigint,
-    disconnect: boolean
+    status: { id: number | bigint, isConnect: boolean },
   ) {
     const sender = this.getById(senderId);
     if (sender && sender.socket) {
-      const isConnected = disconnect
-        ? !this.has(userListId)
-        : this.has(userListId);
       sender.socket.send(
         JSON.stringify({
           statusCode: 200,
-          message: "FRIEND_STATUS_UPDATE",
-          payload: { id: userListId, isConnected },
+          message: "friend:update",
+          payload: status,
         })
       );
     }
   }
 
-  broadcastFriendStatus(id: number | bigint, disconnect = false) {
-    const connected = this.getById(id);
-    if (connected === undefined) return;
-    const userList = connectedRoomInstance.friendListSet(id).get();
-   
-    userList.forEach((senderId) => {
-      this.sendUpdateStatus(senderId, id, disconnect);
-    });
+  broadcastEachFriend(id: number | bigint, disconnect: boolean) {
+    const friends = connectedRoomInstance.friendListManager(id).getEveryFriends();
+    for (const friend of friends) {
+      if (friend.isConnect === false) continue;
+      //print(`[BROADCAST FRIEND STATUS] to ${friend.id} about ${id} isConnect: ${!disconnect}`);
+      this.sendUpdateStatus(friend.id, { id: Number(id), isConnect: disconnect });
+    }
   }
 
   getById(id: number | bigint) {
@@ -179,9 +193,9 @@ export class ConnectedRoom {
           message,
         })
       );
-	  return true;
+      return true;
     }
-	return false;
+    return false;
   }
 
   broadcastWebsocketMessage(id: number | bigint, message: string, payload: any) {
@@ -198,7 +212,7 @@ export class ConnectedRoom {
   }
 
   has(id: number | bigint) {
-    return this.room.has(Number(id));
+    return this.room.has(Number(id)) ? true : false;
   }
 
   size() {

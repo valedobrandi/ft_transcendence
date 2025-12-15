@@ -14,7 +14,7 @@ class ChatStore {
 
     getHistory(senderId: number, receiverId: number) {
         const {status, data} = this.messageModelInstance.getMessages(senderId, receiverId);
-		print(`[CHAT STORE] Fetched ${data.length} messages between ${senderId} and ${receiverId}`);
+		//print(`[CHAT STORE] Fetched ${data.length} messages between ${senderId} and ${receiverId}`);
         if (status === 'error') return [];
 
         return data.map(msg => this.formatHistory(msg));
@@ -22,11 +22,13 @@ class ChatStore {
 
     formatHistory(msg: MessageModelTable) {
         return {
+            id: msg.id,
             from: Number(msg.sender_id),
             to: Number(msg.receiver_id),
             senderId: Number(msg.sender_id),
             message: msg.content,
-            timestamp: new Date(msg.timestamp).getTime()
+            timestamp: new Date(msg.timestamp).getTime(),
+            isRead: msg.isRead,
         };
     }
 
@@ -36,7 +38,7 @@ class ChatStore {
 
     getChatHistories(userId: number): ChatHistory[] {
         const histories = this.messageModelInstance.getChatHistory(Number(userId)) as MessageModelTable[] | [];
-        print(`[CHAT STORE] Fetched ${histories.length} messages for user ID ${userId}`);
+        //print(`[CHAT STORE] Fetched ${histories.length} messages for user ID ${userId}`);
         const chatMap: { [key: number]: { sender: [number, number], history: ChatMessage[] } } = {};
 
         histories.forEach(msg => {

@@ -1,21 +1,20 @@
 import { stateProxyHandler } from '../states/stateProxyHandler';
 
-export function ButtonMatchList(context: string, text: string, id: string, action: boolean): string {
+export function ButtonMatchList(dataContext: string, text: string, dataId: string, dataAction: boolean): string {
 
-    const isMatchRoom = stateProxyHandler.state === "MATCH_ROOM";
-    const isTournamentRoom = stateProxyHandler.state === "TOURNAMENT_ROOM";
+    const isMatchRoom = stateProxyHandler.state === "MATCH";
+    const isTournamentRoom = stateProxyHandler.state === "TOURNAMENT";
 
     const disabled = isMatchRoom || isTournamentRoom;
-    //console.log("DISABLED BUTTON MATCH LIST:", disabled);
     const mainDiv = document.createElement("div");
     function onRender() {
-
-        const btnBg = action ? "bg-green-500" : "bg-red-500";
+        
+        const btnBg = dataAction ? "bg-green-500" : "bg-red-500";
         mainDiv.innerHTML = `<button
-                    data-context="${context}"
-                    data-id="${id}"
-                    data-action="${action ? "true" : "false"}"
-                    class="${btnBg} btn-game-${text} text-white ml-4 p-1 rounded text-xs uppercase ${disabled ? "opacity-50 cursor-not-allowed" : ""}"
+                    data-context="${dataContext}"
+                    data-id="${dataId}"
+                    data-action="${dataAction ? "true" : "false"}"
+                    class="${btnBg} btn-game-${text} text-white text-base ml-4 p-2 rounded uppercase ${disabled ?? "opacity-50 cursor-not-allowed"}"
                     ${disabled ? "disabled" : ""}
                     >
                     ${text}
@@ -25,4 +24,4 @@ export function ButtonMatchList(context: string, text: string, id: string, actio
     onRender();
 
     return mainDiv.innerHTML;
-}   
+} 

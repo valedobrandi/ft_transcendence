@@ -20,6 +20,7 @@ export type NewMatch = {
   matchId: string;
   settings: SettingsType | undefined;
   status: "OPEN" | "PLAYING";
+  type: "MATCH" | "TOURNAMENT";
 };
 
 export type SettingsMatch = {};
@@ -50,9 +51,9 @@ export function joinMatchRoom(username: string, id: number) {
     matchQueue.add(id);
     const player = connectedRoomInstance.getById(id);
     if (player == undefined) return;
-    player.status = 'MATCH_QUEUE';
+    player.status = 'MATCH';
     if (player.socket) {
-        player.socket.send(JSON.stringify({ status: 200, message: 'MATCH_ROOM' }))
+        player.socket.send(JSON.stringify({ status: 200, message: 'MATCH' }))
     }
 
     if (matchQueue.size >= 2) {
