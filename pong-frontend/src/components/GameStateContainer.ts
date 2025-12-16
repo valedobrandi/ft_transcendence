@@ -276,7 +276,7 @@ export function GameStateContainer(): HTMLDivElement {
     "PADDLE SPEED",
     "MATCH POINTS",
   ];
-  const matchPointsOptions = [2, 4, 8];
+  const matchPointsOptions = [6, 4, 2];
   const values = ["HIGH", "MEDIUM", "LOW"];
   root.innerHTML = "";
   function onRender() {
