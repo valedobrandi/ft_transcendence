@@ -6,7 +6,7 @@ import { profile, jwt } from "../app";
 import { removeLocalStorage, stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
 import { onClickGetProfileData } from "./UsersList";
-import { closeSocket, initSocket } from "../websocket";
+import { disconnectSocket, initSocket } from "../websocket";
 import { websocketConnect } from "../websocket/websocketConnect";
 
 export function FormLogin(): HTMLElement {
@@ -51,12 +51,13 @@ export function FormLogin(): HTMLElement {
 	// POPUP 2FA
 	// -------------------------
 
-	function create2FAPopup(username: string) {
+	function create2FAPopup(id: number) {
 		const overlay = document.createElement("div");
 		overlay.className = "fixed inset-0 bg-black/60 flex justify-center items-center z-50";
 
 		const modal = document.createElement("div");
 		modal.className = "bg-[#1e2124] p-8 rounded-xl border border-[#424549] flex flex-col gap-6 items-center w-fit shadow-xl";
+		modal.id = "enter-2fa-code";
 
 		const title = document.createElement("h2");
 		title.className = "text-3xl game-font text-[hsl(345,100%,47%)]";
@@ -64,7 +65,7 @@ export function FormLogin(): HTMLElement {
 
 		const subtitle = document.createElement("p");
 		subtitle.className = "text-gray-300 text-center";
-		subtitle.textContent = "A code has been sent to you by email.";
+		subtitle.textContent = "ENTER THE 6-DIGIT CODE FROM YOUR AUTHENTICATOR APP";
 
 		const input = document.createElement("input");
 		input.type = "text";
@@ -75,7 +76,7 @@ export function FormLogin(): HTMLElement {
 		const error = document.createElement("p");
 		error.className = "text-red-500 text-sm hidden";
 
-		const confirmBtn = FancyButton("confirm", "h-12 w-40 text-lg game-font tracking-widest flex items-center justify-center", async () => {
+		const confirmBtn = FancyButton("confirm", "h-12 w-46 text-sm game-font tracking-widest flex items-center justify-center", async () => {
 
 			const code = input.value.trim();
 
@@ -86,10 +87,7 @@ export function FormLogin(): HTMLElement {
 			}
 
 			const verifyResponse = await fetchRequest(
-				"/2fa/verify",
-				"POST",
-				{},
-				{ body: JSON.stringify({ username, code }) }
+				"/twoFA", "POST", {}, { body: JSON.stringify({ id, code }) }
 			);
 
 			if (verifyResponse.message === "invalid_code") {
@@ -105,16 +103,13 @@ export function FormLogin(): HTMLElement {
 			}
 
 			if (verifyResponse.message === "success") {
-				jwt.token = verifyResponse.payload.accessToken;
-				profile.id = verifyResponse.payload.id;
-				profile.username = verifyResponse.username;
-
+				localStorage.setItem('jwt_token', verifyResponse.payload.accessToken);
 				document.body.removeChild(overlay);
-				navigateTo("/intra");
+				navigateTo("/login");
 			}
 		});
 
-		const cancelBtn = FancyButton("cancel", "h-12 w-40 text-lg game-font tracking-widest flex items-center justify-center", () => {
+		const cancelBtn = FancyButton("cancel", "h-12 w-46 text-sm game-font tracking-widest flex items-center justify-center", () => {
 			document.body.removeChild(overlay);
 		});
 
@@ -152,7 +147,7 @@ export function FormLogin(): HTMLElement {
 
 		if (response.message === "2FA_REQUIRED") {
 			create2FAPopup(
-				response.data.username,
+				response.data.userId,
 			);
 			return;
 		}
@@ -160,10 +155,8 @@ export function FormLogin(): HTMLElement {
 		if (response.message === 'success') {
 
 			removeLocalStorage();
-			localStorage.removeItem('jwt_token');
-
 			stateProxyHandler.reset();
-			closeSocket();
+			disconnectSocket();
 
 			jwt.token = response.payload.accessToken;
 			localStorage.setItem('jwt_token', jwt.token || '');
@@ -186,12 +179,11 @@ export function FormLogin(): HTMLElement {
 				stateProxyHandler.chatBlockList = blockedList.payload;
 			}
 
-			//await onClickGetProfileData();
 			initSocket();
-  			await websocketConnect();
+			await websocketConnect();
 
 			navigateTo("/intra");
-			
+
 		} else if (response.status === 'error') {
 			const existingAlert = document.getElementById("alert-popup");
 			if (existingAlert)

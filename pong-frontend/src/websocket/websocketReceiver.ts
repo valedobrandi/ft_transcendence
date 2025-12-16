@@ -6,6 +6,10 @@ import {
 } from "../states/stateProxyHandler";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { navigateTo } from "../utils";
+import { Alert } from "../components/Alert";
+import { CreateAlert } from "../components/CreateAlert";
+import { InstanceDisconnect } from "../components/GameStateContainer";
+import { disconnectSocket } from "../websocket";
 
 export async function websocketReceiver(socket: WebSocket) {
   socket.addEventListener("message", async (event) => {
@@ -139,6 +143,10 @@ export async function websocketReceiver(socket: WebSocket) {
       case "friend:new": {
         stateProxyHandler.friendList = data.payload.friends;
       }
+        break;
+      case "websocket.disconnect":
+        disconnectSocket();
+        document.body.appendChild(InstanceDisconnect())
         break;
     }
   });

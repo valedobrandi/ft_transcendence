@@ -1,6 +1,6 @@
 import { profile } from "../app";
 import { fetchRequest } from "../utils";
-import { onStateChange, stateProxyHandler } from "./stateProxyHandler";
+import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 
 export function RenderChatMessages(): HTMLDivElement {
     const messageBox = document.createElement("div");

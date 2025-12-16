@@ -3,10 +3,9 @@ import { Alert } from "../components/Alert";
 import {
 	removeLocalStorage,
 	stateProxyHandler,
-	type StateProxyHandler,
 } from "../states/stateProxyHandler";
 import { fetchRequest, navigateTo, renderRoute } from "../utils";
-import { closeSocket, getSocket } from "../websocket";
+import { disconnectSocket, getSocket } from "../websocket";
 import { websocketNewEvents } from "../websocket/websocketNewEvents";
 import { setupPaddleListeners } from "./paddleListeners";
 
@@ -167,6 +166,17 @@ export function eventListeners() {
 			case "btn-remove-friend": { removeFriend(); }
 				break;
 			case "go-to-match": { navigateTo('/match'); }
+				break;
+			case "websocket-disconnect": {
+				// REDIRECT
+				window.location.href = "/";
+			}
+				break;
+			case "qr-close-button": {
+				const qrModal = document.getElementById("qr-code-modal");
+				if (qrModal) { qrModal.remove(); }
+			}
+				break;
 		}
 	});
 }
@@ -347,13 +357,11 @@ async function leaveTournament(button: HTMLButtonElement) {
 	);
 }
 
-async function disconnect() {
-	const response = await fetchRequest(
-		`/logout`,
-		"GET"
-	);
+export async function disconnect() {
+	const response = await fetchRequest(`/logout`,"GET");
+
 	if (response.message === "success") {
-		localStorage.removeItem('jwt_token');
+		localStorage.removeItem("jwt_token");
 		removeLocalStorage();
 		profile.username = "";
 		profile.id = -1;
@@ -362,9 +370,7 @@ async function disconnect() {
 		profile.twoFA_enabled = 0;
 		jwt.token = "";
 		stateProxyHandler.reset();
-		closeSocket();
-
-		navigateTo('/');	
+		window.location.href = "/";
 	}
 
 }

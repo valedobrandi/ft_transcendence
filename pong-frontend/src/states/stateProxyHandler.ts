@@ -81,7 +81,7 @@ export function onStateChange<K extends StateKey>(key: K, fn: () => void) {
     listeners[key].push(fn);
 }
 
-export function loadLocalStorage() {
+export function getStorageStates() {
     const PERSISTED_KEYS: (keyof State)[] = [
         "paddle",
         "state",

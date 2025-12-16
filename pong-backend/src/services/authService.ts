@@ -1,27 +1,21 @@
-import { Resend } from "resend";
 import { UsersModel } from "../models/usersModel.js";
 import db from "../database/db.js";
-
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
+import speakeasy from "speakeasy";
+import QRCode from "qrcode";
 
 class AuthService {
     private usersModelInstance = new UsersModel(db)
-
-    private resend = new Resend(RESEND_API_KEY || "123");
 
     static generate2FACode(): string {
         return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
-    async sendEmail(destination: string, subject: string, html: string): Promise<{ data: any, error: any }> {
-        const defaultReceiver = process.env.EMAIL_DEFAULT_RECEIVER || "";
-        const { data, error } = await this.resend.emails.send({
-            from: "onboarding@resend.dev",
-            to: defaultReceiver,
-            subject: subject,
-            html: html
-        });
-        return { data, error };
+    async sendQrCode(id: number): Promise<{ message: any, data: any }> {
+        const secret = speakeasy.generateSecret({ length: 20 });
+        const qr = await QRCode.toDataURL(secret.otpauth_url);
+
+        this.usersModelInstance.saveAuthToken(id, secret.base32);
+        return {message: 'success', data: { qrCode: qr }};
     }
 
     verifyToken(id: number) {
@@ -35,3 +29,4 @@ class AuthService {
 }
 
 export { AuthService };
+

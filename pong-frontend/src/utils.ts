@@ -1,7 +1,8 @@
 import { profile, jwt } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
+import { QRCodeModal } from "./components/QRCodeModal";
 import { endpoint } from "./endPoints";
-import { loadLocalStorage, removeLocalStorage, stateProxyHandler } from "./states/stateProxyHandler";
+import { getStorageStates, removeLocalStorage, stateProxyHandler } from "./states/stateProxyHandler";
 import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView, profileView } from "./views";
 import { initSocket } from "./websocket";
 import { websocketConnect } from "./websocket/websocketConnect";
@@ -24,75 +25,65 @@ const routes: Record<string, (root: HTMLElement) => void> = {
 };
 
 async function userSession() {
-    const jwt_token = localStorage.getItem('jwt_token');
+    if (jwt.token) { return; }
 
-    if (!jwt_token) {
-        return;
-    }
+    const jwt_token = localStorage.getItem('jwt_token');
+    if (!jwt_token) { return; }
 
     jwt.token = jwt_token;
 
-    if (jwt_token && profile.username !== "") return;
-
-    // profile!: { username: string, avatar: string };
-    if (jwt.token && profile.username === "") {
-        const response = await fetchRequest("/authenticate", "GET", {});
-        if (response.message === "error") {
-            jwt.token = undefined;
-            localStorage.removeItem('jwt_token');
-            removeLocalStorage();
-            return navigateTo("/");
-        }
-
-        if (response.message === "success") {
-            profile.username = response.data.username;
-            profile.id = response.data.id;
-        }
+    const response = await fetchRequest("/authenticate", "GET", {});
+    if (response.message === "error") {
+        jwt.token = undefined;
+        removeLocalStorage();
+        return navigateTo("/");
     }
 
-    try {
-        const [friendList, chatBlockList, userProfile, matchesHistory, serverUsers, serverState] = await Promise.all([
-            fetchRequest('/friends-list', 'GET', {}),
-            fetchRequest('/block-list', 'GET', {}),
-            fetchRequest(`/profile/user?id=${stateProxyHandler.chat.id}`, "GET"),
-            fetchRequest(`/match/history?username=${stateProxyHandler.chat.name}`, "GET"),
-            fetchRequest("/server/register", "GET", {}),
-            fetchRequest("/server/state", "GET", {})
-        ]);
-
-        if (friendList.message === 'success') {
-            stateProxyHandler.friendList = friendList.payload;
-        }
-        if (chatBlockList.message === 'success') {
-            stateProxyHandler.chatBlockList = chatBlockList.payload;
-        }
-        if (userProfile.message === "success") {
-            stateProxyHandler.profile = userProfile.data;
-        }
-        if (matchesHistory.message === "success") {
-            stateProxyHandler.matchesHistory = matchesHistory.data;
-        }
-        if (serverUsers.message === "success") {
-            stateProxyHandler.serverUsers = serverUsers.data;
-        }
-        // if (serverState.message === "success") {
-        //     stateProxyHandler.settings = { state: serverState.data };
-        //     localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
-        // }
-
-        loadLocalStorage();
-
-        initSocket();
-        websocketConnect();
-        await websocketNewEvents();
-
-    } catch (err) {
-        console.error("Failed to initialize user session:", err);
+    if (response.message === "success") {
+        profile.username = response.data.username;
+        profile.id = response.data.id;
     }
+    
+    getStorageStates();
+
+    initSocket();
+    websocketConnect();
+    await websocketNewEvents();
+
+    
+    const [friendList, chatBlockList, userProfile, matchesHistory, serverUsers] = await Promise.all([
+        fetchRequest('/friends-list', 'GET', {}),
+        fetchRequest('/block-list', 'GET', {}),
+        fetchRequest(`/profile/user?id=${stateProxyHandler.chat.id}`, "GET"),
+        fetchRequest(`/match/history?username=${stateProxyHandler.chat.name}`, "GET"),
+        fetchRequest("/server/register", "GET", {}),
+        fetchRequest("/server/state", "GET", {})
+    ]);
+
+    if (friendList.message === 'success') {
+        stateProxyHandler.friendList = friendList.payload;
+    }
+    if (chatBlockList.message === 'success') {
+        stateProxyHandler.chatBlockList = chatBlockList.payload;
+    }
+    if (userProfile.message === "success") {
+        stateProxyHandler.profile = userProfile.data;
+    }
+    if (matchesHistory.message === "success") {
+        stateProxyHandler.matchesHistory = matchesHistory.data;
+    }
+    if (serverUsers.message === "success") {
+        stateProxyHandler.serverUsers = serverUsers.data;
+    }
+
 }
 
 export async function renderRoute(path: string) {
-    await userSession();
+    const sessionRoutes = ["/login", "/match", "/intra", "/profile"];
+    
+    if (sessionRoutes.includes(path)) {
+        await userSession();
+    }
 
     const protectedRoutes = ["/match", "/intra", "/profile"];
 
@@ -170,20 +161,22 @@ export async function toggle2FA(): Promise<void> {
         const new2FAValue = profile.twoFA_enabled === 1 ? 0 : 1;
         console.log('NEWVALEUR= ', new2FAValue);
 
-        const response = await fetchRequest("/updata/2FA", "PUT", {}, {
+        const response = await fetchRequest("/twoFA", "PUT", {}, {
             body: JSON.stringify({ twoFA_enabled: profile.twoFA_enabled ? 0 : 1 })
         });
 
 
         if (response.message === "success") {
-            profile.twoFA_enabled = response.payload.twoFA_enabled;
-
+            const qrCode = response.payload.qrCode;
             const twoFABtn = document.getElementById("toggle_2fa") as HTMLButtonElement;
+            if (new2FAValue === 1 && qrCode) {
+                window.document.body.appendChild(QRCodeModal(qrCode));    
+            }
+            profile.twoFA_enabled = response.payload.twoFA_enabled;
+            
             if (twoFABtn) {
                 twoFABtn.textContent = new2FAValue === 1 ? "Disable 2FA" : "Enable 2FA";
             }
-
-            //alert(`2FA has been ${new2FAValue === 1 ? "enabled" : "disabled"} successfully`);
         } else {
             alert("Failed to update 2FA: " + (response.error || "Unknown error"));
         }

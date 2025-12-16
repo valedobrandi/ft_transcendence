@@ -4,7 +4,7 @@ import { endpoint } from "./endPoints";
 const socket: { websocket: WebSocket | null } = { websocket: null };
 
 
-export function closeSocket() {
+export function disconnectSocket() {
     if (socket.websocket) {
         socket.websocket.close();
         socket.websocket = null;
