@@ -14,7 +14,7 @@ class AuthService {
         const secret = speakeasy.generateSecret({ length: 20 });
         const qr = await QRCode.toDataURL(secret.otpauth_url);
 
-        this.usersModelInstance.saveSecret2FA(id, secret.base32);
+        this.usersModelInstance.saveAuthToken(id, secret.base32);
         return {message: 'success', data: { qrCode: qr }};
     }
 

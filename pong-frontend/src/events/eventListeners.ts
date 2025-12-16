@@ -171,6 +171,12 @@ export function eventListeners() {
 				// REDIRECT
 				window.location.href = "/";
 			}
+				break;
+			case "qr-close-button": {
+				const qrModal = document.getElementById("qr-code-modal");
+				if (qrModal) { qrModal.remove(); }
+			}
+				break;
 		}
 	});
 }

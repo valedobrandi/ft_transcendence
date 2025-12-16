@@ -11,56 +11,48 @@ const users = [
 		username: 'INTRA',
 		email: 'admin',
 		password: hashed_password('admin'),
-		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
 		username: 'john_doe',
 		email: 'john_doe@example.com',
 		password: hashed_password('123'),
-		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
 		username: 'NoobMaster',
 		email: 'NoobMaster@example.com',
 		password: hashed_password('123'),
-		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
 		username: 'bobMarley',
 		email: 'bobMarley@example.com',
 		password: hashed_password('123'),
-		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
 		username: 'proGamer',
 		email: 'proGamer@example.com',
 		password: hashed_password('123'),
-		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
 		username: 'aliceWonder',
 		email: 'aliceWonder@example.com',
 		password: hashed_password('123'),
-		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
 		username: 'charlie123',
 		email: 'charlie123@example.com',
 		password: hashed_password('123'),
-		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 	{
 		username: 'lola',
 		email: 'lola@example.com',
 		password: bcrypt.hashSync('pass', 10),
-		status: 'disconnect',
 		twoFA_enabled: 0,
 	},
 ];
@@ -68,8 +60,8 @@ const users = [
 
 export async function seedUsers() {
 	const insertUser = db.prepare(`
-    INSERT INTO users (username, email, password, status, twoFA_enabled)
-    VALUES (@username, @email, @password, @status, @twoFA_enabled)
+    INSERT INTO users (username, email, password, twoFA_enabled)
+    VALUES (@username, @email, @password, @twoFA_enabled)
   `);
 	const insertMany = db.transaction((users) => {
 		for (const user of users) insertUser.run(user);

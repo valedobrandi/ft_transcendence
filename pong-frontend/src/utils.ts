@@ -1,5 +1,6 @@
 import { profile, jwt } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
+import { QRCodeModal } from "./components/QRCodeModal";
 import { endpoint } from "./endPoints";
 import { getStorageStates, removeLocalStorage, stateProxyHandler } from "./states/stateProxyHandler";
 import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView, profileView } from "./views";
@@ -160,20 +161,22 @@ export async function toggle2FA(): Promise<void> {
         const new2FAValue = profile.twoFA_enabled === 1 ? 0 : 1;
         console.log('NEWVALEUR= ', new2FAValue);
 
-        const response = await fetchRequest("/updata/2FA", "PUT", {}, {
+        const response = await fetchRequest("/twoFA", "PUT", {}, {
             body: JSON.stringify({ twoFA_enabled: profile.twoFA_enabled ? 0 : 1 })
         });
 
 
         if (response.message === "success") {
-            profile.twoFA_enabled = response.payload.twoFA_enabled;
-
+            const qrCode = response.payload.qrCode;
             const twoFABtn = document.getElementById("toggle_2fa") as HTMLButtonElement;
+            if (new2FAValue === 1 && qrCode) {
+                window.document.body.appendChild(QRCodeModal(qrCode));    
+            }
+            profile.twoFA_enabled = response.payload.twoFA_enabled;
+            
             if (twoFABtn) {
                 twoFABtn.textContent = new2FAValue === 1 ? "Disable 2FA" : "Enable 2FA";
             }
-
-            //alert(`2FA has been ${new2FAValue === 1 ? "enabled" : "disabled"} successfully`);
         } else {
             alert("Failed to update 2FA: " + (response.error || "Unknown error"));
         }
