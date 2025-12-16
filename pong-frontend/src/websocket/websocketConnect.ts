@@ -1,5 +1,4 @@
 import { profile } from "../app";
-import { InstanceDisconnect } from "../components/GameStateContainer";
 import { setupPaddleListeners } from "../events/paddleListeners";
 import { getSocket } from "../websocket";
 import { websocketNewEvents } from "./websocketNewEvents";

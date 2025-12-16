@@ -38,31 +38,10 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			const authRoom = authenticationRoomInstance;
 
 			authRoom.delete(existingUser.username);
-			authRoom.add(existingUser.username, AuthService.generate2FACode());
 
-			const email = `<p>Your 2FA code is: <strong>${authRoom.getCode(existingUser.username)}</strong></p>`
-			const { data, error } = await authService.sendEmail(
-				existingUser.email,
-				`ft_transcendence Ping-Pong 2FA Code - ${existingUser.email}`,
-				email
-			);
-			if (error) {
-				return res.status(400).send({ message: "error", data: "error_sending_email" });
-			} else {
-				//print(JSON.stringify(data));
-				return res.status(200).send({
-					message: "2FA_REQUIRED",
-					data: {
-						username: existingUser.username,
-						from: 'auth.ft_transcendence@resend.dev',
-						to: existingUser.email,
-						subject: 'ft_transcendence Ping-Pong 2FA Code',
-						email: email
-					}
-				});
-			}
-		}
-		else {
+			return res.status(200).send({message: "2FA_REQUIRED", data: { userId: existingUser.id, username: existingUser.username } });
+
+		} else {
 			// Let's usernamer and id in payload
 			const payload = { id: existingUser.id, username: existingUser.username };
 
@@ -96,7 +75,7 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			// });
 
 			// Add user to connectedRoomInstance
-		
+
 			connectedRoomInstance.joinRoom(existingUser.username, existingUser.id);
 			return res.status(201).send({ message: 'success', payload: { accessToken, ...payload } });
 		}

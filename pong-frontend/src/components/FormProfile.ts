@@ -4,7 +4,6 @@ import { jwt } from "../app";
 import { navigateTo } from "../utils";
 import { Button } from "./Button";
 import { endpoint } from "../endPoints";
-import { stateProxyHandler } from "../states/stateProxyHandler";
 const AVATAR_DEFAUT = "avatar_default.jpg"
 const AVATAR1 = "avatar3.jpg"
 const AVATAR2 = "avatar5.jpg"
@@ -103,7 +102,8 @@ export function ProfilePage(): HTMLElement {
 	avatarSection.appendChild(avatarLabel);
 
 	const avatarPreview = document.createElement("img");
-	const avatarPath = `${endpoint.pong_backend_api}/avatar/${stateProxyHandler.profile.avatar}`;
+	const path = profile.avatar_url ? profile.avatar_url : AVATAR_DEFAUT;
+	const avatarPath = `${endpoint.pong_backend_api}/avatar/${path}`;
 	console.log("AVATAR PATH:", avatarPath);
 	avatarPreview.src = avatarPath;
 	avatarPreview.id = "avatarPreview";
@@ -269,7 +269,7 @@ export function ProfilePage(): HTMLElement {
 
 		const modal = document.createElement("div");
 		modal.className = "bg-[#1e2124] p-8 rounded-xl border border-gray-700 flex flex-col gap-6 items-center w-[340px] shadow-xl";
-
+		modal.id = "2fa-modal";
 		const text = document.createElement("p");
 		text.className = "text-white text-center font-abee";
 		text.textContent = profile.twoFA_enabled
