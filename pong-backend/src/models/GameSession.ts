@@ -21,7 +21,7 @@ class GameSessionDatabase {
     }
 
     getSessionToken(userId: number): string {
-        const row = this.stmSessionToken.get(userId);
+        const row = this.stmSessionToken.get(userId) as {session_token: string};
         return row ? row.session_token : '';
     }
 }

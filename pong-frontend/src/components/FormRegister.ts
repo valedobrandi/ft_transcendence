@@ -1,4 +1,4 @@
-import { FancyButton } from "./Button";
+import { FancyButton, ReturnButton } from "./Button";
 import DOMPurify from "dompurify";
 import { InputEmail } from "./InputEmail";
 import { InputName } from "./InputName";
@@ -12,6 +12,9 @@ export function Register(): HTMLElement {
 	viewDiv.className = "flex items-center justify-center h-screen";
 	viewDiv.style.backgroundImage = "url('/default_background.jpg')";
 	viewDiv.style.backgroundSize = "cover";
+
+	const backBtn = ReturnButton("/");
+	viewDiv.appendChild(backBtn);
 
 	// Create a card to store Form
 	const card = document.createElement("div");
@@ -97,7 +100,7 @@ export function Register(): HTMLElement {
 		if (response.message === 'success') {
 			profile.username = response.payload.username;
 			profile.id = response.payload.id;
-			navigateTo("/login");
+			navigateTo("/");
 		}
 		else if (response.status === 'error') {
 			const existingAlert = document.getElementById("alert-popup");

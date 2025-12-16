@@ -1,8 +1,7 @@
 import { fetchRequest, toggle2FA } from "../utils";
 import { profile } from "../app";
 import { jwt } from "../app";
-import { navigateTo } from "../utils";
-import { Button } from "./Button";
+import { Button, ReturnButton } from "./Button";
 import { endpoint } from "../endPoints";
 const AVATAR_DEFAUT = "avatar_default.jpg"
 const AVATAR1 = "avatar3.jpg"
@@ -32,41 +31,7 @@ export function ProfilePage(): HTMLElement {
 	headerInner.className = "flex items-center justify-between relative";
 
 	// Bouton flèche "Gaming Back"
-	const backBtn = document.createElement("button");
-	backBtn.className = `
-		absolute left-0 top-2
-		flex items-center justify-center
-		w-12 h-12
-		group
-		transition
-	`;
-
-	backBtn.innerHTML = `
-		<div class="
-			w-12 h-12 flex items-center justify-center
-			bg-black/40 border border-red-600
-			rounded-xl
-			shadow-[0_0_10px_rgba(255,0,0,0.4)]
-			group-hover:shadow-[0_0_18px_rgba(255,0,0,0.9)]
-			group-hover:border-red-500
-			transition-all duration-200
-			group-hover:scale-110
-		">
-			<svg xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 24 24"
-				class="w-8 h-8 text-red-500 group-hover:text-red-400 transition">
-				
-				<!-- Chevron gaming stylisé -->
-				<path fill="currentColor"
-					d="M14.8 3.3 6.1 12l8.7 8.7 1.9-1.9L9.9 12l6.8-6.8-1.9-1.9z"/>
-			</svg>
-		</div>
-	`;
-
-	backBtn.onclick = () => {
-		navigateTo("/intra");
-	};
-
+	const backBtn = ReturnButton("/intra");
 
 	// ===== Zone centre : Profil =====
 
@@ -388,13 +353,13 @@ export function ProfilePage(): HTMLElement {
 
 				console.log("Profile updated", data);
 				alert(("your profil has changed "));
-				const response = await fetchRequest(
-					`/logout`,
-					"GET"
-				);
-				if (response.message === "success") {
-					navigateTo('/');
-				}
+				// const response = await fetchRequest(
+				// 	`/logout`,
+				// 	"GET"
+				// );
+				// if (response.message === "success") {
+					// navigateTo('/intra');
+				// }
 
 			}
 			else {

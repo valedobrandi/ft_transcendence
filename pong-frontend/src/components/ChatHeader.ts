@@ -1,7 +1,6 @@
 import {  onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 import { profile } from "../app";
 import { fetchRequest, navigateTo } from "../utils";
-import { EmbeddedButton } from "./EmbeddedButton";
 
 export function ChatHeader(): HTMLDivElement {
 

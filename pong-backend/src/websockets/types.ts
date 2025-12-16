@@ -27,6 +27,14 @@ export type Tournamentype = {
 	id: number;
 };
 
+export type QuitMatch = {
+    type: 'QUIT_MATCH';
+    username: string;
+	id: number;
+    match_id: string;
+};
+
+
 export type InputType = {
     type: 'input';
     username: string;
@@ -50,4 +58,5 @@ export type MessageType =
     | PlayType
     | Tournamentype
     | InputType
-    | ChatType;
+    | ChatType
+    | QuitMatch;
