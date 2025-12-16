@@ -355,6 +355,7 @@ export async function disconnect() {
 	const response = await fetchRequest(`/logout`,"GET");
 
 	if (response.message === "success") {
+		localStorage.removeItem("jwt_token");
 		removeLocalStorage();
 		profile.username = "";
 		profile.id = -1;
@@ -363,8 +364,7 @@ export async function disconnect() {
 		profile.twoFA_enabled = 0;
 		jwt.token = "";
 		stateProxyHandler.reset();
-		disconnectSocket();
-		navigateTo('/');	
+		window.location.href = "/";
 	}
 
 }

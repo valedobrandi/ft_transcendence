@@ -1,7 +1,6 @@
 import { profile } from "../app";
-import { disconnect } from "../events/eventListeners";
+import { InstanceDisconnect } from "../components/GameStateContainer";
 import { setupPaddleListeners } from "../events/paddleListeners";
-import { navigateTo } from "../utils";
 import { getSocket } from "../websocket";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketReceiver } from "./websocketReceiver";
