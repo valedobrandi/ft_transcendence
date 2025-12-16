@@ -78,7 +78,7 @@ export function List(
 }
 
 function reorder<T extends { id: number }>(list: T[]): T[] {
-    const selectedId = stateProxyHandler.chat.id;
+    // const selectedId = stateProxyHandler.chat.id;
     const newServerUsers = [...list].sort((a, b) => {
         const aUnread = (stateProxyHandler.messages[a.id] ?? [])
             .some(msg => msg.isRead === 0 && msg.from !== profile.id);

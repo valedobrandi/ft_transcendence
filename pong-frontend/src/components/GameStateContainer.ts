@@ -1,6 +1,5 @@
 import { profile } from "../app";
 import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
-import { fetchRequest } from "../utils";
 
 function SelectOption(fields: string[], values: string[], matchPointsOptions: number[]): string {
   const ACCENT = "hsl(345,100%,47%)";
@@ -53,8 +52,9 @@ function SelectOption(fields: string[], values: string[], matchPointsOptions: nu
                   ">
                   VS COMPUTER
                 </button>
-                <button id="cancel-settings" class="px-5 py-2 text-white hover:opacity-80 active:scale-95"
-                  style="background:#424549;">
+                <button class="px-5 py-2 text-white hover:opacity-80 active:scale-95"
+                  style="background:#424549;"
+                  id="cancel-settings">
                   CANCEL
                 </button>
               </div>
@@ -109,9 +109,8 @@ function PlayingMatch(): string {
         </p>
         <button 
           class="px-5 py-2 w-[300px] text-lg rounded-lg text-white bg-red-700 hover:opacity-80"
-          id="cancel-settings"
           data-context="match"
-          data-action="false"
+          data-action="quitMatch"
         >
           LEAVE MATCH
         </button>
@@ -276,7 +275,7 @@ export function GameStateContainer(): HTMLDivElement {
     "PADDLE SPEED",
     "MATCH POINTS",
   ];
-  const matchPointsOptions = [2, 4, 8];
+  const matchPointsOptions = [6, 4, 2];
   const values = ["HIGH", "MEDIUM", "LOW"];
   root.innerHTML = "";
   function onRender() {

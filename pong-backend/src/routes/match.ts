@@ -1,13 +1,14 @@
 import Database from "better-sqlite3";
 import { FastifyRequest, FastifyInstance, FastifyReply } from "fastify";
 import {
+	gameRoom,
 	inviteMatchesQueue,
 	NewInviteMatch,
 	NewMatch,
 	newMatchesQueue,
 	startNewMatch,
 } from "../state/gameRoom.js";
-import { connectedRoomInstance } from "../state/ConnectedRoom.js";
+import { ConnectedRoom, connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
 import db from "../database/db.js";
 import { UsersModel } from "../models/usersModel.js";
@@ -134,6 +135,11 @@ const matchesRoute = (fastify: FastifyInstance) => {
 		handler: matcherController.joinMatch.bind(matcherController),
 	});
 
+	fastify.get("/match/quitMatch", {
+		preHandler: [fastify.authenticate],
+		handler: matcherController.quitMatch.bind(matcherController),
+	});
+
 	fastify.get<{ Querystring: { username: string } }>("/match/history", {
 		preHandler: [fastify.authenticate],
 		schema: {
@@ -154,6 +160,24 @@ class MatcherController {
 
 	constructor() {
 		this.matchesService = new MatchesService();
+	}
+
+	async quitMatch(req: FastifyRequest, res: FastifyReply) {
+		const user = connectedRoomInstance.getById(req.userId);
+		const match = user?.matchId;
+
+		if (match === undefined)
+			return res.code(statusCode("NOT_FOUND")).send({ message: "error", data: "matchid undefined" });
+		if (match === "")
+			return res.code(statusCode("NOT_FOUND")).send({ message: "error", data: "match not found" });
+
+		const quit = gameRoom.get(match);
+		if (user === undefined)
+			return res.code(statusCode("NOT_FOUND")).send({ message: "error", data: "user not found" });
+		if (quit && user)
+			quit.quitMatch(user.username);
+
+		return res.code(statusCode("OK")).send({ message: "sucess" });
 	}
 
 	async getMatchHistory(req: FastifyRequest<{ Querystring: { username: string } }>, res: FastifyReply) {
@@ -237,6 +261,8 @@ class MatcherController {
 		const { message, data } = this.matchesService.joinMatch(req.userId, matchId);
 		return res.code(statusCode("OK")).send({ message, data });
 	}
+
+
 }
 type MatchesHistory = {
 	wins: number;

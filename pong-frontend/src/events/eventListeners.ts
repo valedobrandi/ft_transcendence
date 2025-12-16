@@ -5,7 +5,7 @@ import {
 	stateProxyHandler,
 } from "../states/stateProxyHandler";
 import { fetchRequest, navigateTo, renderRoute } from "../utils";
-import { disconnectSocket, getSocket } from "../websocket";
+import { getSocket } from "../websocket";
 import { websocketNewEvents } from "../websocket/websocketNewEvents";
 import { setupPaddleListeners } from "./paddleListeners";
 
@@ -49,7 +49,7 @@ export function eventListeners() {
 			}
 		} else {
 			// Cancel match
-			const response = await fetchRequest(
+			await fetchRequest(
 				`/match-cancel?matchId=${matchId}`,
 				"DELETE"
 			);
@@ -83,6 +83,10 @@ export function eventListeners() {
 
 		if (action === "cancel-invitation") {
 			await refuseInvite(btn);
+		}
+
+		if (action === "quitMatch") {
+			fetchRequest(`/match/quitMatch`, "GET");
 		}
 	});
 
@@ -351,7 +355,7 @@ async function joinTournament() {
 async function leaveTournament(button: HTMLButtonElement) {
 	const eventId = button.dataset.eventindex;
 	console.log("EVENT ID LEAVE TOURNEY =", eventId);
-	const response = await fetchRequest(
+	await fetchRequest(
 		`/tournament/quit`,
 		"GET"
 	);
@@ -378,7 +382,7 @@ export async function disconnect() {
 async function acceptInvite(button: HTMLButtonElement) {
 	const matchId = button.dataset.matchid;
 
-	const response = await fetchRequest(
+	await fetchRequest(
 		`/match-invite-accept?matchId=${matchId}`,
 		"GET"
 	);

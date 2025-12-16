@@ -12,6 +12,8 @@ class AuthService {
 
     async sendQrCode(id: number): Promise<{ message: any, data: any }> {
         const secret = speakeasy.generateSecret({ length: 20 });
+        if (secret === undefined || secret.otpauth_url === undefined)
+            return {message: 'error', data: ''};
         const qr = await QRCode.toDataURL(secret.otpauth_url);
 
         this.usersModelInstance.saveAuthToken(id, secret.base32);
@@ -29,4 +31,3 @@ class AuthService {
 }
 
 export { AuthService };
-

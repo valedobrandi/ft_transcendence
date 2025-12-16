@@ -39,11 +39,11 @@ export function matchView(root: HTMLElement) {
 
   // header bar
   const headerBar = document.createElement("div");
-  headerBar.className = "w-full no-wrap"
+  headerBar.className = "flex justify-center w-full no-wrap"
 
   // back button
   const backBtn = document.createElement("button");
-  backBtn.className = "border border-black bg-black text-white text-2xl p-4 mt-4 ml-10 rounded-lg hover:bg-red-500 hover:border-red-500 hover:cursor-pointer";
+  backBtn.className = "border border-black bg-black text-white text-2xl p-4 mt-4 rounded-lg hover:bg-red-500 hover:border-red-500 hover:cursor-pointer";
   backBtn.innerText = "QUIT MATCH";
   backBtn.onclick = () => {
     navigateTo("/intra");

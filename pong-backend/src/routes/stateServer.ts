@@ -1,11 +1,11 @@
 import { FastifyRequest, FastifyInstance, FastifyReply } from "fastify";
-import { UsersModel } from "../models/usersModel";
-import db from "../database/db";
-import { statusCode } from "../types/statusCode";
+import { UsersModel } from "../models/usersModel.js";
+import db from "../database/db.js";
+import { statusCode } from "../types/statusCode.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
-import { PlayerType } from "../types/PlayerType";
+import { PlayerType } from "../types/PlayerType.js";
 import { MessagesModel } from "../models/messagesModel.js";
-import ChatManager from "../classes/ChatManager";
+import ChatManager from "../classes/ChatManager.js";
 
 export function serverRoute(fastify: FastifyInstance) {
     const serverControllerInstance = new ServerController();
@@ -63,7 +63,7 @@ class ServerController {
         return res.code(statusCode("OK")).send({ message, data });
     }
 
-    saveUserState(req: FastifyRequest<{ Body: { state: string } }>, res: FastifyReply) {
+    saveUserState(req: FastifyRequest<{ Body: { state: PlayerType["state"] } }>, res: FastifyReply) {
         const { message, data } = this.serverServiceInstance.saveUserState(req.userId, req.body.state);
         return res.code(statusCode("OK")).send({ message, data });
     }

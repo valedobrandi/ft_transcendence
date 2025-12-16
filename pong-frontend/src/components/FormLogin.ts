@@ -1,11 +1,10 @@
-import { FancyButton } from "./Button";
+import { FancyButton, ReturnButton } from "./Button";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
 import { fetchRequest, navigateTo } from "../utils";
 import { profile, jwt } from "../app";
 import { removeLocalStorage, stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
-import { onClickGetProfileData } from "./UsersList";
 import { disconnectSocket, initSocket } from "../websocket";
 import { websocketConnect } from "../websocket/websocketConnect";
 
@@ -14,6 +13,9 @@ export function FormLogin(): HTMLElement {
 	viewDiv.className = "flex items-center justify-center h-screen";
 	viewDiv.style.backgroundImage = "url('/default_background.jpg')";
 	viewDiv.style.backgroundSize = "cover";
+
+	const backBtn = ReturnButton("/");
+	viewDiv.appendChild(backBtn);
 
 	const card = document.createElement("div");
 	card.className = "flex flex-col items-center bg-gray-950 border-4 border-gray-700 rounded-2xl shadow-lg px-20 py-12 w-[520px]";

@@ -24,7 +24,6 @@ export function updatedUserInDB(user : User): void
       email = ?,
       username = ?,
       password = ?,
-      status = ?,
       updated_at = date('now')
     WHERE id = ?
   `);
@@ -33,7 +32,6 @@ export function updatedUserInDB(user : User): void
     user.email,
     user.username,
     user.password,
-    user.status,
     user.id
   );
 }

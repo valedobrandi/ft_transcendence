@@ -98,7 +98,7 @@ export function Intra(): HTMLElement {
         // ================================================================== //
 
         const profileContainer = document.createElement("div");
-        profileContainer.className = "flex justify-between items-center mt-6 px-30";
+        profileContainer.className = "flex items-center justify-between gap-16 mt-6 px-10 w-full";
 
         // Header
         const profileHeader = document.createElement("div");

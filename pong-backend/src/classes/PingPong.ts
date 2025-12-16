@@ -427,8 +427,9 @@ class PingPong {
 	createMatch(playerXId: string, playerYId: string) {
 
 		this.add(playerXId);
-
+		this.gameState.userX.username = playerXId;
 		this.add(playerYId);
+		this.gameState.userY.username = playerYId;
 
 		gameRoom.set(this.machId, this);
 
@@ -457,17 +458,24 @@ class PingPong {
 	}
 
 	handleMatch() {
-		const isDisconnected = [
-			connectedRoomInstance.getByUsername(this.side.LEFT),
-			connectedRoomInstance.getByUsername(this.side.RIGHT),
-		].every((connected) => connected === undefined);
+		const	isPlayerXDisconnect = connectedRoomInstance.getByUsername(this.side.LEFT);
+		const	isPlayerYDisconnect = connectedRoomInstance.getByUsername(this.side.RIGHT);
 
-		if (isDisconnected ||
-			this.gameState.userX.score === this.WIN_SCORE ||
-			this.gameState.userY.score === this.WIN_SCORE) {
-
-			this.endMatch();
+		if (!isPlayerXDisconnect && this.gameState.userX.username !== 'PONG-IA') {
+			this.gameState.userY.score = this.WIN_SCORE;
+		} else if (!isPlayerYDisconnect && this.gameState.userY.username !== 'PONG-IA') {
+			this.gameState.userX.score = this.WIN_SCORE;
 		}
+
+		if (this.gameState.userX.score === this.WIN_SCORE || this.gameState.userY.score === this.WIN_SCORE)
+			this.endMatch();
+	}
+
+	quitMatch(player: string) {
+		if (this.gameState.userX.username === player)
+			this.gameState.userY.score = this.WIN_SCORE;
+		else if (this.gameState.userY.username === player)
+			this.gameState.userX.score = this.WIN_SCORE;
 	}
 
 	update() {
@@ -518,7 +526,7 @@ class PingPong {
 				for (const [id, { disconnect }] of this.playerConnectionInfo) {
 					const connected = this.getFromConnectedRoom(id);
 					if (!connected) continue;
-					connected.status = 'GAME_ROOM';
+					connected.status = 'MATCH';
 					connected.matchId = this.machId;
 
 					const side = id === leftId ? 'LEFT' : 'RIGHT';
