@@ -23,7 +23,7 @@ class UsersModel {
         this.db = db;
         this.stmFindUser = db.prepare('SELECT * FROM users WHERE email = ? OR username = ?');
         this.stmGetAllUsers = db.prepare('SELECT id, username FROM users');
-        this.stmGetProfileById = db.prepare('SELECT id, username, avatar_url FROM users WHERE id = ?');
+        this.stmGetProfileById = db.prepare('SELECT id, username, avatar_url, email FROM users WHERE id = ?');
         this.stmGetAvatarURLById = db.prepare('SELECT avatar_url FROM users WHERE id = ?');
         this.stmSaveAuthToken = db.prepare('UPDATE users SET authToken = ? WHERE id = ?');
         this.stmGetAuthToken = db.prepare('SELECT authToken FROM users WHERE id = ?');
@@ -38,7 +38,7 @@ class UsersModel {
     }
 
     getProfileById(id: number): any | undefined {
-        const returnDB = this.stmGetProfileById.get(id) as { id: number; username: string; avatar: string } | undefined;
+        const returnDB = this.stmGetProfileById.get(id) as { id: number; username: string; avatar: string, email: string } | undefined;
         if (!returnDB) {
             return { message: 'error', data: 'user not found' };
         }
