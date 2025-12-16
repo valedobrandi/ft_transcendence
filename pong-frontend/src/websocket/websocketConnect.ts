@@ -1,5 +1,7 @@
 import { profile } from "../app";
+import { disconnect } from "../events/eventListeners";
 import { setupPaddleListeners } from "../events/paddleListeners";
+import { navigateTo } from "../utils";
 import { getSocket } from "../websocket";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { websocketReceiver } from "./websocketReceiver";
@@ -41,6 +43,14 @@ export async function websocketConnect() {
 				payload: { up, down }
 			}))
 		});
+
+		socket.onclose = async () => {
+			console.log(`[WEBSOCKET] Disconnected from server.`);
+		};
+
+		socket.onerror = (error) => {
+			console.error("WebSocket error:", error);
+		};
 
 	}
 	await waitForSocketOpen(socket);

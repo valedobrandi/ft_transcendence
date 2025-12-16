@@ -1,7 +1,7 @@
 import { profile, jwt } from "./app";
 import { CreateAlert } from "./components/CreateAlert";
 import { endpoint } from "./endPoints";
-import { loadLocalStorage, removeLocalStorage, stateProxyHandler } from "./states/stateProxyHandler";
+import { getStorageStates, removeLocalStorage, stateProxyHandler } from "./states/stateProxyHandler";
 import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView, profileView } from "./views";
 import { initSocket } from "./websocket";
 import { websocketConnect } from "./websocket/websocketConnect";
@@ -24,75 +24,65 @@ const routes: Record<string, (root: HTMLElement) => void> = {
 };
 
 async function userSession() {
-    const jwt_token = localStorage.getItem('jwt_token');
+    if (jwt.token) { return; }
 
-    if (!jwt_token) {
-        return;
-    }
+    const jwt_token = localStorage.getItem('jwt_token');
+    if (!jwt_token) { return; }
 
     jwt.token = jwt_token;
 
-    if (jwt_token && profile.username !== "") return;
-
-    // profile!: { username: string, avatar: string };
-    if (jwt.token && profile.username === "") {
-        const response = await fetchRequest("/authenticate", "GET", {});
-        if (response.message === "error") {
-            jwt.token = undefined;
-            localStorage.removeItem('jwt_token');
-            removeLocalStorage();
-            return navigateTo("/");
-        }
-
-        if (response.message === "success") {
-            profile.username = response.data.username;
-            profile.id = response.data.id;
-        }
+    const response = await fetchRequest("/authenticate", "GET", {});
+    if (response.message === "error") {
+        jwt.token = undefined;
+        removeLocalStorage();
+        return navigateTo("/");
     }
 
-    try {
-        const [friendList, chatBlockList, userProfile, matchesHistory, serverUsers, serverState] = await Promise.all([
-            fetchRequest('/friends-list', 'GET', {}),
-            fetchRequest('/block-list', 'GET', {}),
-            fetchRequest(`/profile/user?id=${stateProxyHandler.chat.id}`, "GET"),
-            fetchRequest(`/match/history?username=${stateProxyHandler.chat.name}`, "GET"),
-            fetchRequest("/server/register", "GET", {}),
-            fetchRequest("/server/state", "GET", {})
-        ]);
-
-        if (friendList.message === 'success') {
-            stateProxyHandler.friendList = friendList.payload;
-        }
-        if (chatBlockList.message === 'success') {
-            stateProxyHandler.chatBlockList = chatBlockList.payload;
-        }
-        if (userProfile.message === "success") {
-            stateProxyHandler.profile = userProfile.data;
-        }
-        if (matchesHistory.message === "success") {
-            stateProxyHandler.matchesHistory = matchesHistory.data;
-        }
-        if (serverUsers.message === "success") {
-            stateProxyHandler.serverUsers = serverUsers.data;
-        }
-        // if (serverState.message === "success") {
-        //     stateProxyHandler.settings = { state: serverState.data };
-        //     localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
-        // }
-
-        loadLocalStorage();
-
-        initSocket();
-        websocketConnect();
-        await websocketNewEvents();
-
-    } catch (err) {
-        console.error("Failed to initialize user session:", err);
+    if (response.message === "success") {
+        profile.username = response.data.username;
+        profile.id = response.data.id;
     }
+    
+    getStorageStates();
+
+    initSocket();
+    websocketConnect();
+    await websocketNewEvents();
+
+    
+    const [friendList, chatBlockList, userProfile, matchesHistory, serverUsers] = await Promise.all([
+        fetchRequest('/friends-list', 'GET', {}),
+        fetchRequest('/block-list', 'GET', {}),
+        fetchRequest(`/profile/user?id=${stateProxyHandler.chat.id}`, "GET"),
+        fetchRequest(`/match/history?username=${stateProxyHandler.chat.name}`, "GET"),
+        fetchRequest("/server/register", "GET", {}),
+        fetchRequest("/server/state", "GET", {})
+    ]);
+
+    if (friendList.message === 'success') {
+        stateProxyHandler.friendList = friendList.payload;
+    }
+    if (chatBlockList.message === 'success') {
+        stateProxyHandler.chatBlockList = chatBlockList.payload;
+    }
+    if (userProfile.message === "success") {
+        stateProxyHandler.profile = userProfile.data;
+    }
+    if (matchesHistory.message === "success") {
+        stateProxyHandler.matchesHistory = matchesHistory.data;
+    }
+    if (serverUsers.message === "success") {
+        stateProxyHandler.serverUsers = serverUsers.data;
+    }
+
 }
 
 export async function renderRoute(path: string) {
-    await userSession();
+    const sessionRoutes = ["/login", "/match", "/intra", "/profile"];
+    
+    if (sessionRoutes.includes(path)) {
+        await userSession();
+    }
 
     const protectedRoutes = ["/match", "/intra", "/profile"];
 

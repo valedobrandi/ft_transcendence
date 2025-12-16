@@ -105,7 +105,7 @@ function PlayingMatch(): string {
           YOU ARE IN A MATCH!
         </h2>
         <p class="mt-4 text-center underline mb-2">
-          WARNING: IF YOU LEAVE THE MATCH, YOU WILL LOSE!
+          WARNING: YOU WILL NEED THE MATCH TO FINISH TO PLAY AGAIN!
         </p>
         <button 
           class="px-5 py-2 w-[300px] text-lg rounded-lg text-white bg-red-700 hover:opacity-80"
@@ -232,6 +232,38 @@ export function InvitationSent(): string {
       </div>
     </div>
   `;
+}
+
+export function InstanceDisconnect(): HTMLDivElement {
+  const ACCENT = "hsl(345,100%,47%)";
+  const root = document.createElement("div")
+  root.innerHTML =  `
+    <div id="match-invitation-sent-container"
+      class="fixed inset-0 flex items-center justify-center bg-[#1e2124]/70 backdrop-blur-sm z-50 px-4">
+      <div class="rounded-lg font-mono text-white crt p-10 w-full max-w-lg" style="
+            background:#1e2124;
+            border:4px solid ${ACCENT};
+          ">
+        <h2 class="text-3xl font-bold mb-6 text-center tracking-wider" style="color:${ACCENT};">
+          YOU ARE DISCONNECTED!
+        </h2>
+        <p class="mb-6 text-center">
+          ANOTHER INSTANCE HAS BEEN CONNECTED
+        </p>
+        <div class="flex justify-end gap-4 pt-4">
+          <button 
+          style="background:#424549;"
+          class="px-5 py-2 font-bold rounded hover:opacity-80 active:scale-95 text-white"
+          id="websocket-disconnect"
+          >
+            CLOSE
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return root;
 }
 
 export function GameStateContainer(): HTMLDivElement {

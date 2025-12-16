@@ -80,8 +80,6 @@ export function List(
 function reorder<T extends { id: number }>(list: T[]): T[] {
     const selectedId = stateProxyHandler.chat.id;
     const newServerUsers = [...list].sort((a, b) => {
-        if (a.id === selectedId) return -1;
-        if (b.id === selectedId) return 1;
         const aUnread = (stateProxyHandler.messages[a.id] ?? [])
             .some(msg => msg.isRead === 0 && msg.from !== profile.id);
         const bUnread = (stateProxyHandler.messages[b.id] ?? [])

@@ -14,7 +14,7 @@ class AuthController {
         const isValid = authenticationRoomInstance.verify(username.toString(), code);
         if (isValid === true) {
             authenticationRoomInstance.delete(username);
-            connectedRoomInstance.addUser(username, id);
+            connectedRoomInstance.joinRoom(username, id);
             return res.status(200).send({
                 message: 'connected', payload: { username }
             });
@@ -31,7 +31,9 @@ class AuthController {
 
             const token = await req.jwtVerify() as { id: number };
             const {message, data} = this.authServiceInstance.verifyToken(token.id);
+            
             if (message === 'success') {
+                connectedRoomInstance.joinRoom(data.username, data.id);
                 return res.status(200).send({ message: 'success', data: data });
             } 
             
