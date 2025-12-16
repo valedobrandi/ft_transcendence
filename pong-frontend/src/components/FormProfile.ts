@@ -314,18 +314,23 @@ export function ProfilePage(): HTMLElement {
 		const curPwdEl = document.getElementById("current_password_input") as HTMLInputElement | null;
 		const newPwdEl = document.getElementById("new_password_input") as HTMLInputElement | null;
 
-		const nextName = nameEl?.value.trim() ?? "";
-		const nextMail = mailEl?.value.trim() ?? "";
+		const payload: Record<string, unknown> = {};
+		const nextName = nameEl?.value.trim() !== "" ? nameEl?.value.trim() : profile.username
+		const nextMail = mailEl?.value.trim() !== "" ? mailEl?.value.trim() : profile.email
 		const curPwd = curPwdEl?.value ?? "";
 		const newPwd = newPwdEl?.value ?? "";
 
-		const payload: Record<string, unknown> = {};
-		if (nextName && nextName !== profile.username) {
-			payload.username = nextName;
+		if (nextName === profile.username) {
+			payload.username = undefined;
+		} else {
+			payload.username = nextName
 		}
-		if (nextMail && nextMail !== profile.email) {
+		
+		if (nextMail === profile.email) {
+			payload.email = undefined;
+		}
+		else
 			payload.email = nextMail;
-		}
 
 		if (curPwd && newPwd) {
 			payload.current_password = curPwd;
