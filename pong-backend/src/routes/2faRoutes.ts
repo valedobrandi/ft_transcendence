@@ -2,47 +2,55 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import db from '../database/db.js';
 import { authenticationRoomInstance } from "../state/authenticationRoom.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
-import { getIdUser, updatedUserInDB } from '../user_service/user_service.js';
+import { getIdUser } from '../user_service/user_service.js';
 import { UserReturnDB } from '../models/usersModel.js';
+import { AuthService } from '../services/authService.js';
 
 
 export default async function twoFARoutes(fastify: FastifyInstance) {
 
-fastify.put(
-    "/updata/2FA",
-    { preHandler: [fastify.authenticate] },
-    async (
-        req: FastifyRequest<{ Body: { twoFA_enabled: 0 | 1 } }>,
-        reply: FastifyReply
-    ) => {
-        try {
-            const { twoFA_enabled } = req.body;
-            const userId = req.userId;
+    fastify.put(
+        "/twoFA",
+        { preHandler: [fastify.authenticate] },
+        async (
+            req: FastifyRequest<{ Body: { twoFA_enabled: 0 | 1 } }>,
+            reply: FastifyReply
+        ) => {
+            try {
+                const { twoFA_enabled } = req.body;
+                const userId = req.userId;
 
-            if (twoFA_enabled !== 0 && twoFA_enabled !== 1) {
-                return reply.status(400).send({ error: "Invalid 2FA value (must be 0 or 1)" });
+                if (twoFA_enabled !== 0 && twoFA_enabled !== 1) {
+                    return reply.status(400).send({ error: "Invalid 2FA value (must be 0 or 1)" });
+                }
+
+                const existingUser = getIdUser(userId);
+                if (!existingUser) {
+                    return reply.status(400).send({ error: "User not found" });
+                }
+
+                db.prepare("UPDATE users SET twoFA_enabled = ? WHERE id = ?")
+                    .run(twoFA_enabled, userId);
+
+                let qrCode = "";
+                if (twoFA_enabled === 1) {
+                    const authService = new AuthService();
+                    const { message, data } = await authService.sendQrCode(userId);
+                    qrCode = data.qrCode;
+                }
+                
+                return reply.send({
+                    message: "success",
+                    payload: { twoFA_enabled, qrCode }
+                });
+
+            } catch (e) {
+                return reply.status(500).send({ message: "error", error: e });
             }
-
-            const existingUser = getIdUser(userId);
-            if (!existingUser) {
-                return reply.status(400).send({ error: "User not found" });
-            }
-
-            db.prepare("UPDATE users SET twoFA_enabled = ? WHERE id = ?")
-              .run(twoFA_enabled, userId);
-
-            return reply.send({
-                message: "success",
-                payload: { twoFA_enabled }
-            });
-
-        } catch (e) {
-            return reply.status(500).send({ message: "error", error: e });
         }
-    }
-);
+    );
 
-    fastify.post('/2fa/verify', async (req: FastifyRequest<{ Body: { username: string, code: string }}>, res: FastifyReply) => {
+    fastify.post('/2fa/verify', async (req: FastifyRequest<{ Body: { username: string, code: string } }>, res: FastifyReply) => {
         const { username, code } = req.body;
 
         if (!username || !code)
@@ -61,20 +69,20 @@ fastify.put(
 
 
         const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username) as UserReturnDB | undefined;
-		if (!user) {
-			return res.status(404).send({ message: "user_not_found" });
-		}
+        if (!user) {
+            return res.status(404).send({ message: "user_not_found" });
+        }
 
         const payload = { id: user.id };
         const accessToken = fastify.jwt.sign(payload, { expiresIn: "10h" });
 
-    const clientIsConnected = connectedRoomInstance.has(Number(user.id));
+        const clientIsConnected = connectedRoomInstance.has(Number(user.id));
 
         if (clientIsConnected) {
             connectedRoomInstance.disconnect(Number(user.id));
         }
 
-        connectedRoomInstance.addUser(user.username, user.id);
+        connectedRoomInstance.joinRoom(user.username, user.id);
 
         return res.send({
             message: "success",

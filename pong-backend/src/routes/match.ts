@@ -253,7 +253,6 @@ type MatchesHistory = {
 class MatchesService {
 
 	private matchesModel = new MatchesModel(db);
-	private usersModel = new UsersModel(db);
 
 	async getMatchHistory(username: string) {
 		const match = await this.matchesModel.getMatchHistoryById(username);

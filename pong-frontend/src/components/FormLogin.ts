@@ -6,7 +6,7 @@ import { profile, jwt } from "../app";
 import { removeLocalStorage, stateProxyHandler } from "../states/stateProxyHandler";
 import { CreateAlert } from "./CreateAlert";
 import { onClickGetProfileData } from "./UsersList";
-import { closeSocket, initSocket } from "../websocket";
+import { disconnectSocket, initSocket } from "../websocket";
 import { websocketConnect } from "../websocket/websocketConnect";
 
 export function FormLogin(): HTMLElement {
@@ -160,10 +160,8 @@ export function FormLogin(): HTMLElement {
 		if (response.message === 'success') {
 
 			removeLocalStorage();
-			localStorage.removeItem('jwt_token');
-
 			stateProxyHandler.reset();
-			closeSocket();
+			disconnectSocket();
 
 			jwt.token = response.payload.accessToken;
 			localStorage.setItem('jwt_token', jwt.token || '');
@@ -186,7 +184,6 @@ export function FormLogin(): HTMLElement {
 				stateProxyHandler.chatBlockList = blockedList.payload;
 			}
 
-			//await onClickGetProfileData();
 			initSocket();
   			await websocketConnect();
 

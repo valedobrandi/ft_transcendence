@@ -13,7 +13,7 @@ export class ConnectedRoom {
   private usersModelsInstance = new UsersModel(db);
   private friendsModelInstance = new FriendsModel(db);
 
-  addUser(name: string, id: number | bigint): Boolean {
+  joinRoom(name: string, id: number | bigint) {
     const user: PlayerType = {
       id: id,
       username: name,
@@ -24,13 +24,17 @@ export class ConnectedRoom {
       chat: new ChatManager(Number(id), name),
       state: "0"
     };
-
-    //print(`[ONLINE]: ${name} (${id})`);
-    if (this.room.has(id) === false) {
+    console.log(`[CONNECTED ROOM] ${name} is connected: ${this.room.has(id)}`);
+    if (this.room.has(id)) {
+      // DISCONNECT PREVIOUS WEBSOCKET
+      console.log(`[CONNECTED ROOM] ${name} is already connected. Disconnecting previous websocket.`);
+      const connected = this.getById(id);
+      if (connected && connected.socket) {
+        this.sendWebsocketMessage(id, "websocket.disconnect");
+      }
+    } else {
       this.room.set(id, user);
-      return true;
     }
-    return false;
   }
 
   friendListManager(useServiceRequestId: number | bigint) {

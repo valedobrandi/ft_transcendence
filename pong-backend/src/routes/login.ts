@@ -96,13 +96,8 @@ export default async function loginRoutes(fastify: FastifyInstance) {
 			// });
 
 			// Add user to connectedRoomInstance
-			const clientIsConnected = connectedRoomInstance.has(Number(existingUser.id));
-
-			if (clientIsConnected) {
-				connectedRoomInstance.disconnect(Number(existingUser.id));
-			}
-			
-			connectedRoomInstance.addUser(existingUser.username, existingUser.id);
+		
+			connectedRoomInstance.joinRoom(existingUser.username, existingUser.id);
 			return res.status(201).send({ message: 'success', payload: { accessToken, ...payload } });
 		}
 	});

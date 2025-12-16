@@ -8,7 +8,7 @@ import { MatchList } from "./MatchList";
 import { endpoint } from "../endPoints";
 import { GameActionBtn } from "./GameButtons";
 import { ProfileButton } from "./ProfileButton";
-import { RenderChatMessages } from "../states/RenderChatMessages";
+import { RenderChatMessages } from "./RenderChatMessages";
 
 export function Intra(): HTMLElement {
     const mainDiv = document.createElement("div");
