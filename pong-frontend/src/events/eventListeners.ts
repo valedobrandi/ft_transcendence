@@ -1,5 +1,6 @@
 import { jwt, profile } from "../app";
 import { Alert } from "../components/Alert";
+import { ResponseMessage } from "../components/GameStateContainer";
 import {
 	removeLocalStorage,
 	stateProxyHandler,
@@ -87,6 +88,9 @@ export function eventListeners() {
 
 		if (action === "quitMatch") {
 			fetchRequest(`/match/quitMatch`, "GET");
+			stateProxyHandler.settings = { state: "intra" };
+			localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
+			navigateTo('/match');
 		}
 	});
 
@@ -156,13 +160,13 @@ export function eventListeners() {
 				break;
 			case "btn-leave-tournament": {
 				await leaveTournament(button);
-				stateProxyHandler.settings = { state: "0" };
+				stateProxyHandler.settings = { state: "intra" };
 				localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
 			}
 				break;
 			case "match-btn": {
 				stateProxyHandler.settings = { state: "game.settings" };
-				localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));	
+				localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
 			}
 				break;
 			case "btn-logout": { await disconnect(); }
@@ -181,6 +185,12 @@ export function eventListeners() {
 				if (qrModal) { qrModal.remove(); }
 			}
 				break;
+			case "remove-message-response": {
+				const messageContainer = document.getElementById("message-response-container");
+				if (messageContainer) {
+					messageContainer.remove();
+				}
+			}
 		}
 	});
 }
@@ -258,7 +268,7 @@ async function onSendSettingsVsComputer(event: Event) {
 
 function onCancelSettings(event: Event) {
 	event.preventDefault();
-	stateProxyHandler.settings = { state: "0" };
+	stateProxyHandler.settings = { state: "intra" };
 	localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
 }
 
@@ -362,7 +372,7 @@ async function leaveTournament(button: HTMLButtonElement) {
 }
 
 export async function disconnect() {
-	const response = await fetchRequest(`/logout`,"GET");
+	const response = await fetchRequest(`/logout`, "GET");
 
 	if (response.message === "success") {
 		localStorage.removeItem("jwt_token");
@@ -397,9 +407,10 @@ async function refuseInvite(button: HTMLButtonElement) {
 		"DELETE"
 	);
 	if (response.message === "success") {
-		stateProxyHandler.settings = { state: "0" };
+		stateProxyHandler.settings = { state: "intra" };
 		localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
 	}
+
 }
 
 const profileOnclick = async () => {
@@ -442,22 +453,17 @@ const inviteSend = async () => {
 	});
 	if (response.message === 'success') {
 		const getMatch = await fetchRequest(`/match-invite?matchId=${response.data.matchId}`, 'GET', {});
-		if (getMatch.message === "success") {
-			
-			stateProxyHandler.invite = {
-				matchId: response.data.matchId,
-				id: -1,
-				username: ""
-			};
-			localStorage.setItem("invite", JSON.stringify(stateProxyHandler.invite))
-
-			stateProxyHandler.state = "MATCH";
-			localStorage.setItem("state", JSON.stringify(stateProxyHandler.state));
-
-			stateProxyHandler.settings = { state: "invite.sent" };
-			localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
-
+		if (getMatch.message === "error") {
+			const root = document.getElementById("root");
+			if (!root) return;
+			root.appendChild(ResponseMessage(`${response.data}`))
 		}
+	}
+
+	if (response.message === 'error') {
+		const root = document.getElementById("root");
+		if (!root) return;
+		root.appendChild(ResponseMessage(`${response.data}`));
 	}
 
 }

@@ -34,7 +34,7 @@ function SelectOption(fields: string[], values: string[], matchPointsOptions: nu
                   ${values.map((value, index) => `
                   <option ${value === "MEDIUM" ? "selected" : ""} 
                     value="${value}">
-                    ${ field === "MATCH POINTS" ? matchPointsOptions[index] : value }
+                    ${field === "MATCH POINTS" ? matchPointsOptions[index] : value}
                   </option>`).join("")}
                 </select>
               </div>
@@ -105,7 +105,7 @@ function PlayingMatch(): string {
           YOU ARE IN A MATCH!
         </h2>
         <p class="mt-4 text-center underline mb-2">
-          WARNING: YOU WILL NEED THE MATCH TO FINISH TO PLAY AGAIN!
+          WARNING: YOU WILL LOST THE MATCH!
         </p>
         <button 
           class="px-5 py-2 w-[300px] text-lg rounded-lg text-white bg-red-700 hover:opacity-80"
@@ -118,7 +118,7 @@ function PlayingMatch(): string {
           class="mt-4 px-5 py-2 w-[300px] text-lg rounded-lg text-white bg-blue-600 hover:opacity-80"
           id="go-to-match"
         >
-          RETURN
+          RETURN TO MATCH
         </button>
       </div>
     </div>
@@ -126,10 +126,10 @@ function PlayingMatch(): string {
 }
 
 export function TournamentWait(): string {
-    const state = stateProxyHandler.tournamentQueue;
-    const queueLength = state.length;
-    return `
-    <div id="waiting-match-container"
+  const state = stateProxyHandler.tournamentQueue;
+  const queueLength = state.length;
+  return `
+    <div 
       class="fixed inset-0 flex items-center justify-center bg-[#1e2124]/70 backdrop-blur-sm z-50 px-4">
       <div class="flex flex-col justify-center items-center rounded-lg font-mono text-white crt p-10 w-[1000px]" 
           style="
@@ -150,14 +150,39 @@ export function TournamentWait(): string {
             id="btn-leave-tournament"
             >
               CLICK TO LEAVE THE TOURNAMENT QUEUE
-            <p class="mb-6 text-center underline text-xs">
-              WARNING: IF YOU LEAVE THE TOURNAMENT, YOU WILL BE REMOVED FROM THE QUEUE!
-            </p>
-          </button>
+              </button>
+              <p class="mb-6 text-center text-yellow-600 underline text-xs mt-4">
+                WARNING: IF YOU LEAVE, YOU WILL BE REMOVED FROM THE QUEUE!
+              </p>
       </div>
     </div>
   `;
 }
+
+export function TournamentPlaying(): string {
+ 
+  return `
+   <div id="waiting-match-container"
+      class="fixed inset-0 flex items-center justify-center bg-[#1e2124]/70 backdrop-blur-sm z-10 px-4">
+      <div class="flex flex-col justify-center items-center rounded-lg font-mono text-white crt p-10 w-fit" 
+          style="
+            background:#1e2124;
+            border:4px solid hsl(345,100%,47%);
+          ">
+        <h2 class="text-3xl font-bold mb-6 text-center tracking-wider" style="color:hsl(345,100%,47%);">
+          YOU MUST FINISH THE TOURNAMENT BEFORE PLAY AGAIN!
+        </h2>
+        <button 
+          class="mt-4 px-5 py-2 w-[300px] text-lg rounded-lg text-white bg-blue-600 hover:opacity-80"
+          id="go-to-match"
+        >
+          RETURN
+        </button>
+      </div>
+    </div>
+  `;
+}
+
 
 export function InvitationReceive(): string {
   const ACCENT = "hsl(345,100%,47%)";
@@ -167,10 +192,8 @@ export function InvitationReceive(): string {
   return `
     <div id="match-invitation-container"
       class="fixed inset-0 flex items-center justify-center bg-[#1e2124]/70 backdrop-blur-sm z-50 px-4">
-      <div class="rounded-lg font-mono text-white crt p-10 w-full max-w-lg" style="
-            background:#1e2124;
-            border:4px solid ${ACCENT};
-          ">
+      <div class="rounded-lg font-mono text-white crt p-10 w-full max-w-lg" 
+        style="background:#1e2124; border:4px solid ${ACCENT};">
         <h2 class="text-3xl font-bold mb-6 text-center tracking-wider" style="color:${ACCENT};">
           MATCH INVITATION
         </h2>
@@ -236,7 +259,7 @@ export function InvitationSent(): string {
 export function InstanceDisconnect(): HTMLDivElement {
   const ACCENT = "hsl(345,100%,47%)";
   const root = document.createElement("div")
-  root.innerHTML =  `
+  root.innerHTML = `
     <div id="match-invitation-sent-container"
       class="fixed inset-0 flex items-center justify-center bg-[#1e2124]/70 backdrop-blur-sm z-50 px-4">
       <div class="rounded-lg font-mono text-white crt p-10 w-full max-w-lg" style="
@@ -265,6 +288,39 @@ export function InstanceDisconnect(): HTMLDivElement {
   return root;
 }
 
+export function ResponseMessage(message: string): HTMLDivElement {
+  const ACCENT = "hsl(345,100%,47%)";
+  const root = document.createElement("div")
+  root.id = "message-response-container";
+  root.innerHTML = `
+    <div
+      class="fixed inset-0 flex items-center justify-center bg-[#1e2124]/70 backdrop-blur-sm z-50 px-4">
+      <div class="rounded-lg font-mono text-white crt p-10 w-full max-w-lg" style="
+            background:#1e2124;
+            border:4px solid ${ACCENT};
+          ">
+        <h2 class="text-3xl font-bold mb-6 tracking-wider text-left" style="color:${ACCENT};">
+          MESSAGE
+        </h2>
+        <p class="mb-6 text-center text-2xl  text-white underline">
+          ${message}
+        </p>
+        <div class="flex justify-end gap-4 pt-4">
+          <button 
+          style="background:#424549;"
+          class="px-5 py-2 font-bold rounded hover:opacity-80 active:scale-95 text-white m-auto"
+          id="remove-message-response"
+          >
+            CLOSE
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return root;
+}
+
 export function GameStateContainer(): HTMLDivElement {
   const root = document.createElement("div");
 
@@ -279,28 +335,43 @@ export function GameStateContainer(): HTMLDivElement {
   const values = ["HIGH", "MEDIUM", "LOW"];
   root.innerHTML = "";
   function onRender() {
+    console.log("Rendering GameStateContainer...");
     const state = stateProxyHandler.settings.state;
+    const status = stateProxyHandler.state;
 
-    if (state === "0") {
-      root.innerHTML = "";
+    switch (state) {
+      case "intra": {
+        root.innerHTML = "";
+        break;
+      }
+      case "game.settings": {
+        root.innerHTML = SelectOption(fields, values, matchPointsOptions);
+        break;
+      }
+      case "match.running": {
+        root.innerHTML = PlayingMatch();
+        break;
+      }
+      case "match.waiting": {
+        root.innerHTML = WaitingMatch();
+        break;
+      }
+      case "invite.receive": {
+        root.innerHTML = InvitationReceive();
+        break;
+      }
+      case "invite.sent": {
+        root.innerHTML = InvitationSent();
+        break;
+      }
+      case "tournament.waiting": {
+        root.innerHTML = TournamentWait();
+        break;
+      }
     }
-    if (state === "game.settings") {
-      root.innerHTML = SelectOption(fields, values, matchPointsOptions);
-    }
-    if (state === "match.waiting") {
-      root.innerHTML = WaitingMatch();
-    }
-    if (state === "match.playing") {
-      root.innerHTML = PlayingMatch();
-    }
-    if (state === "tournament.waiting") {
-      root.innerHTML = TournamentWait();
-    }
-    if (state === "invite.receive") {
-      root.innerHTML = InvitationReceive();
-    }
-    if (state === "invite.sent") {
-      root.innerHTML = InvitationSent();
+    if (status === "TOURNAMENT") {
+      if (state !== "tournament.waiting" && state !== "match.running")
+      root.innerHTML = TournamentPlaying();
     }
   }
 

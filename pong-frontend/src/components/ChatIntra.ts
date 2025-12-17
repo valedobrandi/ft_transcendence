@@ -1,5 +1,4 @@
 import { stateProxyHandler, onStateChange } from "../states/stateProxyHandler";
-import { navigateTo } from "../utils";
 
 export function SystemMessageChat() {
 	const intraContainer = document.createElement("div");
@@ -24,25 +23,10 @@ export function SystemMessageChat() {
 		statusParagraph.id = "server-state";
 		statusParagraph.className = "text-base font-bold italic underline text-white";
 		statusParagraph.textContent = `${stateProxyHandler.state}`;
-		
-		const matchBtn = document.createElement("button");
-		matchBtn.id = "match-btn";
-		matchBtn.className = "ml-4 px-3 py-1 bg-green-600 text-white rounded hover:opacity-80";
-		matchBtn.textContent = "RETURN TO MATCH";
 	
-		matchBtn.onclick = () => {
-			navigateTo("/match")
-		};
-
-		if (stateProxyHandler.state === "MATCH" || stateProxyHandler.state === "TOURNAMENT") {
-			matchBtn.classList.remove("hidden");
-		} else {
-			matchBtn.classList.add("hidden");
-		}
 
 		chatTabs.appendChild(status);
 		chatTabs.appendChild(statusParagraph);
-		chatTabs.appendChild(matchBtn);
 	}
 
 	onRender();

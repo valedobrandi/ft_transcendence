@@ -7,8 +7,8 @@ import { PlayerType } from "../types/PlayerType.js";
 import { MessagesModel } from "../models/messagesModel.js";
 import ChatManager from "../classes/ChatManager.js";
 
-export function serverRoute(fastify: FastifyInstance) {
-    const serverControllerInstance = new ServerController();
+export function stateRoute(fastify: FastifyInstance) {
+    const serverControllerInstance = new StateController();
     fastify.get("/server/register", {
         preHandler: fastify.authenticate,
         handler: serverControllerInstance.getRegisterUsers.bind(serverControllerInstance)
@@ -50,8 +50,8 @@ export function serverRoute(fastify: FastifyInstance) {
     })
 }
 
-class ServerController {
-    private serverServiceInstance = new ServerService();
+class StateController {
+    private serverServiceInstance = new StateService();
 
     getRegisterUsers(req: FastifyRequest, res: FastifyReply) {
         const { message, data } = this.serverServiceInstance.getRegisterUsers();
@@ -75,7 +75,7 @@ class ServerController {
     }
 }
 
-class ServerService {
+class StateService {
     private usersModelInstance: UsersModel;
     private messagesModelInstance: MessagesModel;
 
@@ -109,7 +109,7 @@ class ServerService {
         if (!connected) {
             return { message: "error", data: "disconnected" };
         }
-        connected.state = state;
+        connectedRoomInstance.updateSettingsState(undefined, userId, "intra", undefined);
 
         return { message: "success", data: "state_updated" };
     }

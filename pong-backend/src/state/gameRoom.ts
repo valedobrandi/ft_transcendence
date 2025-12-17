@@ -1,4 +1,3 @@
-import { GameSettings } from "../classes/PingPong.js";
 import { PingPong } from "../classes/PingPong.js";
 import { eventsBus } from "../events/EventsBus.js";
 import { matchQueueEvent } from "../events/matchQueueEvent.js";

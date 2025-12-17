@@ -14,11 +14,15 @@ export function CONNECT(data: ConnectType, connection: WebSocket) {
         timeoutDisconnect.delete(data.userId);
     }
 
+    const existing = connectedRoomInstance.getById(data.userId);
+    if (existing?.socket && existing.socket !== connection) {
+        try {
+            existing.socket.close();
+        } catch { }
+    }
+
     connectedRoomInstance.addWebsocket(data.userId, connection);
-
     connection.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
-
     const user = connectedRoomInstance.getById(data.userId);
     if (user) user.chat.sendHistory();
-
 }

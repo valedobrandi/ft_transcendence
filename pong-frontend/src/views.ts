@@ -5,18 +5,22 @@ import { Register } from "./components/FormRegister";
 import { FormLogin } from "./components/FormLogin";
 import { FormTwoFactorAuthentication } from "./components/FormTwoFactorAuthentication";
 import { ProfilePage } from "./components/FormProfile";
-import { FormGuest } from "./components/FormGuest";
 import { jwt, profile } from "./app";
 import { IntraContainer } from "./components/IntraContainer";
 import { stateProxyHandler } from "./states/stateProxyHandler";
 import { GameStateContainer } from "./components/GameStateContainer";
-import { navigateTo } from "./utils";
+import { fetchRequest, navigateTo } from "./utils";
 import { FriendInvite } from "./components/FriendInvite";
+import { TournamentIntra } from "./components/TournamentIntra";
 
 
-export function intraView(root: HTMLElement) {
+export async function intraView(root: HTMLElement) {
   root.innerHTML = "";
-  stateProxyHandler.chat = {id: profile.id, name: profile.username}
+  stateProxyHandler.chat = { id: profile.id, name: profile.username }
+  const response = await fetchRequest("/server/state", "GET");
+  if (response.message === 'success') {
+    stateProxyHandler.settings = { state: response.data}
+  }
 
   // Main Intra Container
   const intraContainerUI = IntraContainer()
@@ -33,46 +37,46 @@ export function matchView(root: HTMLElement) {
   // main container
   const container = document.createElement("div");
   container.className =
-    "flex flex-col h-full w-full overflow-hidden";
+    "flex flex-1 min-w-0";
   container.style.backgroundImage = "url('/default_background.jpg')";
   container.id = "match-container";
 
   // header bar
-  const headerBar = document.createElement("div");
-  headerBar.className = "flex justify-center w-full no-wrap"
+  const rightBar = document.createElement("div");
+  rightBar.className = "flex p-6 no-wrap "
+
+  const leftBar = document.createElement("div");
+  leftBar.className = "flex flex-col p-6 gap-4 shrink-0 w-fit";
+
+
 
   // back button
   const backBtn = document.createElement("button");
-  backBtn.className = "border border-black bg-black text-white text-2xl p-4 mt-4 rounded-lg hover:bg-red-500 hover:border-red-500 hover:cursor-pointer";
-  backBtn.innerText = "QUIT MATCH";
+  backBtn.className = "border border-black bg-black p-4 text-white rounded-lg hover:bg-red-500 hover:border-red-500 hover:cursor-pointer";
   backBtn.onclick = () => {
     navigateTo("/intra");
   };
-  
-  headerBar.appendChild(backBtn);
-  container.appendChild(headerBar);
+
+  const back = document.createElement("p");
+  back.innerHTML = "&#x21a9;";
+  back.className = "text-white text-7xl font-bold";
+  backBtn.appendChild(back);
+  // Tournament Intra Messages
+
+  rightBar.appendChild(backBtn);
+  container.appendChild(rightBar);
+
+  rightBar.appendChild(TournamentIntra());
+
   container.appendChild(RenderGame());
+  container.appendChild(leftBar)
+  
   root.appendChild(container);
 }
 
 export function defaultView(root: HTMLElement) {
   root.innerHTML = "";
   root.appendChild(Default());
-}
-
-export function guestView(root: HTMLElement) {
-  root.innerHTML = "";
-  const guestUI = FormGuest();
-  root.appendChild(guestUI);
-  const enterBtn = document.getElementById("enter-button") as HTMLButtonElement;
-  if (profile.username !== "") {
-    enterBtn.setAttribute("disabled", "true");
-    enterBtn.className += " opacity-20 cursor-not-allowed";
-    enterBtn.className = enterBtn.className.replace(
-      "cursor-pointer",
-      "cursor-not-allowed"
-    );
-  }
 }
 
 export function loginView(root: HTMLElement) {

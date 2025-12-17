@@ -2,7 +2,6 @@ import db from "../database/db.js";
 import ChatManager from "../classes/ChatManager.js";
 import { UsersModel } from "../models/usersModel.js";
 import { matchServiceInstance } from "../routes/match.js";
-import { print } from "../server.js";
 import { PlayerType } from "../types/PlayerType.js";
 import type { WebSocket } from "ws";
 import { NewMatch, newMatchesQueue } from "./gameRoom.js";
@@ -22,7 +21,7 @@ export class ConnectedRoom {
       matchId: undefined,
       tournamentId: undefined,
       chat: new ChatManager(Number(id), name),
-      state: "0"
+      state: "intra"
     };
     console.log(`[CONNECTED ROOM] ${name} is connected: ${this.room.has(id)}`);
     if (this.room.has(id)) {
@@ -37,6 +36,23 @@ export class ConnectedRoom {
     }
   }
 
+  updateSettingsState(username?: string, id?: number, state: PlayerType["state"] = "0", payload: any = undefined) {
+    if (!username && !id) return;
+    let connected: PlayerType | undefined;
+    if (id) {
+      connected = connectedRoomInstance.getById(id);
+    } else if (username) {
+      connected = connectedRoomInstance.getByUsername(username);
+    }
+
+    if (!connected) return;
+    connected.state = state;
+
+    if (connected.socket) {
+      connected.socket.send(JSON.stringify({ status: 200, message: state, payload }));
+    }
+  }
+
   friendListManager(useServiceRequestId: number | bigint) {
     return {
 
@@ -45,8 +61,8 @@ export class ConnectedRoom {
         this.broadcastWebsocketMessage(
           useServiceRequestId,
           "friend:new", {
-            friends: this.friendListManager(useServiceRequestId).getEveryFriends()
-          }
+          friends: this.friendListManager(useServiceRequestId).getEveryFriends()
+        }
         )
       },
 
@@ -89,17 +105,14 @@ export class ConnectedRoom {
   }
 
   disconnect(id: number | bigint) {
-    this.broadcastEachFriend(id, false);
-    this.dropWebsocket(Number(id));
     const connected = this.getById(id);
     if (connected && connected.matchId) {
-      if (connected.status === "MATCH") {
-        const matchId = connected.matchId;
-        matchServiceInstance.matchRemove(matchId, Number(id));
-      }
       matchServiceInstance.removeMatch(Number(id), connected.matchId);
-
+      const matchId = connected.matchId;
+      matchServiceInstance.matchRemove(matchId, Number(id));
     }
+    this.broadcastEachFriend(id, false);
+    this.dropWebsocket(Number(id));
     this.room.delete(Number(id));
   }
 
@@ -168,6 +181,16 @@ export class ConnectedRoom {
 
   getById(id: number | bigint) {
     return this.room.get(Number(id));
+  }
+
+  getByMatchId(matchId: string) {
+    const players: PlayerType[] = [];
+    for (const player of this.room.values()) {
+      if (player.matchId === matchId) {
+        players.push(player);
+      }
+    }
+    return players;
   }
 
   getByUsername(username: string) {

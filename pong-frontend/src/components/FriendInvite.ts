@@ -5,7 +5,7 @@ export function FriendInvite(): HTMLElement {
     root.className = "absolute top-4 left-4 z-50 flex flex-col space-y-4 pointer-events-auto";
     
     function onRender() {
-        if (stateProxyHandler.settings.state !== '0') {
+        if (stateProxyHandler.settings.state !== 'intra') {
             root.innerHTML = "";
             return;
         }

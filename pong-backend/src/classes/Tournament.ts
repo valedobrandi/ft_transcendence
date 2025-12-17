@@ -1,5 +1,4 @@
 import { events } from "../events/EventsBus.js";
-import { print } from "../server.js";
 import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { tournamentRoom } from "../state/tournamentRoom.js";
 import { EndMatchEventType } from "../types/EndMatchEventType.js";
@@ -10,8 +9,11 @@ class Tournament {
 	currentBracket: Set<string>;
 	currentRoundWinners: Set<string>;
 	nextBracket: Set<string> = new Set<string>();
+	tournamentIntra: string[] = [];
+	tournamentConnecters: string[] = [];
 	private matches = 0;
 	private rounds = 0;
+	private matchRound = 1;
 	cleanup: () => void = () => { };
 
 	constructor(tournamentId: string) {
@@ -28,12 +30,22 @@ class Tournament {
 		this.cleanup = () => events.off('tournament_match_end', matchEndedListener);
 	}
 
+	joinTournament(username: string) {
+		if (this.currentBracket.size >= 4) return;
 
-	add(id: string) {
-		this.currentBracket.add(id);
+		this.currentBracket.add(username);
+		this.tournamentConnecters.push(username);
+
 		if (this.currentBracket.size == 4) {
+			// CLEAR PLAYER FROM TOURNAMENT POOL
+
+			this.broadcastIntraMessage(
+			   `${this.tournamentConnecters[0]}, 
+				${this.tournamentConnecters[1]},
+				${this.tournamentConnecters[2]}, 
+				${this.tournamentConnecters[3]}`,
+			);
 			this.startRound();
-			this.broadcastIntraMessage(`Tournament: Starting with 4 players!`, Array.from(this.currentBracket));
 		}
 	}
 
@@ -45,18 +57,15 @@ class Tournament {
 		this.matches = 0;
 
 		const connecters = Array.from(this.currentBracket.values());
-		const pairings: string[] = [];
 
 		for (let i = 0; i < connecters.length; i += 2) {
 			const playerX = connecters[i];
 			const playerY = connecters[i + 1];
 
 			if (!playerX || !playerY) continue;
-			pairings.push(`${playerX} vs ${playerY}`);
+			this.broadcastIntraMessage(`ROUND ${this.matchRound}: ${playerX} vs ${playerY}`);
 		}
 
-		const tournamentVisualizationBracket = pairings.join(' | ');
-		this.broadcastIntraMessage(`Tournament: Bracket - ${tournamentVisualizationBracket}`, connecters)
 
 		for (let i = 0; i < connecters.length; i += 2) {
 			const playerX = connecters[i];
@@ -69,21 +78,24 @@ class Tournament {
 
 			newMatch.setTournamentId(this.tournamentId);
 
-
-			await new Promise(resolve => setTimeout(resolve, 5000));
 			newMatch.createMatch(playerX, playerY);
 		}
+		this.matchRound++;
 
 	}
 
-	broadcastIntraMessage(message: string, receiversList: string[]) {
-		for (const username of receiversList) {
+	broadcastIntraMessage(message: string) {
+		// Add message to tournament state
+		this.tournamentIntra.push(message);
+
+		// Send message to all connected players in the tournament
+		for (const username of this.tournamentConnecters) {
 			const connected = connectedRoomInstance.getByUsername(username);
 			if (!connected || !connected.socket) continue;
 			connected.socket.send(JSON.stringify({
 				status: 200,
-				message: 'intra:message',
-				payload: { message }
+				message: 'tournament.message',
+				payload: this.tournamentIntra
 			}));
 		}
 	}
@@ -101,18 +113,12 @@ class Tournament {
 			this.currentRoundWinners.add(winnerId);
 			this.currentBracket.delete(loserId);
 
-			this.broadcastIntraMessage(`Tournament: ${winnerId} has defeated ${loserId}`, [winnerId, loserId]);
+			this.broadcastIntraMessage(`${winnerId} has defeated ${loserId}`);
+			this.broadcastIntraMessage(`${loserId} has bean eliminate from the tournament.`);
 		}
 
 		if (this.matches === this.rounds) {
 			this.nextBracket = new Set(this.currentRoundWinners);
-
-			if (this.rounds > 1) {
-				for (const winnerId of this.nextBracket) {
-					this.broadcastIntraMessage(`Tournament: Advancing to next round: ${winnerId}`, [winnerId]);
-				}
-			}
-			await new Promise(resolve => setTimeout(resolve, 5000));
 			await this.advanceBracket();
 		}
 	}
@@ -126,20 +132,22 @@ class Tournament {
 			await this.startRound();
 		} else {
 			const winnerId = Array.from(this.currentBracket)[0];
-			//print(`Tournament ${this.tournamentId} winner is ${winnerId}`);
 			await this.endTournament(winnerId);
 		}
 	}
 
 	async endTournament(username: string) {
-		const connected = connectedRoomInstance.getByUsername(username);;
-		if (connected) {
-			connected.status = 'CONNECTED';
-			if (connected.socket) {
-				this.broadcastIntraMessage(`Tournament: Winner is ${username}! Congratulations!`, [username]);
-				connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
-			}
-		};
+		this.broadcastIntraMessage(`Winner is ${username}! Congratulations!`);
+		for (const p of this.tournamentConnecters) {
+			const connected = connectedRoomInstance.getByUsername(p);
+			if (connected) {
+				connected.status = 'CONNECTED';
+				if (connected.socket) {
+					connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
+					connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
+				}
+			};
+		}
 		tournamentRoom.delete(this.tournamentId);
 		this.cleanup();
 	}

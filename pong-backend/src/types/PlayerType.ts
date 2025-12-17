@@ -12,7 +12,13 @@ export interface PlayerType {
     matchId: string | undefined;
     tournamentId: string | undefined;
     chat: ChatManager;
-    state: "0" | "game.settings" | "match.waiting" | "3" | "tournament.waiting" | "invite.receive" | "invite.sent";
+    state: "intra" | 
+        "game.settings" | 
+        "match.waiting" | 
+        "match.running" | 
+        "tournament.waiting" | 
+        "invite.receive" | 
+        "invite.sent" |
 }
 
 export interface PlayerStatType {

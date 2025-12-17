@@ -5,7 +5,7 @@ import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { print } from '../server.js';
 
 export const timeoutDisconnect: Map<number | bigint, NodeJS.Timeout> = new Map();
-
+const TIMEOUT_DISCONNECT_MS = 1000;
 export function socketHandler(connection: WebSocket, req: FastifyRequest) {
 
     connection.send(JSON.stringify({ type: 'connected', message: 'Welcome!' }));
@@ -25,7 +25,7 @@ export function socketHandler(connection: WebSocket, req: FastifyRequest) {
         const timeout = setTimeout(() => {
           connectedRoomInstance.disconnect(user.id);
           timeoutDisconnect.delete(user.id);
-        }, 3000);
+        }, TIMEOUT_DISCONNECT_MS);
         print(`[WEBSOCKET] Connection closed from ${user.username} (${req.ip}), scheduling disconnect in 3 seconds.`);
         timeoutDisconnect.set(user.id, timeout);
     });

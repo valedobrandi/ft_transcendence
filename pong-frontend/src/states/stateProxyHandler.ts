@@ -73,6 +73,7 @@ const listeners: Record<StateKey, (() => void)[]> = {
     settings: [],
     paddle: [],
     tournamentQueue: [],
+    tournamentIntra: [],
     invite: [],
     friendRequests: [],
 };
@@ -130,8 +131,19 @@ export interface StateProxyHandler {
 
     paddle: { height: number, width: number };
     state: "CONNECTED" | "MATCH" | "TOURNAMENT",
-    settings: { state: "0" | "game.settings" | "match.waiting" | "match.playing" | "tournament.waiting" | "invite.receive" | "invite.sent" };
+    settings: {
+        state: "intra" |
+        "game.settings" |
+        "match.waiting" |
+        "match.running" |
+        "tournament.waiting" |
+        "invite.receive" |
+        "invite.sent"
+    };
+
     tournamentQueue: { id: number; username: string }[];
+    tournamentIntra: string[];
+
     invite: { matchId: string; id: number; username: string } | undefined;
     reset: () => void;
 }
@@ -147,15 +159,20 @@ class State {
     matchesHistory!: MatchesHistory;
     profile!: { username: string, avatar: string };
     settings!: {
-        state: "0" | 
-        "game.settings" | 
-        "match.waiting" | 
-        "match.playing" | 
-        "tournament.waiting" | 
-        "invite.receive" | "invite.sent"
+        state: "intra" |
+        "game.settings" |
+        "match.waiting" |
+        "match.running" |
+        "tournament.waiting" |
+        "invite.receive" |
+        "invite.sent" 
     };
     paddle!: { height: number, width: number };
+
+    // TOURNAMENT STATE
     tournamentQueue!: { id: number; username: string }[];
+    tournamentIntra!: string[];
+
     invite!: { matchId: string; id: number; username: string } | undefined;
     friendRequests!: { id: number; username: string, eventId: number }[];
 
@@ -177,6 +194,7 @@ class State {
         this.settings = { state: '0' };
         this.paddle = { height: 0.150, width: 0.020 };
         this.tournamentQueue = [];
+        this.tournamentIntra = [];
         this.invite = undefined;
         this.friendRequests = [];
     }

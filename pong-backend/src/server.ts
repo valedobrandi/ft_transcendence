@@ -15,7 +15,7 @@ import avatarRoute from './routes/avatar.js';
 import twoFARoutes from './routes/2faRoutes.js'
 import { tournamentsRoute } from './routes/tournament.js';
 import { logout } from './routes/logout.js';
-import { serverRoute } from './routes/stateServer.js';
+import { stateRoute } from './routes/state.js';
 
 const fastify = Fastify({
 	logger: {
@@ -106,7 +106,7 @@ fastify.register(avatarRoute);
 fastify.register(twoFARoutes);
 fastify.register(tournamentsRoute);
 fastify.register(logout);
-fastify.register(serverRoute);
+fastify.register(stateRoute);
 await fastify.register(websocketRoute);
 
 await fastify.register(fastifyCors, {

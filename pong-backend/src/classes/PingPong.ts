@@ -246,10 +246,24 @@ class PingPong {
 
 
 		// Wall collision
-		if (ball.y + ball.radius > 1 || ball.y - ball.radius < 0) {
-			ball.velocityY = -ball.velocityY;
-			if (Math.abs(ball.velocityY) < 0.01) {
-				ball.velocityY = 0.01 * Math.sign(ball.velocityY);
+		let wallBounce = false;
+		if (ball.y + ball.radius > 1) {
+			ball.y = 1 - ball.radius;
+			ball.velocityY = -Math.abs(ball.velocityY);
+			wallBounce = true;
+		}
+		else if (ball.y - ball.radius < 0) {
+			ball.y = ball.radius;
+			ball.velocityY = Math.abs(ball.velocityY);
+			wallBounce = true;
+		}
+
+		if (wallBounce) {
+			const MIN_Y_SPEED = 0.003;
+			if (Math.abs(ball.velocityY) < MIN_Y_SPEED) {
+				ball.velocityY =
+					(ball.velocityY >= 0 ? 1 : -1) *
+					(MIN_Y_SPEED + Math.random() * MIN_Y_SPEED);
 			}
 		}
 
@@ -323,24 +337,26 @@ class PingPong {
 
 		this.saveMatchHistory(playerXScore, playerYScore);
 
-		//print(`[GAME OVER] Winner: ${this.winnerId}`);
-
 		this.messages("GAME_OVER");
 
 		if (this.tournamentId) {
+
 			if (this.winnerId) {
 				const playerWinner = this.getFromConnectedRoom(this.winnerId);
 				if (playerWinner) playerWinner.status = 'TOURNAMENT';
+				if (playerWinner && playerWinner.socket) {
+					playerWinner.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT' }));
+				}
 			}
 			if (this.loserId) {
 				const playerLoser = this.getFromConnectedRoom(this.loserId);
-				if (playerLoser) {
-					playerLoser.status = 'CONNECTED';
-					if (playerLoser.socket) {
-						playerLoser.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
-					}
+				if (playerLoser) playerLoser.status = 'TOURNAMENT';
+				if (playerLoser && playerLoser.socket) {
+					playerLoser.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT' }));
 				}
 			}
+
+
 			events.emit('tournament_match_end', {
 				matchId: this.machId,
 				winnerId: this.winnerId,
@@ -356,6 +372,7 @@ class PingPong {
 				if (connected.socket) {
 					connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
 				}
+				connectedRoomInstance.updateSettingsState(id, undefined, "intra", undefined);
 			};
 		}
 
@@ -381,12 +398,13 @@ class PingPong {
 				paddleHeight: this.PADDLE_HEIGHT,
 				players: {
 					userX: {
-						 ...this.gameState.userX,
-						 username: this.side.LEFT },
-					userY: { 
+						...this.gameState.userX,
+						username: this.side.LEFT
+					},
+					userY: {
 						...this.gameState.userY,
-						username: this.side.RIGHT 
-						},
+						username: this.side.RIGHT
+					},
 				},
 			},
 		};
@@ -438,6 +456,7 @@ class PingPong {
 			if (isConnect) {
 				isConnect.status = 'MATCH';
 			}
+			connectedRoomInstance.updateSettingsState(id, undefined, "match.running");
 		};
 
 		this.side.LEFT = playerXId;
@@ -447,6 +466,7 @@ class PingPong {
 		this.messages("MATCH_CREATED");
 		this.notifyPaddleSettings();
 		this.messages("COUNTDOWN");
+
 
 		//print(`[MATCH CREATED]: ${this.machId} between ${playerXId} and ${playerYId}`);
 	}
@@ -458,8 +478,8 @@ class PingPong {
 	}
 
 	handleMatch() {
-		const	isPlayerXDisconnect = connectedRoomInstance.getByUsername(this.side.LEFT);
-		const	isPlayerYDisconnect = connectedRoomInstance.getByUsername(this.side.RIGHT);
+		const isPlayerXDisconnect = connectedRoomInstance.getByUsername(this.side.LEFT);
+		const isPlayerYDisconnect = connectedRoomInstance.getByUsername(this.side.RIGHT);
 
 		if (!isPlayerXDisconnect && this.gameState.userX.username !== 'PONG-IA') {
 			this.gameState.userY.score = this.WIN_SCORE;
@@ -509,6 +529,7 @@ class PingPong {
 	}
 
 	saveMatchHistory(score1: number, score2: number) {
+		console.log(`[SAVE MATCH HISTORY] Player1: ${this.side.LEFT}, Player2: ${this.side.RIGHT}`);
 		eventsBus.emit('game:savehistory', {
 			matchId: this.machId,
 			player1: this.side.LEFT,
@@ -533,10 +554,8 @@ class PingPong {
 					if (!connected.socket) continue;
 					connected.socket.send(JSON.stringify({
 						status: 200,
-						message: 'GAME_ROOM',
-						payload: { message: `${leftId} vs ${rightId}` },
+						message: 'match.side',
 						side: side,
-						id: connected.id
 					}));
 				};
 				break;
@@ -544,7 +563,7 @@ class PingPong {
 
 				for (const [id, { disconnect }] of this.playerConnectionInfo) {
 					const connected = this.getFromConnectedRoom(id);
-					//print(`[GAME OVER] Sending GAME_OVER to ${id}`);
+
 					if (!connected || !connected.socket) continue;
 					connected.socket.send(JSON.stringify({
 						status: 200,
