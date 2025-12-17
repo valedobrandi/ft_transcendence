@@ -8,10 +8,9 @@ import {
 	newMatchesQueue,
 	startNewMatch,
 } from "../state/gameRoom.js";
-import { ConnectedRoom, connectedRoomInstance } from "../state/ConnectedRoom.js";
+import { connectedRoomInstance } from "../state/ConnectedRoom.js";
 import { statusCode } from "../types/statusCode.js";
 import db from "../database/db.js";
-import { UsersModel } from "../models/usersModel.js";
 import fetch from "node-fetch";
 
 import { SettingsType } from "../types/GameStateType.js";
@@ -198,7 +197,7 @@ class MatcherController {
 
 		const connected = connectedRoomInstance.getById(req.userId);
 		if (connected === undefined) {
-			return res.code(statusCode("UNAUTHORIZED")).send({ message: "error", data: "user disconnected" });	
+			return res.code(statusCode("INTERNAL_SERVER_ERROR")).send({ message: "error", data: "user_not_found" });
 		}
 
 		if (connected.status !== "CONNECTED") {
@@ -232,7 +231,7 @@ class MatcherController {
 
 	createMatch(req: FastifyRequest<{ Body: RequestSettingsType }>, res: FastifyReply) {
 		const { settings } = req.body as RequestSettingsType;
-		
+
 		const parsedSettings: SettingsType = {
 			paddle: {
 				height: gameSettings.paddle.height[settings.paddle.size],
@@ -283,15 +282,15 @@ class MatchesService {
 	async getMatchHistory(username: string) {
 		const match = await this.matchesModel.getMatchHistoryById(username);
 		//print(`[MATCH HISTORY] Retrieved match history for user: ${JSON.stringify(match)}`);
-		
+
 		const matchesHistory: MatchesHistory = {
 			wins: 0,
 			loses: 0,
 			history: [],
 		};
-		
+
 		if (match === undefined || match.length === 0) {
-		return { message: "success", data: matchesHistory};
+			return { message: "success", data: matchesHistory };
 		}
 
 		for (const m of match) {
@@ -323,15 +322,18 @@ class MatchesService {
 
 	removeMatch(userId: number, matchId: string) {
 		const connected = connectedRoomInstance.getById(userId);
-		if (connected === undefined) throw new Error("disconnected");
-
-		const nextMatch = newMatchesQueue.get(matchId);
-		if (nextMatch?.createId !== userId) {
-			return { message: "error", data: "FORBIDDEN" };
+		if (connected === undefined) {
+			connectedRoomInstance.disconnect(userId);
+			return { message: "error", data: "internal_server_error" };
 		}
 
+		const nextMatch = newMatchesQueue.get(matchId);
 		if (nextMatch === undefined) {
-			return { message: "error", data: "match not find" };
+			return { message: "error", data: "MATCH_NOT_FOUND" };
+		}
+		
+		if (nextMatch.createId !== userId) {
+			return { message: "error", data: "FORBIDDEN" };
 		}
 
 		newMatchesQueue.delete(matchId);
@@ -339,9 +341,10 @@ class MatchesService {
 		connected.status = "CONNECTED";
 
 		connectedRoomInstance.sendWebsocketMessage(userId, "CONNECTED");
+		connectedRoomInstance.updateSettingsState(undefined, userId, "intra", undefined);
 		connectedRoomInstance.broadcastNewMatchesList();
 
-		return { message: "success", data: "match canceled" };
+		return { message: "success", data: "MATCH_CANCELED" };
 	}
 
 	joinMatch(userId: number, matchId: string) {
@@ -375,7 +378,8 @@ class MatchesService {
 
 		const connected = connectedRoomInstance.getById(userId);
 		if (connected === undefined) {
-			return { message: "error", data: "user disconnected" };
+			connectedRoomInstance.disconnect(userId);
+			return { message: "error", data: "internal_server_error" };
 		}
 
 		const nexMatch = inviteMatchesQueue.get(matchId);
@@ -383,8 +387,17 @@ class MatchesService {
 		inviteMatchesQueue.delete(matchId);
 
 		if (nexMatch === undefined) {
-			return { message: "error", data: "sorry, the invitation has been canceled" };
+			const connecters = connectedRoomInstance.getByMatchId(matchId);
+			for (const p of connecters) {
+				p.matchId = undefined;
+				p.status = "CONNECTED";
+				connectedRoomInstance.sendWebsocketMessage(Number(p.id), "CONNECTED");
+				matchServiceInstance.matchRemove(matchId, Number(p.id));
+				matchServiceInstance.removeMatch(Number(p.id), matchId);
+			}
+			return { message: "error", data: "INVITATION CANCELED BY THE OTHER PLAYER" };
 		}
+
 
 		nexMatch.players.push({ id: Number(connected.id), username: connected.username });
 
@@ -446,8 +459,8 @@ class MatchesService {
 
 		if (settings.IA) {
 			const newMatch = new PingPong(matchId, settings);
-    		newMatch.createMatch(connected.username, 'PONG-IA');
-			return {message: 'success', data: 'new game with IA started'}
+			newMatch.createMatch(connected.username, 'PONG-IA');
+			return { message: 'success', data: 'new game with IA started' }
 		}
 
 		newMatchesQueue.set(matchId, newMatch);
@@ -474,17 +487,26 @@ class MatchesService {
 	}
 
 	matchRemove(matchId: string, userId: number) {
+		const connected = connectedRoomInstance.getById(userId);
+		if (connected && connected.socket) {
+			connected.matchId = undefined;
+			connected.status = "CONNECTED";
+			connectedRoomInstance.sendWebsocketMessage(connected.id, "CONNECTED");
+			connectedRoomInstance.updateSettingsState(undefined, Number(connected.id), "intra", undefined);
+		}
+
 		const match = inviteMatchesQueue.get(matchId);
 		if (match === undefined) {
 			return { message: "error", data: "match not found" };
 		}
 
-		for (const matchUser of [match.from, match.to]) {
-			const requestUser = connectedRoomInstance.getById(Number(matchUser));
-			if (requestUser && requestUser.socket) {
-				requestUser.matchId = undefined;
-				requestUser.status = "CONNECTED";
-				requestUser.socket.send(
+		for (const id of [match.from, match.to]) {
+			if (id === userId) continue;
+			const connected = connectedRoomInstance.getById(Number(id));
+			if (connected && connected.socket) {
+				connected.matchId = undefined;
+				connected.status = "CONNECTED";
+				connected.socket.send(
 					JSON.stringify({
 						status: 200,
 						message: "MATCH_DECLINED",
@@ -495,7 +517,10 @@ class MatchesService {
 					})
 				);
 			}
+			connectedRoomInstance.updateSettingsState(undefined, Number(id), "intra", undefined);
+			connectedRoomInstance.sendWebsocketMessage(Number(id), "CONNECTED");
 		}
+
 		if (inviteMatchesQueue.delete(matchId)) {
 			return { message: "success", data: "invitation canceled" };
 		}
@@ -506,7 +531,7 @@ class MatchesService {
 	sendMatchInvite(id: number, invitedId: number) {
 		const connected = connectedRoomInstance.getById(id);
 		if (connected === undefined) {
-			return { message: "error", data: "user disconnected" };
+			return { message: "error", data: `user_disconnected_${id}` };
 		}
 
 		const matchId = crypto.randomUUID();
@@ -519,43 +544,38 @@ class MatchesService {
 			settings: undefined,
 		};
 
-		for (const playerId of [invitedId, id]) {
-			let userInstance = connectedRoomInstance.getById(playerId);
-			if (userInstance === undefined) {
-				return { message: "error", data: "user disconnected" };
+		for (const p of [invitedId, id]) {
+			const connected = connectedRoomInstance.getById(p);
+			if (connected === undefined) {
+				return { message: "error", data: `PLAYER IS NOT ONLINE` };
 			}
 
-			if (playerId === id) {
-				if (userInstance.status !== "CONNECTED") {
+			if (p === id) {
+				if (connected.status !== "CONNECTED") {
 					return {
 						message: "error",
-						data: "cannot send invite when you are subscribed to a match/tournament",
+						data: "YOU ARE SUBSCRIBED TO A MATCH/TOURNAMENT. TRY TO DISCONNECT/CONNECT.",
 					};
 				}
-				userInstance.status = "MATCH";
+				connected.status = "MATCH";
+				connected.matchId = matchId;
+				connectedRoomInstance.sendWebsocketMessage(connected.id, "MATCH");
+				const payload = { to: invitedId, matchId: matchId, username: connected.username };
+				connectedRoomInstance.updateSettingsState(undefined, Number(connected.id), "invite.sent", payload);
 			}
-			userInstance.matchId = matchId;
 
-			if (playerId === invitedId) {
-				if (userInstance.status !== "CONNECTED") {
+			if (p === invitedId) {
+				if (connected.status !== "CONNECTED") {
 					return {
 						message: "error",
-						data: "cannot send invite the other player is subscribed to a match/tournament",
+						data: "THE OTHER PLAYER IS SUBSCRIBED TO A MATCH/TOURNAMENT. TRY LATER.",
 					};
 				}
-				userInstance.status = "MATCH";
-				if (userInstance.socket) {
-					userInstance.socket.send(
-						JSON.stringify({
-							status: 200,
-							message: "match.invite",
-							payload: {
-								from: id,
-								matchId: matchId,
-							},
-						})
-					);
-				}
+				connected.status = "MATCH";
+				connected.matchId = matchId;
+				connectedRoomInstance.sendWebsocketMessage(connected.id, "MATCH");
+				const payload = { from: p, matchId: matchId, username: connected.username };
+				connectedRoomInstance.updateSettingsState(undefined, Number(connected.id), "invite.receive", payload);
 			}
 		}
 

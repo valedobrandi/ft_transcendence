@@ -372,7 +372,7 @@ class PingPong {
 				if (connected.socket) {
 					connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
 				}
-				connectedRoomInstance.updateSettingsState(id, undefined, "0");
+				connectedRoomInstance.updateSettingsState(id, undefined, "intra", undefined);
 			};
 		}
 

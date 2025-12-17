@@ -5,24 +5,22 @@ export function GameActionBtn(): HTMLDivElement {
   rootDiv.id = "game-buttons-container";
   rootDiv.classList.add("flex", "justify-evenly", "w-full", "mt-6", "mb-6");
 
-  const isMatch = stateProxyHandler.state === "MATCH";
-  const isTournament = stateProxyHandler.state === "TOURNAMENT";
+  const isConnected = stateProxyHandler.state === "CONNECTED";
 
-  const isDisabled = isMatch || isTournament;
   function onRender() {
     rootDiv.innerHTML = `
         <button class="px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase
-          ${isDisabled ? " cursor-not-allowed opacity-50" : ""} 
-          ${isMatch ? "bg-green-500" : "bg-blue-500"}" 
-          ${isDisabled ? "disabled" : ""} 
+          ${!isConnected ? " cursor-not-allowed opacity-50" : ""} 
+          ${isConnected ? "bg-green-500" : "bg-blue-500"}" 
+          ${!isConnected ? "disabled" : ""} 
           id="match-btn"
         >
           PLAY MATCH
         </button>
         <button class="px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase 
-          ${isDisabled ? " cursor-not-allowed opacity-50 bg-gray-500" : ""} 
-          ${isTournament ? "bg-green-500" : "bg-blue-500"}" 
-          ${isDisabled ? "disabled" : ""} 
+          ${!isConnected ? " cursor-not-allowed opacity-50 bg-gray-500" : ""} 
+          ${isConnected ? "bg-green-500" : "bg-blue-500"}" 
+          ${!isConnected ? "disabled" : ""} 
           id="tournament-btn"
         >
           PLAY TOURNAMENT

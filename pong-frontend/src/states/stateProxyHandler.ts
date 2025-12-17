@@ -132,13 +132,13 @@ export interface StateProxyHandler {
     paddle: { height: number, width: number };
     state: "CONNECTED" | "MATCH" | "TOURNAMENT",
     settings: {
-        state: "0" |
+        state: "intra" |
         "game.settings" |
         "match.waiting" |
         "match.running" |
         "tournament.waiting" |
         "invite.receive" |
-        "invite.sent" 
+        "invite.sent"
     };
 
     tournamentQueue: { id: number; username: string }[];
@@ -159,7 +159,7 @@ class State {
     matchesHistory!: MatchesHistory;
     profile!: { username: string, avatar: string };
     settings!: {
-        state: "0" |
+        state: "intra" |
         "game.settings" |
         "match.waiting" |
         "match.running" |

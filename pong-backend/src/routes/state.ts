@@ -109,7 +109,7 @@ class StateService {
         if (!connected) {
             return { message: "error", data: "disconnected" };
         }
-        connected.state = state;
+        connectedRoomInstance.updateSettingsState(undefined, userId, "intra", undefined);
 
         return { message: "success", data: "state_updated" };
     }

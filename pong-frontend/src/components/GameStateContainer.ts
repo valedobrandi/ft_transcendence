@@ -288,6 +288,39 @@ export function InstanceDisconnect(): HTMLDivElement {
   return root;
 }
 
+export function ResponseMessage(message: string): HTMLDivElement {
+  const ACCENT = "hsl(345,100%,47%)";
+  const root = document.createElement("div")
+  root.id = "message-response-container";
+  root.innerHTML = `
+    <div
+      class="fixed inset-0 flex items-center justify-center bg-[#1e2124]/70 backdrop-blur-sm z-50 px-4">
+      <div class="rounded-lg font-mono text-white crt p-10 w-full max-w-lg" style="
+            background:#1e2124;
+            border:4px solid ${ACCENT};
+          ">
+        <h2 class="text-3xl font-bold mb-6 tracking-wider text-left" style="color:${ACCENT};">
+          MESSAGE
+        </h2>
+        <p class="mb-6 text-center text-2xl  text-white underline">
+          ${message}
+        </p>
+        <div class="flex justify-end gap-4 pt-4">
+          <button 
+          style="background:#424549;"
+          class="px-5 py-2 font-bold rounded hover:opacity-80 active:scale-95 text-white m-auto"
+          id="remove-message-response"
+          >
+            CLOSE
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return root;
+}
+
 export function GameStateContainer(): HTMLDivElement {
   const root = document.createElement("div");
 
@@ -302,11 +335,12 @@ export function GameStateContainer(): HTMLDivElement {
   const values = ["HIGH", "MEDIUM", "LOW"];
   root.innerHTML = "";
   function onRender() {
+    console.log("Rendering GameStateContainer...");
     const state = stateProxyHandler.settings.state;
     const status = stateProxyHandler.state;
 
     switch (state) {
-      case "0": {
+      case "intra": {
         root.innerHTML = "";
         break;
       }

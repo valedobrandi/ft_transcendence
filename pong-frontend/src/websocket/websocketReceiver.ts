@@ -95,18 +95,19 @@ export async function websocketReceiver(socket: WebSocket) {
         stateProxyHandler.availableMatches = data.payload.matches;
         break;
       }
-      case "match.invite": {
-        stateProxyHandler.state = "MATCH";
-        localStorage.setItem("state", JSON.stringify(stateProxyHandler.state));
+      case "invite.receive": {
 
-        const username = stateProxyHandler.serverUsers.find((user) => user.id === data.payload.from)?.name;
-        const invitation = { matchId: data.payload.matchId, id: data.payload.from, username: username || "Unknown" };
-
+        const invitation = { matchId: data.payload.matchId, id: data.payload.from, username: data.payload.username };
         stateProxyHandler.invite = invitation;
         localStorage.setItem("invite", JSON.stringify(stateProxyHandler.invite));
-
         stateProxyHandler.settings = { state: "invite.receive" };
-        localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
+      }
+        break;
+      case "invite.sent": {
+        const invitation = { matchId: data.payload.matchId, id: data.payload.to, username: data.payload.username };
+        stateProxyHandler.invite = invitation;
+        localStorage.setItem("invite", JSON.stringify(stateProxyHandler.invite));
+        stateProxyHandler.settings = { state: "invite.sent" };
       }
         break;
       case "match.side": {
@@ -121,7 +122,7 @@ export async function websocketReceiver(socket: WebSocket) {
       case "MATCH_DECLINED": {
         stateProxyHandler.state = "CONNECTED";
         localStorage.setItem("state", JSON.stringify(stateProxyHandler.state));
-        stateProxyHandler.settings = { state: "0" };
+        stateProxyHandler.settings = { state: "intra" };
         localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
       }
         break;
@@ -146,6 +147,10 @@ export async function websocketReceiver(socket: WebSocket) {
         disconnectSocket();
         document.body.appendChild(InstanceDisconnect());
         localStorage.removeItem("jwt_token");
+        break;
+      case "intra": {
+        stateProxyHandler.settings = { state: data.message };
+      }
         break;
     }
   });
