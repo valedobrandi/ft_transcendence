@@ -37,6 +37,23 @@ export class ConnectedRoom {
     }
   }
 
+  updateSettingsState(username?: string, id?: number, state: PlayerType["state"] = "0", payload: any = undefined) {
+    if (!username && !id) return;
+    let connected: PlayerType | undefined;
+    if (id) {
+      connected = connectedRoomInstance.getById(id);
+    } else if (username) {
+      connected = connectedRoomInstance.getByUsername(username);
+    }
+
+    if (!connected) return;
+    connected.state = state;
+    
+    if (connected.socket) {
+      connected.socket.send(JSON.stringify({ status: 200, message: state, payload}));
+    }
+  }
+
   friendListManager(useServiceRequestId: number | bigint) {
     return {
 

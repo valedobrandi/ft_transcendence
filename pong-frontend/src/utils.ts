@@ -3,7 +3,7 @@ import { CreateAlert } from "./components/CreateAlert";
 import { QRCodeModal } from "./components/QRCodeModal";
 import { endpoint } from "./endPoints";
 import { getStorageStates, removeLocalStorage, stateProxyHandler } from "./states/stateProxyHandler";
-import { guestView, intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView, profileView } from "./views";
+import { intraView, loginView, matchView, registerView, defaultView, twoFactorAuthenticationView, profileView } from "./views";
 import { initSocket } from "./websocket";
 import { websocketConnect } from "./websocket/websocketConnect";
 import { websocketNewEvents } from "./websocket/websocketNewEvents";
@@ -19,7 +19,6 @@ const routes: Record<string, (root: HTMLElement) => void> = {
     "/": defaultView,
     "/login": loginView,
     "/register": registerView,
-    "/guest": guestView,
     "/auth": twoFactorAuthenticationView,
     "/profile": profileView
 };
@@ -90,7 +89,7 @@ export async function renderRoute(path: string) {
     const root = document.getElementById("root")!;
     const view = routes[path] || defaultView;
 
-    if (protectedRoutes.includes(path) && profile.username === "") {
+    if (protectedRoutes.includes(path) && !jwt.token) {
         navigateTo("/");
         const alertBox = CreateAlert("You must be logged in to access this page.", "error");
         const viewContainer = document.getElementById("view-container");
@@ -133,7 +132,7 @@ export async function fetchRequest
         });
 
         if (!response.ok) {
-            return response;
+            return { message: "error"}
         }
 
 
@@ -144,12 +143,12 @@ export async function fetchRequest
             return data;
         }
         catch {
-            return response;
+            return { message: "error"}
         }
     }
     catch (err) {
         console.error(`[FETCH ERROR] ${url}:`, err);
-        throw err;
+        return { message: "error"}
     }
 }
 

@@ -87,6 +87,9 @@ export function eventListeners() {
 
 		if (action === "quitMatch") {
 			fetchRequest(`/match/quitMatch`, "GET");
+			stateProxyHandler.settings = { state: "0" };
+			localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
+			navigateTo('/match');
 		}
 	});
 
@@ -162,7 +165,7 @@ export function eventListeners() {
 				break;
 			case "match-btn": {
 				stateProxyHandler.settings = { state: "game.settings" };
-				localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));	
+				localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
 			}
 				break;
 			case "btn-logout": { await disconnect(); }
@@ -362,7 +365,7 @@ async function leaveTournament(button: HTMLButtonElement) {
 }
 
 export async function disconnect() {
-	const response = await fetchRequest(`/logout`,"GET");
+	const response = await fetchRequest(`/logout`, "GET");
 
 	if (response.message === "success") {
 		localStorage.removeItem("jwt_token");
@@ -443,7 +446,7 @@ const inviteSend = async () => {
 	if (response.message === 'success') {
 		const getMatch = await fetchRequest(`/match-invite?matchId=${response.data.matchId}`, 'GET', {});
 		if (getMatch.message === "success") {
-			
+
 			stateProxyHandler.invite = {
 				matchId: response.data.matchId,
 				id: -1,

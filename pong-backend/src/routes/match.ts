@@ -177,7 +177,7 @@ class MatcherController {
 		if (quit && user)
 			quit.quitMatch(user.username);
 
-		return res.code(statusCode("OK")).send({ message: "sucess" });
+		return res.code(statusCode("OK")).send({ message: "success" });
 	}
 
 	async getMatchHistory(req: FastifyRequest<{ Querystring: { username: string } }>, res: FastifyReply) {

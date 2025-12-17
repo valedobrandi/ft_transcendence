@@ -20,7 +20,7 @@ export function GameActionBtn(): HTMLDivElement {
           PLAY MATCH
         </button>
         <button class="px-10 py-4 rounded text-white bg-green-500 hover:bg-green-600 uppercase 
-          ${isDisabled ? " cursor-not-allowed opacity-50" : ""} 
+          ${isDisabled ? " cursor-not-allowed opacity-50 bg-gray-500" : ""} 
           ${isTournament ? "bg-green-500" : "bg-blue-500"}" 
           ${isDisabled ? "disabled" : ""} 
           id="tournament-btn"

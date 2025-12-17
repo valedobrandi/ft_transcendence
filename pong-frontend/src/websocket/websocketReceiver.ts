@@ -30,13 +30,6 @@ export async function websocketReceiver(socket: WebSocket) {
         stateProxyHandler.state = data.message;
         localStorage.setItem("state", JSON.stringify(stateProxyHandler.state));
         break;
-      case "GAME_ROOM": {
-        playerSideState.side = data.side;
-        stateProxyHandler.settings = { state: "match.playing" };
-        localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
-        navigateTo("/match");
-      }
-        break;
       case "TOURNAMENT":
         stateProxyHandler.state = data.message;
         localStorage.setItem("state", JSON.stringify(stateProxyHandler.state));
@@ -54,11 +47,9 @@ export async function websocketReceiver(socket: WebSocket) {
         localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
       }
         break;
-      case "GAME_OVER": ;
-        stateProxyHandler.state = data.message;
-        localStorage.setItem("state", JSON.stringify(stateProxyHandler.state));
-        stateProxyHandler.settings = { state: "0" };
-        localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
+      case "tournament.message": {
+        stateProxyHandler.tournamentIntra = data.payload;
+      }
         break;
       case "CHAT_MESSAGE":
         if ("sender" in data && "history" in data) {
@@ -118,6 +109,15 @@ export async function websocketReceiver(socket: WebSocket) {
         localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
       }
         break;
+      case "match.side": {
+        playerSideState.side = data.side;
+        navigateTo("/match");
+      }
+        break;
+      case "match.running": {
+        stateProxyHandler.settings = { state: "match.running" };
+      }
+        break;
       case "MATCH_DECLINED": {
         stateProxyHandler.state = "CONNECTED";
         localStorage.setItem("state", JSON.stringify(stateProxyHandler.state));
@@ -144,7 +144,8 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       case "websocket.disconnect":
         disconnectSocket();
-        document.body.appendChild(InstanceDisconnect())
+        document.body.appendChild(InstanceDisconnect());
+        localStorage.removeItem("jwt_token");
         break;
     }
   });

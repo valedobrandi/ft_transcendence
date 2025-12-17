@@ -26,7 +26,7 @@ export function RenderGame(): HTMLElement {
   canvasElement.id = "pong";
   canvasElement.width = 1200;
   canvasElement.height = 600;
-  canvasElement.className = "border-4 border-blue-500 bg-black m-auto";
+  canvasElement.className = "border-4 border-blue-500 bg-black m-auto min-w-0";
   setActiveCanvas(canvasElement);
 
   const netWidth = Math.max(2, Math.min(canvasElement.width * 0.002, 6));
@@ -42,8 +42,9 @@ export function RenderGame(): HTMLElement {
   function resizeCanvas() {
     const aspect = 2 / 1;
     const parent = canvasElement.parentElement || document.body;
-    let width = parent.clientWidth;
-    let height = parent.clientHeight - 100;
+    const rect = parent.getBoundingClientRect();
+    let width = rect.width;
+    let height = rect.height;
 
     if (width / height > aspect) {
       width = height * aspect;

@@ -4,7 +4,7 @@ import { onStateChange, stateProxyHandler } from "../states/stateProxyHandler";
 export function ProfileButton(): HTMLDivElement {
 
     const isUserProfile = stateProxyHandler.chat.id === profile.id;
-
+    const state = stateProxyHandler.state !== "CONNECTED";
     const buttonsDiv = document.createElement("div");
     buttonsDiv.id = "profile-buttons";
     buttonsDiv.className = "flex flex-col gap-10 mb-9";
@@ -39,8 +39,14 @@ export function ProfileButton(): HTMLDivElement {
             const inviteButton = document.createElement("button");
             inviteButton.id = "btn-invite-match";
             inviteButton.textContent = "INVITE TO A MATCH";
-            inviteButton.className = "px-10 py-4 rounded text-white text-base bg-yellow-500 hover:bg-yellow-600";
+            inviteButton.className = `px-10 py-4 rounded text-white text-base 
+                ${state ? "bg-gray-500 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600"}`;
             buttonsDiv.appendChild(inviteButton);
+            if (state) {
+                inviteButton.setAttribute("disable", "true");
+            } else {
+                inviteButton.setAttribute("disable", "false");
+            }
         }
         else {
             const updateProfileButton = document.createElement("button");
@@ -54,5 +60,6 @@ export function ProfileButton(): HTMLDivElement {
     onStateChange("chat", onRender);
     onStateChange("friendList", onRender);
     onStateChange("chatBlockList", onRender);
+    onStateChange("state", onRender);
     return buttonsDiv;
 }
