@@ -124,6 +124,9 @@ export function FormLogin(): HTMLElement {
 
 		overlay.appendChild(modal);
 		document.body.appendChild(overlay);
+		setTimeout(() => {
+		input.focus();
+	}, 0);
 	}
 
 	// -------------------------
