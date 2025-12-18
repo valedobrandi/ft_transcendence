@@ -74,7 +74,7 @@ export function setButtonToUnblockState(button: HTMLButtonElement) {
 }
 
 const inviteUserOnclick = async () => {
-	console.log("[INVITE USER]: ", stateProxyHandler.chat.id);
+	//console.log("[INVITE USER]: ", stateProxyHandler.chat.id);
 	const response = await fetchRequest('/match-invite', 'POST', {}, {
 		body: JSON.stringify({
 			invitedId: stateProxyHandler.chat.id,
@@ -96,10 +96,10 @@ const inviteUserOnclick = async () => {
 
 const profileOnclick = async () => {
 
-	console.log("(opt.value === view-profile")
+	//console.log("(opt.value === view-profile")
 	try {
 		const data = await fetchRequest('/profile', 'GET', {});
-		console.log("DATA PROFILE = ", data);
+		//console.log("DATA PROFILE = ", data);
 		if (data.message === 'success') {
 			profile.username = data.existUser.username;
 			profile.id = data.existUser.id;
@@ -109,11 +109,11 @@ const profileOnclick = async () => {
 			navigateTo("/profile");
 		}
 		else {
-			console.error("Erreur lors du chargement du profil :", data);
+			//console.error("Erreur lors du chargement du profil :", data);
 		}
 	}
 	catch (err) {
-		console.error("Erreur réseau :", err);
+		//console.error("Erreur réseau :", err);
 	}
 
 }

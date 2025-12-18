@@ -6,7 +6,7 @@ export function RenderChatMessages(): HTMLDivElement {
     const messageBox = document.createElement("div");
     messageBox.id = "messages";
     messageBox.className = "border-0 flex-1 overflow-y-auto p-3 bg-[#282b30] text-white";
-    
+
     // Create a new paragraph element for each message
     function onRender() {
 
@@ -30,6 +30,10 @@ export function RenderChatMessages(): HTMLDivElement {
                     fetchRequest("/server/markedRead", "POST", {}, { body: JSON.stringify({ messageId: msg.id }) });
                 }
             }
+        });
+        messageBox.scrollTo({
+            top: messageBox.scrollHeight,
+            behavior: "smooth"
         });
     }
     onRender();

@@ -19,50 +19,50 @@ const eventsSchema = db.prepare("PRAGMA table_info(events)").all();
 const events = db.prepare('SELECT * FROM events').all();
 
 
-console.log('🧬 Users Table Schema:')
+//console.log('🧬 Users Table Schema:')
 console.table(usersSchema);
 
-console.log('🧬 Matchs Table Schema:')
+//console.log('🧬 Matchs Table Schema:')
 console.table(matchsSchema);
 
-console.log('🧬 Friends Table Schema:')
+//console.log('🧬 Friends Table Schema:')
 console.table(friendsSchema);
 
-console.log('🧬 chatBlock Table Schema:')
+//console.log('🧬 chatBlock Table Schema:')
 console.table(chatBlockSchema);
 
-console.log('🧬 Messages Table Schema:')
+//console.log('🧬 Messages Table Schema:')
 console.table(messagesSchema);
 
-console.log('🧬 Events Table Schema:')
+//console.log('🧬 Events Table Schema:')
 console.table(eventsSchema);
 
-console.log('📋 Users Table:')
+//console.log('📋 Users Table:')
 for (const user of users) {
-    console.log(user);
+    //console.log(user);
 }
 
-console.log('📋 Matchs Table:')
+//console.log('📋 Matchs Table:')
 for (const match of matchs) {
-    console.log(match);
+    //console.log(match);
 }
 
-console.log('📋 Friends Table:')
+//console.log('📋 Friends Table:')
 for (const friend of friends) {
-    console.log(friend);
+    //console.log(friend);
 }
 
-console.log('📋 chatBlock Table:')
+//console.log('📋 chatBlock Table:')
 for (const chatblockuser of chatBlock) {
-    console.log(chatblockuser);
+    //console.log(chatblockuser);
 }
 
-console.log('📋 Messages Table:')
+//console.log('📋 Messages Table:')
 for (const message of messages) {
-    console.log(message);
+    //console.log(message);
 }
 
-console.log('📋 Events Table:')
+//console.log('📋 Events Table:')
 for (const event of events) {
-    console.log(event);
+    //console.log(event);
 }

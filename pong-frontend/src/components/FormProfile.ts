@@ -69,7 +69,7 @@ export function ProfilePage(): HTMLElement {
 	const avatarPreview = document.createElement("img");
 	const path = profile.avatar_url ? profile.avatar_url : AVATAR_DEFAUT;
 	const avatarPath = `${endpoint.pong_backend_api}/avatar/${path}`;
-	console.log("AVATAR PATH:", avatarPath);
+	//console.log("AVATAR PATH:", avatarPath);
 	avatarPreview.src = avatarPath;
 	avatarPreview.id = "avatarPreview";
 	avatarPreview.className = "w-24 h-24 rounded-full object-cover";
@@ -350,13 +350,13 @@ export function ProfilePage(): HTMLElement {
 
 		try {
 			const data = await fetchRequest("/update", "PUT", {}, { body: JSON.stringify(payload) });
-			console.log("DATA FROM BACKEND:", data);
+			//console.log("DATA FROM BACKEND:", data);
 
 			if (data.message === 'success') {
 				profile.username = data.payload.username;
 				profile.email = data.payload.email;
 
-				console.log("Profile updated", data);
+				//console.log("Profile updated", data);
 				alert(("your profil has changed "));
 				// const response = await fetchRequest(
 				// 	`/logout`,
@@ -368,7 +368,7 @@ export function ProfilePage(): HTMLElement {
 
 			}
 			else {
-				console.error("Error loading profile: ", data);
+				//console.error("Error loading profile: ", data);
 				alert("Error loading profile: " + (data.error || "Erreur inconnue"));
 			}
 
@@ -401,13 +401,13 @@ export function ProfilePage(): HTMLElement {
 
 export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFileBtn: HTMLButtonElement,
 	avatarFile: HTMLInputElement, avatarGrid: HTMLDivElement): Promise<void> {
-	console.log("handleProfilePage called");
+	//console.log("handleProfilePage called");
 
 	let data;
 	try {
 		data = await fetchRequest(`/profile`, 'GET', {}, {});
 	} catch (err) {
-		console.error("Error réseau on /profile:", err);
+		//console.error("Error réseau on /profile:", err);
 		window.location.hash = "/login";
 		return;
 	}
@@ -464,13 +464,13 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 			if (!data.payload?.avatar_url) throw new Error("Avatar not receved");
 
 
-			console.log("AVATAR SAVED AT DB:", data.payload.avatar_url);
+			//console.log("AVATAR SAVED AT DB:", data.payload.avatar_url);
 			user.avatar_url = data.payload.avatar_url;
 			profile.avatar_url = data.payload.avatar_url;
 
 			avatarPreview.src = `${endpoint.pong_backend_api}/avatar/${profile.avatar_url}`;
 		} catch (err) {
-			console.error("Upload failed:", err);
+			//console.error("Upload failed:", err);
 			avatarPreview.src = user.avatar_url ? `${user.avatar_url}` : AVATAR_DEFAUT;
 		} finally {
 			URL.revokeObjectURL(tempUrl);
@@ -493,7 +493,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 		avatarPreview.src = AVATAR_DEFAUT;
 	};
 
-	console.log(user.avatar_url);
+	//console.log(user.avatar_url);
 
 	const presetButtons = avatarGrid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 
@@ -534,7 +534,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 					{ body: JSON.stringify({ avatar_url: url }) }
 				);
 				if (res.error) {
-					console.error("Server error:", res.status, await res.text());
+					//console.error("Server error:", res.status, await res.text());
 					return;
 				}
 				user.avatar_url = res.payload.avatar_url;
@@ -544,7 +544,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 				highlight(btn);
 				selected = btn;
 			} catch (err) {
-				console.error("change avatar update failed:", err);
+				//console.error("change avatar update failed:", err);
 				avatarPreview.src = oldSrc;
 				highlight(selected);
 			}

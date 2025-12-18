@@ -7,19 +7,28 @@ import { PingPong } from "./PingPong.js";
 class Tournament {
 	tournamentId: string;
 	currentBracket: Set<string>;
-	currentRoundWinners: Set<string>;
-	nextBracket: Set<string> = new Set<string>();
+
 	tournamentIntra: string[] = [];
 	tournamentConnecters: string[] = [];
-	private matches = 0;
-	private rounds = 0;
-	private matchRound = 1;
+
+
+	private round: 'SEMIFINAL' | 'FINAL' | 'ENDED';
+
+	private first: string | null = null;
+	private second: string | null = null;
+	private third: string | null = null;
+	private fourth: string | null = null;
+
+	private winners: string[] = [];
+	private losers: string[] = [];
+
+
 	cleanup: () => void = () => { };
 
 	constructor(tournamentId: string) {
 		this.tournamentId = tournamentId;
 		this.currentBracket = new Set<string>();
-		this.currentRoundWinners = new Set<string>();
+		this.round = 'SEMIFINAL';
 
 		const matchEndedListener = (report: EndMatchEventType) => {
 			if (report.tournamentId != this.tournamentId) return;
@@ -40,32 +49,18 @@ class Tournament {
 			// CLEAR PLAYER FROM TOURNAMENT POOL
 
 			this.broadcastIntraMessage(
-			   `${this.tournamentConnecters[0]}, 
+				`${this.tournamentConnecters[0]}, 
 				${this.tournamentConnecters[1]},
 				${this.tournamentConnecters[2]}, 
 				${this.tournamentConnecters[3]}`,
 			);
-			this.startRound();
+			this.startRound(this.currentBracket);
 		}
 	}
 
-	async startRound() {
-		if (this.currentBracket.size % 2 !== 0) return;
+	async startRound(bracket: Set<string>) {
 
-		this.rounds = Math.floor(this.currentBracket.size / 2);
-		this.currentRoundWinners = new Set<string>();
-		this.matches = 0;
-
-		const connecters = Array.from(this.currentBracket.values());
-
-		for (let i = 0; i < connecters.length; i += 2) {
-			const playerX = connecters[i];
-			const playerY = connecters[i + 1];
-
-			if (!playerX || !playerY) continue;
-			this.broadcastIntraMessage(`ROUND ${this.matchRound}: ${playerX} vs ${playerY}`);
-		}
-
+		const connecters = Array.from(bracket.values());
 
 		for (let i = 0; i < connecters.length; i += 2) {
 			const playerX = connecters[i];
@@ -101,59 +96,68 @@ class Tournament {
 	async reportMatchResult(report: EndMatchEventType) {
 		const { winnerId, loserId, drawMatch } = report;
 
-		this.matches++;
+		if (drawMatch) return; // ignore or rematch (constraint)
 
-		// Take the two player out of the current bracket
-		if (drawMatch) {
-			this.currentBracket.delete(winnerId);
-			this.currentBracket.delete(loserId);
-		} else {
-			this.currentRoundWinners.add(winnerId);
-			this.currentBracket.delete(loserId);
+		if (this.round === 'SEMIFINAL') {
+			this.winners.push(winnerId);
+			this.losers.push(loserId);
 
-			this.broadcastIntraMessage(`${winnerId} has defeated ${loserId}`);
-			this.broadcastIntraMessage(`${loserId} has bean eliminate from the tournament.`);
-			this.broadcastIntraMessage(`${winnerId} advances to the next round.`);
+			this.broadcastIntraMessage(`${winnerId} defeated ${loserId}`);
 
+			if (this.winners.length === 2 && this.losers.length === 2) {
+				this.round = 'FINAL';
 
-			if (this.matchRound === 1) {
-				const otherMatch = this.tournamentConnecters.filter(p => p !== winnerId && p !== loserId);
-				this.broadcastIntraMessage(`Waiting for ${otherMatch[0]} vs ${otherMatch[1]} match to end.`);
+				// start final
+				// 2 secs delay before starting next round
+				await new Promise(resolve => setTimeout(resolve, 2000));
+				this.currentBracket = new Set(this.winners);
+				await this.startRound(this.currentBracket);
+				// assign 3rd and 4th place
+				await this.startRound(new Set(this.losers));
 			}
-			
+			return;
 		}
-		this.matchRound++;
-		
 
-		if (this.matches === this.rounds) {
-			this.nextBracket = new Set(this.currentRoundWinners);
-			await this.advanceBracket();
-		}
-	}
+		if (this.round === 'FINAL') {
+			if (this.winners.includes(winnerId) && this.winners.includes(loserId)) {
+				this.first = winnerId;
+				this.second = loserId;
+			} else if (this.losers.includes(winnerId) && this.losers.includes(loserId)) {
+				this.third = winnerId;
+				this.fourth = loserId;
+			}
 
-	async advanceBracket() {
-		if (this.nextBracket.size === 0) return;
-		this.currentBracket = new Set<string>(this.nextBracket);
-		this.nextBracket.clear();
-
-		if (this.currentBracket.size > 1) {
-			await this.startRound();
-		} else {
-			const winnerId = Array.from(this.currentBracket)[0];
-			await this.endTournament(winnerId);
+			if (this.first && this.second && this.third && this.fourth) {
+				this.round = 'ENDED';
+				await this.endTournament();
+			}
 		}
 	}
 
-	async endTournament(username: string) {
-		this.broadcastIntraMessage(`Tournament winner is ${username}! Congratulations!`);
+	printRanking() {
+		return [
+			{ rank: 1, player: this.first },
+			{ rank: 2, player: this.second },
+			{ rank: 3, player: this.third },
+			{ rank: 4, player: this.fourth },
+		];
+	}
+
+	async endTournament() {
 		this.broadcastIntraMessage(`Tournament has ended.`);
+		const ranking = this.printRanking();
+		const printRank = `Ranking:<br>` +
+			ranking.map(r => `#${r.rank}: ${r.player}`).join('<br>');
+
+
+		// Notify all players about tournament end	
 		for (const p of this.tournamentConnecters) {
 			const connected = connectedRoomInstance.getByUsername(p);
 			if (connected) {
 				connected.status = 'CONNECTED';
 				if (connected.socket) {
 					connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
-					connected.socket.send(JSON.stringify({ status: 200, message: 'tournament.finish', payload: `Tournament winner is ${username}! Congratulations!` }));
+					connected.socket.send(JSON.stringify({ status: 200, message: 'tournament.finish', payload: printRank }));
 				}
 			};
 			connectedRoomInstance.updateSettingsState(p, undefined, 'intra');
