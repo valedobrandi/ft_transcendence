@@ -346,6 +346,7 @@ class PingPong {
 				if (playerWinner) playerWinner.status = 'TOURNAMENT';
 				if (playerWinner && playerWinner.socket) {
 					playerWinner.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT' }));
+					connectedRoomInstance.updateSettingsState(this.winnerId, undefined, 'intra');
 				}
 			}
 			if (this.loserId) {
@@ -353,6 +354,7 @@ class PingPong {
 				if (playerLoser) playerLoser.status = 'TOURNAMENT';
 				if (playerLoser && playerLoser.socket) {
 					playerLoser.socket.send(JSON.stringify({ status: 200, message: 'TOURNAMENT' }));
+					connectedRoomInstance.updateSettingsState(this.loserId, undefined, 'intra');
 				}
 			}
 

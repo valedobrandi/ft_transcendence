@@ -191,7 +191,7 @@ class State {
         this.availableMatches = [];
         this.matchesHistory = { wins: 0, loses: 0, history: [] };
         this.profile = { username: "", avatar: "" };
-        this.settings = { state: '0' };
+        this.settings = { state: 'intra' };
         this.paddle = { height: 0.150, width: 0.020 };
         this.tournamentQueue = [];
         this.tournamentIntra = [];

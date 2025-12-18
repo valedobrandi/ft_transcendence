@@ -36,7 +36,7 @@ export class ConnectedRoom {
     }
   }
 
-  updateSettingsState(username?: string, id?: number, state: PlayerType["state"] = "0", payload: any = undefined) {
+  updateSettingsState(username?: string, id?: number, state: PlayerType["state"] = "intra", payload: any = undefined) {
     if (!username && !id) return;
     let connected: PlayerType | undefined;
     if (id) {
@@ -51,6 +51,7 @@ export class ConnectedRoom {
     if (connected.socket) {
       connected.socket.send(JSON.stringify({ status: 200, message: state, payload }));
     }
+    console.log(`[UPDATE SETTINGS STATE] ${connected.username} state updated to ${state}`);
   }
 
   friendListManager(useServiceRequestId: number | bigint) {

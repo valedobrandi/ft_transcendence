@@ -12,7 +12,10 @@ export function TournamentIntra(): HTMLElement {
         if (messages.length === 0) {
             wrapper.style.display = "none";
             return;
+        } else {
+            wrapper.style.display = "flex";
         }
+        
         wrapper.innerHTML = `
                 <div class=" rounded-lg font-mono text-white flex flex-col p-4"> 
                     <h2 class="text-3xl font-bold m-2 text-center tracking-wider text-nowrap" style="color:hsl(345,100%,47%);">

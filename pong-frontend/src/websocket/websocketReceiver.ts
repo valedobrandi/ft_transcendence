@@ -6,7 +6,7 @@ import {
 } from "../states/stateProxyHandler";
 import { websocketNewEvents } from "./websocketNewEvents";
 import { navigateTo } from "../utils";
-import { InstanceDisconnect } from "../components/GameStateContainer";
+import { InstanceDisconnect, ResponseMessage } from "../components/GameStateContainer";
 import { disconnectSocket } from "../websocket";
 
 export async function websocketReceiver(socket: WebSocket) {
@@ -49,6 +49,13 @@ export async function websocketReceiver(socket: WebSocket) {
         break;
       case "tournament.message": {
         stateProxyHandler.tournamentIntra = data.payload;
+      }
+        break;
+      case "tournament.finish": {
+        stateProxyHandler.tournamentIntra = [];
+        const root = document.getElementById("root");
+        if (!root) return;
+        root.appendChild(ResponseMessage(`${data.payload}`));
       }
         break;
       case "CHAT_MESSAGE":

@@ -18,7 +18,7 @@ export interface PlayerType {
         "match.running" | 
         "tournament.waiting" | 
         "invite.receive" | 
-        "invite.sent" |
+        "invite.sent";
 }
 
 export interface PlayerStatType {
