@@ -443,7 +443,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 		const allow = ["image/png", "image/jpeg", "image/jpg"];
 		if (!allow.includes(f.type) || f.size > 5 * 1024 * 1024) {
 			avatarFile.value = "";
-			console.log("image format error");
+			alert("image format error");
 			return;
 		}
 
