@@ -18,10 +18,10 @@ ENV VITE_PONG_BACKEND_WEBSOCKET=$VITE_PONG_BACKEND_WEBSOCKET
 
 RUN npm run build
 
-FROM nginx:1.25.0-alpine AS production
+FROM nginx:1.25.0-alpine3.19 AS production
 
 # Generate self-signed certs at build time
-RUN apk add --no-cache openssl && \
+RUN apk update && apk add --no-cache openssl openssl-util && \
     mkdir -p /etc/ssl/private && \
     openssl req -x509 -newkey rsa:4096 -nodes \
     -keyout /etc/ssl/private/key.pem \
