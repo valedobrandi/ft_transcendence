@@ -126,7 +126,7 @@ export class ConnectedRoom {
       }));
     //print(`[BROADCAST USERS REGISTER]: ${registeredUsers.length}`);
     // SORT OUT ADMIN INTRA
-    registeredUsers.sort((a, b) => (a.id === 1 ? -1 : 1)).splice(0, 1);
+    registeredUsers.sort((a, b) => (a.id === 1 ? -1 : 1));
     this.room.forEach(({ socket }) => {
       if (socket)
         socket.send(
