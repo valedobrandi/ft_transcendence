@@ -8,12 +8,6 @@ function hashed_password(password: string) {
 
 const users = [
 	{
-		username: 'INTRA',
-		email: 'admin',
-		password: hashed_password('admin'),
-		twoFA_enabled: 0,
-	},
-	{
 		username: 'john_doe',
 		email: 'john_doe@example.com',
 		password: hashed_password('123'),
