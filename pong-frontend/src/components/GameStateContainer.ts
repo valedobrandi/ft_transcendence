@@ -335,7 +335,7 @@ export function GameStateContainer(): HTMLDivElement {
   const values = ["HIGH", "MEDIUM", "LOW"];
   root.innerHTML = "";
   function onRender() {
-    console.log("Rendering GameStateContainer...");
+    //console.log("Rendering GameStateContainer...");
     const state = stateProxyHandler.settings.state;
     const status = stateProxyHandler.state;
 

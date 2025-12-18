@@ -80,6 +80,7 @@ class Tournament {
 
 			newMatch.createMatch(playerX, playerY);
 		}
+		this.matchRound++;
 	}
 
 	broadcastIntraMessage(message: string) {
@@ -116,13 +117,12 @@ class Tournament {
 			this.broadcastIntraMessage(`${winnerId} advances to the next round.`);
 
 
-			if (this.matchRound === 1) {
+			if (this.matchRound === 2) {
 				const otherMatch = this.tournamentConnecters.filter(p => p !== winnerId && p !== loserId);
 				this.broadcastIntraMessage(`Waiting for ${otherMatch[0]} vs ${otherMatch[1]} match to end.`);
 			}
 			
 		}
-		this.matchRound++;
 		
 
 		if (this.matches === this.rounds) {
