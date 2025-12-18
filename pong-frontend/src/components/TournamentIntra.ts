@@ -18,10 +18,10 @@ export function TournamentIntra(): HTMLElement {
         
         wrapper.innerHTML = `
                 <div class=" rounded-lg font-mono text-white flex flex-col p-4"> 
-                    <h2 class="text-xs font-bold m-2 text-center tracking-wider text-nowrap" style="color:hsl(345,100%,47%);">
+                    <h2 class="text-base font-bold m-2 text-center tracking-wider text-nowrap" style="color:hsl(345,100%,47%);">
                         FT_TOURNAMENT 
                     </h2>
-                    ${messages.map((msg) => `<p class="p-4 text-nowrap text-white font-bold text-left text-2xl">${msg}</p>`).join("")}
+                    ${messages.map((msg) => `<p class="p-4 text-nowrap text-white font-bold text-left text-sm">${msg}</p>`).join("")}
                 </div>`;
     }
     onRender();
