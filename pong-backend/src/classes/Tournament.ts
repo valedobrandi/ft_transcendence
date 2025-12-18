@@ -80,8 +80,6 @@ class Tournament {
 
 			newMatch.createMatch(playerX, playerY);
 		}
-		this.matchRound++;
-
 	}
 
 	broadcastIntraMessage(message: string) {
@@ -115,7 +113,17 @@ class Tournament {
 
 			this.broadcastIntraMessage(`${winnerId} has defeated ${loserId}`);
 			this.broadcastIntraMessage(`${loserId} has bean eliminate from the tournament.`);
+			this.broadcastIntraMessage(`${winnerId} advances to the next round.`);
+
+
+			if (this.matchRound === 1) {
+				const otherMatch = this.tournamentConnecters.filter(p => p !== winnerId && p !== loserId);
+				this.broadcastIntraMessage(`Waiting for ${otherMatch[0]} vs ${otherMatch[1]} match to end.`);
+			}
+			
 		}
+		this.matchRound++;
+		
 
 		if (this.matches === this.rounds) {
 			this.nextBracket = new Set(this.currentRoundWinners);
@@ -137,17 +145,21 @@ class Tournament {
 	}
 
 	async endTournament(username: string) {
-		this.broadcastIntraMessage(`Winner is ${username}! Congratulations!`);
+		this.broadcastIntraMessage(`Tournament winner is ${username}! Congratulations!`);
+		this.broadcastIntraMessage(`Tournament has ended.`);
 		for (const p of this.tournamentConnecters) {
 			const connected = connectedRoomInstance.getByUsername(p);
 			if (connected) {
 				connected.status = 'CONNECTED';
 				if (connected.socket) {
 					connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
-					connected.socket.send(JSON.stringify({ status: 200, message: 'CONNECTED' }));
+					connected.socket.send(JSON.stringify({ status: 200, message: 'tournament.finish', payload: `Tournament winner is ${username}! Congratulations!` }));
 				}
 			};
+			connectedRoomInstance.updateSettingsState(p, undefined, 'intra');
 		}
+
+		// Remove tournament from tournamentRoom
 		tournamentRoom.delete(this.tournamentId);
 		this.cleanup();
 	}

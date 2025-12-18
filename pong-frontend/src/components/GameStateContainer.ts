@@ -295,14 +295,14 @@ export function ResponseMessage(message: string): HTMLDivElement {
   root.innerHTML = `
     <div
       class="fixed inset-0 flex items-center justify-center bg-[#1e2124]/70 backdrop-blur-sm z-50 px-4">
-      <div class="rounded-lg font-mono text-white crt p-10 w-full max-w-lg" style="
+      <div class="rounded-lg font-mono text-white crt p-10 w-full max-w-fit" style="
             background:#1e2124;
             border:4px solid ${ACCENT};
           ">
         <h2 class="text-3xl font-bold mb-6 tracking-wider text-left" style="color:${ACCENT};">
           MESSAGE
         </h2>
-        <p class="mb-6 text-center text-2xl  text-white underline">
+        <p class="mb-6 text-center text-2xl text-white text-nowrap underline">
           ${message}
         </p>
         <div class="flex justify-end gap-4 pt-4">
