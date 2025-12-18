@@ -59,7 +59,7 @@ export default function avatarRoute(fastify: FastifyInstance) {
       return reply.send({ message: "Avatar uploaded successfully!", payload: { avatar_url: fileName } });
 
     } catch (err) {
-      console.error("Upload error:", err);
+      //console.error("Upload error:", err);
       return reply.status(500).send({ error: "Internal server error" });
     }
   });

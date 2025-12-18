@@ -26,7 +26,7 @@ export function Register(): HTMLElement {
 
     formElement.onsubmit = (e) => {
         e.preventDefault();
-        console.log("2FA code submitted");
+        //console.log("2FA code submitted");
     };
 
 	// Add a title to the form
@@ -95,12 +95,11 @@ export function Register(): HTMLElement {
 		const response = await fetchRequest(
 			`/register`,'POST',{},
 			{body: JSON.stringify({username, email, password})}
-		);
+		);                              
 		
 		if (response.message === 'success') {
-			profile.username = response.payload.username;
-			profile.id = response.payload.id;
-			navigateTo("/");
+			localStorage.removeItem("jwt_token");
+			window.location.href = "/";
 		}
 		else if (response.status === 'error') {
 			const existingAlert = document.getElementById("alert-popup");

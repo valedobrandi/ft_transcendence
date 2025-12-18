@@ -7,12 +7,19 @@
 #Major Module:
 
 	#Major module: Use a framework to build the backend
+	
 	#Major module: Store the score of a tournament in the Blockchain
+
 	#Major module: Implement Two-Factor Authentication (2FA) and JWT.
+
     #Major module: Live Chat.
+
 	#Major module: Remote players
+
 	#Major module: Introduce an AI opponent
+
 	#Major module: Standard user management, authentication and users across tour-naments.
+
 	#Minor module: Game customization options.
 
 #Minor Module:

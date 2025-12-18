@@ -113,13 +113,13 @@ class FriendService {
 				connectedRoomInstance.friendListManager(requestId).updateNewFriend(friendId);
 			} catch (error) {
 				// fastify.log.error(error);
-				console.log(error);
+				//console.log(error);
 			}
 			try {
 				connectedRoomInstance.friendListManager(friendId).updateNewFriend(requestId);
 			} catch (error) {
 				// fastify.log.error(error);
-				console.log(error);
+				//console.log(error);
 			}
 			return { message, data };
 		}

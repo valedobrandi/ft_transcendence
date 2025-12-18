@@ -11,8 +11,16 @@ export function ChatSendInput(): HTMLDivElement {
     
     function onRender() {
         inputDiv.innerHTML = "";
-        const isChatSelected = stateProxyHandler.chat.id === profile.id;;
-        if (isChatSelected) {
+        const isChatSelected = stateProxyHandler.chat.id === profile.id;
+        const isChatBlocked = stateProxyHandler.chatBlockList.includes(stateProxyHandler.chat.id);
+
+        if (isChatSelected) { return; }
+
+        if (isChatBlocked) {
+            const blockedMsg = document.createElement("p");
+            blockedMsg.className = "text-gray-400 italic";
+            blockedMsg.innerText = "You have blocked this user. Unblock to send messages.";
+            inputDiv.appendChild(blockedMsg);
             return;
         }
         const form = document.createElement("form");
@@ -50,5 +58,6 @@ export function ChatSendInput(): HTMLDivElement {
     }
     onRender();
     onStateChange("chat", onRender);
+    onStateChange("chatBlockList", onRender);
     return inputDiv;
 }

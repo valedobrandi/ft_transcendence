@@ -1,3 +1,4 @@
+import { profile } from "../app";
 import { onClickGetProfileData } from "../components/UsersList";
 import type { ChatMessage } from "../interface/ChatMessage";
 
@@ -10,10 +11,9 @@ export function onMessageChange(fn: () => void) {
 export function changeChatHeader(header: string) {
     const chatHeader = document.getElementById('chat-tabs');
     if (!chatHeader) return;
-
     const tab = document.createElement('h1');
     tab.innerHTML = '';
-    tab.textContent = `#${header}`;
+    tab.textContent = header === profile.username ? "SELECT A USER TO CHAT" : `#${header}`;
     tab.className = 'm-auto font-bold text-white text-2xl tracking-wide';
     chatHeader.innerHTML = '';
     chatHeader.appendChild(tab);
@@ -100,7 +100,7 @@ export function getStorageStates() {
 }
 
 export function removeLocalStorage() {
-    console.log("[REMOVE LOCAL STORAGE]");
+    //console.log("[REMOVE LOCAL STORAGE]");
     const PERSISTED_KEYS: (keyof State)[] = [
         "paddle",
         "state",
