@@ -90,7 +90,7 @@ export function Intra(): HTMLElement {
 
     function onRender() {
         middleParent.innerHTML = "";
-
+        if (stateProxyHandler.profile.avatar === "") return;  
         const matchesHistory = stateProxyHandler.matchesHistory;
 
         // ================================================================== //
@@ -112,6 +112,7 @@ export function Intra(): HTMLElement {
 
         // Avatar
         const profileAvatar = document.createElement("img");
+    
         const usersAvatarPath = `${endpoint.pong_backend_api}/avatar/${stateProxyHandler.profile.avatar}`;
         profileAvatar.src = usersAvatarPath;
         profileAvatar.alt = `${stateProxyHandler.profile.avatar}'s avatar`;

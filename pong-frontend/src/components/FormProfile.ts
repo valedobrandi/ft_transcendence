@@ -325,7 +325,7 @@ export function ProfilePage(): HTMLElement {
 		} else {
 			payload.username = nextName
 		}
-		
+
 		if (nextMail === profile.email) {
 			payload.email = undefined;
 		}
@@ -363,7 +363,7 @@ export function ProfilePage(): HTMLElement {
 				// 	"GET"
 				// );
 				// if (response.message === "success") {
-					// navigateTo('/intra');
+				// navigateTo('/intra');
 				// }
 
 			}
@@ -439,9 +439,9 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 	avatarFile.addEventListener("change", async () => {
 		const f = avatarFile.files?.[0];
 		if (!f) return;
-
+		console.log("Selected file:", f);
 		const allow = ["image/png", "image/jpeg", "image/jpg"];
-		if (!allow.includes(f.type) || f.size > 5 * 1024 * 1024) {
+		if (!allow.includes(f.type) || f.size > 4.5 * 1024 * 1024) {
 			avatarFile.value = "";
 			alert("image format error");
 			return;
@@ -459,19 +459,25 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 				headers: { Authorization: `Bearer ${jwt.token}` },
 				body: fd
 			});
-			
+
 			const data = await res.json();
-			if (!data.payload?.avatar_url) throw new Error("Avatar not receved");
+			if (data.error) {
+				//console.error("Server error:", res.status, await res.text());
+				alert("avatar upload failed: " + data.error);
+				return;
+			}
 
 
 			//console.log("AVATAR SAVED AT DB:", data.payload.avatar_url);
 			user.avatar_url = data.payload.avatar_url;
 			profile.avatar_url = data.payload.avatar_url;
 
-			avatarPreview.src = `${endpoint.pong_backend_api}/avatar/${profile.avatar_url}`;
+			avatarPreview.src = profile.avatar_url
+				? `${endpoint.pong_backend_api}/avatar/${profile.avatar_url}`
+				: `${endpoint.pong_backend_api}/avatar/${AVATAR_DEFAUT}`;
 		} catch (err) {
-			//console.error("Upload failed:", err);
-			avatarPreview.src = user.avatar_url ? `${user.avatar_url}` : AVATAR_DEFAUT;
+			//console.error("avatar upload failed:", err);
+			alert("avatar upload failed");
 		} finally {
 			URL.revokeObjectURL(tempUrl);
 			avatarFile.value = "";
