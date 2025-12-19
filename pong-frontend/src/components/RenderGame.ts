@@ -64,7 +64,7 @@ export function RenderGame(): HTMLElement {
 
   function drawRect({ x, y, w, h, color }: DrawRectType) {
     if (!ctx) {
-      return //console.error("Error: drawRect.");
+      return ///error("Error: drawRect.");
     }
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
@@ -72,7 +72,7 @@ export function RenderGame(): HTMLElement {
 
   function drawCircle({ x, y, r, color }: drawCircleType) {
     if (!ctx) {
-      return //console.error("Error: drawCircle");
+      return 
     }
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -83,7 +83,7 @@ export function RenderGame(): HTMLElement {
 
   function drawText({ text, x, y, color, font }: DrawTextType) {
     if (!ctx) {
-      return //console.error("Error: drawText.");
+      return 
     }
     if (text === "0" || text === undefined) return;
     ctx.fillStyle = color;

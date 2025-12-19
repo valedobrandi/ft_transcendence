@@ -23,10 +23,10 @@ export class ConnectedRoom {
       chat: new ChatManager(Number(id), name),
       state: "intra"
     };
-    //console.log(`[CONNECTED ROOM] ${name} is connected: ${this.room.has(id)}`);
+
     if (this.room.has(id)) {
       // DISCONNECT PREVIOUS WEBSOCKET
-      //console.log(`[CONNECTED ROOM] ${name} is already connected. Disconnecting previous websocket.`);
+
       const connected = this.getById(id);
       if (connected && connected.socket) {
         this.sendWebsocketMessage(id, "websocket.disconnect");
@@ -51,7 +51,7 @@ export class ConnectedRoom {
     if (connected.socket) {
       connected.socket.send(JSON.stringify({ status: 200, message: state, payload }));
     }
-    //console.log(`[UPDATE SETTINGS STATE] ${connected.username} state updated to ${state}`);
+
   }
 
   friendListManager(useServiceRequestId: number | bigint) {

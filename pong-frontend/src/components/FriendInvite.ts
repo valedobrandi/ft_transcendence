@@ -10,7 +10,7 @@ export function FriendInvite(): HTMLElement {
             return;
         }
         const state = stateProxyHandler.friendRequests;  
-        //console.log("Rendering Friend Invites:", state);
+        ///log("Rendering Friend Invites:", state);
         root.innerHTML = `
         ${state.map(request => {
             return `

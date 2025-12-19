@@ -100,7 +100,7 @@ export function getStorageStates() {
 }
 
 export function removeLocalStorage() {
-    //console.log("[REMOVE LOCAL STORAGE]");
+    ///log("[REMOVE LOCAL STORAGE]");
     const PERSISTED_KEYS: (keyof State)[] = [
         "paddle",
         "state",

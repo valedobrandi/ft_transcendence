@@ -13,7 +13,7 @@ export async function websocketReceiver(socket: WebSocket) {
   socket.addEventListener("message", async (event) => {
     const data = JSON.parse(event.data);
     if (data.message != "STATE") {
-      //console.log("[WEBSOCKET RECEIVER] ", data);
+      ///log("[WEBSOCKET RECEIVER] ", data);
     }
     switch (data.message) {
       case "PADDLE_HEIGHT":

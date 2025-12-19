@@ -51,6 +51,7 @@ class TournamentService {
 
 		connected.status = "CONNECTED";
 		connectedRoomInstance.sendWebsocketMessage(connected.id, "CONNECTED");
+		connectedRoomInstance.updateSettingsState(undefined, Number(connected.id), "intra");
 
 		return { message: "success", data: "unsubscribed from tournament" };
 
@@ -58,7 +59,9 @@ class TournamentService {
 
 	joinTournament(userId: number) {
 		const connected = connectedRoomInstance.getById(userId);
-		if (connected === undefined) throw new Error("disconnected");
+		if (connected === undefined) {
+			return { message: "error", data: "user_not_found" };
+		}
 
 		if (connected.status !== "CONNECTED") {
 			return { message: "error", data: "you are subscribed to a other match/tournament" };
@@ -66,6 +69,7 @@ class TournamentService {
 
 		connected.status = 'TOURNAMENT';
 		connectedRoomInstance.sendWebsocketMessage(connected.id, "TOURNAMENT");
+		connectedRoomInstance.updateSettingsState(undefined, Number(connected.id), "tournament.waiting");
 		joinTournamentQueue(Number(connected.id));
 
 		return { message: 'success', data: "subscribed to tournament" }

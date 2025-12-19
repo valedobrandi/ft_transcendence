@@ -10,7 +10,9 @@ export default function avatarRoute(fastify: FastifyInstance) {
 
   const imageDir = '/app/images';
 
-  fastify.register(fastifyMultipart);
+  fastify.register(fastifyMultipart, {
+    limits: { fileSize: 5 * 1024 * 1024 } // 5 MB limit
+  });
 
   fastify.register(fastifyStatic, {
     root: imageDir,
@@ -20,7 +22,7 @@ export default function avatarRoute(fastify: FastifyInstance) {
   fastify.post('/avatar', {
     preHandler: [fastify.authenticate],
   }, async (request: any, reply) => {
-    try {
+   
       const idUser = request.user?.id;
       if (!idUser) {
         return reply.status(401).send({ error: "Unauthorized" });
@@ -58,10 +60,7 @@ export default function avatarRoute(fastify: FastifyInstance) {
 
       return reply.send({ message: "Avatar uploaded successfully!", payload: { avatar_url: fileName } });
 
-    } catch (err) {
-      //console.error("Upload error:", err);
-      return reply.status(500).send({ error: "Internal server error" });
-    }
+
   });
 
 

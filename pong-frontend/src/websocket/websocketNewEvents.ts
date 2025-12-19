@@ -4,7 +4,7 @@ import { fetchRequest } from "../utils";
 
 async function websocketNewEvents() {
 	const { message, data } = await fetchRequest('/to-events', 'GET');
-	//console.log('Fetch New-Events: ', data);
+	///log('Fetch New-Events: ', data);
 	if (message === 'success') {
 		const newFriendList = [];
 		for (const event of data) {
