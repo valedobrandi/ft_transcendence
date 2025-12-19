@@ -44,12 +44,10 @@ export async function websocketConnect() {
 
 		socket.onclose = async () => {
 			///log(`[WEBSOCKET] Disconnected from server.`);
-			window.location.reload();
 		};
 
 		socket.onerror = () => {
 			///error("WebSocket error:", error);
-			window.location.reload();
 		};
 
 	}
