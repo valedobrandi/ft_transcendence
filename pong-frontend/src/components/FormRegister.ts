@@ -3,9 +3,9 @@ import DOMPurify from "dompurify";
 import { InputEmail } from "./InputEmail";
 import { InputName } from "./InputName";
 import { InputPassword } from "./InputPassword";
-import { fetchRequest, navigateTo } from "../utils";
+import { fetchRequest } from "../utils";
 import { CreateAlert } from "./CreateAlert";
-import { profile } from "../app";
+
 
 export function Register(): HTMLElement {
 	const viewDiv = document.createElement("div");
@@ -26,7 +26,7 @@ export function Register(): HTMLElement {
 
     formElement.onsubmit = (e) => {
         e.preventDefault();
-        //console.log("2FA code submitted");
+        ///log("2FA code submitted");
     };
 
 	// Add a title to the form

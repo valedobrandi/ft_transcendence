@@ -95,7 +95,7 @@ export function eventListeners() {
 	});
 
 	async function friendInviteAccept(button: HTMLButtonElement) {
-		//console.log("[ACCEPT FRIEND CLICKED]");
+
 		const eventId = button.dataset.eventid;
 		const userId = button.dataset.userid;
 
@@ -127,7 +127,7 @@ export function eventListeners() {
 		const target = event.target as HTMLButtonElement;
 		const button = target.closest("button");
 		if (!button) return;
-		//console.log("Button clicked:", button.id);
+
 
 		switch (button.id) {
 			case "save-settings": { await onSendSettingsVsHuman(event); }
@@ -154,12 +154,10 @@ export function eventListeners() {
 				break;
 			case "tournament-btn": {
 				await joinTournament();
-				stateProxyHandler.settings = { state: "tournament.waiting" };
-				localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
 			}
 				break;
 			case "btn-leave-tournament": {
-				await leaveTournament(button);
+				await leaveTournament();
 				stateProxyHandler.settings = { state: "intra" };
 				localStorage.setItem("settings", JSON.stringify(stateProxyHandler.settings));
 			}
@@ -277,7 +275,7 @@ function selectChat(button: HTMLButtonElement) {
 	const chatName = button.value;
 	const chatId = button.name;
 
-	//console.log("Selected chat:", chatName, chatId);
+	///log("Selected chat:", chatName, chatId);
 
 	stateProxyHandler.chat = { name: chatName, id: Number(chatId) };
 
@@ -357,18 +355,15 @@ async function joinTournament() {
 	);
 
 	if (response.message === "error") {
-		const alert = new Alert(`${response.data}`);
-		alert.show();
+		const root = document.getElementById("root");
+		if (!root) return;
+		root.appendChild(ResponseMessage(`${response.data}`));
 	}
 }
 
-async function leaveTournament(button: HTMLButtonElement) {
-	const eventId = button.dataset.eventindex;
-	//console.log("EVENT ID LEAVE TOURNEY =", eventId);
-	await fetchRequest(
-		`/tournament/quit`,
-		"GET"
-	);
+async function leaveTournament() {
+
+	await fetchRequest(`/tournament/quit`,"GET");
 }
 
 export async function disconnect() {
@@ -415,10 +410,10 @@ async function refuseInvite(button: HTMLButtonElement) {
 
 const profileOnclick = async () => {
 
-	//console.log("(opt.value === view-profile")
+	///log("(opt.value === view-profile")
 	try {
 		const data = await fetchRequest('/profile', 'GET', {});
-		//console.log("DATA PROFILE = ", data);
+		///log("DATA PROFILE = ", data);
 		if (data.message === 'success') {
 			profile.username = data.existUser.username;
 			profile.id = data.existUser.id;
@@ -427,25 +422,25 @@ const profileOnclick = async () => {
 			profile.twoFA_enabled = data.existUser.twoFA_enabled ? 1 : 0
 
 
-			//console.log("PROFIL = ", profile.username);
-			//console.log("EMAIL IIII = ", profile.email);
-			//console.log("AVATAR IIII = ", profile.avatar_url);
-			//console.log("AVATAR IIII = ", profile.twoFA_enabled);
+			///log("PROFIL = ", profile.username);
+			///log("EMAIL IIII = ", profile.email);
+			///log("AVATAR IIII = ", profile.avatar_url);
+			///log("AVATAR IIII = ", profile.twoFA_enabled);
 
 			navigateTo("/profile");
 		}
 		else {
-			//console.error("Erreur lors du chargement du profil :", data);
+			///error("Erreur lors du chargement du profil :", data);
 		}
 	}
 	catch (err) {
-		//console.error("Erreur réseau :", err);
+		///error("Erreur réseau :", err);
 	}
 
 }
 
 const inviteSend = async () => {
-	//console.log("[INVITE USER]: ", stateProxyHandler.chat.id);
+	///log("[INVITE USER]: ", stateProxyHandler.chat.id);
 	const response = await fetchRequest('/match-invite', 'POST', {}, {
 		body: JSON.stringify({
 			invitedId: stateProxyHandler.chat.id,

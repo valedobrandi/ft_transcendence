@@ -11,7 +11,7 @@ async function testUpload() {
     headers: form.getHeaders(),
   });
 
-  ////console.log(res.data);
+  /////log(res.data);
 }
 
 testUpload();

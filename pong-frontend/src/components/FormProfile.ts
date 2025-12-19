@@ -69,7 +69,7 @@ export function ProfilePage(): HTMLElement {
 	const avatarPreview = document.createElement("img");
 	const path = profile.avatar_url ? profile.avatar_url : AVATAR_DEFAUT;
 	const avatarPath = `${endpoint.pong_backend_api}/avatar/${path}`;
-	//console.log("AVATAR PATH:", avatarPath);
+
 	avatarPreview.src = avatarPath;
 	avatarPreview.id = "avatarPreview";
 	avatarPreview.className = "w-24 h-24 rounded-full object-cover";
@@ -138,7 +138,7 @@ export function ProfilePage(): HTMLElement {
 
 	const emailLabel = document.createElement("label");
 	emailLabel.className = "font-abee text-white";
-	emailLabel.textContent = `Email : ${profile.email}`;
+	emailLabel.textContent = `Email :`;
 	emailSection1.appendChild(emailLabel);
 
 	const emailInput = document.createElement("input");
@@ -159,7 +159,7 @@ export function ProfilePage(): HTMLElement {
 
 	const nameLabel = document.createElement("label");
 	nameLabel.className = "font-abee text-white";
-	nameLabel.textContent = `Name : ${profile.username} `;
+	nameLabel.textContent = `Name : `;
 	nameSection.appendChild(nameLabel);
 
 	const nameInput = document.createElement("input");
@@ -308,6 +308,10 @@ export function ProfilePage(): HTMLElement {
 	//sendBtn.setAttribute("role", "button");
 	card.appendChild(sendBtn);
 
+	function isValidEmail(email: string) {
+		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+	}
+
 	sendBtn.addEventListener("click", async () => {
 		const nameEl = document.getElementById("change_name_input") as HTMLInputElement | null;
 		const mailEl = document.getElementById("change_email_input") as HTMLInputElement | null;
@@ -329,6 +333,10 @@ export function ProfilePage(): HTMLElement {
 		if (nextMail === profile.email) {
 			payload.email = undefined;
 		}
+		else if (!isValidEmail(nextMail!)) {
+			alert("invalid email format.");
+			return;
+		}
 		else
 			payload.email = nextMail;
 
@@ -337,38 +345,31 @@ export function ProfilePage(): HTMLElement {
 			payload.password = newPwd;
 		}
 		else if (curPwd || newPwd) {
-			console.warn("To change the password, fill in both fields.");
+
 			alert("To change the password, fill in both fields.");
 			return;
 		}
 
 		if (Object.keys(payload).length === 0) {
-			console.info("No changes to send.");
+
 			alert("No changes to send.");
 			return;
 		}
 
 		try {
 			const data = await fetchRequest("/update", "PUT", {}, { body: JSON.stringify(payload) });
-			//console.log("DATA FROM BACKEND:", data);
+
 
 			if (data.message === 'success') {
 				profile.username = data.payload.username;
 				profile.email = data.payload.email;
 
-				//console.log("Profile updated", data);
+
 				alert(("your profil has changed "));
-				// const response = await fetchRequest(
-				// 	`/logout`,
-				// 	"GET"
-				// );
-				// if (response.message === "success") {
-				// navigateTo('/intra');
-				// }
 
 			}
 			else {
-				//console.error("Error loading profile: ", data);
+
 				alert("Error loading profile: " + (data.error || "Erreur inconnue"));
 			}
 
@@ -401,19 +402,18 @@ export function ProfilePage(): HTMLElement {
 
 export async function handleProfilePage(avatarPreview: HTMLImageElement, pickFileBtn: HTMLButtonElement,
 	avatarFile: HTMLInputElement, avatarGrid: HTMLDivElement): Promise<void> {
-	//console.log("handleProfilePage called");
+	///log("handleProfilePage called");
 
 	let data;
 	try {
 		data = await fetchRequest(`/profile`, 'GET', {}, {});
 	} catch (err) {
-		//console.error("Error réseau on /profile:", err);
+		///error("Error réseau on /profile:", err);
 		window.location.hash = "/login";
 		return;
 	}
 
 	if (data.message !== "success") {
-		console.warn("Profile not access:", data);
 		window.location.hash = "/login";
 		return;
 	}
@@ -439,11 +439,19 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 	avatarFile.addEventListener("change", async () => {
 		const f = avatarFile.files?.[0];
 		if (!f) return;
-		console.log("Selected file:", f);
-		const allow = ["image/png", "image/jpeg", "image/jpg"];
-		if (!allow.includes(f.type) || f.size > 4.5 * 1024 * 1024) {
+
+		const allowedTypes = ["image/png", "image/jpeg"];
+		if (!allowedTypes.includes(f.type)) {
 			avatarFile.value = "";
-			alert("image format error");
+			alert(`Invalid file type: ${f.type}. Only PNG or JPEG allowed.`);
+			return;
+		}
+
+		// 2️⃣ Check size
+		const maxSize = 4.5 * 1024 * 1024; // 4.5MB
+		if (f.size > maxSize) {
+			avatarFile.value = "";
+			alert(`File is too large: ${(f.size / 1024 / 1024).toFixed(2)} MB. Max is 4.5 MB.`);
 			return;
 		}
 
@@ -462,13 +470,13 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 
 			const data = await res.json();
 			if (data.error) {
-				//console.error("Server error:", res.status, await res.text());
+
 				alert("avatar upload failed: " + data.error);
 				return;
 			}
 
 
-			//console.log("AVATAR SAVED AT DB:", data.payload.avatar_url);
+
 			user.avatar_url = data.payload.avatar_url;
 			profile.avatar_url = data.payload.avatar_url;
 
@@ -476,7 +484,7 @@ export function bind_user_avatar_upload(user: { avatar_url: string | null }, ava
 				? `${endpoint.pong_backend_api}/avatar/${profile.avatar_url}`
 				: `${endpoint.pong_backend_api}/avatar/${AVATAR_DEFAUT}`;
 		} catch (err) {
-			//console.error("avatar upload failed:", err);
+			///error("avatar upload failed:", err);
 			alert("avatar upload failed");
 		} finally {
 			URL.revokeObjectURL(tempUrl);
@@ -489,7 +497,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 	avatarGrid: HTMLDivElement): void {
 
 	if (!avatarPreview || !avatarGrid) {
-		console.warn("upload_avatar: avatarPreview ou avatarGrid introuvable dans le DOM");
+		;
 		return;
 	}
 
@@ -499,7 +507,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 		avatarPreview.src = AVATAR_DEFAUT;
 	};
 
-	//console.log(user.avatar_url);
+
 
 	const presetButtons = avatarGrid.querySelectorAll<HTMLButtonElement>(".preset-btn");
 
@@ -540,7 +548,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 					{ body: JSON.stringify({ avatar_url: url }) }
 				);
 				if (res.error) {
-					//console.error("Server error:", res.status, await res.text());
+					///error("Server error:", res.status, await res.text());
 					return;
 				}
 				user.avatar_url = res.payload.avatar_url;
@@ -550,7 +558,7 @@ export function upload_avatar(user: { avatar_url: string | null }, avatarPreview
 				highlight(btn);
 				selected = btn;
 			} catch (err) {
-				//console.error("change avatar update failed:", err);
+
 				avatarPreview.src = oldSrc;
 				highlight(selected);
 			}

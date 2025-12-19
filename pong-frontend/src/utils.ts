@@ -115,7 +115,7 @@ export async function fetchRequest
         options: RequestInit = {}) {
 
     const url = `${endpoint.pong_backend_api}${path}`;
-    //console.log(`[REQUEST] ${method} ${url} response:`, JSON.stringify(options));
+
     const defaultHeaders: Record<string, string> = {
         // Add auth token
         'Authorization': `Bearer ${jwt.token}`,
@@ -139,7 +139,7 @@ export async function fetchRequest
         if ('accessToken' in response) jwt.token = response.accessToken as string;
         try {
             const data = await response.json();
-            //console.log(`[RESPONSE] ${method} ${url} response:`, data);
+            ///log(`[RESPONSE] ${method} ${url} response:`, data);
             return data;
         }
         catch {
@@ -157,7 +157,7 @@ export async function toggle2FA(): Promise<void> {
 
 
         const new2FAValue = profile.twoFA_enabled === 1 ? 0 : 1;
-        //console.log('NEWVALEUR= ', new2FAValue);
+        ///log('NEWVALEUR= ', new2FAValue);
 
         const response = await fetchRequest("/twoFA", "PUT", {}, {
             body: JSON.stringify({ twoFA_enabled: profile.twoFA_enabled ? 0 : 1 })
@@ -180,7 +180,7 @@ export async function toggle2FA(): Promise<void> {
         }
     } catch (err) {
 
-        //console.error("Error toggling 2FA:", err);
+        ///error("Error toggling 2FA:", err);
         alert("Error toggling 2FA");
     }
 }

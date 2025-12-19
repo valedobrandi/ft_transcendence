@@ -42,7 +42,7 @@ class MatchesModel {
 			this.stmSaveMatch.run(
 				machId, player1, player2);
 		} catch (error) {
-			//console.error('Error saving match:', error);
+			
 		}
 	}
 }

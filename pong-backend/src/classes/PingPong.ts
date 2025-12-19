@@ -531,7 +531,7 @@ class PingPong {
 	}
 
 	saveMatchHistory(score1: number, score2: number) {
-		//console.log(`[SAVE MATCH HISTORY] Player1: ${this.side.LEFT}, Player2: ${this.side.RIGHT}`);
+		
 		eventsBus.emit('game:savehistory', {
 			matchId: this.machId,
 			player1: this.side.LEFT,

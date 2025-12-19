@@ -96,7 +96,7 @@ class Tournament {
 	async reportMatchResult(report: EndMatchEventType) {
 		const { winnerId, loserId, drawMatch } = report;
 
-		if (drawMatch) return; // ignore or rematch (constraint)
+		if (drawMatch) return; 
 
 		if (this.round === 'SEMIFINAL') {
 			this.winners.push(winnerId);

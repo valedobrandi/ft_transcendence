@@ -134,9 +134,9 @@ export function TournamentWait(): string {
       <div class="flex flex-col justify-center items-center rounded-lg font-mono text-white crt p-10 w-[1000px]" 
           style="
             background:#1e2124;
-            border:4px solid hsl(345,100%,47%);
+            border:4px solid white;
           ">
-          <h2 class="text-3xl font-bold mb-6 text-center tracking-wider" style="color:hsl(345,100%,47%);">
+          <h2 class="text-3xl font-bold mb-6 text-center tracking-wider text-blue-400">
           WAITING FOR OTHER PLAYERS (${queueLength})/4
           </h2>
           <p class="mb-6 text-center underline">
@@ -151,9 +151,6 @@ export function TournamentWait(): string {
             >
               CLICK TO LEAVE THE TOURNAMENT QUEUE
               </button>
-              <p class="mb-6 text-center text-yellow-600 underline text-xs mt-4">
-                WARNING: IF YOU LEAVE, YOU WILL BE REMOVED FROM THE QUEUE!
-              </p>
       </div>
     </div>
   `;
@@ -335,7 +332,7 @@ export function GameStateContainer(): HTMLDivElement {
   const values = ["HIGH", "MEDIUM", "LOW"];
   root.innerHTML = "";
   function onRender() {
-    //console.log("Rendering GameStateContainer...");
+
     const state = stateProxyHandler.settings.state;
     const status = stateProxyHandler.state;
 
